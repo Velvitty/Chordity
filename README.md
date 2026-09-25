@@ -1,10 +1,10 @@
-# 마디 코드 (Madi Code)
+# Chordity
 
-**노래 파일을 넣으면 마디마다 코드를 적어 주고, 노래의 박에 딱 맞춰 메트로놈을 쳐 주는 웹 페이지입니다.**
+**Chordity는 노래 파일을 넣으면 마디마다 코드를 적어 주고, 노래의 박에 딱 맞춰 메트로놈을 쳐 주는 웹 페이지입니다.**
 
 코드가 바뀌는 순간에는 피아노가 그 코드를 쳐 줘서, 귀로 확인하며 따라 칠 수 있습니다. 설치도, 회원 가입도, 인터넷 연결도 필요 없습니다. 음악 파일은 내 컴퓨터 밖으로 나가지 않습니다.
 
-*Per-measure chord recognition, a beat-locked metronome and synthesized piano chord playback in a single offline HTML file. No libraries, no uploads.*
+*Chordity: per-measure chord recognition, a beat-locked metronome and synthesized piano chord playback in a single offline HTML file. No libraries, no uploads.*
 
 ![재생 중인 화면: 지금 마디에 노란 형광펜, 지금 박의 빗금이 진하게 표시된다](docs/screenshot-desktop.png)
 
@@ -39,7 +39,7 @@
 
 ### 쓰는 법
 
-1. `chord-chart.html` 파일을 크롬, 엣지, 사파리, 파이어폭스 같은 브라우저로 엽니다.
+1. `chordity.html` 파일을 크롬, 엣지, 사파리, 파이어폭스 같은 브라우저로 엽니다.
 2. **파일 열기**를 누르거나, 음악 파일을 창 위로 끌어다 놓습니다. 몇 초 기다리면 코드 차트가 나타납니다.
 3. **재생** 버튼을 누릅니다. 음악과 함께 메트로놈이 박마다 "딱" 하고 울리고, 지금 연주되는 마디에 노란 형광펜이 칠해집니다. 코드가 바뀔 때마다 피아노가 그 코드를 쳐 줍니다.
 
@@ -318,8 +318,8 @@ y[n] = \sum_{j=0}^{2W-1} x[\,i_n - W + 1 + j\,]\; h(\phi_n + W - 1 - j)
 ```
 
 ```math
-h(u) = 2f_c\,\operatorname{sinc}(2f_c u)\,w\!\left(\frac{u}{W+1}\right),\qquad
-w(r) = 0.42 + 0.5\cos\pi r + 0.08\cos 2\pi r
+h(u) = 2f_c\,\mathrm{sinc}(2f_c u)\,w\!\left(\frac{u}{W+1}\right),\qquad
+w(r) = 0.42 + 0.5\cos\,\pi r + 0.08\cos\, 2\pi r
 ```
 
 ```math
@@ -380,7 +380,7 @@ J(v) = \pi(v)\cdot\max\!\Big(0,\ \sum_{k=1}^{4} c_k \max_{|\delta| \le \delta_k}
 ```
 
 ```math
-\pi(v) = \exp\!\left(-\frac12 \log_2^2 \frac{v}{110}\right),\qquad
+\pi(v) = \exp\!\left(-\frac12 \log_2^2\, \frac{v}{110}\right),\qquad
 \delta_1 = 0.5,\quad \delta_{k\ge 2} = 0.5 + 0.004\,k\tau_v
 ```
 
@@ -395,7 +395,7 @@ $v \in [40, 240]$ 을 0.25 간격으로 훑고, 최댓값에서 세 점 포물�
 ```
 
 ```math
-C(t) = \ell(t) + \max_{\tau(t)/2 \,\le\, d \,\le\, 2\tau(t)}\Big[\,C(t-d) - \alpha \ln^2\frac{d}{\tau(t)}\,\Big],\qquad \alpha = \operatorname{clip}\!\left(2000\,T^2,\ 100,\ 1600\right)
+C(t) = \ell(t) + \max_{\tau(t)/2 \,\le\, d \,\le\, 2\tau(t)}\Big[\,C(t-d) - \alpha \ln^2\,\frac{d}{\tau(t)}\,\Big],\qquad \alpha = \mathrm{clip}\!\left(2000\,T^2,\ 100,\ 1600\right)
 ```
 
 $T = \tau/F$ 는 박 주기(초)입니다. $\alpha\ln^2(d/\tau) \approx 2000\,(\Delta t)^2$ ( $\Delta t$ 는 간격이 어긋난 초)이므로 벌점이 템포와 상관없이 **절대 시간** 기준이 됩니다. 원래 방법의 고정값 100은 퍼센트 기준이라, 느린 곡에서는 같은 퍼센트가 훨씬 긴 ms가 되어 박이 싱코페이션에 끌려갔습니다.
@@ -404,7 +404,7 @@ $T = \tau/F$ 는 박 주기(초)입니다. $\alpha\ln^2(d/\tau) \approx 2000\,(\
 
 ```math
 \tau_w = \arg\max_{\ell \in [0.85\tau,\ 1.15\tau]} \Big( r_w(\ell) + \tfrac12\, r_w(2\ell) \Big),\qquad
-\tau(t) = \operatorname{clip}\!\Big(\operatorname{interp}_t\big(\operatorname{median}_{7}\,\tau_w\big),\ 0.85\tau,\ 1.15\tau\Big)
+\tau(t) = \mathrm{clip}\!\Big(\mathrm{interp}_t\big(\mathrm{median}_{7}\,\tau_w\big),\ 0.85\tau,\ 1.15\tau\Big)
 ```
 
 역추적 시작점은 $C$ 의 국소 최댓값 가운데 그 중앙값의 절반을 넘는 마지막 지점입니다. 경로의 앞뒤에서 평활한 국소 점수가 전체 RMS의 절반에 못 미치는 비트는 잘라 냅니다.
@@ -463,7 +463,7 @@ r_2 = \frac{\max(\bar p_\text{even}, \bar p_\text{odd})}{\min(\bar p_\text{even}
 **같은 쪽 치우침**은 짝·홀 비트에서 킥이 강한 쪽을 +로 두고 잰 치우침입니다.
 
 ```math
-s_X = \operatorname{sgn}(K_\text{even} - K_\text{odd})\cdot\frac{X_\text{even} - X_\text{odd}}{X_\text{even} + X_\text{odd}},\qquad
+s_X = \mathrm{sgn}(K_\text{even} - K_\text{odd})\cdot\frac{X_\text{even} - X_\text{odd}}{X_\text{even} + X_\text{odd}},\qquad
 \text{same side} \iff s_K \ge 0.15\ \land\ s_{S_n} \ge 0.15\ \land\ s_\nu > 0\ \land\ r_2 \ge 1.3
 ```
 
@@ -476,7 +476,7 @@ s_X = \operatorname{sgn}(K_\text{even} - K_\text{odd})\cdot\frac{X_\text{even} -
 비트 구간을 24등분한 위상마다 온셋 최댓값을 평균한 프로필 $P(\varphi)$ 에서
 
 ```math
-\text{triple} \iff \min\!\big(P(\tfrac13), P(\tfrac23)\big) > 1.15\,P(\tfrac12)\ \ \land\ \ \tfrac12\big(P(\tfrac13) + P(\tfrac23)\big) > 1.1\,\operatorname{median}(P)
+\text{triple} \iff \min\!\big(P(\tfrac13), P(\tfrac23)\big) > 1.15\,P(\tfrac12)\ \ \land\ \ \tfrac12\big(P(\tfrac13) + P(\tfrac23)\big) > 1.1\,\mathrm{median}(P)
 ```
 
 #### (10) 스펙트럼 피크, 튜닝, 크로마
@@ -487,20 +487,20 @@ s_X = \operatorname{sgn}(K_\text{even} - K_\text{odd})\cdot\frac{X_\text{even} -
 \delta = \frac12\cdot\frac{L_- - L_+}{L_- - 2L_0 + L_+},\qquad
 \hat f = (k + \delta)\frac{f_s}{N},\qquad
 \hat A = \frac{4}{N}\exp\!\left(L_0 - \tfrac14(L_- - L_+)\,\delta\right),\qquad
-m = 69 + 12\log_2\frac{\hat f}{440}
+m = 69 + 12\log_2\,\frac{\hat f}{440}
 ```
 
-기준음 편차(반음 단위)는 소수부 $d_j = m_j - \operatorname{round}(m_j)$ 의 원형 평균입니다(베이스 STFT의 MIDI 40–90 피크, 가중치 $\sqrt{A_j}$ ).
+기준음 편차(반음 단위)는 소수부 $d_j = m_j - \mathrm{round}(m_j)$ 의 원형 평균입니다(베이스 STFT의 MIDI 40–90 피크, 가중치 $\sqrt{A_j}$ ).
 
 ```math
-\theta = \frac{1}{2\pi}\operatorname{atan2}\!\Big(\sum_j \sqrt{A_j}\sin 2\pi d_j,\ \sum_j \sqrt{A_j}\cos 2\pi d_j\Big),\qquad
+\theta = \frac{1}{2\pi}\mathrm{atan2}\!\Big(\sum_j \sqrt{A_j}\sin\, 2\pi d_j,\ \sum_j \sqrt{A_j}\cos\, 2\pi d_j\Big),\qquad
 A4 = 440 \cdot 2^{\theta/12}\ \text{Hz}
 ```
 
 보정한 음높이 $\tilde m = m - \theta$ 로 크로마를 쌓습니다. $w(\cdot)$ 는 트레블과 베이스 각각의 음역 창입니다.
 
 ```math
-C(t, q) = \sum_{j:\ \operatorname{round}(\tilde m_j) \bmod 12 = q} A_j\, w(\tilde m_j)\, \cos^2\!\big(\pi(\tilde m_j - \operatorname{round}(\tilde m_j))\big)
+C(t, q) = \sum_{j:\ \mathrm{round}(\tilde m_j) \bmod 12 = q} A_j\, w(\tilde m_j)\, \cos^2\!\big(\pi(\tilde m_j - \mathrm{round}(\tilde m_j))\big)
 ```
 
 #### (11) 박 동기 집계, 베이스 바닥, 조성
@@ -511,14 +511,14 @@ C(t, q) = \sum_{j:\ \operatorname{round}(\tilde m_j) \bmod 12 = q} A_j\, w(\tild
 \bar C(q) = \frac{\sum_j \omega_j\,C(j, q)}{\sum_j \omega_j},\qquad \omega_j = 0.1 + \sin(\pi u_j),\quad u_j = \frac{j h - t_0}{t_1 - t_0}
 ```
 
-베이스 크로마의 상시 성분 제거와 조성 추정은 다음과 같습니다. $\mathbf{K}_\text{mode}$ 는 Krumhansl–Kessler 장조, 단조 프로필이고 $\mathrm{rot}_t$ 는 으뜸음 $t$ 로의 회전입니다.
+베이스 크로마의 상시 성분 제거와 조성 추정은 다음과 같습니다. $\vec{K}_\text{mode}$ 는 Krumhansl–Kessler 장조, 단조 프로필이고 $\mathrm{rot}_t$ 는 으뜸음 $t$ 로의 회전입니다.
 
 ```math
-B'_s(q) = \max\!\Big(0,\ B_s(q) - \tfrac12\operatorname{median}_i B_i(q)\Big)
+B'_s(q) = \max\!\Big(0,\ B_s(q) - \tfrac12\mathrm{median}_i B_i(q)\Big)
 ```
 
 ```math
-(\hat t, \widehat{\text{mode}}) = \arg\max_{t,\ \text{mode}}\ \operatorname{corr}\!\big(\mathbf{h},\ \mathrm{rot}_t(\mathbf{K}_\text{mode})\big),\qquad
+(\hat t, \widehat{\text{mode}}) = \arg\max_{t,\ \text{mode}}\ \mathrm{corr}\!\big(\vec{h},\ \mathrm{rot}_t(\vec{K}_\text{mode})\big),\qquad
 h_q = \sum_i \sqrt{\frac{T_i(q)}{\sum_{q'} T_i(q')}} + \frac12\sqrt{\frac{B_i(q)}{\sum_{q'} B_i(q')}}
 ```
 
@@ -537,7 +537,7 @@ T = \frac{(\tilde T/\max\tilde T)^{\gamma}}{\left\|(\tilde T/\max\tilde T)^{\gam
 관측 $o_s$ 도 트레블 크로마를 같은 방식(최댓값 정규화, $\gamma$ 제곱, L2 정규화)으로 만듭니다. 코드 $c$ 의 방출 점수는 다음과 같습니다.
 
 ```math
-e_s(c) = \beta\,\langle o_s, T_c\rangle + \pi_q + \pi_\text{inv} + \kappa\,\mathbf{1}[\,c \subset \text{key}\,]
+e_s(c) = \beta\,\langle o_s, T_c\rangle + \pi_q + \pi_\text{inv} + \kappa\,[\,c \subset \text{key}\,]
 + \eta\,g_s\Big(\ln\big(0.06 + \hat b_s(p_\text{bass})\big) - \ln\big(0.06 + \tfrac{1}{12}\big)\Big)
 ```
 
@@ -610,7 +610,7 @@ t^\text{click}_i = t_s + (b_i + \delta - o_s),\qquad
 스케줄러는 주기 $T_\text{tick} = 25$ ms로 깨어나 $b_i + \delta \le \text{pos} + H$ 인 클릭을 예약합니다( $H = 0.2$ s, 백그라운드 탭은 1.5 s). $H \gg T_\text{tick}$ 이므로 타이머가 한 번에 약 175 ms 이상 늦지 않는 한 클릭은 이미 예약되어 있습니다. 클릭 소리는 다음 파형을 미리 계산해 둔 버퍼입니다(첫 박 $f$ = 1,850 Hz, 나머지 1,250 Hz, 앞 2 ms에 선형 감쇠 잡음을 더함).
 
 ```math
-x(t) = A\Big[\,0.75\,\big(\sin 2\pi f t + 0.3\sin 2\pi (2.02 f) t\big)\,e^{-t/16\,\text{ms}}\Big]
+x(t) = A\Big[\,0.75\,\big(\sin\, 2\pi f t + 0.3\sin\, 2\pi (2.02 f) t\big)\,e^{-t/16\,\text{ms}}\Big]
 ```
 
 #### (16) 피아노 합성
@@ -624,7 +624,7 @@ f_0 = 440 \cdot 2^{(m - 69 + \theta)/12},\qquad f_k = k f_0\sqrt{1 + B k^2},\qqu
 해머 타격 위치 $x_h = 1/7.5$ 와 해머 펠트의 고역 감쇠로 배음 크기를 정합니다.
 
 ```math
-a_k = \frac{|\sin(\pi k x_h)|}{k^{0.8}}\cdot\frac{1}{1 + (f_k/f_b)^2},\qquad f_b = \operatorname{clip}\big(2600 + 40(m-60),\ 1800,\ 5000\big)\ \text{Hz}
+a_k = \frac{|\sin(\pi k x_h)|}{k^{0.8}}\cdot\frac{1}{1 + (f_k/f_b)^2},\qquad f_b = \mathrm{clip}\big(2600 + 40(m-60),\ 1800,\ 5000\big)\ \text{Hz}
 ```
 
 각 배음은 빠른 감쇠(즉음)와 느린 감쇠(여음)의 합이고, 낮은 배음은 여러 현 $s$ 가 조금씩 다른 음정 $d_s$ 로 함께 울립니다.
@@ -634,14 +634,14 @@ y(t) = \sum_{k}\ \sum_{s=1}^{S_k} \frac{a_k}{S_k}\left(0.60\,e^{-t/\tau^{F}_k} +
 ```
 
 ```math
-\tau^{S}_k = \max\!\left(0.12,\ \tau_1\Big(\frac{f_0}{f_k}\Big)^{0.7}\right),\qquad \tau^{F}_k = 0.15\,\tau^{S}_k,\qquad \tau_1 = \operatorname{clip}\!\left(8.5\cdot 2^{-(m-38)/16},\ 1.0,\ 8.5\right)\ \text{s}
+\tau^{S}_k = \max\!\left(0.12,\ \tau_1\Big(\frac{f_0}{f_k}\Big)^{0.7}\right),\qquad \tau^{F}_k = 0.15\,\tau^{S}_k,\qquad \tau_1 = \mathrm{clip}\!\left(8.5\cdot 2^{-(m-38)/16},\ 1.0,\ 8.5\right)\ \text{s}
 ```
 
-현의 수 $S_k$ 는 $k \le 6$ 에서 1(m < 35), 2(m < 47), 3(그 밖)이고 $k > 6$ 은 1입니다. 현별 조율 차는 $d = (0, +1.0, -0.8)$ cent입니다. 배음은 32번째, 8 kHz까지만 쓰고 −100 dB 아래로 내려간 뒤는 계산하지 않습니다. 시작 위상 $\varphi_k$ 는 음마다 고정된 난수로 배음마다 다르게 두되, 같은 배음의 여러 현은 같은 위상으로 출발시킵니다(4-2의 맥놀이 참고). 여기에 30 ms 해머 잡음, 2 ms 어택 램프, 끝 60 ms 페이드를 더하고, 앞 0.3초의 RMS가 0.12가 되도록 맞춥니다. 길이는 $\operatorname{clip}(5.6 - 0.07(m-38),\ 2.6,\ 5.6)$ 초입니다. 피아노 경로 전체에는 고정 보정 이득 +6.4 dB(×2.09)를 곱합니다. 사인은 `Math.sin` 대신 회전 재귀로 만들고 2,048 샘플마다 크기를 1로 되돌립니다.
+현의 수 $S_k$ 는 $k \le 6$ 에서 1(m < 35), 2(m < 47), 3(그 밖)이고 $k > 6$ 은 1입니다. 현별 조율 차는 $d = (0, +1.0, -0.8)$ cent입니다. 배음은 32번째, 8 kHz까지만 쓰고 −100 dB 아래로 내려간 뒤는 계산하지 않습니다. 시작 위상 $\varphi_k$ 는 음마다 고정된 난수로 배음마다 다르게 두되, 같은 배음의 여러 현은 같은 위상으로 출발시킵니다(4-2의 맥놀이 참고). 여기에 30 ms 해머 잡음, 2 ms 어택 램프, 끝 60 ms 페이드를 더하고, 앞 0.3초의 RMS가 0.12가 되도록 맞춥니다. 길이는 $\mathrm{clip}(5.6 - 0.07(m-38),\ 2.6,\ 5.6)$ 초입니다. 피아노 경로 전체에는 고정 보정 이득 +6.4 dB(×2.09)를 곱합니다. 사인은 `Math.sin` 대신 회전 재귀로 만들고 2,048 샘플마다 크기를 1로 되돌립니다.
 
 ```math
 \begin{pmatrix} c_{i+1} \\ s_{i+1} \end{pmatrix} =
-\begin{pmatrix} \cos\omega & -\sin\omega \\ \sin\omega & \cos\omega \end{pmatrix}
+\begin{pmatrix} \cos\,\omega & -\sin\,\omega \\ \sin\,\omega & \cos\,\omega \end{pmatrix}
 \begin{pmatrix} c_i \\ s_i \end{pmatrix},\qquad \omega = \frac{2\pi f}{f_s}
 ```
 
@@ -655,7 +655,7 @@ n_\text{bass} = 38 + \big((p_\text{bass} - 38) \bmod 12\big),\qquad
 \mu \leftarrow 0.7\,\bar{\hat V} + 0.3\cdot 62
 ```
 
-$\bar V$ 는 배치의 평균 음높이이고, $\mu$ 는 D4(62)에서 시작해 직전 배치를 따라가되 가운데로 조금씩 당겨집니다. 세기는 베이스 0.62, 오른손 음마다 $0.5\sqrt{3/n}$ ( $n$ 은 오른손 음 수), 좌우 위치는 $\operatorname{clip}((m-60)/36,\ -0.5,\ 0.5)$ 입니다. 타건 시각 $t_j$ 는 (15)와 같은 방식으로 오디오 시계에 옮기되 사용자 클릭 보정 $\delta$ 는 더하지 않고, 코드 구간이 끝나는 시각 $t^\text{end}_j$ 부터 음량을 시간 상수 70 ms로 줄입니다.
+$\bar V$ 는 배치의 평균 음높이이고, $\mu$ 는 D4(62)에서 시작해 직전 배치를 따라가되 가운데로 조금씩 당겨집니다. 세기는 베이스 0.62, 오른손 음마다 $0.5\sqrt{3/n}$ ( $n$ 은 오른손 음 수), 좌우 위치는 $\mathrm{clip}((m-60)/36,\ -0.5,\ 0.5)$ 입니다. 타건 시각 $t_j$ 는 (15)와 같은 방식으로 오디오 시계에 옮기되 사용자 클릭 보정 $\delta$ 는 더하지 않고, 코드 구간이 끝나는 시각 $t^\text{end}_j$ 부터 음량을 시간 상수 70 ms로 줄입니다.
 
 ```math
 t^\text{piano}_j = t_s + (t_j - o_s),\qquad g(t) = g_0\,e^{-(t - t^\text{end}_j)/70\,\text{ms}}\quad (t \ge t^\text{end}_j)
@@ -669,15 +669,15 @@ t^\text{piano}_j = t_s + (t_j - o_s),\qquad g(t) = g_0\,e^{-(t - t^\text{end}_j)
 
 ```math
 f(m) = 440 \cdot 2^{(m - 69)/12}\ \text{Hz},\qquad
-m(f) = 69 + 12\log_2\frac{f}{440},\qquad
-\text{cent}(f_1, f_2) = 1200\log_2\frac{f_1}{f_2}
+m(f) = 69 + 12\log_2\,\frac{f}{440},\qquad
+\text{cent}(f_1, f_2) = 1200\log_2\,\frac{f_1}{f_2}
 ```
 
 옥타브가 주파수 2배라는 사실이 음들을 12칸(크로마)으로 접는 근거입니다. 녹음의 기준음은 오래된 녹음의 테이프 속도, 악기 조율, 의도적인 튜닝 때문에 440 Hz에서 벗어나곤 합니다. 예를 들어 +18 cent면 $440 \cdot 2^{0.18/12} \approx 444.6$ Hz입니다.
 
 #### 배음
 
-현이나 관의 진동은 기본 주파수 $f_0$ 의 정수배 $h f_0$ 성분(배음)을 함께 냅니다. 배음이 기본음으로부터 떨어진 거리는 $12\log_2 h$ 반음입니다.
+현이나 관의 진동은 기본 주파수 $f_0$ 의 정수배 $h f_0$ 성분(배음)을 함께 냅니다. 배음이 기본음으로부터 떨어진 거리는 $12\log_2\, h$ 반음입니다.
 
 | 배음 $h$ | 반음 거리 | 가장 가까운 평균율 | 차이 | 템플릿 가중치 |
 |---|---|---|---|---|
@@ -788,18 +788,18 @@ flowchart LR
 
 ```
 .
-├── chord-chart.html          앱 전체: 엔진 스크립트 + UI 스크립트 + 스타일 (단일 파일, 약 130 KB)
+├── chordity.html             앱 전체: 엔진 스크립트 + UI 스크립트 + 스타일 (단일 파일, 약 130 KB)
 ├── README.md
 └── docs/
     ├── screenshot-desktop.png
     └── screenshot-mobile.png
 ```
 
-GitHub Pages로 공개하려면 `chord-chart.html` 을 `index.html` 로 바꾸고, 저장소 설정의 Pages에서 배포할 브랜치를 지정하세요. 외부 파일을 하나도 불러오지 않으므로 그대로 동작합니다.
+GitHub Pages로 공개하려면 `chordity.html` 을 `index.html` 로 바꾸고, 저장소 설정의 Pages에서 배포할 브랜치를 지정하세요. 외부 파일을 하나도 불러오지 않으므로 그대로 동작합니다.
 
 #### 엔진 API
 
-`chord-chart.html` 의 첫 번째 `<script>` 가 전역 `Engine` 을 정의합니다. 같은 코드를 `engine.js` 로 떼어 내면 `module.exports` 로도 내보내므로 Node에서 `require` 할 수 있습니다.
+`chordity.html` 의 첫 번째 `<script>` 가 전역 `Engine` 을 정의합니다. 같은 코드를 `engine.js` 로 떼어 내면 `module.exports` 로도 내보내므로 Node에서 `require` 할 수 있습니다.
 
 ```js
 // buf: AudioBuffer (예: AudioContext.decodeAudioData 결과)
@@ -884,7 +884,7 @@ flowchart LR
 
 #### 설정 저장
 
-메트로놈 켜기, 첫 박 강조, 코드 연주 켜기와 치는 때, 음악과 클릭과 코드 볼륨, 클릭 타이밍, 자동 스크롤, 테마, 코드 어휘, 해상도, 슬래시 표기를 `localStorage` 의 `madi-code-prefs-v1` 에 저장합니다. 저장할 수 없는 환경에서도 앱은 그대로 동작합니다.
+메트로놈 켜기, 첫 박 강조, 코드 연주 켜기와 치는 때, 음악과 클릭과 코드 볼륨, 클릭 타이밍, 자동 스크롤, 테마, 코드 어휘, 해상도, 슬래시 표기를 `localStorage` 의 `chordity-prefs-v1` 에 저장(이전 이름의 저장값이 있으면 옮겨 옴)합니다. 저장할 수 없는 환경에서도 앱은 그대로 동작합니다.
 
 ### 4-4. 이슈와 해결
 
