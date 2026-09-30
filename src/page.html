@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chordity: 마디별 코드 인식과 메트로놈</title>
+<style>
+/* ===== 디자인 토큰 ===== */
+:root {
+  --paper: #f2f4ef;        /* 서늘한 악보 종이 */
+  --sheet: #fbfcf9;        /* 차트 면 */
+  --ink: #1b2433;          /* 잉크 */
+  --pencil: #6c7480;       /* 연필: 보조 텍스트 */
+  --rule: #c7cdd4;         /* 마디선 */
+  --hover: rgba(27, 36, 51, .045);
+  --hl: #ffe45c;           /* 형광펜: 지금 마디 */
+  --hl-ink: #1b2433;
+  --wave: rgba(27, 36, 51, .22);
+  --wave-played: rgba(27, 36, 51, .7);
+  --focus: #2d6be0;
+  --danger: #b3261e;
+  --chord-font: "Avenir Next Condensed", "Bahnschrift SemiCondensed", "Bahnschrift", "Roboto Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --ui-font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+    --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b;
+    --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+  --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b;
+  --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
+  color-scheme: dark;
+}
+html { height: 100%; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 150px); -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--ui-font); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px 48px; }
+
+/* ===== 상단 ===== */
+.top { max-width: 1100px; margin: 0 auto; padding: 14px 20px 6px; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
+.brand svg { width: 26px; height: 26px; }
+.brand .ver { margin-left: -4px; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 99px; font-size: 11.5px; font-weight: 700; line-height: 1.45; letter-spacing: 0; color: var(--pencil); font-variant-numeric: tabular-nums; }
+/* 테마 선택 막대(시스템·밝게·어둡게): 코드 표기 막대와 같은 모양, 고른 칸은 글자색으로 채우고 아이콘은 종이색 */
+.tseg { position: relative; display: inline-flex; flex: none; box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; }
+.tseg .thumb { position: absolute; top: 0; left: 0; background: var(--ink); pointer-events: none; will-change: transform; transition: background-color .2s ease; }
+.tseg .opt { all: unset; box-sizing: border-box; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; flex: none; width: 35px; height: 35px; cursor: pointer; line-height: 0; color: var(--ink); transition: color .2s ease; }
+.tseg .opt + .opt { width: 36.5px; border-left: 1.5px solid var(--ink); }
+.tseg .opt[aria-checked="true"] { color: var(--paper); }
+.tseg .opt[aria-checked="false"]:hover { background: var(--hover); }
+.tseg .opt:focus-visible { outline: 2px solid currentColor; outline-offset: -5px; border-radius: 7px; }
+.tseg .opt svg { display: block; flex: none; width: 20px; height: 20px; }
+.iconbtn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid transparent; background: none; cursor: pointer; color: var(--pencil); }
+.iconbtn:hover { background: var(--hover); color: var(--ink); }
+.iconbtn svg { width: 20px; height: 20px; }
+
+/* ===== 버튼 ===== */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--rule); background: var(--sheet); cursor: pointer; font-weight: 600; white-space: nowrap; }
+.btn:hover { border-color: var(--pencil); }
+.btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); min-height: 48px; padding: 0 22px; font-size: 16px; }
+.btn.primary:hover { opacity: .92; }
+.btn.small { min-height: 34px; padding: 0 12px; font-size: 14px; font-weight: 600; }
+.btn:disabled { opacity: .45; cursor: default; }
+
+/* ===== 첫 화면 ===== */
+.intro { position: relative; margin-top: 18px; border-radius: 16px; background: var(--sheet); border: 1px solid var(--rule); overflow: hidden; min-height: 400px; display: grid; place-items: center; }
+.intro.drag { border-color: var(--ink); box-shadow: 0 0 0 3px var(--hl) inset; }
+.blank { position: absolute; inset: 22px 26px; display: grid; grid-template-rows: repeat(4, 1fr); opacity: .5; pointer-events: none; }
+.blank .bl { display: grid; grid-template-columns: repeat(4, 1fr); border-left: 1.5px solid var(--rule); }
+.blank .bb { border-right: 1.5px solid var(--rule); position: relative; }
+.blank .bb::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 30%; height: 14px;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(25% - 3px), var(--rule) calc(25% - 3px) 25%); transform: skewX(-22deg); }
+.drop { position: relative; text-align: center; max-width: 560px; padding: 36px 24px; background: radial-gradient(closest-side, var(--sheet) 70%, transparent); }
+.drop h1 { font-size: clamp(24px, 4.2vw, 34px); line-height: 1.25; margin: 0 0 12px; letter-spacing: -.02em; text-wrap: balance; }
+.drop h1 .hl { background: linear-gradient(transparent 58%, var(--hl) 58% 92%, transparent 92%); padding: 0 2px; color: inherit; }
+:root[data-theme="dark"] .drop h1 .hl { color: var(--ink); }
+.drop p { margin: 0 0 22px; color: var(--pencil); text-wrap: pretty; }
+.drop .hint { margin: 14px 0 0; font-size: 13px; }
+.fmt { font-size: 12.5px; color: var(--pencil); margin-top: 6px; }
+
+/* ===== 진행률 ===== */
+.busy { margin-top: 18px; padding: 28px 24px; border-radius: 16px; background: var(--sheet); border: 1px solid var(--rule); }
+.busy .row1 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.busy .stage { font-weight: 700; }
+.busy .pct { font-variant-numeric: tabular-nums; color: var(--pencil); }
+.busy .track { height: 8px; border-radius: 99px; background: var(--hover); overflow: hidden; }
+.busy .fill { height: 100%; width: 0; background: var(--ink); border-radius: 99px; transition: width .15s linear; }
+.busy .file { margin-top: 10px; color: var(--pencil); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.err { margin: 18px 0 0; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--danger); color: var(--danger); background: var(--sheet); }
+
+/* ===== 곡 정보 ===== */
+.song { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin: 14px 0 12px; }
+.song h2 { margin: 0; font-size: clamp(20px, 3vw, 26px); letter-spacing: -.015em; line-height: 1.25; overflow-wrap: anywhere; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 8px 0 0; }
+.facts div { display: flex; align-items: baseline; gap: 6px; }
+.facts dt { font-size: 12.5px; color: var(--pencil); }
+.facts dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ===== 트랜스포트(상단 고정) ===== */
+.transport { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); padding: 10px 0 10px; border-bottom: 1px solid var(--rule); }
+.tp { display: flex; align-items: center; gap: 14px 18px; flex-wrap: wrap; }
+.play { width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--ink); color: var(--paper); display: grid; place-items: center; cursor: pointer; flex: none; }
+.play svg { width: 22px; height: 22px; }
+.play:disabled { opacity: .4; cursor: default; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 92px; }
+.clock .dur { color: var(--pencil); font-weight: 500; }
+.where { font-size: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; }
+/* 재생 막대의 템포: 스크롤해도 늘 보이도록 고정된 막대 안에, 재생하는 자리의 템포를 박마다 */
+.tp .tpo { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; padding: 0 1px; line-height: 1.1; }
+@media (max-width: 440px) { .tp .tpo b { font-size: 17px; } .tp .tpo .lab { font-size: 10.5px; } }
+.tp .tpo .lab { font-size: 11px; color: var(--pencil); white-space: nowrap; }
+.tp .tpo b { font: 800 19px/1.15 var(--ui-font); color: var(--ink); font-variant-numeric: tabular-nums; }
+.now { display: flex; align-items: baseline; gap: 12px; min-width: 150px; }
+.now .cur { font-family: var(--chord-font); font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -.01em; }
+.now .nxt { font-size: 13px; color: var(--pencil); white-space: nowrap; }
+.now .nxt b { font-family: var(--chord-font); font-size: 17px; color: var(--ink); font-weight: 700; }
+.leds { display: flex; align-items: center; gap: 7px; }
+.leds i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--pencil); transition: background-color .06s; }
+.leds i.down { width: 16px; height: 16px; }
+.leds i.on { background: var(--ink); border-color: var(--ink); }
+.leds i.down.on { background: var(--hl); border-color: var(--ink); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 99px; border: 1.5px solid var(--ink); background: none; cursor: pointer; font-weight: 700; min-height: 44px; }
+.toggle svg { width: 18px; height: 18px; }
+.toggle[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.vols { display: flex; gap: 14px; align-items: center; font-size: 13px; color: var(--pencil); }
+.vols label { display: flex; align-items: center; gap: 6px; }
+.vols-narrow { display: none; }
+.vols-wide { margin-left: auto; }
+.vols-wide input[type=range] { width: 84px; }
+.ovrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.ovrow .overview { flex: 1 1 auto; min-width: 0; margin-top: 0; }
+.toggles { display: flex; gap: 8px; flex: none; }
+input[type=range] { accent-color: var(--ink); width: 92px; }
+.overview { position: relative; height: 46px; margin-top: 10px; border-radius: 8px; background: var(--sheet); border: 1px solid var(--rule); overflow: hidden; cursor: pointer; touch-action: none; }
+.overview canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.overview .played { position: absolute; left: 0; top: 0; bottom: 0; width: 0; overflow: hidden; }
+.overview .played canvas { width: auto; }
+.overview .head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ink); left: 0; }
+.overview .head::before { content: ""; position: absolute; top: -1px; left: -4px; width: 10px; height: 6px; background: var(--hl); border: 1px solid var(--ink); border-radius: 2px; }
+
+/* ===== 보정 패널 ===== */
+.panel { margin-top: 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); }
+.panel > summary { cursor: pointer; padding: 12px 16px; font-weight: 700; list-style: none; display: flex; align-items: center; gap: 10px; }
+.panel > summary::-webkit-details-marker { display: none; }
+.panel > summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s; margin-right: 2px; }
+.panel[open] > summary::before { transform: rotate(45deg); }
+.panel > summary .sub { font-weight: 500; color: var(--pencil); font-size: 13px; }
+.pbody { padding: 4px 16px 16px; }
+.grp { display: grid; grid-template-columns: 110px 1fr; gap: 10px 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--rule); }
+.grp:first-child { border-top: none; }
+.grp > .lab { font-size: 13px; color: var(--pencil); font-weight: 600; }
+.grp .ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.grp .note { flex-basis: 100%; font-size: 12.5px; color: var(--pencil); margin-top: -2px; }
+select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); padding: 0 8px; }
+.chk { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; cursor: pointer; }
+.chk input[type=checkbox] { accent-color: var(--ink); width: 16px; height: 16px; }
+.applied { font-size: 13px; color: var(--pencil); flex-basis: 100%; line-height: 1.6; }
+.applied b { color: var(--ink); }
+.oms { font-variant-numeric: tabular-nums; min-width: 58px; font-size: 13px; }
+
+/* ===== 코드 차트 ===== */
+.viewbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+.viewbar .vlab { font-size: 13px; font-weight: 600; color: var(--pencil); }
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; }
+.seg button { border: none; background: none; min-height: 38px; padding: 0 15px; font-weight: 700; font-size: 14px; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1.5px solid var(--ink); }
+.seg button:hover { background: var(--hover); }
+.seg button[aria-checked="true"] { background: var(--ink); color: var(--paper); }
+.seg button:focus-visible { outline-offset: -4px; border-radius: 8px; }
+.sheet { margin-top: 10px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 14px 18px 6px; }
+.chart { --per: 4; }
+.empty-msg { padding: 28px 14px; color: var(--pencil); }
+.line { display: grid; grid-template-columns: 36px minmax(0, 1fr); }
+.line + .line { margin-top: 2px; }
+.line .num { font-size: 11.5px; color: var(--pencil); text-align: right; padding: 8px 8px 0 0; font-variant-numeric: tabular-nums; }
+.bars { display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); border-left: 1.5px solid var(--rule); }
+.bar { position: relative; height: 86px; border-right: 1.5px solid var(--rule); cursor: pointer; outline-offset: -2px; }
+.bar:hover { background: var(--hover); }
+.bar.final { border-right: none; }
+.bar.final::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 7px; border-left: 1.5px solid var(--ink); border-right: 4px solid var(--ink); }
+.bar .band { position: absolute; left: 5px; right: 6px; top: 9px; height: 40px; background: var(--hl); border-radius: 4px 12px 5px 14px / 14px 5px 12px 4px; transform: rotate(-.7deg); opacity: 0; z-index: 0; }
+.bar.cur .band { opacity: 1; animation: swipe .18s ease-out both; }
+@keyframes swipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.lane, .slashes { position: absolute; left: 12px; right: 10px; }
+.lane { top: 12px; height: 34px; z-index: 1; }
+.slashes { bottom: 14px; height: 18px; }
+.chord { position: absolute; top: 0; white-space: nowrap; font-family: var(--chord-font); font-weight: 700; font-size: 25px; line-height: 34px; letter-spacing: -.01em; color: var(--ink); }
+.chord .q { font-size: .8em; }
+.chord sup { font-size: .6em; vertical-align: .62em; line-height: 0; margin-left: 1px; }
+.chord .bs { font-size: .8em; color: inherit; }
+.chord .rq { font-size: .62em; vertical-align: .6em; line-height: 0; margin-left: 1px; }
+.chord .fig { display: inline-flex; flex-direction: column; align-items: center; font-size: .47em; line-height: .98; vertical-align: .95em; margin: 0 1px 0 2px; }
+.chord .sec { font-size: .8em; }
+.chord.sm { font-size: 19px; }
+.chord.xs { font-size: 15px; }
+.chord.tied { color: var(--pencil); font-weight: 600; }
+.chord.nc { font-family: var(--ui-font); font-size: 14px; font-weight: 600; color: var(--pencil); letter-spacing: .02em; }
+.bar.cur .chord { color: var(--hl-ink); }
+.slashes i { position: absolute; bottom: 0; width: 3.5px; height: 15px; margin-left: 5px; background: var(--pencil); border-radius: 1px; transform: skewX(-24deg); opacity: .5; }
+.slashes i.off { height: 8px; width: 2.5px; opacity: .3; }
+.bar.cur .slashes i { opacity: .8; }
+.slashes i.hit { background: var(--ink); opacity: 1 !important; height: 19px; }
+.bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; color: var(--pencil); font-variant-numeric: tabular-nums; background: var(--sheet); padding: 0 3px; border-radius: 3px; }
+.bar.pickup .tag { right: auto; left: 10px; }
+.bar .pillrow { position: absolute; top: -4px; z-index: 3; display: flex; gap: 4px; }
+.bar .pillrow .keychg { position: static; }
+/* 서서히 바뀌는 템포: 슬래시 아래 줄의 긴 육각형(삼각형 + 사각형 몸통 + 삼각형). 재생 중엔 지나온 만큼 형광펜 색으로 참 */
+.bar .ramp { position: absolute; bottom: 0; height: 13px; z-index: 2; display: flex; align-items: stretch; }
+.bar .ramp .tip { flex: none; width: 7px; height: 13px; overflow: visible; }
+.bar .ramp .tip .tb { fill: var(--sheet); }
+.bar .ramp .tip .tf { fill: var(--hl); }
+.bar .ramp .tip .tl { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-linejoin: round; }
+.bar .ramp .rb { position: relative; flex: 1; min-width: 0; box-sizing: border-box; border-top: 1.2px solid var(--ink); border-bottom: 1.2px solid var(--ink); background: var(--sheet); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.bar .ramp .rf { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--hl); }
+.bar .ramp .rt { position: relative; z-index: 1; font: 800 9.5px/10px var(--ui-font); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* 템포: 슬래시 아래 줄에 흰 알약(조성 이름표는 검은 알약). 도착 알약은 도착 박에 잠깐 형광펜 색으로 켜짐(페이드 없음) */
+.bar .tempochg { position: absolute; bottom: 0; z-index: 3; margin-left: -1px; box-sizing: border-box; height: 13px; font: 800 9.5px/10.6px var(--ui-font); padding: 0 5px; border-radius: 99px; background: var(--sheet); color: var(--ink); border: 1.2px solid var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bar .tempochg.lit { background: var(--hl); color: var(--hl-ink); }
+.bar .keychg { position: absolute; top: -4px; z-index: 3; font: 700 10.5px/16px var(--ui-font); padding: 0 7px; border-radius: 99px; background: var(--ink); color: var(--paper); white-space: nowrap; letter-spacing: -.01em; }
+
+/* ===== 텍스트 차트, 정보 ===== */
+textarea { width: 100%; min-height: 220px; resize: vertical; border-radius: 10px; border: 1px solid var(--rule); background: var(--paper); padding: 12px; font: 13px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, "D2Coding", monospace; white-space: pre; overflow: auto; }
+.row-end { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; align-items: center; }
+.copied { font-size: 13px; color: var(--pencil); }
+.info { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: 13.5px; margin: 0; }
+.info dt { color: var(--pencil); }
+.info dd { margin: 0; font-variant-numeric: tabular-nums; }
+.keys { font-size: 12.5px; color: var(--pencil); margin: 18px 0 0; }
+kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 5px; padding: 2px 6px; background: var(--sheet); color: var(--ink); }
+
+/* ===== 드롭 가림막 ===== */
+.veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: color-mix(in srgb, var(--paper) 82%, transparent); pointer-events: none; }
+.veil div { padding: 22px 28px; border: 2px dashed var(--ink); border-radius: 16px; font-weight: 700; background: var(--sheet); }
+
+/* ===== 좁은 화면 ===== */
+@media (max-width: 640px) {
+  .wrap { padding: 0 12px 40px; }
+  .top { padding: 10px 12px 4px; }
+  .tp { gap: 8px 10px; }
+  .clock { font-size: 14px; }
+  .leds i { width: 10px; height: 10px; }
+  .leds i.down { width: 13px; height: 13px; }
+  .play { width: 48px; height: 48px; }
+  .now { min-width: 0; }
+  .now .cur { font-size: 26px; }
+  .tp .vols-wide { display: none; }
+  .vols-narrow { display: flex; justify-content: space-between; margin-top: 12px; }
+  .vols-narrow input[type=range] { width: 74px; }
+  .ovrow { gap: 8px; }
+  .toggles { gap: 6px; }
+  .toggle { padding: 0; width: 44px; height: 44px; justify-content: center; }
+  .toggle .lbl { display: none; }
+  .toggle svg { width: 20px; height: 20px; }
+  .leds { gap: 4px; }
+  .now { gap: 8px; }
+  .clock { min-width: 0; }
+  .bar .band { height: 35px; top: 10px; }
+  .sheet { padding: 12px 8px 14px 2px; }
+  .line { grid-template-columns: 26px minmax(0, 1fr); }
+  .line .num { padding-right: 5px; }
+  .bar { height: 78px; }
+  .chord { font-size: 21px; }
+  .chord.sm { font-size: 16px; }
+  .chord.xs { font-size: 13px; }
+  .grp { grid-template-columns: 1fr; gap: 6px; }
+  .intro { min-height: 440px; }
+}
+@media (max-width: 370px) {
+  .leds { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar.cur .band { animation: none; }
+  .busy .fill { transition: none; }
+}
+/* 내용이 짧아도 맨 아래 안내가 화면 바닥에 오도록(본문이 남는 높이를 채움) */
+body { display: flex; flex-direction: column; }
+body > header, body > main, body > footer { width: 100%; flex-shrink: 0; }
+body > main { flex: 1 0 auto; }
+/* 맨 아래 안내: 누르면 판단 근거를 정리한 도움말로 */
+.disclaimer { max-width: 1100px; margin: 0 auto; padding: 6px 20px 24px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--pencil); }
+.disclaimer a { color: inherit; text-decoration: none; }
+.disclaimer a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.infohelp { margin: 12px 0 0; font-size: 13px; }
+.infohelp a { color: var(--pencil); text-underline-offset: 3px; }
+.infohelp a:hover { color: var(--ink); }
+/* 좁은 화면: 재생 막대에 템포 칸이 더해져도 박 표시등이 한 줄에 들어가게(모바일 규칙보다 뒤에 둠) */
+@media (max-width: 400px) { .tp { column-gap: 7px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    <span>Chordity</span>
+    <span class="ver" title="Chordity 버전 __VERSION__">v__VERSION__</span>
+  </div>
+  <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
+    <span class="thumb" aria-hidden="true"></span>
+    <button class="opt" type="button" role="radio" data-theme-opt="" aria-label="테마: 시스템 설정 따름" title="시스템 설정 따름"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+    <button class="opt" type="button" role="radio" data-theme-opt="light" aria-label="테마: 밝게" title="밝게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+    <button class="opt" type="button" role="radio" data-theme-opt="dark" aria-label="테마: 어둡게" title="어둡게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro" id="intro">
+    <div class="blank" aria-hidden="true">
+      <div class="bl"><div class="bb"></div><div class="bb"></div><div class="bb"></div><div class="bb"></div></div>
+      <div class="bl"><div class="bb"></div><div class="bb"></div><div class="bb"></div><div class="bb"></div></div>
+      <div class="bl"><div class="bb"></div><div class="bb"></div><div class="bb"></div><div class="bb"></div></div>
+      <div class="bl"><div class="bb"></div><div class="bb"></div><div class="bb"></div><div class="bb"></div></div>
+    </div>
+    <div class="drop">
+      <h1>음악 파일을 넣으면 <span class="hl">마디마다 코드</span>를 적어 드립니다</h1>
+      <p>박과 첫 박을 찾아 마디를 나누고, 곡의 박에 정확히 맞춘 메트로놈을 함께 들려줍니다. 분석은 모두 이 브라우저 안에서만 이루어지며 파일은 어디에도 전송되지 않습니다.</p>
+      <label class="btn primary" for="file">파일 열기</label>
+      <input type="file" id="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.webm" hidden>
+      <p class="hint">또는 이 창에 파일을 끌어다 놓으세요</p>
+      <p class="fmt">MP3, WAV, M4A, FLAC, OGG 등 브라우저가 재생할 수 있는 형식</p>
+    </div>
+  </section>
+
+  <section class="busy" id="busy" hidden aria-live="polite">
+    <div class="row1"><span class="stage" id="stage">파일 읽는 중</span><span class="pct" id="pct">0%</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="file" id="busyFile"></div>
+  </section>
+
+  <p class="err" id="err" role="alert" hidden></p>
+
+  <section id="app" hidden>
+    <div class="song">
+      <div>
+        <h2 id="title"></h2>
+        <dl class="facts">
+          <div><dt>템포</dt><dd id="fBpm"></dd></div>
+          <div><dt>박자</dt><dd id="fMeter"></dd></div>
+          <div><dt>조성</dt><dd id="fKey"></dd></div>
+          <div><dt>기준음</dt><dd id="fTune"></dd></div>
+          <div><dt>마디</dt><dd id="fBars"></dd></div>
+        </dl>
+      </div>
+      <label class="btn small" for="file2">다른 파일</label>
+      <input type="file" id="file2" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.webm" hidden>
+    </div>
+
+    <div class="transport" id="transport">
+      <div class="tp">
+        <button class="play" id="play" type="button" aria-label="재생">
+          <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.2-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+          <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" hidden><rect x="5.5" y="4" width="4.5" height="16" rx="1.2"/><rect x="14" y="4" width="4.5" height="16" rx="1.2"/></svg>
+        </button>
+        <div>
+          <div class="clock"><span id="tNow">0:00</span> <span class="dur">/ <span id="tDur">0:00</span></span></div>
+          <div class="where" id="where">&nbsp;</div>
+        </div>
+        <div class="tpo" aria-live="off" title="재생하는 자리의 템포(BPM)"><span class="lab" id="tBpmLab">템포</span><b id="tBpm">–</b></div>
+        <div class="now" aria-live="off">
+          <span class="cur" id="cNow">&nbsp;</span>
+          <span class="nxt" id="nxtWrap" hidden>다음 <b id="cNext"></b></span>
+        </div>
+        <div class="leds" id="leds" aria-hidden="true"></div>
+        <div class="vols vols-wide">
+          <label>음악 <input type="range" data-vol="music" min="0" max="1" step="0.01" aria-label="음악 볼륨"></label>
+          <label>클릭 <input type="range" data-vol="click" min="0" max="1" step="0.01" aria-label="메트로놈 볼륨"></label>
+          <label>코드 <input type="range" data-vol="piano" min="0" max="1" step="0.01" aria-label="코드 연주 볼륨"></label>
+        </div>
+      </div>
+      <div class="ovrow">
+      <div class="overview" id="overview" role="slider" tabindex="0" aria-label="재생 위치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <canvas id="wave"></canvas>
+        <div class="played" id="played"><canvas id="wave2"></canvas></div>
+        <div class="head" id="head"></div>
+      </div>
+        <div class="toggles">
+          <button class="toggle" id="metro" type="button" aria-pressed="true" aria-label="메트로놈">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M9 3h6l4 18H5z"/><path d="M12 16l5-9"/></svg>
+          <span class="lbl">메트로놈</span>
+        </button>
+          <button class="toggle" id="pianoBtn" type="button" aria-pressed="true" aria-label="코드 연주">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 13v7M15 13v7" stroke-width="1.6"/><rect x="7.2" y="4" width="3.6" height="9" rx=".6" fill="currentColor" stroke="none"/><rect x="13.2" y="4" width="3.6" height="9" rx=".6" fill="currentColor" stroke="none"/></svg>
+            <span class="lbl">코드 연주</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="vols vols-narrow">
+      <label>음악 <input type="range" data-vol="music" min="0" max="1" step="0.01" aria-label="음악 볼륨"></label>
+      <label>클릭 <input type="range" data-vol="click" min="0" max="1" step="0.01" aria-label="메트로놈 볼륨"></label>
+      <label>코드 <input type="range" data-vol="piano" min="0" max="1" step="0.01" aria-label="코드 연주 볼륨"></label>
+    </div>
+
+    <details class="panel" id="adjust">
+      <summary>박이 안 맞나요? 보정하기 <span class="sub" id="appliedSum"></span></summary>
+      <div class="pbody">
+        <div class="grp">
+          <div class="lab">엇박 교정</div>
+          <div class="ctl">
+            <button class="btn small" type="button" data-op="half">½박 옮기기</button>
+            <span class="note">클릭이 박과 박 사이(엇박)에 들리면 한 번 누르세요.</span>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">템포 단계</div>
+          <div class="ctl">
+            <button class="btn small" type="button" data-op="x2">두 배 빠르게 ×2</button>
+            <button class="btn small" type="button" data-op="d2">절반으로 ÷2</button>
+            <button class="btn small" type="button" data-op="d3">셋씩 묶기 ÷3</button>
+            <span class="note">클릭이 너무 촘촘하면 ÷2, 너무 드문드문하면 ×2. 6/8·12/8 곡이 8분음표마다 치면 ÷3.</span>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">마디 첫 박</div>
+          <div class="ctl">
+            <button class="btn small" type="button" id="dsPrev">한 박 앞당기기</button>
+            <button class="btn small" type="button" id="dsNext">한 박 늦추기</button>
+            <span class="note">강박(마디 시작)이 실제와 어긋날 때 사용합니다.</span>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">박자</div>
+          <div class="ctl">
+            <select id="selMeter" aria-label="박자">
+              <option value="auto">자동</option>
+              <option value="2">마디당 2박</option><option value="3">마디당 3박</option><option value="4">마디당 4박</option>
+              <option value="5">마디당 5박</option><option value="6">마디당 6박</option><option value="7">마디당 7박</option>
+            </select>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">코드 종류</div>
+          <div class="ctl">
+            <select id="selVocab" aria-label="코드 종류">
+              <option value="basic">기본: 장·단3화음</option>
+              <option value="standard">표준: 7, maj7, m7, sus4, dim 포함</option>
+              <option value="extended">확장: sus2, aug, m7♭5, dim7까지</option>
+            </select>
+            <select id="selRes" aria-label="코드 변화 단위">
+              <option value="1">1박 단위</option>
+              <option value="2">½박 단위</option>
+            </select>
+            <label class="chk"><input type="checkbox" id="chkSlash"> 베이스음 표기 (G/B)</label>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">코드 연주</div>
+          <div class="ctl">
+            <select id="selPianoMode" aria-label="피아노가 코드를 치는 때">
+              <option value="song">곡 따라(새로 친 곳만 다시)</option>
+              <option value="change">코드가 바뀔 때</option>
+              <option value="bar">마디마다 다시</option>
+              <option value="beat">박마다</option>
+            </select>
+            <span class="note">인식한 코드를 피아노로 들려줍니다. 원곡과 겹쳐 들으면 코드가 맞는지 귀로 확인할 수 있습니다.</span>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">메트로놈</div>
+          <div class="ctl">
+            <label class="chk"><input type="checkbox" id="chkAccent"> 첫 박 강조</label>
+            <label class="chk"><input type="checkbox" id="chkScroll"> 자동 스크롤</label>
+            <label class="chk">클릭 타이밍 <input type="range" id="rOffset" min="-50" max="50" step="1" aria-label="클릭 타이밍 미세 조정"></label>
+            <span class="oms" id="offTxt">0 ms</span>
+          </div>
+        </div>
+        <div class="grp">
+          <div class="lab">적용 중</div>
+          <div class="ctl">
+            <div class="applied" id="applied">없음 (모두 기본값)</div>
+            <button class="btn small" type="button" id="resetBtn">박 보정 되돌리기</button>
+            <button class="btn small" type="button" id="resetPrefsBtn">설정 기본값으로</button>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="viewbar">
+      <span class="vlab" id="notLab">코드 표기</span>
+      <div class="seg" id="notation" role="radiogroup" aria-labelledby="notLab">
+        <button type="button" role="radio" data-not="name" aria-checked="true" title="음이름: C, Am, G7, G/B">음이름</button>
+        <button type="button" role="radio" data-not="camelot" aria-checked="false" title="카멜롯: 휠 번호(1~12)와 A(단조 계열)·B(장조 계열). 코드 종류는 작은 글자, 베이스음은 생략">카멜롯</button>
+        <button type="button" role="radio" data-not="roman" aria-checked="false" title="로마 숫자: 그 자리 조성에서의 도수(대문자 장3화음, 소문자 단3화음), 6·⁶₄·⁶₅·⁴₃·⁴₂ 자리바꿈, V/x 부속화음">로마 숫자</button>
+      </div>
+    </div>
+    <div class="sheet"><div class="chart" id="chart" role="list" aria-label="마디별 코드 차트"></div></div>
+
+    <details class="panel">
+      <summary>텍스트 코드 차트 <span class="sub">복사해서 메모나 악보에 붙여넣기</span></summary>
+      <div class="pbody">
+        <textarea id="txt" readonly spellcheck="false" aria-label="텍스트 코드 차트"></textarea>
+        <div class="row-end"><span class="copied" id="copied"></span><button class="btn small" type="button" id="copyBtn">복사</button></div>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary>분석 정보</summary>
+      <div class="pbody"><dl class="info" id="info"></dl><p class="infohelp"><a href="__INFO_HREF__#panel" target="_blank" rel="noopener">각 항목의 뜻과 분석 원리 보기</a></p></div>
+    </details>
+
+    <p class="keys"><kbd>Space</kbd> 재생·정지 &nbsp; <kbd>M</kbd> 메트로놈 &nbsp; <kbd>P</kbd> 코드 연주 &nbsp; <kbd>←</kbd> <kbd>→</kbd> 이전·다음 마디 &nbsp; <kbd>Home</kbd> 처음으로 &nbsp; 마디를 누르면 그 마디부터 재생합니다.</p>
+  </section>
+</main>
+
+<footer class="disclaimer">
+  <a href="__INFO_HREF__#accuracy" target="_blank" rel="noopener">Chordity는 AI이며 실수할 수 있습니다. 중요한 부분은 귀로 들어 다시 한번 확인해 주세요.</a>
+</footer>
+
+<div class="veil" id="veil" hidden><div>놓으면 분석을 시작합니다</div></div>
+
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+/*__UI__*/
+</script>
+</body>
+</html>

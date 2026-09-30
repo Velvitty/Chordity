@@ -1,0 +1,8 @@
+node_modules/
+__pycache__/
+tests/*.wav
+tests/*.png
+tests/*.jsonl
+tests/hold_truth.json
+tests/assets/*
+!tests/assets/README.md

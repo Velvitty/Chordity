@@ -1,0 +1,22 @@
+pop 97                     bpm  97.1/97  beats 96/96 off 0  err 0.1±1.5ms  4/4  down 24/24  chords 100.0%  [none r2 1.47 sn 0.29] 0.89s
+pop 128                    bpm 128.1/128  beats 96/96 off 0  err 0.5±1.7ms  4/4  down 24/24  chords 100.0%  [none r2 1.54 sn 0.16] 0.64s
+waltz 150                  bpm 150.2/150  beats 48/48 off 0  err 0.5±1.8ms  3/4  down 16/16  chords 100.0%  [none r2 1.19 sn 0.29] 0.37s
+ballad 12/8 58             bpm  58.0/58  beats 48/48 off 0  err -1.4±2.0ms  12/8  down 12/12  chords 100.0%  [none r2 1.55 sn 0.01] 0.51s
+ballad 4/4 68 drift        bpm  67.1/68  beats 64/64 off 0  err -1.0±1.9ms  4/4  down 16/16  chords 98.4%  [halve r2 3.92 sn 0.01] 0.61s
+       E→Esus4 x1
+reggae 76                  bpm 151.7/76  beats 48/48 off 47  err -3.8±3.8ms  4/4  down 12/12 extra 12  chords 100.0%  [none r2 1.39 sn 0.01] 0.49s
+rock weak-snare 118        bpm 118.0/118  beats 96/96 off 0  err 0.0±1.6ms  4/4  down 24/24  chords 100.0%  [none r2 1.66 sn 0.13] 0.54s
+dance 124                  bpm 123.9/124  beats 96/96 off 0  err -0.4±1.5ms  4/4  down 24/24  chords 100.0%  [none r2 1.05 sn 0.46] 0.48s
+hiphop 88                  bpm  87.9/88  beats 64/64 off 0  err 0.7±2.0ms  4/4  down 16/16  chords 100.0%  [none r2 1.19 sn 0.10] 0.46s
+punk 176                   bpm 176.2/176  beats 96/96 off 0  err 0.4±1.7ms  4/4  down 24/24  chords 100.0%  [double r2 1.34 sn 1.54] 0.35s
+solo piano 72              bpm  72.0/72  beats 64/64 off 0  err -3.2±3.2ms  4/4  down 16/16  chords 98.4%  [none r2 4.39 sn 1.06] 0.68s
+       E→Esus4 x1
+solo piano 3/4 84          bpm  84.0/84  beats 48/48 off 0  err -2.6±2.7ms  3/4  down 16/16  chords 100.0%  [none r2 1.03 sn 1.04] 0.36s
+ballad rit 72→63           bpm  71.6/72  beats 80/80 off 0  err -0.8±2.0ms  4/4  down 20/20  chords 88.8%  [none r2 1.51 sn 0.68] 0.82s
+       Cmaj7→C x4, Dm7→Dm x4, E→Esus4 x1
+mod pivot C→D 110          bpm 110.2/110  beats 116/116 off 0  err -0.0±1.5ms  4/4  down 29/29  chords 100.0%  [none r2 1.51 sn 0.16] 0.64s
+mod ballad Eb→E 70         bpm  70.0/70  beats 116/116 off 0  err -1.1±2.0ms  4/4  down 29/29  chords 93.1%  [none r2 1.52 sn 0.66] 1.01s
+       Ebmaj7→Eb x4, Emaj7→E x4
+mod direct G→Ab 100        bpm 100.0/100  beats 112/112 off 0  err 0.0±1.4ms  4/4  down 28/28  chords 100.0%  [none r2 1.48 sn 0.16] 0.73s
+relative Am→C (전조 아님)      bpm  96.0/96  beats 64/64 off 0  err -0.2±1.5ms  4/4  down 16/16  chords 100.0%  [none r2 1.48 sn 0.14] 0.42s
+drum intro + pickup 104    bpm 104.0/104  beats 57/57 off 0  err -0.7±2.3ms  4/4  down 14/14  chords 100.0% NC 9/9  [none r2 1.36 sn 0.17] 0.35s

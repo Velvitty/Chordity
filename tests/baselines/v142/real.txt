@@ -1,0 +1,26 @@
+조성: E♭ 장조@0마디 → E 장조@45마디
+ 1: B♭sus4=Vsus4
+ 2: E♭=I  Gm7=iii7
+ 3: Cm7=vi7  B♭m7=ii7/IV  E♭7=V7/IV
+ 4: A♭maj7=IVM7  B♭7=V7
+ 5: Gm7=iii7  Cm7=vi7
+ 6: Fm7=ii7  E♭/G=I6  A♭=IV
+ 7: B♭sus4=Vsus4
+ 8: E♭=I
+ 9: E♭7=V7/IV
+10: A♭maj7=IVM7  B♭/F=V64
+...
+42: Gdim=iii°  C7=V7/ii
+43: Fm7=ii7
+44: B♭7=V7  B7=V7
+45: E=I
+46: G♯m7=iii7
+47: E7/D=I42  C♯7=V7/ii
+48: F♯m7=ii7
+49: A=IV  B7/A=V42
+곡 전체 105 개 코드의 표기 종류: {"기본":79,"부속화음":10,"자리바꿈":16}
+
+# 세월이 가면  |  BPM 68.1  |  박자 4/4  |  조성 Eb 장조 → E 장조
+  0 | N.C. / | Vsus4 / / / | I iii7 / / | vi7 / ii7/IV V7/IV |
+  4 | IVM7 / V7 / | iii7 / vi7 / | ii7 I6 IV / | Vsus4 / / / |
+  8 | I / / / | V7/IV / / / | IVM7 / / V64 | iii7 / I / |

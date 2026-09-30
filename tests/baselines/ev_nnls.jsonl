@@ -1,0 +1,35 @@
+{"grp":"R","name":"pop 128","bpm":128.1,"hit":96,"nb":96,"off":0,"mae":1.7,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":96,"fam":96,"root":96,"tot":96,"keys":"C 장조@1","keyOk":true,"sec":1.39}
+{"grp":"R","name":"pop 97","bpm":97.1,"hit":96,"nb":96,"off":0,"mae":1.5,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":94,"fam":94,"root":94,"tot":96,"keys":"C 장조@1","keyOk":true,"sec":1.68}
+{"grp":"R","name":"waltz 150","bpm":150.2,"hit":48,"nb":48,"off":0,"mae":1.8,"meter":"3/4","dh":16,"nd":16,"extra":0,"ex":48,"fam":48,"root":48,"tot":48,"keys":"D 장조@1","keyOk":true,"sec":0.77}
+{"grp":"R","name":"ballad 12/8 58","bpm":58,"hit":48,"nb":48,"off":0,"mae":2,"meter":"12/8","dh":12,"nd":12,"extra":0,"ex":42,"fam":48,"root":48,"tot":48,"keys":"E♭ 장조@1","keyOk":true,"sec":1.58}
+{"grp":"R","name":"reggae 76","bpm":151.7,"hit":48,"nb":48,"off":47,"mae":3.8,"meter":"4/4","dh":12,"nd":12,"extra":12,"ex":44,"fam":44,"root":48,"tot":48,"keys":"A 단조@1","keyOk":true,"sec":1.01}
+{"grp":"R","name":"ballad 4/4 68 drift","bpm":67.1,"hit":64,"nb":64,"off":0,"mae":1.9,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":64,"fam":64,"root":64,"tot":64,"keys":"C 장조@1","keyOk":true,"sec":1.5}
+{"grp":"R","name":"dance 124","bpm":123.9,"hit":96,"nb":96,"off":0,"mae":1.5,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":96,"fam":96,"root":96,"tot":96,"keys":"C 장조@1","keyOk":true,"sec":1.08}
+{"grp":"R","name":"rock weak-snare 118","bpm":118,"hit":96,"nb":96,"off":0,"mae":1.6,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":94,"fam":94,"root":94,"tot":96,"keys":"C 장조@1","keyOk":true,"sec":1.19}
+{"grp":"R","name":"punk 176","bpm":176.2,"hit":96,"nb":96,"off":0,"mae":1.7,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":96,"fam":96,"root":96,"tot":96,"keys":"C 장조@1","keyOk":true,"sec":0.78}
+{"grp":"R","name":"hiphop 88","bpm":87.9,"hit":64,"nb":64,"off":0,"mae":2,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":62,"fam":62,"root":64,"tot":64,"keys":"C 장조@1","keyOk":true,"sec":1.08}
+{"grp":"R","name":"solo piano 3/4 84","bpm":84,"hit":48,"nb":48,"off":0,"mae":2.7,"meter":"3/4","dh":16,"nd":16,"extra":0,"ex":48,"fam":48,"root":48,"tot":48,"keys":"D 장조@1","keyOk":true,"sec":0.89}
+{"grp":"R","name":"solo piano 72","bpm":72,"hit":64,"nb":64,"off":0,"mae":3.2,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":63,"fam":63,"root":64,"tot":64,"keys":"C 장조@1","keyOk":true,"sec":1.13}
+{"grp":"R","name":"mod pivot C→D 110","bpm":110.2,"hit":116,"nb":116,"off":0,"mae":1.5,"meter":"4/4","dh":29,"nd":29,"extra":0,"ex":116,"fam":116,"root":116,"tot":116,"keys":"C 장조@1→D 장조@18","keyOk":true,"sec":1.33}
+{"grp":"R","name":"ballad rit 72→63","bpm":71.6,"hit":80,"nb":80,"off":0,"mae":2,"meter":"4/4","dh":20,"nd":20,"extra":0,"ex":79,"fam":79,"root":80,"tot":80,"keys":"C 장조@1","keyOk":true,"sec":1.61}
+{"grp":"R","name":"mod direct G→Ab 100","bpm":100,"hit":112,"nb":112,"off":0,"mae":1.4,"meter":"4/4","dh":28,"nd":28,"extra":0,"ex":112,"fam":112,"root":112,"tot":112,"keys":"G 장조@1→A♭ 장조@17","keyOk":true,"sec":1.53}
+{"grp":"R","name":"mod ballad Eb→E 70","bpm":70,"hit":116,"nb":116,"off":0,"mae":2,"meter":"4/4","dh":29,"nd":29,"extra":0,"ex":100,"fam":105,"root":114,"tot":116,"keys":"E♭ 장조@1→E 장조@18","keyOk":true,"sec":2.06}
+{"grp":"R","name":"drum intro + pickup 104","bpm":104,"hit":57,"nb":57,"off":0,"mae":2.3,"meter":"4/4","dh":14,"nd":14,"extra":0,"ex":48,"fam":48,"root":48,"tot":48,"keys":"C 장조","keyOk":true,"sec":0.74}
+{"grp":"R","name":"relative Am→C (전조 아님)","bpm":96,"hit":64,"nb":64,"off":0,"mae":1.5,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":62,"fam":64,"root":64,"tot":64,"keys":"A 단조@1","keyOk":true,"sec":0.96}
+{"grp":"S","name":"7/4 록 126","bpm":125.8,"hit":84,"nb":84,"off":0,"mae":2.1,"meter":"7/4","dh":12,"nd":12,"extra":1,"ex":84,"fam":84,"root":84,"tot":84,"keys":"A 단조@1","keyOk":null,"sec":0.94}
+{"grp":"S","name":"5/4 팝 120","bpm":119.8,"hit":80,"nb":80,"off":0,"mae":1.8,"meter":"5/4","dh":16,"nd":16,"extra":0,"ex":80,"fam":80,"root":80,"tot":80,"keys":"C 장조@1","keyOk":null,"sec":0.91}
+{"grp":"P","name":"루바토 피아노 66","bpm":68.5,"hit":64,"nb":64,"off":0,"mae":3.2,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":63,"fam":63,"root":64,"tot":64,"keys":"C 장조@1","keyOk":null,"sec":1.23}
+{"grp":"P","name":"템포 급변 96→132","bpm":96.7,"hit":93,"nb":96,"off":1,"mae":2.1,"meter":"4/4","dh":23,"nd":24,"extra":1,"ex":94,"fam":95,"root":95,"tot":96,"keys":"C 장조@1","keyOk":null,"sec":1.18}
+{"grp":"S","name":"비밥 260","bpm":260,"hit":96,"nb":96,"off":0,"mae":3.4,"meter":"4/4","dh":24,"nd":24,"extra":1,"ex":37,"fam":38,"root":44,"tot":96,"keys":"D 단조@1","keyOk":null,"sec":0.59}
+{"grp":"S","name":"스윙 재즈 140","bpm":139.9,"hit":68,"nb":68,"off":0,"mae":1.5,"meter":"4/4","dh":17,"nd":17,"extra":1,"ex":8,"fam":13,"root":18,"tot":68,"keys":"D 단조@1","keyOk":null,"sec":0.71}
+{"grp":"S","name":"메탈 150 디스토션","bpm":150,"hit":64,"nb":64,"off":0,"mae":1.2,"meter":"4/4","dh":15,"nd":16,"extra":2,"ex":0,"fam":64,"root":64,"tot":64,"keys":"E 장조@1","keyOk":null,"sec":0.64}
+{"grp":"S","name":"보사노바 132","bpm":66,"hit":32,"nb":64,"off":0,"mae":4.2,"meter":"4/4","dh":8,"nd":16,"extra":0,"ex":54,"fam":54,"root":62,"tot":64,"keys":"F 장조@1","keyOk":null,"sec":0.69}
+{"grp":"P","name":"코드 밖 베이스(F/G 등) 100","bpm":100,"hit":64,"nb":64,"off":0,"mae":1.5,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":64,"fam":64,"root":64,"tot":64,"keys":"C 장조@1","keyOk":null,"sec":0.94}
+{"grp":"S","name":"앰비언트 패드 70","bpm":69.9,"hit":64,"nb":64,"off":0,"mae":8.6,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":64,"fam":64,"root":64,"tot":64,"keys":"C 장조@1","keyOk":null,"sec":1.24}
+{"grp":"P","name":"케이팝·EDM 126","bpm":125.9,"hit":96,"nb":96,"off":0,"mae":4.4,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":96,"fam":96,"root":96,"tot":96,"keys":"C 장조@1","keyOk":null,"sec":1.07}
+{"grp":"P","name":"테이프 음높이 0→+40 cent","bpm":100,"hit":96,"nb":96,"off":0,"mae":1.5,"meter":"4/4","dh":24,"nd":24,"extra":0,"ex":96,"fam":96,"root":96,"tot":96,"keys":"C 장조@1","keyOk":null,"sec":1.19}
+{"grp":"P","name":"R&B 발라드 슬래시 72","bpm":72,"hit":68,"nb":68,"off":0,"mae":2,"meter":"4/4","dh":17,"nd":17,"extra":0,"ex":59,"fam":68,"root":68,"tot":68,"keys":"C 장조@1","keyOk":null,"sec":1.25}
+{"grp":"P","name":"드럼이 아주 큰 록(심벌) 112","bpm":112.2,"hit":64,"nb":64,"off":0,"mae":4.9,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":62,"fam":62,"root":64,"tot":64,"keys":"C 장조@1","keyOk":null,"sec":0.83}
+{"grp":"P","name":"팝록 파워 코드→3화음 138","bpm":138,"hit":64,"nb":64,"off":0,"mae":1.3,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":48,"fam":64,"root":64,"tot":64,"keys":"E 장조@1","keyOk":null,"sec":0.52}
+{"grp":"P","name":"드럼이 큰 힙합 90","bpm":90,"hit":64,"nb":64,"off":0,"mae":3.6,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":62,"fam":64,"root":64,"tot":64,"keys":"C 장조@1","keyOk":null,"sec":0.48}
+{"grp":"P","name":"어쿠스틱 스트로크 팝 104","bpm":104,"hit":64,"nb":64,"off":0,"mae":1.6,"meter":"4/4","dh":16,"nd":16,"extra":0,"ex":64,"fam":64,"root":64,"tot":64,"keys":"G 장조@1","keyOk":null,"sec":0.45}

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chordity 도움말: 분석 원리와 근거</title>
+<style>
+/* ===== 디자인 토큰(앱과 같음) ===== */
+:root {
+  --paper: #f2f4ef; --sheet: #fbfcf9; --ink: #1b2433; --pencil: #6c7480; --rule: #c7cdd4;
+  --hover: rgba(27, 36, 51, .05); --hl: #ffe45c; --hl-ink: #1b2433; --focus: #2d6be0; --soft: rgba(27, 36, 51, .04);
+  --ui-font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+    --hover: rgba(232, 235, 239, .06); --hl: #e9c93f; --hl-ink: #14171b; --focus: #7aa7ff; --soft: rgba(232, 235, 239, .04);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+  --hover: rgba(232, 235, 239, .06); --hl: #e9c93f; --hl-ink: #14171b; --focus: #7aa7ff; --soft: rgba(232, 235, 239, .04);
+  color-scheme: dark;
+}
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 88px); -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15.5px/1.75 var(--ui-font); }
+a { color: inherit; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+[hidden] { display: none !important; }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 16px; top: 12px; z-index: 50; background: var(--sheet); padding: 6px 12px; border-radius: 8px; }
+
+/* ===== 머리글 ===== */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.top .in { max-width: 1180px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; letter-spacing: -.01em; }
+.brand svg { width: 26px; height: 26px; }
+.brand .ver { margin-left: -4px; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 99px; font-size: 11.5px; font-weight: 700; line-height: 1.45; letter-spacing: 0; color: var(--pencil); font-variant-numeric: tabular-nums; }
+.chip { font-size: 12.5px; font-weight: 700; padding: 2px 10px; border-radius: 99px; border: 1.5px solid var(--ink); }
+.grow { flex: 1; }
+.btn { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--rule); background: var(--sheet); font-weight: 700; font-size: 14px; text-decoration: none; }
+.btn:hover { border-color: var(--pencil); }
+/* 아주 좁은 화면(370px 이하): 테마 막대가 들어가도록 '도움말' 딱지를 숨김(탭 제목과 본문 제목에 이미 있음) */
+@media (max-width: 370px) { header.top .chip { display: none; } }
+/* 테마 선택 막대(시스템·밝게·어둡게): 코드 표기 막대와 같은 모양, 고른 칸은 글자색으로 채우고 아이콘은 종이색 */
+.tseg { position: relative; display: inline-flex; flex: none; box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; }
+.tseg .thumb { position: absolute; top: 0; left: 0; background: var(--ink); pointer-events: none; will-change: transform; transition: background-color .2s ease; }
+.tseg .opt { all: unset; box-sizing: border-box; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; flex: none; width: 35px; height: 35px; cursor: pointer; line-height: 0; color: var(--ink); transition: color .2s ease; }
+.tseg .opt + .opt { width: 36.5px; border-left: 1.5px solid var(--ink); }
+.tseg .opt[aria-checked="true"] { color: var(--paper); }
+.tseg .opt[aria-checked="false"]:hover { background: var(--hover); }
+.tseg .opt:focus-visible { outline: 2px solid currentColor; outline-offset: -5px; border-radius: 7px; }
+.tseg .opt svg { display: block; flex: none; width: 20px; height: 20px; }
+.iconbtn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; border: none; background: none; color: var(--pencil); cursor: pointer; }
+.iconbtn:hover { background: var(--hover); color: var(--ink); }
+.iconbtn svg { width: 20px; height: 20px; }
+
+/* ===== 배치 ===== */
+.layout { max-width: 1180px; margin: 0 auto; padding: 0 24px 72px; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 44px; }
+.side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 68px); align-self: start; max-height: calc(100vh - 84px); overflow: auto; padding: 22px 0 24px; }
+.tocbox > summary { display: none; cursor: pointer; font-weight: 700; list-style: none; }
+.tocbox > summary::-webkit-details-marker { display: none; }
+.search input:focus-visible { outline-offset: -2px; }
+.search input { width: 100%; min-height: 38px; border-radius: 10px; border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); padding: 0 12px; font: inherit; font-size: 14px; }
+.toc { margin-top: 14px; font-size: 13.5px; line-height: 1.45; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc > ol > li { margin: 2px 0 8px; }
+.toc > ol > li > a { font-weight: 700; }
+.toc ol ol { margin: 4px 0 0 10px; border-left: 1.5px solid var(--rule); }
+.toc ol ol a { color: var(--pencil); }
+.toc a { display: block; padding: 3px 10px; border-radius: 6px; text-decoration: none; }
+.toc a:hover { background: var(--hover); color: var(--ink); }
+.toc a[aria-current="true"] { background: var(--hl); color: var(--hl-ink); }
+.noresult { font-size: 13.5px; color: var(--pencil); margin: 12px 4px; }
+
+/* ===== 본문 ===== */
+.doc { min-width: 0; max-width: 800px; padding-top: 26px; word-break: keep-all; overflow-wrap: break-word; }   /* 한국어는 낱말 단위로 줄바꿈 */
+.crumb { font-size: 13px; color: var(--pencil); margin: 0 0 6px; }
+.doc h1 { font-size: clamp(28px, 4.2vw, 38px); line-height: 1.25; letter-spacing: -.02em; margin: 0 0 14px; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--pencil); margin: 0 0 22px; text-wrap: pretty; }
+.doc h2 { font-size: 26px; letter-spacing: -.015em; line-height: 1.3; margin: 0 0 12px; }
+.doc h3 { font-size: 19px; letter-spacing: -.01em; line-height: 1.35; margin: 30px 0 8px; }
+.doc h4 { font-size: 15.5px; margin: 20px 0 6px; }
+.topic { margin-top: 54px; padding-top: 30px; border-top: 1px solid var(--rule); }
+.topic:first-of-type { margin-top: 26px; }
+.doc p, .doc li { text-wrap: pretty; }
+.doc ul { padding-left: 1.2em; }
+.doc li + li { margin-top: 4px; }
+.callout { margin: 18px 0; padding: 14px 18px 14px 16px; border-left: 4px solid var(--hl); background: var(--sheet); border-radius: 0 12px 12px 0; }
+.callout p { margin: 0; }
+.callout p + p { margin-top: 8px; }
+.callout.big p:first-child { font-weight: 700; font-size: 16.5px; }
+.note { font-size: 14px; color: var(--pencil); }
+kbd, .k { font: 700 12.5px/1 var(--ui-font); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 5px; padding: 2px 6px; background: var(--sheet); white-space: nowrap; }
+code { font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--soft); border-radius: 4px; padding: 1px 5px; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.55; }
+th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: none; }
+th { font-size: 12.5px; color: var(--pencil); font-weight: 700; background: var(--soft); white-space: nowrap; }
+td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+details.more { margin: 12px 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); }
+details.more > summary { cursor: pointer; padding: 10px 14px; font-weight: 700; font-size: 14.5px; }
+details.more > .tbl { margin: 0; border: none; border-top: 1px solid var(--rule); border-radius: 0 0 12px 12px; }
+dl.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 12px 0; }
+dl.terms dt { font-weight: 700; }
+dl.terms dd { margin: 0; color: var(--ink); }
+.refs li { font-size: 14.5px; }
+
+/* ===== 수식(MathML) ===== */
+math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto Sans Math", math; font-size: 1.07em; }
+.eq { overflow-x: auto; overflow-y: hidden; margin: 12px 0; padding: 10px 14px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; }
+.eq math { margin: 0; }
+
+/* ===== 흐름도 ===== */
+.flow { display: grid; gap: 14px; margin: 16px 0; }
+.stage { border: 1.5px solid var(--rule); border-radius: 14px; padding: 14px 14px 6px; background: var(--sheet); }
+.stage .tag { display: inline-block; font-size: 12.5px; font-weight: 700; padding: 2px 11px; border-radius: 99px; background: var(--ink); color: var(--paper); margin-bottom: 10px; }
+.stage.light .tag { background: var(--hl); color: var(--hl-ink); }
+.stage ol { list-style: none; margin: 0; padding: 0; counter-reset: st; }
+.stage li { position: relative; padding: 9px 12px 9px 42px; margin: 0 0 8px; border-radius: 10px; background: var(--paper); }
+.stage li::before { counter-increment: st; content: counter(st); position: absolute; left: 11px; top: 11px; width: 21px; height: 21px; border-radius: 50%; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 800; line-height: 21px; text-align: center; }
+.stage li b { display: block; font-size: 14.5px; }
+.stage li span { display: block; font-size: 13.5px; color: var(--pencil); line-height: 1.5; }
+.graph { overflow-x: auto; margin: 16px 0; padding: 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); }
+.graph .row { display: flex; align-items: center; gap: 10px; min-width: 560px; }
+.graph .col { display: grid; gap: 8px; }
+.graph .node { border: 1.5px solid var(--ink); border-radius: 10px; padding: 6px 10px; font-size: 13.5px; font-weight: 700; background: var(--paper); white-space: nowrap; }
+.graph .node small { display: block; font-weight: 500; color: var(--pencil); font-size: 12px; }
+.graph .node.key { background: var(--ink); color: var(--paper); }
+.graph .arrow { color: var(--pencil); font-size: 18px; }
+.foot { max-width: 1180px; margin: 0 auto; padding: 18px 24px 30px; font-size: 12.5px; color: var(--pencil); border-top: 1px solid var(--rule); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 0 16px 56px; }
+  .side { position: static; max-height: none; overflow: visible; padding: 14px 0 0; }
+  .tocbox { border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); padding: 10px 14px; }
+  .tocbox > summary { display: block; }
+  .tocbox[open] > summary { margin-bottom: 10px; }
+  .top .in { padding: 10px 16px; }
+  .top .btn { display: none; }
+  dl.terms { grid-template-columns: 1fr; gap: 2px; }
+  dl.terms dd { margin-bottom: 10px; }
+}
+@media print {
+  .top, .side, .foot { display: none; }
+  .layout { display: block; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#doc">본문으로 건너뛰기</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="__APP_HREF__">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <span>Chordity</span>
+      <span class="ver" title="Chordity 버전 __VERSION__">v__VERSION__</span>
+    </a>
+    <span class="chip">도움말</span>
+    <span class="grow"></span>
+    <a class="btn" href="__APP_HREF__">Chordity 열기</a>
+    <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
+      <span class="thumb" aria-hidden="true"></span>
+      <button class="opt" type="button" role="radio" data-theme-opt="" aria-label="테마: 시스템 설정 따름" title="시스템 설정 따름"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+      <button class="opt" type="button" role="radio" data-theme-opt="light" aria-label="테마: 밝게" title="밝게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <button class="opt" type="button" role="radio" data-theme-opt="dark" aria-label="테마: 어둡게" title="어둡게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <details class="tocbox" id="tocbox" open>
+      <summary>목차</summary>
+      <div class="search"><input id="q" type="search" placeholder="도움말에서 찾기" aria-label="도움말에서 찾기" autocomplete="off"></div>
+      <nav class="toc" id="toc" aria-label="목차">
+        <ol>
+          <li><a href="#accuracy">실수할 수 있는 이유와 확인하는 법</a>
+            <ol><li><a href="#mistakes">자주 틀리는 경우</a></li><li><a href="#check">귀로 확인하기</a></li><li><a href="#panel">분석 정보 읽는 법</a></li></ol></li>
+          <li><a href="#principles">원리</a>
+            <ol><li><a href="#p-spectrum">소리를 그림으로</a></li><li><a href="#p-beat">박 찾기</a></li><li><a href="#p-verify">진짜 박인지 확인하기</a></li><li><a href="#p-bar">마디 나누기</a></li><li><a href="#p-chord">코드 알아내기</a></li><li><a href="#p-hmm">음악의 규칙을 확률로</a></li><li><a href="#p-key">조성과 전조</a></li><li><a href="#p-metro">어긋나지 않는 메트로놈</a></li><li><a href="#p-piano">피아노로 들려주기</a></li></ol></li>
+          <li><a href="#process">분석 과정</a>
+            <ol><li><a href="#pr-flow">두 단계로 나눈 흐름</a></li><li><a href="#pr-params">단계별 주요 값</a></li></ol></li>
+          <li><a href="#math">알고리즘과 수식</a>
+            <ol><li><a href="#m-signal">신호 준비</a></li><li><a href="#m-onset">온셋</a></li><li><a href="#m-tempo">템포</a></li><li><a href="#m-dp">비트 추적</a></li><li><a href="#m-verify">정박과 박 단계 검증</a></li><li><a href="#m-chroma">음높이와 크로마</a></li><li><a href="#m-chord">코드 판정</a></li><li><a href="#m-bar">박자와 첫 박</a></li><li><a href="#m-key">조성과 전조</a></li><li><a href="#m-notation">카멜롯과 로마 숫자</a></li><li><a href="#m-v15">곡 종류별 보강</a></li><li><a href="#m-audio">메트로놈과 코드 연주</a></li></ol></li>
+          <li><a href="#physics">소리의 물리</a>
+            <ol><li><a href="#ph-pitch">음높이와 평균율</a></li><li><a href="#ph-harmonics">배음</a></li><li><a href="#ph-bands">악기별 주파수 대역</a></li><li><a href="#ph-tf">시간과 주파수의 맞바꿈</a></li><li><a href="#ph-perception">음량, 잔향, 지각</a></li><li><a href="#ph-latency">지연과 거리</a></li><li><a href="#ph-piano">피아노 현</a></li></ol></li>
+          <li><a href="#structure">프로그램 구조</a>
+            <ol><li><a href="#s-parts">구성</a></li><li><a href="#s-clocks">세 개의 시계</a></li><li><a href="#s-audio">오디오 그래프</a></li><li><a href="#s-prefs">저장되는 설정</a></li></ol></li>
+          <li><a href="#verification">검증</a>
+            <ol><li><a href="#v-summary">한눈에 보기</a></li><li><a href="#v-unit">기본 계산</a></li><li><a href="#v-synthetic">합성 곡 18곡</a></li><li><a href="#v-150">곡 종류 확장 시험</a></li><li><a href="#v-real">실제 녹음</a></li><li><a href="#v-browser">브라우저 시험</a></li><li><a href="#v-key">조성과 전조</a></li><li><a href="#v-notation">표기</a></li><li><a href="#v-piano">코드 연주</a></li></ol></li>
+          <li><a href="#glossary">용어 풀이</a></li>
+          <li><a href="#references">참고 문헌</a></li>
+        </ol>
+      </nav>
+      <p class="noresult" id="noresult" hidden>찾는 내용이 없습니다. 다른 낱말로 찾아보세요.</p>
+    </details>
+  </aside>
+
+  <main class="doc" id="doc">
+    <p class="crumb">Chordity 도움말</p>
+    <h1>Chordity는 어떻게 박과 코드를 찾나요?</h1>
+    <p class="lede">Chordity가 음악에서 박, 마디, 코드, 조성을 찾아내는 원리와 그 판단의 근거, 그리고 결과를 확인하고 바로잡는 방법을 정리했습니다.</p>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-accuracy">
+      <div class="block">
+        <h2 id="accuracy">실수할 수 있는 이유와 확인하는 법</h2>
+        <div class="callout big">
+          <p>Chordity는 AI이며 실수할 수 있습니다. 중요한 부분은 귀로 들어 다시 한번 확인해 주세요.</p>
+        </div>
+        <p>Chordity는 미리 학습된 인공지능 모델을 쓰지 않습니다. 소리의 물리와 음악 이론을 수식으로 옮긴 <b>수학 모델</b>, 곧 신호 처리와 확률 추론으로 음악을 분석합니다. 박, 마디의 첫 박, 코드, 조성은 모두 소리에서 <b>가장 그럴듯한 답을 고른 추정</b>입니다. 녹음 상태, 편곡, 연주 방식에 따라 추정은 흔들릴 수 있습니다.</p>
+        <p>대신 판단의 근거는 모두 드러나 있습니다. 앱의 <b>분석 정보</b>에서 곡마다 템포 후보, 정박 판정, 조성 판정의 근거를 볼 수 있고, 이 도움말에는 그 판단에 쓰인 원리와 수식, 검증 결과를 담았습니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="mistakes">자주 틀리는 경우와 바로잡는 법</h3>
+        <p>대부분은 앱의 <b>박이 안 맞나요? 보정하기</b>에서 버튼 하나로 고칠 수 있습니다. 보정은 다시 분석하지 않고 곧바로 반영됩니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>이렇게 보이면</th><th>왜 그런가요</th><th>이렇게 하세요</th></tr></thead>
+          <tbody>
+            <tr><td>클릭이 너무 촘촘하거나 드문드문하다</td><td>음악에는 8분음표, 4분음표, 2분음표 층위의 주기가 모두 있고, 어느 층위를 박으로 느끼는지는 듣는 사람에 따라 다릅니다.</td><td><b>절반으로 ÷2</b> 또는 <b>두 배 빠르게 ×2</b>. 6/8·12/8 곡이 8분음표마다 치면 <b>셋씩 묶기 ÷3</b></td></tr>
+            <tr><td>클릭이 박과 박 사이에 들린다</td><td>하이햇이나 엇박 반주가 강하면 박의 줄이 반 박 밀려 잡힐 수 있습니다.</td><td><b>½박 옮기기</b></td></tr>
+            <tr><td>마디가 시작되는 곳이 한 박 어긋났다</td><td>코드가 두 박마다 바뀌면 마디 첫 박의 흔적이 약해집니다.</td><td><b>한 박 앞당기기</b>, <b>한 박 늦추기</b>, 필요하면 <b>박자</b>를 직접 지정</td></tr>
+            <tr><td>텐션 코드가 단순하게 적힌다</td><td>9·11·13 텐션, 6화음, add9, 파워 코드는 코드 어휘에 없어 가까운 3화음이나 7화음으로 적습니다.</td><td>코드 연주를 켜고 원곡과 겹쳐 들어 보세요. <b>코드 종류</b>를 "확장"으로 바꾸면 sus2, aug, m7♭5, dim7까지 찾습니다.</td></tr>
+            <tr><td>Cm7이 E♭이나 E♭maj7로 적힌다</td><td>구성음이 같거나 거의 같은 코드(Cm7과 E♭6, Cm9와 E♭maj7)는 베이스음이 유일한 단서입니다.</td><td>베이스 소리를 들어 가장 낮은 음을 확인하세요.</td></tr>
+            <tr><td>조성이 나란한 장·단조로 나온다</td><td>C 장조와 A 단조처럼 같은 음을 쓰는 조성은 헷갈리기 쉽고, 로마 숫자가 통째로 달라집니다.</td><td>위쪽 조성 칸과 분석 정보의 조성 판정을 확인하세요.</td></tr>
+            <tr><td>짧은 전조가 표시되지 않는다</td><td>전조는 대략 6마디(24박) 이상 이어질 때만 표시합니다. 잠깐 스쳐 가는 다른 조의 화음을 전조로 오해하지 않기 위해서입니다.</td><td>그 구간의 코드를 직접 들어 확인하세요.</td></tr>
+            <tr><td>템포가 크게 흔들리는 곳에서 박을 놓친다</td><td>곡 중간의 템포 변화는 새 템포가 10초 넘게 이어질 때 따라갑니다. 몇 초짜리 급변과 심한 루바토에는 한두 박 늦게 따라갑니다.</td><td>해당 구간은 클릭보다 원곡을 기준으로 들어 주세요.</td></tr>
+            <tr><td>마디가 두 배로 길게 적힌다</td><td>보사노바처럼 두 박 단위로 느끼는 곡은 박을 한 층위 느리게(2분음표마다) 잡을 수 있습니다.</td><td><b>두 배 빠르게 ×2</b></td></tr>
+            <tr><td>파워 코드(E5)가 E나 Em으로 나온다</td><td>파워 코드는 곡 안에서 충분히 자주 나올 때만 적습니다(발라드의 sus4 오판 방지). 디스토션이 아주 강하면 3음 대역까지 채워져 3화음으로 읽힙니다.</td><td>원곡의 기타 소리를 들어 3음이 없는지 확인하세요.</td></tr>
+            <tr><td>박자 변화가 표시되지 않는다</td><td>새 박자가 4마디 이상 이어질 때만 박자 변화로 적습니다. 한두 마디짜리 변박은 불규칙 마디로 두고 차트에 "3박"처럼 표시합니다.</td><td>차트의 "3박" 같은 표시를 참고하세요.</td></tr>
+            <tr><td>슬래시 코드가 너무 많다</td><td>경과음이 많은 베이스 라인은 자리바꿈(G/B 등)으로 읽힐 수 있습니다.</td><td><b>코드 종류</b>에서 "베이스음 표기"를 끄면 기본형으로 적습니다.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="note">잘못 잡은 박 단계(두 배·절반)와 엇박은 자동으로도 검증합니다. 자세한 기준은 <a href="#p-verify">진짜 박인지 확인하기</a>에 있습니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="check">귀로 확인하는 가장 빠른 방법</h3>
+        <ul>
+          <li><b>코드 연주를 켜고 원곡과 겹쳐 듣기.</b> 피아노는 분석에서 찾은 곡의 기준음에 맞춰 조율되므로, 코드가 맞으면 원곡과 자연스럽게 섞이고 틀리면 부딪쳐 들립니다. <span class="k">P</span> 키로 켜고 끕니다.</li>
+          <li><b>메트로놈으로 박 확인하기.</b> 클릭이 킥과 스네어에 겹치는지, 크게 울리는 첫 박 클릭이 마디 시작에 오는지 들어 보세요. <span class="k">M</span> 키로 켜고 끕니다.</li>
+          <li><b>다른 표기로 보기.</b> 차트 위 코드 표기 막대에서 카멜롯을 고르면 조성 번호에서 멀리 떨어진 코드가, 로마 숫자를 고르면 ♭·♯이 붙거나 V/x 로 적힌 코드가 조성 밖의 화음입니다. 틀린 코드는 대개 이런 곳에 숨어 있습니다.</li>
+          <li><b>마디를 눌러 그 자리부터 듣기.</b> 의심 가는 마디를 누르면 그 마디부터 재생됩니다. <span class="k">←</span> <span class="k">→</span>로 한 마디씩 옮겨 다닐 수 있습니다.</li>
+        </ul>
+      </div>
+
+      <div class="block">
+        <h3 id="panel">분석 정보 읽는 법</h3>
+        <p>앱 아래쪽의 <b>분석 정보</b>에는 곡마다 판단 근거가 나옵니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>항목</th><th>뜻</th></tr></thead>
+          <tbody>
+            <tr><td>분석 시간</td><td>파일을 분석하는 데 걸린 시간입니다.</td></tr>
+            <tr><td>원본</td><td>파일의 샘플레이트, 채널 수, 길이입니다.</td></tr>
+            <tr><td>기준음</td><td>녹음의 A4 주파수와, 440 Hz에서 벗어난 정도(cent)입니다. 코드 연주 피아노도 이 음높이에 맞춥니다.</td></tr>
+            <tr><td>템포 후보</td><td>박 주기로 가장 그럴듯한 템포 세 개와, 1위 대비 점수입니다. 두 배나 절반 관계인 후보의 점수가 비슷하면 박 단계가 헷갈리기 쉬운 곡입니다.</td></tr>
+            <tr><td>정박 검증</td><td>박 위치와 반 박 위치에서 킥·스네어·화성 변화가 얼마나 강한지 비교한 값입니다. 반 박 쪽이 뚜렷하게 강하면 반 박 옮겨 교정합니다.</td></tr>
+            <tr><td>박 단계 검증</td><td>8분음표를 박으로 잡았는지(두 배), 2분음표를 박으로 잡았는지(절반) 판정한 결과와 근거입니다.</td></tr>
+            <tr><td>박 세분</td><td>한 박이 둘로 나뉘는지(2분할), 셋으로 나뉘는지(3분할: 6/8, 12/8 같은 겹박자)입니다.</td></tr>
+            <tr><td>박자 판정</td><td>2·3·4·5·7박(겹박자면 4와 2) 가정에서 마디 첫 박 증거가 얼마나 뚜렷한지(대비도)입니다. 값이 클수록 그 박자가 분명합니다.</td></tr>
+            <tr><td>조성 상관</td><td>곡의 음 분포가 고른 조성의 전형적인 분포와 얼마나 닮았는지입니다. 1에 가까울수록 조성이 분명합니다.</td></tr>
+            <tr><td>조성 변화</td><td>전조가 있으면 몇 마디 몇 박, 몇 분 몇 초부터 무슨 조인지입니다.</td></tr>
+            <tr><td>박자 변화</td><td>곡 중간에 박자가 바뀌면 몇 마디부터 어떤 박자인지입니다. 차트에는 검은 이름표("3/4으로")로 나옵니다. 곡 첫 마디에는 시작 박자("4/4")가 조사 없이 붙습니다.</td></tr>
+            <tr><td>템포 변화</td><td>템포가 갑자기 바뀐 곳과 새 템포, 그리고 서서히 바뀐 구간(몇 마디 몇 박부터 어디까지, 몇에서 몇으로)입니다. 차트에는 곡 첫 박에 시작 템포("72"), 갑자기 바뀐 곳에 흰 알약("132로", "63으로")이, 서서히 바뀐 구간에 흰 육각형 틀이 나옵니다.</td></tr>
+            <tr><td>카멜롯</td><td>조성의 카멜롯 휠 번호입니다.</td></tr>
+            <tr><td>비트 수</td><td>곡 전체에서 찾은 박의 개수입니다.</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-principles">
+      <div class="block">
+        <h2 id="principles">원리</h2>
+        <p>Chordity는 소리를 아주 짧은 조각으로 나눠 들여다보고, "음악은 대개 이렇게 흘러간다"는 규칙을 확률로 넣어 곡 전체에서 가장 그럴듯한 해석을 고릅니다. 그래서 판단 하나하나를 설명할 수 있습니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-spectrum">소리를 그림으로 바꾸기</h3>
+        <p>녹음 파일은 공기의 떨림을 1초에 수만 번 잰 숫자의 나열입니다. 이것을 아주 짧은 조각으로 잘라 조각마다 <b>어떤 높이의 소리가 얼마나 섞여 있는지</b>(스펙트럼)를 계산하고, 시간 순으로 늘어놓으면 가로가 시간, 세로가 음높이인 소리의 그림(스펙트로그램)이 됩니다. 이후의 분석은 모두 이 그림을 읽는 일입니다.</p>
+        <p>조각을 짧게 자르면 <b>언제</b> 소리가 났는지는 정확하지만 <b>무슨 음</b>인지는 흐려지고, 길게 자르면 그 반대입니다. 그래서 박을 찾을 때는 짧은 조각(46 ms)을, 코드를 찾을 때는 긴 조각(0.19초, 베이스는 0.37초)을 따로 씁니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-beat">박 찾기</h3>
+        <p>드럼을 치거나 건반을 누르면 그 순간 소리 에너지가 갑자기 늘어납니다. 이런 순간(온셋)들이 일정한 간격으로 반복되는 뼈대가 박입니다. 먼저 온셋 곡선을 자기 자신과 밀어 겹쳐 보며(자기상관) 가장 잘 겹치는 간격, 곧 템포를 찾습니다. 그다음 "강한 온셋은 최대한 많이 지나가면서 간격은 크게 흔들리지 않는" 박의 줄을 곡 전체에 걸쳐 한 번에 찾습니다(동적 계획법).</p>
+        <p>간격의 기준은 곡 전체의 템포가 아니라 몇 초 단위로 구한 <b>국소 템포</b>입니다. 그래서 필인처럼 잠깐 리듬이 복잡해지는 곳에는 끌려가지 않고, 곡이 실제로 느려지거나 빨라지면 따라갑니다. 곡 중간에 템포가 크게 바뀌면(예: 96에서 132로) 그 지점을 찾아 구간마다 따로 따라가는데, 원래 템포가 계속 지지를 받는 동안에는 넘어가지 않아 템포가 일정한 곡의 결과는 바뀌지 않습니다. 재생하는 동안 화면 위 템포는 그 자리의 템포를 따라 움직이고(스크롤해도 화면 맨 위에 고정되는 재생 막대에도 같은 값이 나옴), 템포가 갑자기 바뀐 곳에는 흰 알약으로 새 템포를 적습니다. 템포가 서서히 바뀌는 구간에는 흰 육각형 틀이 그 길이만큼 걸쳐 있고, 틀 안에는 평소 "여기까지 63"처럼 도착 템포가, 재생 위치가 틀 안에 있으면 "현재 67"처럼 지금 템포가 나옵니다. 틀과 흰 알약은 슬래시 아래 줄에 있어 슬래시를 가리지 않고, 재생 중에는 틀이 지나온 만큼 형광펜 색으로 차며, 다 바뀐 박에서는 흰 알약이 잠깐 켜집니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-verify">진짜 박인지 확인하기</h3>
+        <p><b>엇박을 박으로 잡는 경우.</b> 킥, 스네어, 베이스가 들어오는 순간과 코드가 바뀌는 순간은 대부분 정박에 몰립니다. 그래서 찾은 박 위치와 반 박 옮긴 위치에서 이런 사건들의 세기를 비교하고, 반 박 쪽이 분명히 강하면 박의 줄을 반 박 옮깁니다.</p>
+        <p><b>템포를 두 배나 절반으로 잡는 경우.</b> 박을 하나씩 걸러 두 무리로 나눠 봅니다. 제 템포라면 킥(1·3박)과 스네어(2·4박)가 서로 다른 무리에 오고, 8분음표를 박으로 잡았다면 둘 다 같은 무리(진짜 박)에 몰립니다. 이 경우 새 템포로 처음부터 다시 추적합니다. 반대로 박 사이 한가운데마다 스네어가 규칙적으로 오면 너무 느리게 잡은 것입니다. 두 배로 늘리는 쪽은 틀리면 곧바로 엇박 클릭이 생기므로 훨씬 엄격한 조건에서만 합니다.</p>
+        <p>스네어를 알아보는 방법은 물리적입니다. 스네어 밑면의 줄이 떨리면 중간 높이부터 아주 높은 소리까지 <b>한꺼번에</b> 커지지만, 건반 음은 몇몇 높이에서만, 하이햇은 높은 쪽에서만 커집니다. 그래서 중간 대역과 높은 대역이 함께 오를 때만 커지는 값(두 값의 기하평균)으로 스네어를 골라냅니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-bar">마디 나누기</h3>
+        <p>마디의 첫 박에는 흔적이 남습니다. 코드와 베이스가 바뀌고, 킥이 세게 들어가고, 소리가 커지기도 합니다. 박마다 이런 흔적에 점수를 매기고, "마디는 같은 길이로 반복된다"는 규칙을 지키면서 점수가 가장 높은 묶음을 찾습니다. 2·3·4·5·7박 가운데 어느 쪽이 더 잘 맞는지도 이렇게 정하고(마디 길이를 억지로 늘이거나 줄여야 맞는 박자는 버림), 한 박이 셋으로 쪼개지는 느낌이 강하면 6/8, 12/8 같은 겹박자로 봅니다. 드물게 길이가 다른 마디도 허용해 변박이나 잘린 마디에서 경로가 무너지지 않게 합니다. 곡 중간에 박자가 바뀌어 새 박자가 4마디 이상 이어지면 그 마디부터 새 박자로 적습니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-chord">코드 알아내기</h3>
+        <p>옥타브가 다른 같은 음은 화음에서 같은 역할을 하므로, 모든 음을 도, 도♯ … 시의 12칸으로 접으면 그 순간 울리는 음들의 지문(크로마)이 생깁니다. 실제 악기는 한 음만 내지 않고 한 옥타브 위의 도, 그 위의 솔 같은 <b>배음</b>을 함께 내기 때문에, 코드의 지문도 배음까지 포함해 만들어 두고 비교합니다. 그러지 않으면 C 코드의 미에서 나온 배음(시) 때문에 C를 Cmaj7으로 착각합니다.</p>
+        <p>가장 낮은 음(베이스)은 따로 봐서 C/E 같은 자리바꿈을 적습니다. 녹음마다 기준음이 조금씩 다르므로(A4가 440 Hz가 아닌 곡도 많습니다) 곡 전체 음들의 평균적인 어긋남을 먼저 재고 그만큼 보정합니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-hmm">음악의 규칙을 확률로</h3>
+        <p>박마다 가장 비슷한 코드를 고르기만 하면 멜로디의 지나가는 음 때문에 코드가 깜빡이듯 바뀝니다. 그래서 "코드는 자주 바뀌지 않는다", "바뀐다면 마디 첫 박에서 가장 잘 바뀐다"는 상식을 확률로 넣고, 소리와의 닮음과 함께 따져 곡 전체에서 가장 그럴듯한 코드 순서를 한 번에 고릅니다(은닉 마르코프 모델과 비터비 알고리즘). 박자, 첫 박, 조성도 같은 방식으로 풉니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-key">조성과 전조</h3>
+        <p>조성은 "주로 어떤 음들이 쓰이는가"로 드러납니다. 비트마다 앞뒤 몇 마디의 음 분포를 24개 조성의 전형적인 분포와 비교하고, "조는 잘 바뀌지 않는다"는 규칙을 넣어 조성의 흐름을 찾습니다. 조표가 같은 나란한 장·단조(C 장조와 A 단조) 사이의 이동과 한두 마디 스쳐 가는 다른 조의 화음은 전조로 치지 않습니다.</p>
+        <p>코드를 인식한 뒤에는 코드로 조성을 다시 확인합니다. 코드들이 어느 음계에 들어맞는지, 으뜸화음이 얼마나 오래 나오는지, V → I 마침, 처음과 마지막 코드, 4마디 악구의 첫 코드를 음 분포와 함께 봅니다. 새 조의 딸림화음(예: E 장조의 B7)을 거쳐 넘어가면 악보의 관례대로 새 으뜸화음이 나오는 자리를 전조 위치로 봅니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-metro">어긋나지 않는 메트로놈</h3>
+        <p>이 메트로놈은 일정한 간격으로 치지 않고, <b>찾아낸 박 하나하나의 시각</b>에 칩니다. 연주가 조금 빨라지거나 느려져도 따라갑니다. 클릭은 타이머가 아니라 음악을 재생하는 <b>오디오 장치의 시계</b>에 0.2초 앞서 예약해 두므로, 음악과 샘플 하나 단위로 맞물립니다. 블루투스처럼 출력이 늦는 장치에서도 음악과 클릭이 함께 늦게 나와 서로는 어긋나지 않습니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="p-piano">코드를 피아노로 들려주기</h3>
+        <p>녹음된 피아노 소리를 쓰는 대신, 피아노 현의 물리를 흉내 내어 소리를 직접 만듭니다. 뻣뻣한 강철 현이라 배음이 정수배보다 조금씩 높게 울리고(비조화성), 해머가 현 길이의 1/7쯤을 때려 그 지점에서 움직이지 않는 배음은 약하게 울립니다. 한 음을 두세 가닥의 현이 함께 내어 소리가 천천히 일렁이고(맥놀이), 처음엔 빨리 줄다가 나중엔 오래 남는 두 단계 감쇠가 생깁니다. 피아노는 곡의 기준음에 맞춰 조율되고, 메트로놈과 같은 시계에 예약되어 코드가 바뀌는 순간에 정확히 울립니다.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-process">
+      <div class="block">
+        <h2 id="process">분석 과정</h2>
+        <p>분석은 파일을 열 때 한 번 하는 <b>무거운 단계</b>와, 보정이나 설정을 바꿀 때마다 다시 하는 <b>가벼운 단계</b>로 나뉩니다. 가벼운 단계는 5분짜리 곡도 수십 ms라서 버튼을 누르는 즉시 반영됩니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="pr-flow">두 단계로 나눈 흐름</h3>
+        <div class="flow">
+          <div class="stage heavy"><span class="tag">파일을 열 때 한 번</span>
+            <ol>
+              <li><b>디코딩</b><span>브라우저가 파일을 PCM으로 풀고, 이 버퍼 하나를 재생과 분석에 함께 씁니다(두 시간축이 어긋나지 않게).</span></li>
+              <li><b>지연 0 리샘플</b><span>22,050 Hz(리듬용)와 11,025 Hz(화성용) 신호를 만듭니다. 필터가 좌우 대칭이라 한 샘플도 밀리지 않습니다.</span></li>
+              <li><b>리듬 특징</b><span>저·중·고역별 스펙트럴 플럭스와 음량.</span></li>
+              <li><b>화성 특징</b><span>스펙트럼 피크, 기준음, 트레블·베이스 크로마, 화성 변화 곡선.</span></li>
+              <li><b>템포</b><span>자기상관 콤 점수 × 선호 분포.</span></li>
+              <li><b>비트 추적</b><span>국소 템포를 따르는 동적 계획법, 온셋 정점에 맞춤.</span></li>
+              <li><b>검증</b><span>정박 위상, 박 단계(두 배나 절반이면 새 템포로 다시 추적).</span></li>
+            </ol>
+          </div>
+          <div class="stage light"><span class="tag">보정·설정을 바꿀 때마다</span>
+            <ol>
+              <li><b>보정 적용</b><span>½박, ×2, ÷2, ÷3, 첫 박 이동, 박자 지정.</span></li>
+              <li><b>조성과 전조</b><span>조표 단위로 조성 구간을 나눕니다.</span></li>
+              <li><b>박자와 첫 박</b><span>첫 박 증거와 마디 위치 모델.</span></li>
+              <li><b>코드</b><span>자리바꿈을 포함한 코드 모델, 코드로 조성 다시 확인.</span></li>
+              <li><b>마디와 표기</b><span>마디 구성, 음이름·카멜롯·로마 숫자.</span></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="block">
+        <h3 id="pr-params">단계별 주요 값</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>단계</th><th>주요 값</th></tr></thead>
+          <tbody>
+            <tr><td>리듬 분석 창</td><td>1024점(46.4 ms), 홉 256점(11.6 ms, 초당 86.13 프레임). 저역 21–200 Hz, 중역 200–2,500 Hz, 고역 2.5–10 kHz</td></tr>
+            <tr><td>화성 분석 창</td><td>트레블 2048점(186 ms, 110–4,200 Hz, 피크 36개), 베이스 4096점(372 ms, 32–1,400 Hz, 피크 24개)</td></tr>
+            <tr><td>소리 구간</td><td>큰 음량(상위 5%) 대비 −38 dB 이상</td></tr>
+            <tr><td>템포 범위</td><td>40–300 BPM을 0.25 간격으로, 110 BPM 중심의 선호 분포</td></tr>
+            <tr><td>비트 정밀화</td><td>±2프레임(±23 ms) 안의 온셋 정점, 검출 지연 6.5 ms 보정</td></tr>
+            <tr><td>조성 추적</td><td>앞뒤 ±6박 창, 조 바꿈 벌점 6, 최소 구간 24박</td></tr>
+            <tr><td>코드 상태 수</td><td>기본 73개, 표준 241개, 확장 289개(자리바꿈과 코드 없음 포함)</td></tr>
+            <tr><td>메트로놈 예약</td><td>25 ms마다 깨어나 0.2초 앞까지 예약(탭이 뒤에 있으면 1.5초)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-math">
+      <div class="block">
+        <h2 id="math">알고리즘과 수식</h2>
+        <p>원리를 실제로 계산하는 식입니다. \(F = 22050/256 \approx 86.13\) 은 리듬 프레임률(프레임/초), \(\tau\) 는 박 주기(프레임), \(b_i\) 는 \(i\) 번째 비트 시각(초)입니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-signal">신호 준비</h3>
+        <p>재생 버퍼를 직접 리샘플링해 분석과 재생의 시간축을 일치시킵니다. 블랙맨 창을 씌운 싱크 필터는 좌우 대칭이라 위상 지연이 0입니다.</p>
+        \[ y[n] = \sum_{j=0}^{2W-1} x[\,i_n - W + 1 + j\,]\; h(\phi_n + W - 1 - j) \]
+        \[ h(u) = 2f_c\,\mathrm{sinc}(2f_c u)\,w\!\left(\frac{u}{W+1}\right),\quad w(r) = 0.42 + 0.5\cos\pi r + 0.08\cos 2\pi r,\quad f_c = 0.46\,\min\!\left(1, \frac{f_\text{out}}{f_\text{in}}\right) \]
+        <p>\(N\) 점 실수 신호의 푸리에 변환은 \(N/2\) 점 복소 FFT 한 번으로 계산합니다(\(z[m] = x[2m] + i\,x[2m+1]\), \(Z\) 는 그 FFT).</p>
+        \[ X[k] = F_e[k] + e^{-2\pi i k/N} F_o[k],\qquad F_e[k] = \tfrac12\left(Z[k] + Z^{*}[N/2-k]\right),\quad F_o[k] = -\tfrac{i}{2}\left(Z[k] - Z^{*}[N/2-k]\right) \]
+        <p class="note">\(Z^{*}\) 는 켤레복소수입니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-onset">온셋: 대역별 스펙트럴 플럭스</h3>
+        <p>스펙트럼을 로그로 압축해 조용한 소리의 변화도 드러나게 하고, 두 프레임 전의 스펙트럼을 주파수 방향으로 넓혀 비교해 비브라토를 온셋으로 착각하지 않게 합니다. 커진 양만 더하므로 잔향의 감쇠는 가짜 온셋을 만들지 않습니다.</p>
+        \[ Y(t,k) = \ln\!\left(1 + \lambda \cdot \tfrac{4}{N}\,|X(t,k)|\right),\qquad \lambda = 1000 \]
+        \[ \Delta(t,k) = \max\!\Big(0,\; Y(t,k) - \max_{|\nu| \le 1} Y(t-2,\, k+\nu)\Big),\qquad f_b = \frac{1}{|B_b|}\sum_{k \in B_b} \Delta(t,k) \]
+        \[ O(t) = \frac{f_\text{low}(t)}{\sigma_\text{low}} + \frac{f_\text{mid}(t)}{\sigma_\text{mid}} + \frac12\,\frac{f_\text{high}(t)}{\sigma_\text{high}} \]
+        <p class="note">고역을 절반만 반영해 엇박 하이햇의 영향을 줄입니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-tempo">템포</h3>
+        <p>온셋을 ±3초 음량으로 평준화한 \(E(t)\) 의 자기상관에서, 박 주기의 1~4배 지연을 함께 보는 콤 점수에 선호 분포를 곱해 템포 \(v\) 를 고릅니다.</p>
+        \[ r(\ell) = \frac{1}{n-\ell}\sum_{t=0}^{n-\ell-1} E(t)\,E(t+\ell) \]
+        \[ J(v) = \pi(v)\cdot \max\!\Big(0,\ \sum_{k=1}^{4} c_k \max_{|\delta| \le \delta_k} \tilde r(k\tau_v + \delta)\Big),\qquad \pi(v) = \exp\!\left(-\frac12 \log_2^2 \frac{v}{110}\right),\qquad c = \left(1, \tfrac12, 0.33, \tfrac14\right) \]
+      </div>
+
+      <div class="block">
+        <h3 id="m-dp">비트 추적</h3>
+        <p>Ellis(2007)의 동적 계획법을 두 가지 바꿔 씁니다. 간격을 전체 템포 대신 국소 박 주기 \(\tau(t)\) 와 비교하고, 벌점을 박 주기의 제곱에 비례하게 두어(\(T = \tau/F\) 초) 느린 곡에서도 같은 ms만큼의 흔들림에 같은 벌점을 줍니다.</p>
+        \[ C(t) = \ell(t) + \max_{\tau(t)/2 \le d \le 2\tau(t)}\Big[\,C(t-d) - \alpha \ln^2\frac{d}{\tau(t)}\,\Big],\qquad \alpha = \mathrm{clip}(2000\,T^2,\ 100,\ 1600) \]
+        <p>국소 박 주기는 8초 창(1초 간격)의 자기상관 \(r_w\) 로 구하고, 7개 창의 중앙값으로 필인 같은 순간적인 흔들림을 거릅니다.</p>
+        \[ \tau_w = \arg\max_{\ell \in [0.85\tau,\ 1.15\tau]} \Big( r_w(\ell) + \tfrac12\, r_w(2\ell) \Big) \]
+        <p>찾은 비트는 ±2프레임 안의 온셋 정점으로 옮긴 뒤 포물선 보간하고, 검출 지연 6.5 ms를 보정합니다.</p>
+        \[ \hat t = j + \frac12\cdot\frac{O(j-1) - O(j+1)}{O(j-1) - 2O(j) + O(j+1)},\qquad b = \frac{\hat t}{F} + 6.5\ \text{ms} \]
+      </div>
+
+      <div class="block">
+        <h3 id="m-verify">정박과 박 단계 검증</h3>
+        <p>정박 검증은 저역·중역·고역 플럭스와 화성 변화 \(\nu\) 를 섞은 강세 \(S\) 를 비트 위치와 반 박 위치에서 비교합니다.</p>
+        \[ S(t) = 1.0\,\frac{f_\text{low}}{\mu_\text{low}} + 0.7\,\frac{f_\text{mid}}{\mu_\text{mid}} + 0.2\,\frac{f_\text{high}}{\mu_\text{high}} + 0.8\,\frac{\nu}{\mu_\nu},\qquad \text{off} > 1.1\cdot\text{on} \;\Rightarrow\; \text{반 박 옮김} \]
+        <p>박 단계 검증에는 킥 곡선 \(K\) 와, 중역과 고역이 함께 오를 때만 커지는 스네어 곡선 \(S_n\) 을 씁니다.</p>
+        \[ K(t) = \frac{f_\text{low}(t)}{\sigma_\text{low}},\qquad S_n(t) = \sqrt{\frac{f_\text{mid}(t)}{\sigma_\text{mid}}\cdot\frac{f_\text{high}(t)}{\sigma_\text{high}}},\qquad s_X = \mathrm{sgn}(K_\text{even} - K_\text{odd})\cdot\frac{X_\text{even} - X_\text{odd}}{X_\text{even} + X_\text{odd}} \]
+        <div class="tbl"><table>
+          <thead><tr><th>교정</th><th>조건</th></tr></thead>
+          <tbody>
+            <tr><td>절반으로</td><td>짝·홀 박 드럼 세기 비 \(r_2 \ge 2.4\), 또는 킥과 스네어가 같은 쪽에 몰림(\(s_K \ge 0.15\), \(s_{S_n} \ge 0.15\), \(s_\nu > 0\), \(r_2 \ge 1.3\)). 110 BPM 이상일 때만</td></tr>
+            <tr><td>두 배로</td><td>100 BPM 이하에서, 박 사이 스네어가 박 위 스네어의 1.3배 이상이고 박 위 킥이 박 사이 킥의 2배 이상</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="block">
+        <h3 id="m-chroma">음높이와 크로마</h3>
+        <p>스펙트럼 피크의 주파수를 MIDI 음번호로 바꾸고, 모든 피크의 반음 소수부 \(d_j\) 를 원 위에서 평균해 기준음 편차 \(\theta\) (반음)를 구합니다.</p>
+        \[ m(f) = 69 + 12\log_2\frac{f}{440},\qquad \theta = \frac{1}{2\pi}\,\mathrm{atan2}\!\Big(\sum_j \sqrt{A_j}\sin 2\pi d_j,\ \sum_j \sqrt{A_j}\cos 2\pi d_j\Big) \]
+        \[ C(t,q) = \sum_{j:\ \mathrm{round}(\tilde m_j) \bmod 12 = q} A_j\, w(\tilde m_j)\cos^2\!\big(\pi(\tilde m_j - \mathrm{round}(\tilde m_j))\big),\qquad \tilde m = m - \theta \]
+      </div>
+
+      <div class="block">
+        <h3 id="m-chord">코드 판정</h3>
+        <p>코드의 지문(템플릿)은 구성음마다 배음 6개(반음 오프셋 \(d = (0, 12, 19, 24, 28, 31)\), 세기 \(0.6^{h-1}\))와 베이스 배음의 새어 나옴(\(\rho = 0.25\))을 더해 만들고, \(\gamma = 0.45\) 제곱으로 압축합니다.</p>
+        \[ \tilde T(q) = \sum_{p \in \text{chord}}\sum_{h=1}^{6} 0.6^{h-1}\,[\,q \equiv p + d_h\,] + \rho\sum_{h=1}^{6} 0.6^{h-1}\,[\,q \equiv p_\text{bass} + d_h\,] \]
+        <p>박(또는 ½박)마다 소리와 템플릿의 닮음에 코드 종류와 자리바꿈의 사전 점수, 조성 가산점, 베이스 음의 일치를 더합니다.</p>
+        \[ e_s(c) = \beta\,\langle o_s, T_c\rangle + \pi_q + \pi_\text{inv} + \kappa\,[\,c \subset \text{key}\,] + \eta\,g_s\Big(\ln\big(0.06 + \hat b_s(p_\text{bass})\big) - \ln\big(0.06 + \tfrac{1}{12}\big)\Big) \]
+        <p class="note">\(\beta = 30\), \(\kappa = 0.6\), \(\eta = 1.5\). 사전 점수는 장·단3화음 0, 7·m7 −0.4, maj7 −0.6, sus4 −1.2, dim −1.3, aug −1.8 등이고, 자리바꿈은 3음 베이스 −0.7, 5음·7음 베이스 −1.0입니다.</p>
+        <p>코드는 유지하면 벌점 0, 바꾸면 자리에 따라 \(\lambda_s\) 를 빼는 비터비 알고리즘으로 곡 전체에서 한 번에 고릅니다. 마디 첫 박 1.5, 가운데 박 3.0, 그 밖의 박 4.0, 박 사이(½박) 6.0입니다.</p>
+        \[ V_s(c) = e_s(c) + \max\!\Big(V_{s-1}(c),\ \max_{c'} V_{s-1}(c') - \lambda_s\Big) \]
+      </div>
+
+      <div class="block">
+        <h3 id="m-bar">박자와 첫 박</h3>
+        <p>박마다 화성 변화 \(h\), 예비 코드 변화 \(l\), 베이스 변화 \(g\), 저역 온셋 \(k\), 음량 증가 \(e\), 으뜸화음 진입 \(o\) 을 표준화(\(Z\))해 더한 첫 박 증거로, 마디 안 위치를 상태로 하는 모델을 풉니다.</p>
+        \[ z_i = 1.0\,Z(h)_i + 1.0\,Z(l)_i + 0.5\,Z(g)_i + 0.6\,Z(k)_i + 0.3\,Z(e)_i + 0.4\,Z(o)_i \]
+        \[ P(p \to p+1) = 1 - 2\varepsilon,\qquad P(k \to 0) = \varepsilon,\qquad P(m-1 \to m-1) = \varepsilon,\qquad \varepsilon = 3\times 10^{-4} \]
+        <p class="note">작은 확률로 마디가 짧아지거나 길어지는 것을 허용해 변박에도 경로가 무너지지 않습니다. 4박보다 대비도가 0.25(겹박자는 0.3) 이상 높을 때만 다른 박자를 고릅니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-key">조성과 전조</h3>
+        <p>비트마다 앞뒤 ±6박을 삼각 가중으로 모은 음 분포 \(H_i\) 와 Krumhansl–Kessler 조성 프로필의 상관을, 장조와 나란한 단조를 한 부류(조표 \(g\))로 묶어 계산합니다.</p>
+        \[ c_i(g) = \max\Big(\mathrm{corr}\big(H_i, \vec K_\text{major}(g)\big),\ \mathrm{corr}\big(H_i, \vec K_\text{minor}(g+9)\big)\Big) \]
+        \[ V_i(g) = c_i(g) + \max\Big(V_{i-1}(g),\ \max_{g'} V_{i-1}(g') - \Lambda\Big),\qquad \Lambda = 6 \]
+        <p>24박보다 짧은 구간은 이웃 구간에 흡수합니다. 코드 인식이 끝나면 구간마다 코드로 조성을 다시 정합니다.</p>
+        \[ J(K) = \frac{\sum_j \ell_j [c_j \subset K]}{\sum_j \ell_j} + 0.5\,\frac{\sum_j \ell_j [c_j = \mathrm{I}_K]}{\sum_j \ell_j} + 0.3\min\Big(1, \frac{N_{V \to I}}{3}\Big) + 0.15\,[c_1 = \mathrm{I}_K] + 0.15\,[c_\text{last} = \mathrm{I}_K] + 0.4\,\frac{N_\text{phrase}(\mathrm{I}_K)}{N_\text{phrase}} + 1.2\,\mathrm{corr}\Big(\sum_i h_i, \vec K\Big) \]
+        <p class="note">\(\ell_j\) 는 코드 길이(박), \(\mathrm{I}_K\) 는 으뜸화음, \(N_{V \to I}\) 는 V → I 진행 수, \(N_\text{phrase}\) 는 4마디마다의 첫 박 수입니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-notation">카멜롯과 로마 숫자</h3>
+        <p>카멜롯 휠은 조성을 5도권 순서로 1~12번에 놓고 장조에 B, 단조에 A를 붙입니다. 장조 으뜸음 \(t\) (C = 0)의 번호와, 나란한 장조와 번호를 공유하는 단조의 번호는 다음과 같습니다. 코드는 근음과 3음이 같은 조성의 번호로 적습니다.</p>
+        \[ n_\text{major}(t) = \big((7t + 7) \bmod 12\big) + 1,\qquad n_\text{minor}(t) = n_\text{major}\big((t+3) \bmod 12\big) \]
+        <p>로마 숫자는 그 자리의 조성을 기준으로 근음의 음정 \(d = (r - t) \bmod 12\) 를 도수로 바꿉니다. 단조는 자연단음계를 기준으로 하고, 이끎음 위의 감화음은 관례대로 vii°로 적습니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th class="num">d</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th></tr></thead>
+          <tbody>
+            <tr><td>장조</td><td>I</td><td>♭II</td><td>II</td><td>♭III</td><td>III</td><td>IV</td><td>♯IV</td><td>V</td><td>♭VI</td><td>VI</td><td>♭VII</td><td>VII</td></tr>
+            <tr><td>단조</td><td>I</td><td>♭II</td><td>II</td><td>III</td><td>♯III</td><td>IV</td><td>♯IV</td><td>V</td><td>VI</td><td>♯VI</td><td>VII</td><td>♯VII</td></tr>
+          </tbody>
+        </table></div>
+        <ul>
+          <li>3음이 단3도인 코드는 소문자, 감화음은 °, 반감7화음은 ø, 증3화음은 +, 장7화음은 M입니다.</li>
+          <li>자리바꿈 숫자는 3화음 6·⁶₄, 7화음 7·⁶₅·⁴₃·⁴₂입니다.</li>
+          <li>조성 밖의 장3화음·딸림7화음이 바로 다음 코드로 완전5도 내려가 해결하면 V/x, 조성 밖 감화음이 반음 위로 가면 vii°/x, 그 앞의 조성 밖 단3화음은 ii/x로 적습니다.</li>
+          <li>전조 직전에 새 조의 딸림화음이 오면 새 조 기준 V로 적습니다.</li>
+        </ul>
+        <p><b>코드 이름의 철자.</b> 같은 건반이라도 화음의 기능에 따라 이름이 다릅니다. 로마 숫자가 정한 도수로 글자를 정하고, 실제 음높이와의 차이만큼 임시표를 붙입니다. 그래서 C 장조의 나폴리 화음(♭II)은 D♭, ii로 가는 이끎음 화음(vii°/ii)은 C♯로 적고, 자리바꿈 베이스는 구성음 글자대로 적습니다(E♭7/D♭). 겹임시표가 필요하거나 조에 없는 F♭·C♭·E♯·B♯가 되면 한소리 이름을 씁니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-v15">곡 종류별 보강</h3>
+        <p><b>템포 도약.</b> 8초 창(1초 간격)마다 전체 박 주기의 0.6~1.65배 범위에서 박 주기 점수를 구하고 템포 상태 비터비로 흐름을 고릅니다. 원래 템포 근처(±4%)는 점수가 창 최댓값의 60% 이상이면 만점으로 보아 쉽게 떠나지 않게 하고, 다른 템포는 실제 점수로 비교해 2/3배 같은 가짜 주기로 가지 않게 합니다. 창 사이의 이동 비용은 다음과 같습니다(\(d = |\ln(\ell_w/\ell_{w-1})|\)).</p>
+        <div class="tbl"><table>
+          <thead><tr><th>창 사이 변화</th><th>비용</th><th>뜻</th></tr></thead>
+          <tbody>
+            <tr><td>\(d \le 0.005\)</td><td>\(0\)</td><td>서서히 바뀌는 템포는 그대로 따라감</td></tr>
+            <tr><td>\(0.005 < d \le 0.04\)</td><td>\(-6 - 100\,(d - 0.005)\)</td><td>작은 걸음을 이어 멀리 가는 길이 도약보다 비쌈</td></tr>
+            <tr><td>\(d > 0.04\)</td><td>\(-12 - 2d\)</td><td>원래 템포의 지지가 12창 넘게 무너져야 넘어감</td></tr>
+          </tbody>
+        </table></div>
+        <p>도약이 없으면 앞의 국소 템포 곡선을 그대로 쓰고, 있으면 도약 지점으로 구간을 나눠 구간마다 같은 방식으로 곡선을 만듭니다.</p>
+        <p><b>워킹 베이스 층위.</b> 85 BPM 이하인데 저역 온셋이 박 사이에도 박 위의 40% 이상 울리고(박 위/박 사이 비 2.5 이하) 백비트도 없으면 한 층위 위로 올리고, 150 BPM 이하에서 한 번 더 확인합니다.</p>
+        <p><b>박자.</b> 4박이 아닌 박자는 첫 박 대비도가 4박보다 3박은 0.25, 5·7박은 0.3 넘게 높고, 길이를 억지로 맞춘 마디가 15% 이하일 때만 고릅니다.</p>
+        <p><b>파워 코드.</b> 근음 위 2·3·4·5반음의 세기가 근음과 5음으로 설명되는 정도를 넘으면 감점하고, 곡 안에서 16박 이상, 전체의 8% 이상 나올 때만 적습니다.</p>
+        \[ e_s(c_5) \leftarrow e_s(c_5) - 6\,\max\Big(0,\ \sum_{d \in \{2,3,4,5\}} o_s(r+d) - 0.7\,\big(o_s(r) + o_s(r+7)\big)\Big) \]
+        <p><b>박자 변화.</b> 첫 박 모델의 상태를 (박자, 마디 안 위치)로 넓혀, 마디가 끝날 때만 아주 작은 확률(\(\mu = 10^{-6}\))로 다른 박자로 넘어가게 합니다. 새 박자가 4마디 이상 이어질 때만 박자 변화로 보고, 그런 변화가 없으면 이 결과를 쓰지 않습니다.</p>
+        <p><b>템포 표시.</b> 박마다 앞뒤 4박 간격의 중앙값으로 템포를 구해 화면 위 BPM에 쓰고, 앞뒤 8박의 템포가 12% 넘게 갑자기 바뀌며 새 템포가 직전 표시보다 8% 넘게 다른 곳에 표시를 붙입니다(\(\Delta b\) 는 박 간격).</p>
+        \[ r_j = \left|\ln\frac{\mathrm{med}\{\Delta b_{j-8}, \dots, \Delta b_{j-1}\}}{\mathrm{med}\{\Delta b_{j}, \dots, \Delta b_{j+7}\}}\right| \ge 0.12 \]
+        <p><b>서서히 바뀌는 템포.</b> 앞뒤 8박으로 다듬은 템포가 4박 전보다 1% 넘게 한 방향으로 계속 바뀌고, 모두 합쳐 8% 넘게 16박 이상에 걸쳐 바뀐 구간입니다. 구간 끝 뒤 16박 안에서 박마다 템포가 더 바뀌면 거기까지를 끝으로 보고, 끝 박에 도착 템포를 흰 알약으로 둡니다. 재생 중 틀은 재생 위치까지 채워지고 도착 박에서 0.8초 동안 옅어지며, 도착 알약은 도착 박의 길이 \(\Delta b\) 에 대해 다음 시간 동안 켜집니다. 1.1배는 템포에 비례한 여운, 0.06초는 꺼짐이 다음 박의 시작과 겹쳐 보이지 않게 하는 고정 여운입니다.</p>
+        \[ T_{\mathrm{on}} = 1.1\,\Delta b + 0.06\,\mathrm{s} \]
+        <p><b>코드 연주(곡 따라).</b> 기본 타건 방식은 코드가 바뀌는 곳과, 같은 코드라도 새로 친 마디 첫 박(검은 글자)에서 치고, 끌어 둔 곳(회색)에서는 누른 채로 이어서 울립니다. 원곡의 치는 짜임을 따라가므로 서스테인을 따로 늘리지 않아도 새로 친 곳에서는 소리가 다시 살아납니다.</p>
+        <p><b>이어짐(회색).</b> 마디 첫 박의 코드가 앞 칸과 같을 때, 그 구성음의 세기를 박 직전 약 0.12초 평균과 직후 약 0.12초 최대로 비교해 1.2배 넘게 뛰면 새로 친 것(검은 글자), 아니면 끌어 둔 것(회색)으로 적습니다. <b>약박 바뀜 다듬기.</b> 약박(2·4박)에서 바뀐 것으로 판정됐지만 앞 강박에서 옛 코드에만 있는 음이 새로 쳐지지 않았고 두 코드의 점수 차가 2.5 이내이면, 바뀜을 앞 강박으로 옮깁니다(분산화음 반주의 Esus4 → E 등).</p>
+        <p><b>온음 위 베이스(F/G형).</b> 장3화음 위에 근음보다 온음 높은 베이스를 둔 상태로, 베이스 크로마의 30% 이상이 그 음일 때만 인정합니다. <b>자리바꿈 다듬기.</b> 같은 코드 안에서 베이스가 세 번 이상 움직이면 2박보다 짧은 자리바꿈을 합치고, 근음과 오가는 5음 베이스는 자리바꿈으로 적지 않습니다.</p>
+      </div>
+
+      <div class="block">
+        <h3 id="m-audio">메트로놈과 코드 연주</h3>
+        <p>오디오 시계에서 음악을 \(t_s\) 에 곡 위치 \(o_s\) 부터 재생하기 시작했다면, 클릭 타이밍 보정 \(\delta\) 를 더한 \(i\) 번째 클릭의 예약 시각과 화면의 재생 위치는 다음과 같습니다(\(L_\text{out}\) 은 출력 장치의 지연).</p>
+        \[ t^\text{click}_i = t_s + (b_i + \delta - o_s),\qquad \text{pos}_\text{display} = o_s + \max(0,\ t_\text{now} - t_s) - L_\text{out} \]
+        <p>코드 연주의 피아노 음은 곡의 기준음 \(\theta\) 에 맞춘 비조화 배음과 두 단계 감쇠로 합성합니다.</p>
+        \[ f_0 = 440\cdot 2^{(m - 69 + \theta)/12},\qquad f_k = k f_0\sqrt{1 + B k^2},\qquad B = 3.5\times 10^{-4}\cdot 2^{(m-60)/24} \]
+        \[ y(t) = \sum_k \sum_{s=1}^{S_k} \frac{a_k}{S_k}\left(0.60\,e^{-t/\tau^F_k} + 0.40\,e^{-t/\tau^S_k}\right)\sin\!\left(2\pi f_k 2^{d_s/1200} t + \varphi_k\right) \]
+        <p class="note">\(a_k\) 에는 해머 타격 위치(현 길이의 1/7.5)와 해머 펠트의 고역 감쇠가, \(S_k\) 에는 한 음을 이루는 현의 수(1~3)가, \(d_s\) 에는 현마다의 미세한 조율 차(0, +1.0, −0.8 cent)가 들어갑니다.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-physics">
+      <div class="block">
+        <h2 id="physics">소리의 물리</h2>
+        <p>분석의 여러 선택은 소리와 악기의 물리적 성질에서 나옵니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="ph-pitch">음높이와 평균율</h3>
+        <p>음높이는 떨림의 주파수이고, 12평균율은 한 옥타브(주파수 2배)를 12개의 같은 비로 나눕니다. 옥타브가 주파수 2배라는 사실이 음들을 12칸(크로마)으로 접는 근거입니다.</p>
+        \[ f(m) = 440\cdot 2^{(m-69)/12}\ \text{Hz},\qquad \text{cent}(f_1, f_2) = 1200\log_2\frac{f_1}{f_2} \]
+        <p>녹음의 기준음은 테이프 속도, 악기 조율, 의도적인 튜닝 때문에 440 Hz에서 벗어나곤 합니다. 예를 들어 +18 cent면 A4는 약 444.6 Hz입니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="ph-harmonics">배음</h3>
+        <p>현이나 관의 진동은 기본 주파수의 정수배 성분(배음)을 함께 냅니다. 배음이 기본음에서 떨어진 거리는 \(12\log_2 h\) 반음입니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>배음</th><th>반음 거리</th><th>가까운 평균율</th><th>차이</th><th>코드 템플릿에서</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">0</td><td>같은 음</td><td class="num">0 cent</td><td>1</td></tr>
+            <tr><td>2</td><td class="num">12.00</td><td>옥타브</td><td class="num">0 cent</td><td>0.6</td></tr>
+            <tr><td>3</td><td class="num">19.02</td><td>옥타브 위 5도</td><td class="num">+2.0 cent</td><td>0.36</td></tr>
+            <tr><td>4</td><td class="num">24.00</td><td>두 옥타브</td><td class="num">0 cent</td><td>0.216</td></tr>
+            <tr><td>5</td><td class="num">27.86</td><td>두 옥타브 위 장3도</td><td class="num">−13.7 cent</td><td>0.13</td></tr>
+            <tr><td>6</td><td class="num">31.02</td><td>두 옥타브 위 5도</td><td class="num">+2.0 cent</td><td>0.078</td></tr>
+            <tr><td>7</td><td class="num">33.69</td><td>34반음</td><td class="num">−31.2 cent</td><td>쓰지 않음</td></tr>
+          </tbody>
+        </table></div>
+        <p>C 장3화음(C, E, G)만 쳐도 E의 3배음은 B, G의 3배음은 D가 되어, 배음을 무시하면 Cmaj7이나 Cadd9처럼 보입니다. 템플릿이 이 성분까지 품고 있어야 비교가 공정해집니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="ph-bands">악기별 주파수 대역</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>소리</th><th>주요 대역</th><th>물리적 특징</th><th>분석에서의 쓰임</th></tr></thead>
+          <tbody>
+            <tr><td>킥 드럼</td><td>약 40–100 Hz</td><td>짧은 저음, 음높이가 빠르게 내려감</td><td>저역 플럭스로 박과 첫 박의 증거</td></tr>
+            <tr><td>베이스</td><td>약 41–400 Hz</td><td>정수배 배음, 긴 지속</td><td>베이스 크로마로 자리바꿈 판단</td></tr>
+            <tr><td>스네어</td><td>몸통 약 150–250 Hz, 줄 잡음 약 2–10 kHz</td><td>넓은 대역의 잡음</td><td>중역과 고역의 동시 상승으로 백비트</td></tr>
+            <tr><td>하이햇</td><td>약 5–15 kHz</td><td>금속성 잡음</td><td>고역 플럭스(박 판정에서는 가중치를 낮춤)</td></tr>
+            <tr><td>피아노, 기타, 보컬</td><td>기본음 약 80 Hz–1 kHz</td><td>정수배 배음</td><td>트레블 크로마로 코드</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="ph-tf">시간과 주파수의 맞바꿈</h3>
+        <p>창 길이 \(T\) 의 주파수 분해능은 대략 \(1/T\) 이고, 이론적 하한은 \(\Delta t\,\Delta f \ge 1/(4\pi)\) 입니다. 반면 반음 간격은 주파수에 비례해서, 베이스 최저음 E1(41.2 Hz)에서는 2.45 Hz뿐입니다.</p>
+        \[ \Delta f_\text{semitone}(f) = f\,(2^{1/12} - 1) \approx 0.0595\,f \]
+        <div class="tbl"><table>
+          <thead><tr><th>용도</th><th>샘플레이트</th><th>창 길이</th><th>홉</th><th>칸 간격</th></tr></thead>
+          <tbody>
+            <tr><td>리듬(온셋)</td><td class="num">22,050 Hz</td><td class="num">46.4 ms</td><td class="num">11.6 ms</td><td class="num">21.5 Hz</td></tr>
+            <tr><td>트레블(코드)</td><td class="num">11,025 Hz</td><td class="num">185.8 ms</td><td class="num">23.2 ms</td><td class="num">5.38 Hz</td></tr>
+            <tr><td>베이스, 기준음</td><td class="num">11,025 Hz</td><td class="num">371.5 ms</td><td class="num">46.4 ms</td><td class="num">2.69 Hz</td></tr>
+          </tbody>
+        </table></div>
+        <p>샘플레이트 \(f_s\) 로는 \(f_s/2\) 보다 높은 성분을 담을 수 없고, 줄이면 높은 성분이 낮은 주파수로 접혀 들어옵니다(앨리어싱). 그래서 리샘플러는 새 나이퀴스트 주파수의 92%에서 자르는 저역 필터를 겸합니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="ph-perception">음량, 잔향, 지각</h3>
+        <ul>
+          <li>사람의 음량 감각은 대략 로그적이라 데시벨로 다룹니다. 스펙트럼을 로그로 압축하면 절대 크기보다 상대 변화가 드러나, 조용한 기타 스트로크와 큰 킥이 모두 온셋으로 잡힙니다.</li>
+          <li>음이 멈춘 뒤에도 방의 잔향 때문에 에너지가 수백 ms 동안 줄어들며 남습니다. 플럭스는 커진 양만 더하므로 잔향의 감쇠는 가짜 온셋을 만들지 않습니다.</li>
+          <li>사람들이 편하게 박을 세는 템포는 대략 120 BPM 안팎에 몰린다고 알려져 있습니다(Moelants, 2002). 템포 선호 분포는 느린 발라드를 고려해 110 BPM을 중심으로 둡니다.</li>
+          <li>숙련된 연주자는 수 ms에서 수십 ms의 어긋남도 알아차린다고 알려져 있어, 박 오차의 목표를 ±10 ms 안으로 두었습니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3 id="ph-latency">지연과 거리</h3>
+        <p>소리는 공기 중에서 약 343 m/s로 움직여 1 m에 약 2.9 ms가 걸립니다. 출력 장치의 지연은 유선이 수 ms에서 수십 ms, 블루투스는 흔히 100–300 ms입니다. 음악, 클릭, 코드 연주가 같은 오디오 경로를 지나므로 셋 다 똑같이 늦어져 서로의 정렬은 유지되고, 화면만 출력 지연만큼 보정합니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="ph-piano">피아노 현</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>현상</th><th>물리</th><th>합성에서</th></tr></thead>
+          <tbody>
+            <tr><td>비조화성</td><td>강철 현의 굽힘 강성 때문에 높은 배음일수록 정수배보다 높아짐. \(B = \pi^3 E d^4 / (64\,T L^2)\) (\(E\) 영률, \(d\) 지름, \(T\) 장력, \(L\) 길이)</td><td>\(f_k = k f_0\sqrt{1 + B k^2}\)</td></tr>
+            <tr><td>타격 위치</td><td>해머가 현 길이의 약 1/7~1/9 지점을 때리면 그 지점에서 움직이지 않는 배음은 거의 울리지 않음</td><td>\(|\sin(\pi k x_h)|\), \(x_h = 1/7.5\)</td></tr>
+            <tr><td>이중 감쇠</td><td>한 음의 여러 현이 브리지를 통해 에너지를 주고받아 처음엔 빨리 줄고 나중엔 오래 남음</td><td>즉음 60%, 여음 40%</td></tr>
+            <tr><td>맥놀이</td><td>한 음의 현들이 1 cent 안팎으로 다르게 조율되어 소리가 천천히 일렁임</td><td>같은 위상에서 출발하는 현 2~3개</td></tr>
+            <tr><td>배음별 감쇠</td><td>높은 배음일수록 빨리 사라져 시간이 갈수록 소리가 어두워짐</td><td>\(\tau_k \propto (f_0/f_k)^{0.7}\)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-structure">
+      <div class="block">
+        <h2 id="structure">프로그램 구조</h2>
+        <p>Chordity는 외부 라이브러리 없이 HTML 파일 하나로 동작합니다. 파일은 인터넷으로 보내지지 않고, 모든 분석은 브라우저 안에서 이루어집니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="s-parts">구성</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>부분</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr><td>분석 엔진</td><td>신호 처리와 박 추적(무거운 단계), 박자·첫 박·조성·코드 추론(가벼운 단계), 텍스트 차트 만들기. 화면에 기대지 않아 따로 떼어 쓸 수도 있습니다.</td></tr>
+            <tr><td>불러오기</td><td>파일 선택과 끌어 놓기, 브라우저 디코딩</td></tr>
+            <tr><td>재생기와 스케줄러</td><td>음악 재생, 메트로놈 클릭과 코드 연주 예약</td></tr>
+            <tr><td>렌더러</td><td>코드 차트, 박 표시등, 파형, 지금·다음 코드</td></tr>
+            <tr><td>보정과 설정</td><td>박 보정, 코드 종류와 표기, 메트로놈과 코드 연주 설정</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="s-clocks">세 개의 시계</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>시계</th><th>기준</th><th>쓰는 곳</th></tr></thead>
+          <tbody>
+            <tr><td>샘플 시간</td><td>디코딩한 버퍼의 샘플 번호 ÷ 샘플레이트</td><td>분석, 모든 비트 시각</td></tr>
+            <tr><td>오디오 시계</td><td>오디오 장치의 재생 시각</td><td>음악 재생, 클릭과 코드 연주 예약</td></tr>
+            <tr><td>화면 시계</td><td>화면을 다시 그리는 주기</td><td>형광펜, 표시등, 재생 위치</td></tr>
+          </tbody>
+        </table></div>
+        <p>비트 시각은 샘플 시간으로 계산되고 오디오 시계로 옮겨집니다. 재생 버퍼와 분석 신호가 같은 디코딩 결과에서 나오고 리샘플러의 지연이 0이므로, 두 시간축 사이에 어긋남이 없습니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="s-audio">오디오 그래프</h3>
+        <div class="graph"><div class="row">
+          <div class="col"><div class="node">음악</div><div class="node">메트로놈 클릭</div><div class="node">피아노 음<small>방 잔향 1.6초, 보정 이득 +6.4 dB</small></div></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="col"><div class="node">음악 볼륨</div><div class="node">클릭 볼륨</div><div class="node">코드 볼륨</div></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="col"><div class="node key">리미터 −1 dBFS<small style="color:inherit;opacity:.75">셋이 겹쳐도 깨지지 않게</small></div></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="col"><div class="node">출력</div></div>
+        </div></div>
+      </div>
+      <div class="block">
+        <h3 id="s-prefs">저장되는 설정</h3>
+        <p>메트로놈과 코드 연주 켜기, 첫 박 강조, 코드 연주 방식, 음악·클릭·코드 볼륨, 클릭 타이밍, 자동 스크롤, 테마, 코드 종류, 해상도, 베이스음 표기, 코드 표기 방식은 브라우저에 저장되어 다음에도 그대로입니다. 박 보정은 곡마다 따로라서 저장하지 않습니다.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-verification">
+      <div class="block">
+        <h2 id="verification">검증</h2>
+        <p>정답(박, 첫 박, 코드, 조성)을 알고 있는 합성 음원과, 실제 녹음, 실제 브라우저에서의 동작으로 확인했습니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="v-summary">한눈에 보기</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>항목</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>박 적중(합성 곡)</td><td>18곡 모두 정답 박을 100% 찾음. 엇박 클릭 0(두 해석이 모두 통용되는 레게 1곡 제외)</td></tr>
+            <tr><td>박 시각 오차</td><td>평균 −3.2 ~ +0.7 ms, 평균 절대 오차 1.4 ~ 3.8 ms</td></tr>
+            <tr><td>마디 첫 박</td><td>박자가 정해진 곡 모두 100%</td></tr>
+            <tr><td>코드(베이스까지 일치)</td><td>88.8 ~ 100%</td></tr>
+            <tr><td>조성</td><td>조성이 분명한 18곡 모두 맞음, 전조 위치 오차 0박</td></tr>
+            <tr><td>메트로놈(브라우저)</td><td>예약된 클릭 모두 정박, 첫 박 강조 모두 실제 첫 박</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-unit">기본 계산</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>항목</th><th>방법</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>실수 FFT</td><td>직접 계산한 DFT와 비교</td><td class="num">최대 오차 3.8×10⁻¹³</td></tr>
+            <tr><td>리샘플러 정확도</td><td>1 kHz 사인을 이상적인 사인과 비교</td><td class="num">RMS 오차 7.7×10⁻⁶</td></tr>
+            <tr><td>리샘플러 지연</td><td>1.0초 위치의 임펄스를 변환</td><td class="num">1.00000초(지연 0)</td></tr>
+            <tr><td>샘플레이트</td><td>22.05, 44.1, 96 kHz 입력</td><td>비트 적중 100%, 평균 오차 0.3 ms 이내</td></tr>
+            <tr><td>특수 입력</td><td>무음, 1.5초와 0.2초 클립</td><td>오류 없이 빈 결과</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-synthetic">합성 곡 18곡</h3>
+        <p>킥, 스네어, 하이햇, 배음이 있는 베이스와 건반, 비화성음이 20% 섞인 멜로디, 잡음을 넣어 만들었습니다. 기준음을 18 cent 틀거나, 템포를 흔들거나, 후반부를 15% 늦추거나, 전조한 곡도 있습니다. 비트 적중은 70 ms 이내, 코드는 박 가운데에서 근음·성질·베이스가 모두 맞아야 정답으로 쳤습니다.</p>
+        <details class="more">
+          <summary>곡별 결과 보기</summary>
+          <div class="tbl"><table>
+            <thead><tr><th>곡</th><th>BPM(정답)</th><th>비트</th><th>엇박</th><th>평균 / 절대 오차</th><th>박자</th><th>첫 박</th><th>코드</th></tr></thead>
+            <tbody>
+              <tr><td>팝, 강한 엇박 하이햇, +18 cent</td><td class="num">97.1 (97)</td><td class="num">96/96</td><td class="num">0</td><td class="num">0.1 / 1.5 ms</td><td>4/4</td><td class="num">24/24</td><td class="num">100%</td></tr>
+              <tr><td>팝</td><td class="num">128.1 (128)</td><td class="num">96/96</td><td class="num">0</td><td class="num">0.5 / 1.7 ms</td><td>4/4</td><td class="num">24/24</td><td class="num">100%</td></tr>
+              <tr><td>왈츠</td><td class="num">150.2 (150)</td><td class="num">48/48</td><td class="num">0</td><td class="num">0.5 / 1.8 ms</td><td>3/4</td><td class="num">16/16</td><td class="num">100%</td></tr>
+              <tr><td>셋잇단 발라드</td><td class="num">58.0 (58)</td><td class="num">48/48</td><td class="num">0</td><td class="num">−1.4 / 2.0 ms</td><td>12/8</td><td class="num">12/12</td><td class="num">100%</td></tr>
+              <tr><td>8분 아르페지오 발라드, 템포 흔들림</td><td class="num">67.1 (68)</td><td class="num">64/64</td><td class="num">0</td><td class="num">−1.0 / 1.9 ms</td><td>4/4</td><td class="num">16/16</td><td class="num">98.4%</td></tr>
+              <tr><td>약한 스네어 록</td><td class="num">118.0 (118)</td><td class="num">96/96</td><td class="num">0</td><td class="num">0.0 / 1.6 ms</td><td>4/4</td><td class="num">24/24</td><td class="num">100%</td></tr>
+              <tr><td>댄스</td><td class="num">123.9 (124)</td><td class="num">96/96</td><td class="num">0</td><td class="num">−0.4 / 1.5 ms</td><td>4/4</td><td class="num">24/24</td><td class="num">100%</td></tr>
+              <tr><td>힙합</td><td class="num">87.9 (88)</td><td class="num">64/64</td><td class="num">0</td><td class="num">0.7 / 2.0 ms</td><td>4/4</td><td class="num">16/16</td><td class="num">100%</td></tr>
+              <tr><td>펑크</td><td class="num">176.2 (176)</td><td class="num">96/96</td><td class="num">0</td><td class="num">0.4 / 1.7 ms</td><td>4/4</td><td class="num">24/24</td><td class="num">100%</td></tr>
+              <tr><td>피아노 솔로</td><td class="num">72.0 (72)</td><td class="num">64/64</td><td class="num">0</td><td class="num">−3.2 / 3.2 ms</td><td>4/4</td><td class="num">16/16</td><td class="num">98.4%</td></tr>
+              <tr><td>피아노 솔로, 3박자</td><td class="num">84.0 (84)</td><td class="num">48/48</td><td class="num">0</td><td class="num">−2.6 / 2.7 ms</td><td>3/4</td><td class="num">16/16</td><td class="num">100%</td></tr>
+              <tr><td>발라드, 후반부 15% 느려짐</td><td class="num">71.6 (72→63)</td><td class="num">80/80</td><td class="num">0</td><td class="num">−0.8 / 2.0 ms</td><td>4/4</td><td class="num">20/20</td><td class="num">88.8%</td></tr>
+              <tr><td>전조 C → D (A7 경유)</td><td class="num">110.2 (110)</td><td class="num">116/116</td><td class="num">0</td><td class="num">0.0 / 1.5 ms</td><td>4/4</td><td class="num">29/29</td><td class="num">100%</td></tr>
+              <tr><td>전조 E♭ → E (B7 경유, 발라드)</td><td class="num">70.0 (70)</td><td class="num">116/116</td><td class="num">0</td><td class="num">−1.1 / 2.0 ms</td><td>4/4</td><td class="num">29/29</td><td class="num">93.1%</td></tr>
+              <tr><td>전조 G → A♭ (바로)</td><td class="num">100.0 (100)</td><td class="num">112/112</td><td class="num">0</td><td class="num">0.0 / 1.4 ms</td><td>4/4</td><td class="num">28/28</td><td class="num">100%</td></tr>
+              <tr><td>A 단조 절 → C 장조 후렴</td><td class="num">96.0 (96)</td><td class="num">64/64</td><td class="num">0</td><td class="num">−0.2 / 1.5 ms</td><td>4/4</td><td class="num">16/16</td><td class="num">100%</td></tr>
+              <tr><td>드럼 인트로 + 못갖춘마디</td><td class="num">104.0 (104)</td><td class="num">57/57</td><td class="num">0</td><td class="num">−0.7 / 2.3 ms</td><td>4/4</td><td class="num">14/14</td><td class="num">100%</td></tr>
+              <tr><td>레게 원드롭</td><td class="num">151.7 (76)</td><td class="num">48/48</td><td class="num">47</td><td class="num">−3.8 / 3.8 ms</td><td>4/4</td><td>두 배 층위</td><td class="num">100%</td></tr>
+            </tbody>
+          </table></div>
+        </details>
+        <p class="note">레게는 스캥크를 백비트로 보는 두 배 템포 해석도 흔히 쓰여 자동으로 강제하지 않았습니다(÷2 한 번으로 76 BPM). 코드 오답은 Esus4 → E가 마디 가운데에서 바뀌는 곳과, 아르페지오 속 7음이 약한 발라드에서 maj7·m7을 3화음으로 읽은 경우입니다.</p>
+      </div>
+      <div class="block">
+        <h3 id="v-150">곡 종류 확장 시험</h3>
+        <p>회귀 18곡에 없던 곡 종류 17곡을 더해 1.4.2와 비교했습니다. 검증 시 기준은 대중음악을 우선하는 것입니다. 대중음악 곡의 결과가 나빠지는 수정은 특수 장르가 좋아져도 넣지 않고, 대중음악 곡의 결과가 좋아지는 수정은 특수 장르가 조금 나빠져도 넣습니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>묶음</th><th>항목</th><th>1.4.2</th><th>1.5.0</th></tr></thead>
+          <tbody>
+            <tr><td>회귀 18곡</td><td>비트, 첫 박, 코드, 조성</td><td>100%, 100%, 98.6%, 18곡</td><td>같음</td></tr>
+            <tr><td>대중음악형 10곡</td><td>비트 / 엇박 클릭</td><td class="num">95.7% / 16</td><td class="num">99.6% / 1</td></tr>
+            <tr><td></td><td>첫 박 / 코드(정확)</td><td class="num">95.7% / 88.1%</td><td class="num">99.5% / 97.0%</td></tr>
+            <tr><td>특수 장르 7곡</td><td>비트 / 첫 박 / 코드(정확)</td><td class="num">80.0% / 74.4% / 52.7%</td><td class="num">93.8% / 93.2% / 56.0%</td></tr>
+            <tr><td>실제 녹음</td><td>1.4.2와 일치</td><td></td><td>코드 100%, 첫 박 66/66, 비트 257/257</td></tr>
+          </tbody>
+        </table></div>
+        <p>대중음악형은 템포 급변, 루바토 피아노, 코드 밖 베이스, 테이프 음높이 변화, 케이팝·EDM, 팝록 파워 코드, R&amp;B 슬래시 발라드, 드럼이 큰 힙합, 드럼이 아주 큰 록, 어쿠스틱 스트로크 팝이고, 특수 장르는 5/4, 7/4, 스윙 재즈, 비밥, 보사노바, 메탈, 앰비언트입니다.</p>
+        <h4>비교했지만 넣지 않은 방법</h4>
+        <div class="tbl"><table>
+          <thead><tr><th>방법</th><th>대중음악</th><th>특수 장르</th></tr></thead>
+          <tbody>
+            <tr><td>7화음의 9·13 확장음 변형</td><td>실제 녹음 코드의 18%가 바뀜</td><td>스윙 재즈 계열 일치 28→32%</td></tr>
+            <tr><td>화성·타악기 분리(HPSS)</td><td>변화 없음, 분석 시간 2배</td><td>코드 정확 56→61%</td></tr>
+            <tr><td>NNLS 음 분해 크로마</td><td>코드 정확 98.6→97.4%(회귀)</td><td>코드 정확 56→63%</td></tr>
+            <tr><td>바 포인터 모델</td><td>엇박 클릭 47→304, 첫 박 100→56.7%</td><td>첫 박 93→44%</td></tr>
+          </tbody>
+        </table></div>
+        <p class="note">바 포인터 모델은 원래 학습된 신경망의 박·첫 박 활성과 함께 쓰는 방법이라, 손으로 만든 온셋 곡선으로는 박의 층위와 박자를 가르지 못했습니다.</p>
+        <h4>이어짐과 바뀜 위치(1.8.4)</h4>
+        <div class="tbl"><table>
+          <thead><tr><th>항목</th><th>1.8.3</th><th>1.8.4</th></tr></thead>
+          <tbody>
+            <tr><td>합성곡 마디 첫머리 회색(모두 새로 친 곳)</td><td class="num">49곳</td><td>8곳, 모두 곡이 끝난 뒤의 여운</td></tr>
+            <tr><td>코드 바뀜이 정답과 같은 박 / 한 박 이름</td><td class="num">772 / 50</td><td class="num">776 / 46</td></tr>
+            <tr><td>회귀 18곡 코드 정확 / 계열</td><td class="num">98.6% / 99.8%</td><td class="num">98.9% / 100%</td></tr>
+            <tr><td>비트, 첫 박, 조성, 특수 장르, 실제 녹음 코드</td><td></td><td>같음</td></tr>
+          </tbody>
+        </table></div>
+        <h4>박자 변화와 템포 표시</h4>
+        <div class="tbl"><table>
+          <thead><tr><th>곡</th><th>정답</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>팝, 4/4 → 3/4 → 4/4</td><td>9마디부터 3/4, 17마디부터 4/4</td><td>같음, 첫 박 24/24</td></tr>
+            <tr><td>왈츠 절 → 4/4 후렴</td><td>9마디부터 4/4</td><td>같음, 첫 박 20/20</td></tr>
+            <tr><td>템포 급변 96 → 132</td><td>13마디 1박부터 132</td><td>같음</td></tr>
+            <tr><td>후반부가 서서히 느려지는 발라드</td><td>서서히 72 → 63</td><td>11마디 2박부터 20마디 4박까지 육각형 틀, 20마디 4박에 흰 알약 63</td></tr>
+            <tr><td>박자가 일정한 35곡과 실제 녹음</td><td>박자 변화 없음</td><td>가짜 박자 변화 0, 기존 결과 모두 같음</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="block">
+        <h3 id="v-real">실제 녹음</h3>
+        <p>상업 녹음 한 곡(최호섭 「세월이 가면」, 3분 50초)으로 시험했습니다. 정답 박 표시가 없으므로, 템포가 일정한 스튜디오 녹음이라는 점을 이용해 구간마다 비트를 직선에 맞춘 잔차를 추적 오차의 대리 지표로 썼습니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>항목</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>박 단계</td><td>68.1 BPM(8분음표를 박으로 잡는 두 배 오판을 교정)</td></tr>
+            <tr><td>구간별 직선 잔차 RMS</td><td class="num">6 ~ 23 ms</td></tr>
+            <tr><td>필인 구간 클릭 간격</td><td class="num">0.86 ~ 0.90 s(목표 0.88 s)</td></tr>
+            <tr><td>전조</td><td>45마디 1박(2:37)부터 E♭ 장조 → E 장조, 이후 G♯m7·C♯7로 표기</td></tr>
+            <tr><td>로마 숫자</td><td>코드 105개 중 10개가 부속화음(ii7/IV, V7/IV, V7/ii 등), 16개가 자리바꿈</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-browser">브라우저 시험</h3>
+        <p>헤드리스 Chromium에서 페이지를 실제로 조작하며, 예약되는 클릭을 모두 기록해 곡 안의 시각으로 되돌린 뒤 정답 비트와 대조했습니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>시험</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>재생·이동·정지를 섞은 클릭</td><td>37/37, 29/29, 22/22 정박, 첫 박 강조 모두 실제 첫 박</td></tr>
+            <tr><td>½박 옮기기</td><td>모든 클릭이 정답 박의 중간점으로, 한 번 더 누르면 정박으로 복귀</td></tr>
+            <tr><td>×2, ÷2, 첫 박 이동, 박자 지정</td><td>간격과 첫 박 강조가 기대대로 바뀜</td></tr>
+            <tr><td>클릭 타이밍 +30 ms</td><td>클릭이 29.2 ms 늦게 예약됨</td></tr>
+            <tr><td>화면</td><td>콘솔 오류 0, 데스크톱과 휴대폰 폭에서 가로 넘침 0 px</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-key">조성과 전조</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>곡</th><th>정답</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>C 장조 → D 장조, A7 경유</td><td>18마디부터</td><td>18마디 1박</td></tr>
+            <tr><td>E♭ 장조 → E 장조, B7 경유</td><td>18마디부터</td><td>18마디 1박</td></tr>
+            <tr><td>G 장조 → A♭ 장조, 바로</td><td>17마디부터</td><td>17마디 1박</td></tr>
+            <tr><td>A 단조 절 → C 장조 후렴</td><td>전조 없음(조표 같음)</td><td>전조 없음</td></tr>
+            <tr><td>전조 없는 합성 곡 14곡</td><td>전조 없음</td><td>가짜 전조 0</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-notation">표기</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>시험</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>카멜롯 번호 24개를 표준 휠 표와 대조</td><td>24/24 일치</td></tr>
+            <tr><td>A 단조: Am, Em/G, F, C/E, Dm, G, C, E7</td><td>i, v6, VI, III6, iv, V/III, III, V7</td></tr>
+            <tr><td>C 장조: C, E7, Am, D7, G7, C, A7, Dm, G7, C, Fm, C, B♭, C</td><td>I, V7/vi, vi, V7/V, V7, I, V7/ii, ii, V7, I, iv, I, ♭VII, I</td></tr>
+            <tr><td>E♭ 장조: E♭, B♭/D, Cm, B♭m7, E♭7, A♭maj7, B♭7/A♭ …</td><td>I, V6, vi, ii7/IV, V7/IV, IVM7, V⁴₂ …</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="block">
+        <h3 id="v-piano">코드 연주</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>시험</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>피아노가 친 코드</td><td>18회 모두 구성음과 베이스가 정답과 일치</td></tr>
+            <tr><td>치는 시각</td><td>코드가 바뀌는 시각과의 오차 평균 1.4 ms, 최대 8.1 ms</td></tr>
+            <tr><td>피아노 음높이</td><td>곡의 기준음(+18 cent)에 대해 모든 음이 +17.7 ~ +18.3 cent</td></tr>
+            <tr><td>재생 중 끊김</td><td>50 ms 넘게 멈추는 작업 0건</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-glossary">
+      <div class="block">
+        <h2 id="glossary">용어 풀이</h2>
+        <dl class="terms">
+          <dt>박</dt><dd>음악을 들으며 발로 까딱이게 되는 일정한 맥박입니다.</dd>
+          <dt>마디와 첫 박</dt><dd>박을 몇 개씩 묶은 단위가 마디이고, 마디의 첫 박(다운비트)이 가장 강합니다.</dd>
+          <dt>못갖춘마디</dt><dd>곡이 마디 중간에서 시작할 때의 첫 마디입니다. 차트에서 0마디로 표시합니다.</dd>
+          <dt>BPM</dt><dd>1분에 몇 박이 오는지, 곧 템포입니다.</dd>
+          <dt>온셋</dt><dd>새 소리가 시작되는 순간입니다.</dd>
+          <dt>스펙트로그램</dt><dd>가로가 시간, 세로가 주파수인 소리의 그림입니다.</dd>
+          <dt>크로마</dt><dd>옥타브를 무시하고 12개 음이름으로 접은 음 분포입니다.</dd>
+          <dt>배음</dt><dd>한 음을 낼 때 기본 주파수의 정수배로 함께 울리는 성분입니다.</dd>
+          <dt>센트(cent)</dt><dd>반음의 1/100인 음높이 단위입니다.</dd>
+          <dt>자기상관</dt><dd>신호를 시간 방향으로 밀어 자기 자신과 겹쳐 보며 반복 주기를 찾는 방법입니다.</dd>
+          <dt>동적 계획법</dt><dd>큰 문제를 작은 문제의 최적해를 이어 붙여 푸는 방법입니다. 박의 줄을 곡 전체에 걸쳐 한 번에 찾는 데 씁니다.</dd>
+          <dt>은닉 마르코프 모델</dt><dd>겉으로 보이는 관측(소리) 뒤의 숨은 상태(코드, 첫 박, 조성)를 확률로 추론하는 모델입니다. 가장 그럴듯한 상태 순서는 비터비 알고리즘으로 찾습니다.</dd>
+          <dt>조성과 전조</dt><dd>곡이 중심으로 삼는 음과 음계가 조성이고, 곡 중간에 조성이 바뀌는 것이 전조입니다.</dd>
+          <dt>나란한조</dt><dd>같은 조표를 쓰는 장조와 단조입니다(C 장조와 A 단조).</dd>
+          <dt>자리바꿈</dt><dd>코드의 근음이 아닌 음을 가장 낮은 음(베이스)으로 두는 것입니다(G/B).</dd>
+          <dt>부속화음</dt><dd>조성 안의 다른 화음으로 가기 위해 잠시 빌려 쓰는 딸림화음 등입니다(V7/vi).</dd>
+          <dt>카멜롯 휠</dt><dd>조성을 5도권 순서로 1~12번 자리에 놓은 DJ용 표기입니다.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section class="topic" id="s-references">
+      <div class="block">
+        <h2 id="references">참고 문헌</h2>
+        <ul class="refs">
+          <li>D. P. W. Ellis, "Beat Tracking by Dynamic Programming," <i>Journal of New Music Research</i>, 36(1), 2007.</li>
+          <li>S. Böck and G. Widmer, "Maximum Filter Vibrato Suppression for Onset Detection," <i>Proc. DAFx</i>, 2013.</li>
+          <li>E. D. Scheirer, "Tempo and Beat Analysis of Acoustic Musical Signals," <i>JASA</i>, 103(1), 1998.</li>
+          <li>D. Moelants, "Preferred Tempo Reconsidered," <i>Proc. ICMPC</i>, 2002.</li>
+          <li>T. Fujishima, "Realtime Chord Recognition of Musical Sound: A System Using Common Lisp Music," <i>Proc. ICMC</i>, 1999.</li>
+          <li>M. Mauch and S. Dixon, "Simultaneous Estimation of Chords and Musical Context from Audio," <i>IEEE Trans. Audio, Speech, and Language Processing</i>, 18(6), 2010.</li>
+          <li>C. L. Krumhansl and E. J. Kessler, "Tracing the Dynamic Changes in Perceived Tonal Organization in a Spatial Representation of Musical Keys," <i>Psychological Review</i>, 89(4), 1982.</li>
+          <li>C. Harte, M. Sandler, S. Abdallah, and E. Gómez, "Symbolic Representation of Musical Chords: A Proposed Syntax for Text Annotations," <i>Proc. ISMIR</i>, 2005.</li>
+          <li>B. McFee et al., "librosa: Audio and Music Signal Analysis in Python," <i>Proc. SciPy</i>, 2015.</li>
+          <li>H. Fletcher, "Normal Vibration Frequencies of a Stiff Piano String," <i>JASA</i>, 36(1), 1964.</li>
+          <li>G. Weinreich, "Coupled Piano Strings," <i>JASA</i>, 62(6), 1977.</li>
+          <li>N. Whiteley, A. T. Cemgil, and S. Godsill, "Bayesian Modelling of Temporal Structure in Musical Audio," <i>Proc. ISMIR</i>, 2006.</li>
+          <li>F. Krebs, S. Böck, and G. Widmer, "An Efficient State-Space Model for Joint Tempo and Meter Tracking," <i>Proc. ISMIR</i>, 2015.</li>
+          <li>D. FitzGerald, "Harmonic/Percussive Separation using Median Filtering," <i>Proc. DAFx</i>, 2010.</li>
+          <li>M. Mauch and S. Dixon, "Approximate Note Transcription for the Improved Identification of Difficult Chords," <i>Proc. ISMIR</i>, 2010.</li>
+          <li>S. Kostka, D. Payne, and B. Almén, <i>Tonal Harmony</i>, 8th ed., McGraw-Hill, 2018.</li>
+          <li>J. O. Smith III, "Digital Audio Resampling Home Page," CCRMA, Stanford University.</li>
+          <li>C. Wilson, "A Tale of Two Clocks: Scheduling Web Audio with Precision," 2013.</li>
+          <li>W3C, <i>Web Audio API</i> 명세.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+<footer class="foot">Chordity 도움말</footer>
+
+<script>
+// 도움말 페이지: 테마, 목차(좁은 화면에서 접기, 스크롤 위치 표시), 찾기
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const root = document.documentElement;
+  // 테마: 앱과 같은 저장값(chordity-prefs-v1 의 theme)을 함께 씀
+  const KEY = 'chordity-prefs-v1';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } };
+  const p0 = load();
+  if (p0.theme === 'light' || p0.theme === 'dark') root.dataset.theme = p0.theme;
+  // 테마 선택 막대: 고른 칸의 바탕이 80ms 가감속으로 미끄러짐(두 칸 건너뛰면 1.3배, '동작 줄이기'면 바로).
+  // 바탕 자리는 소수점까지 잰 칸 상자(막대 안쪽 기준, 구분선 오른쪽부터)로 정하고, 크기가 바뀌면 다시 맞춤
+  function mountThemeSeg(seg, initial, onChange) {
+    const opts = [...seg.querySelectorAll('.opt')], thumb = seg.querySelector('.thumb'), vals = opts.map(o => o.dataset.themeOpt);
+    let cur = vals.includes(initial) ? initial : '', x = null, anim = null, raf = 0;
+    const ease = u => u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+    const boxOf = v => {
+      const b = opts[vals.indexOf(v)], r = b.getBoundingClientRect(), g = seg.getBoundingClientRect(), gs = getComputedStyle(seg);
+      const sep = parseFloat(getComputedStyle(b).borderLeftWidth) || 0;
+      return { x: r.left - g.left - parseFloat(gs.borderLeftWidth) + sep, y: r.top - g.top - parseFloat(gs.borderTopWidth), w: r.width - sep, h: r.height };
+    };
+    const place = px => { const bx = boxOf(cur); thumb.style.width = bx.w + 'px'; thumb.style.height = bx.h + 'px'; thumb.style.transform = 'translate(' + px.toFixed(2) + 'px,' + bx.y.toFixed(2) + 'px)'; };
+    const mark = () => opts.forEach(o => { const on = o.dataset.themeOpt === cur; o.setAttribute('aria-checked', on ? 'true' : 'false'); o.tabIndex = on ? 0 : -1; });
+    const frame = now => { raf = 0; if (!anim) return; const u = Math.min(1, (now - anim.t0) / anim.d); x = anim.a + (anim.b - anim.a) * ease(u); place(x); if (u < 1) raf = requestAnimationFrame(frame); else anim = null; };
+    const settle = () => { if (anim) return; x = boxOf(cur).x; place(x); };
+    function choose(v, focus) {
+      if (v === cur) return;
+      const steps = Math.abs(vals.indexOf(v) - vals.indexOf(cur)), from = x;
+      cur = v; mark(); onChange(v);
+      const to = boxOf(v).x, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (from == null || still) { anim = null; x = to; place(to); }
+      else { anim = { a: from, b: to, t0: performance.now(), d: 80 * (steps > 1 ? 1.3 : 1) }; place(from); if (!raf) raf = requestAnimationFrame(frame); }
+      if (focus) opts[vals.indexOf(v)].focus();
+    }
+    opts.forEach(o => o.addEventListener('click', () => choose(o.dataset.themeOpt, false)));
+    seg.addEventListener('keydown', e => {
+      const i = vals.indexOf(cur), n = vals.length;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); choose(vals[(i + 1) % n], true); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); choose(vals[(i + n - 1) % n], true); }
+    });
+    mark(); settle();
+    if (window.ResizeObserver) new ResizeObserver(settle).observe(seg);
+    window.addEventListener('load', settle);
+    return { choose };
+  }
+  mountThemeSeg($('themeSeg'), p0.theme === 'light' || p0.theme === 'dark' ? p0.theme : '', t => {
+    if (t) root.dataset.theme = t; else delete root.dataset.theme;
+    try { const p = load(); p.theme = t; localStorage.setItem(KEY, JSON.stringify(p)); } catch (e) { /* 저장 불가 환경은 무시 */ }
+  });
+
+  // 좁은 화면에서는 목차를 접어 두고, 항목을 누르면 닫음
+  const box = $('tocbox');
+  const narrow = window.matchMedia ? window.matchMedia('(max-width: 900px)') : { matches: false };
+  const fit = () => { box.open = !narrow.matches; };
+  fit();
+  if (narrow.addEventListener) narrow.addEventListener('change', fit); else if (narrow.addListener) narrow.addListener(fit);
+  document.querySelectorAll('#toc a').forEach(a => a.addEventListener('click', () => { if (narrow.matches) box.open = false; }));
+
+  // 스크롤 위치에 맞춰 목차의 현재 항목 표시
+  const links = new Map(Array.from(document.querySelectorAll('#toc a'), a => [a.getAttribute('href').slice(1), a]));
+  const heads = Array.from(document.querySelectorAll('.doc h2[id], .doc h3[id]')).filter(h => links.has(h.id));
+  let current = null;
+  const spy = () => {
+    let pick = null;
+    for (const h of heads) {
+      if (h.closest('[hidden]')) continue;
+      if (h.getBoundingClientRect().top <= 124) pick = h; else break;
+    }
+    pick = pick || heads.find(h => !h.closest('[hidden]')) || null;
+    if (pick === current) return;
+    links.forEach(a => a.removeAttribute('aria-current'));
+    if (pick) {
+      const a = links.get(pick.id);
+      a.setAttribute('aria-current', 'true');
+      if (!narrow.matches) {                     // 긴 목차 안에서도 현재 항목이 보이게
+        const side = document.querySelector('.side'), r = a.getBoundingClientRect(), s = side.getBoundingClientRect();
+        if (r.top < s.top + 60 || r.bottom > s.bottom - 20) side.scrollTop += r.top - s.top - s.height / 3;
+      }
+    }
+    current = pick;
+  };
+  let raf = 0;
+  window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; spy(); }); }, { passive: true });
+  spy();
+
+  // 찾기: 입력한 말이 들어 있는 소절만 남김(목차도 함께 줄임)
+  const q = $('q'), blocks = Array.from(document.querySelectorAll('.doc .block')), none = $('noresult');
+  q.addEventListener('input', () => {
+    const s = q.value.trim().toLowerCase();
+    let shown = 0;
+    blocks.forEach(b => { const hit = !s || b.textContent.toLowerCase().includes(s); b.hidden = !hit; if (hit) shown++; });
+    document.querySelectorAll('.doc section.topic').forEach(sec => {
+      const any = !!sec.querySelector('.block:not([hidden])');
+      sec.hidden = !!s && !any;
+      if (s && any) sec.querySelector('.block').hidden = false;   // 찾은 소절이 있으면 그 절의 제목도 보이게
+    });
+    links.forEach((a, id) => { const t = document.getElementById(id); a.parentElement.hidden = !!s && (!t || !!t.closest('[hidden]')); });
+    none.hidden = shown > 0;
+    current = null; spy();
+  });
+})();
+</script>
+</body>
+</html>
