@@ -10,7 +10,7 @@ function lib(file) {
   const s = fs.readFileSync(file, 'utf-8');
   return ['const PIANO', 'function synthPiano(m)', 'function makeRoomIR()', 'function buildPianoChain(out)'].map(h => extract(s, h)).join('\n');
 }
-const OLD = lib('ui_old.js'), NEW = lib('ui.js');
+const OLD = lib('ui_old.js'), NEW = lib('../src/ui.js');
 const makeup = process.argv[2];
 (async () => {
   const browser = await chromium.launch();

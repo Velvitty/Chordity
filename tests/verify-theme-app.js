@@ -71,4 +71,5 @@ const PAGES = [['앱', require('url').pathToFileURL(require('path').resolve(__di
   }
   for (const [pname, url] of PAGES) for (const scheme of ['light', 'dark']) { const c3 = await b.newContext({ viewport: { width: 1180, height: 800 }, colorScheme: scheme }), q = await c3.newPage(); await q.goto(url); await q.waitForTimeout(300); await q.screenshot({ path: `${require('os').tmpdir()}/hdr-${pname === '앱' ? 'app' : 'info'}-${scheme}.png`, clip: { x: 0, y: 0, width: 1180, height: 70 } }); await c3.close(); }
   console.log(out.join('\n')); console.log(`UI 검증: 통과 ${pass}, 실패 ${fail}`); await b.close();
+  if (fail) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

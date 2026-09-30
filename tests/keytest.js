@@ -17,7 +17,8 @@ const T = require('./testlib.js');
       const err = TL.keys.slice(1).map((k, i) => tb[i] !== undefined ? Math.round((k.t0 - tb[i]) / (60 / spec.bpm)) : NaN);
       verdict = (ok ? '✓' : '✗') + ' 정답 ' + truth.map(([b, k]) => k + (b ? `@${b + 1}마디` : '')).join(' → ') + (err.length ? ` | 위치 오차 ${err.map(e => (e > 0 ? '+' : '') + e).join(',')}박` : '');
     }
+    if (verdict.startsWith('✗')) process.exitCode = 1;   // 실패하면 종료 코드 1
     const post = TL.bars.slice(-6).flatMap(b => b.events.map(e => e.label.text)).join(' ');
     console.log(name.padEnd(28), '|', det.padEnd(40), '|', verdict, spec.keys && spec.keys.length > 1 ? '| 끝부분: ' + post : '');
   }
-})();
+})().catch(e => { console.error('FAIL', e); process.exit(1); });

@@ -2,6 +2,10 @@
 import json, sys
 names = sys.argv[1::2]; files = sys.argv[2::2]
 D = [{j['name']: j for j in map(json.loads, open(f, encoding='utf-8'))} for f in files]
+# 첫 파일에 있는 곡이 뒤 파일에 빠졌으면(채점이 도중에 멈춤 등) 알리고 끝에 종료 코드 1
+missing = {nm: [k for k in D[0] if k not in d] for nm, d in zip(names[1:], D[1:])}
+for nm, ks in missing.items():
+    if ks: print(f'※ {nm}: 첫 설정에 있는 {len(ks)}곡이 없음 — ' + ', '.join(ks), file=sys.stderr)
 G = {'R': '회귀 18곡(대중)', 'P': '대중음악형 새 곡', 'S': '특수 장르'}
 def agg(d, g):
     xs = [v for v in d.values() if v['grp'] == g]
@@ -22,3 +26,4 @@ for k, v0 in D[0].items():
         diff = [f'{q} {v0[q]}→{v[q]}' for q in ['hit', 'off', 'meter', 'dh', 'extra', 'ex', 'keyOk'] if v0.get(q) != v.get(q)]
         if diff: row.append(f'{nm}: ' + ', '.join(diff))
     if row: print(f'  {k[:22]:22} ' + ' | '.join(row))
+if any(missing.values()): sys.exit(1)

@@ -1,7 +1,7 @@
 // 코드 연주 검증: 예약된 피아노 음의 음높이를 버퍼에서 직접 추정해 정답 코드와 대조
 const { chromium } = require('playwright');
 const T = require('./testlib.js');
-const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chord-chart.html')).href;
+const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chordity.html')).href;
 const [, spec] = T.cases().find(c => c[0] === 'pop 97');
 const R = T.render(spec);
 const beatsT = R.beats.map(b => b.t);

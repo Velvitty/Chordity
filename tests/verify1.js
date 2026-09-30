@@ -27,5 +27,6 @@ for (const [c, kind] of cases) { const a = app(c, kind), t = truthOf(c); if (a !
 const none = [['Cm7', 'chord'], ['F♯', 'chord'], ['G7', 'chord'], ['Bbmaj7', 'chord'], ['Cm', 'key'], ['3/4', 'tempo'], ['X9', 'camelot']].filter(([c, k]) => app(c, k) !== '');
 const show = ['55', '63', '72', '97', '100', '120', '132', '3/4', '4/4', '5/4', '6/8', '7/4', '12/8', 'D 장조', 'A 단조', '10B', '8A'];
 console.log('대조한 이름표', cases.length + '개 | 어긋남', bad.length ? bad.slice(0, 10) : '0개', '| 규칙 없는 이름표에 조사 붙음', none.length ? none : '0개');
+if (bad.length || none.length) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 const kindOf = x => /\//.test(x) ? 'meter' : /^\d+$/.test(x) ? 'tempo' : /[AB]$/.test(x) ? 'camelot' : 'key';
 console.log('예:', show.map(x => x + app(x, kindOf(x))).join('  '));

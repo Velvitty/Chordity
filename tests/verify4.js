@@ -20,7 +20,7 @@ const check = (kind, label, why) => {
   all[kind].add(label);
 };
 for (const key of keys) {
-  const names = I.spelling(key.tonic, key.mode) || I.spelling(key);
+  const names = I.spelling(key);
   for (const st of states) {
     for (const wb of [true, false]) {
       const f = I.formatChord(st, names, wb); nName++; nCam++;
@@ -47,6 +47,7 @@ for (const key of keys) {
 const leak = {}; for (const k of ['tempo', 'meter', 'camelot', 'key']) leak[k] = [...all.name, ...all.cam, ...all.roman].filter(l => josaRo(l, k) !== '');
 console.log(`상태 ${states.length}개 × 조 24개 | 만든 이름표: 음이름 ${nName}, 카멜롯 ${nCam}, 로마 숫자 ${nRoman} (서로 다른 글자 ${all.name.size} / ${all.cam.size} / ${all.roman.size}종)`);
 console.log(`조사로 끝나거나 깨지거나 형식이 틀린 이름표: ${bad.length ? bad.slice(0, 12).join(' | ') : '0개'}`);
+if (bad.length || leak.tempo.length || leak.meter.length || leak.key.length) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 console.log(`조사 함수에 넣으면 조사가 붙는 코드 이름표: 템포 ${leak.tempo.length}, 박자 ${leak.meter.length}, 조 이름 ${leak.key.length}, 카멜롯 ${leak.camelot.length}개(${[...new Set(leak.camelot)].slice(0, 6).join(' ')} …: 카멜롯 3화음은 조 코드와 글자가 같음)`);
 const sample = (set, re) => [...set].filter(x => re.test(x)).slice(0, 14).join(' ');
 console.log('예외 종류 예(로마 숫자):', sample(all.roman, /sus|5$|11|ø|°|\+|\/|6|4|2/));

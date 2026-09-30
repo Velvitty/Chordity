@@ -18,6 +18,7 @@ const seq = (TL) => { const out = []; let last = null; TL.bars.forEach(b => b.ev
     const got = seq(TL);
     const w = want.split(' ');
     const ok = w.every((x, i) => got[i] === x);
+    if (!ok) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
     console.log(`${ok ? '✓' : '✗'} ${name} | 조성 ${TL.keys.map(k => k.name).join('→')}\n   기대: ${want}\n   결과: ${got.slice(0, w.length + 1).join(' ')}\n   코드: ${[...new Set([])].join('')}${TL.bars.slice(0, 8).map(b => b.events.map(e => e.label.text).join(' ')).join(' | ')}`);
   }
-})();
+})().catch(e => { console.error('FAIL', e); process.exit(1); });

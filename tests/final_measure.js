@@ -25,7 +25,7 @@ const lib = f => { const s = fs.readFileSync(f, 'utf-8'); return ['const PIANO',
     for (const [n, notes] of [['C', [48, 60, 64, 67]], ['G7', [43, 59, 62, 65, 67]], ['Am', [45, 57, 60, 64]]])
       out[n] = { old: await render(OLD, false, notes, 0.6), neu: await render(NEW, true, notes, 0.6), neuMax: await render(NEW, true, notes, 1.0) };
     return out;
-  }, { OLD: lib('ui_old.js'), NEW: lib('ui.js') });
+  }, { OLD: lib('ui_old.js'), NEW: lib('../src/ui.js') });
   const f = x => (x >= 0 ? '+' : '') + x.toFixed(1);
   for (const [n, v] of Object.entries(r)) console.log(`${n.padEnd(3)} 첫 1초 RMS ${v.old.r01.toFixed(1)} → ${v.neu.r01.toFixed(1)} dBFS (${f(v.neu.r01 - v.old.r01)} dB, ×${Math.pow(10, (v.neu.r01 - v.old.r01) / 20).toFixed(2)}) | 꼬리 1–2s ${f(v.neu.tail12 - v.old.tail12)} dB, 2–3s ${f(v.neu.tail23 - v.old.tail23)} dB | T10 ${v.old.t10.toFixed(2)} → ${v.neu.t10.toFixed(2)}s (×${(v.neu.t10 / v.old.t10).toFixed(2)}) | 피크 기본 ${v.neu.peak.toFixed(1)}, 최대 볼륨 ${v.neuMax.peak.toFixed(1)} dBFS`);
   await browser.close();

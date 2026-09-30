@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 function extract(src, head) { const i = src.indexOf(head); let k = src.indexOf('{', i), d = 0; for (let j = k; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}') { d--; if (!d) { let e = j + 1; if (src[e] === ';') e++; return src.slice(i, e); } } } }
 const lib = f => { const s = fs.readFileSync(f, 'utf-8'); return ['const PIANO', 'function synthPiano(m)', 'function makeRoomIR()', 'function buildPianoChain(out)'].map(h => extract(s, h)).filter(Boolean).join('\n'); };
-const OLD = lib('ui_old.js'), NEW = lib('ui.js');
+const OLD = lib('ui_old.js'), NEW = lib('../src/ui.js');
 const cfgs = [{ label: '이전 합성 + 배음별 위상 난수만', phaseRand: true, prompt: 0.72, tauMax: 7.5, promptRatio: 0.12 }];
 for (const prompt of [0.72, 0.68, 0.64, 0.6]) for (const tauMax of [7.5, 8.5, 9.5]) for (const promptRatio of [0.12, 0.15])
   cfgs.push({ phaseRand: true, prompt, tauMax, promptRatio });

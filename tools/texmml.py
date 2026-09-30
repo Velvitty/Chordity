@@ -26,6 +26,7 @@ class Conv:
         self.texts = []
         def keep(m):
             self.texts.append((m.group(1), m.group(2)))
+            if len(self.texts) > 26: raise ValueError('한 수식의 \\text·\\mathrm 은 26개까지')   # 자리표시 이름이 A~Z 한 글자
             return '\\KEEP' + chr(65 + len(self.texts) - 1) + ' '
         src = re.sub(r'\\(text|mathrm)\{([^{}]*)\}', keep, src)       # 글자 부분은 토큰으로 쪼개지 않음
         self.t = [x for x in TOK.findall(src) if not x.isspace()]
@@ -102,7 +103,9 @@ class Conv:
             a = self.arg(); b = self.arg()
             ds = ' displaystyle="false"' if name == 'tfrac' else ''
             return ('<mfrac' + ds + '><mrow>' + a + '</mrow><mrow>' + b + '</mrow></mfrac>', 'n')
-        if name == 'sqrt': return ('<msqrt><mrow>' + self.arg() + '</mrow></msqrt>', 'n')
+        if name == 'sqrt':
+            if self.peek() == '[': raise ValueError('지원하지 않는 명령 \\sqrt[n]')   # 거듭제곱근은 조용히 틀리게 그리지 않고 멈춤
+            return ('<msqrt><mrow>' + self.arg() + '</mrow></msqrt>', 'n')
         if name in ('hat', 'bar', 'tilde', 'vec', 'widehat', 'overline'):
             ch = {'hat': '^', 'widehat': '^', 'bar': '\u00AF', 'overline': '\u203E', 'tilde': '~', 'vec': '→'}[name]
             st = 'true' if name in ('widehat', 'overline') else 'false'

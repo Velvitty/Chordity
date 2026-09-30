@@ -20,7 +20,7 @@ const { chromium } = require('playwright');
   const box = await page.$eval('.keychg', el => { const r = el.closest('.line').getBoundingClientRect(); return { y: r.top }; });
   await page.screenshot({ path: require('path').resolve(__dirname, 'shot-key.png'), clip: { x: 0, y: Math.max(0, box.y - 110), width: 1180, height: 330 } });
   // 어두운 테마, 휴대폰 폭에서도 표시 확인
-  await page.click('#themeBtn'); await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(400);
+  await page.click('#themeSeg .opt[data-theme-opt="dark"]'); await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(400);
   await page.$eval('.keychg', el => el.scrollIntoView({ block: 'center' })); await page.waitForTimeout(300);
   await page.screenshot({ path: require('path').resolve(__dirname, 'shot-key-mobile.png') });
   console.log('가로 넘침(휴대폰):', await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), '| errors:', errors.length ? errors : 'none');

@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
-const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chord-chart.html')).href;
+const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chordity.html')).href;
 const truth = JSON.parse(fs.readFileSync('test-pop97.json'));
 const mids = truth.beats.slice(0, -1).map((t, i) => (t + truth.beats[i + 1]) / 2);
 const near = (arr, t) => arr.reduce((b, x) => Math.abs(x - t) < Math.abs(b) ? x - t : b, 1e9);

@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   const page = await (await browser.newContext()).newPage();
   page.on('pageerror', e => console.log('PAGEERROR', e.message));
   page.on('console', m => console.log('CONSOLE', m.type(), m.text().slice(0, 200)));
-  await page.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chord-chart.html')).href);
+  await page.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chordity.html')).href);
   const canMp3 = await page.evaluate(() => new Audio().canPlayType('audio/mpeg'));
   console.log('canPlayType(audio/mpeg):', JSON.stringify(canMp3));
   await page.setInputFiles('#file', require('path').join(__dirname, 'assets', 'song.mp3'));

@@ -1,7 +1,7 @@
 // 실제 브라우저(헤드리스 크로미움)에서 전체 흐름 검증
 const { chromium } = require('playwright');
 const fs = require('fs');
-const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chord-chart.html')).href;
+const URL = require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chordity.html')).href;
 
 function analyzeClicks(starts, truth) {
   // 음악 소스(길이 > 1초) 시작 정보로 클릭의 '곡 시각' 복원
@@ -105,7 +105,7 @@ function analyzeClicks(starts, truth) {
   console.log('h-overflow desktop:', await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth));
 
   // 다크 테마 스크린샷
-  await page.click('#themeBtn');
+  await page.click('#themeSeg .opt[data-theme-opt="dark"]');
   await page.keyboard.press('Space');
   await page.waitForTimeout(1200);
   await page.screenshot({ path: 'shot-3-dark.png' });

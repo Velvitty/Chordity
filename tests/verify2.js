@@ -51,4 +51,5 @@ const CASES = [
     await p.close();
   }
   console.log(`검증 2: 통과 ${pass}, 실패 ${fail} | 오류 ${errors.length ? errors : '없음'}`); await b.close();
+  if (fail || errors.length) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

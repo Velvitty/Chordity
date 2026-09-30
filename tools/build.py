@@ -14,13 +14,15 @@ out = page.replace('/*__ENGINE__*/', eng.rstrip()).replace('/*__UI__*/', ui.rstr
 # 도움말 주소: 저장소에서는 옆 파일(information.html), 미리보기 게시본은 게시된 도움말 주소
 info_href = sys.argv[1] if len(sys.argv) > 1 else 'information.html'
 out = out.replace('__INFO_HREF__', info_href)
-version = open(os.path.join(ROOT, 'VERSION')).read().strip()   # 버전은 VERSION 파일 하나에서
+version = open(os.path.join(ROOT, 'VERSION'), encoding='utf-8').read().strip()   # 버전은 VERSION 파일 하나에서
 out = out.replace('__VERSION__', version)
 assert '__INFO_HREF__' not in out and '__VERSION__' not in out
 dst = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, 'chordity.html')
-open(dst, 'w', encoding='utf-8').write(out)
+open(dst, 'w', encoding='utf-8', newline='\n').write(out)   # 운영체제와 관계없이 LF
 scripts = re.findall(r'<script>(.*?)</script>', out, re.S)
-for i, sc in enumerate(scripts):
-    open(os.path.join(tempfile.gettempdir(), f'chordity_built_{i}.js'), 'w', encoding='utf-8').write(sc)
+checks = [os.path.join(tempfile.gettempdir(), f'chordity_built_{i}.js') for i in range(len(scripts))]   # node --check 용
+for path, sc in zip(checks, scripts):
+    open(path, 'w', encoding='utf-8').write(sc)
 ext = re.findall(r'(?:src|href)\s*=\s*"(https?:[^"]+)"', out)
-print('written', dst, len(out.encode('utf-8')), 'bytes;', len(scripts), 'scripts; external refs:', ext)
+assert not ext, ('외부 참조', ext)   # 외부 파일·CDN 금지
+print('written', dst, len(out.encode('utf-8')), 'bytes;', len(scripts), 'scripts; external refs:', ext, '| check:', ' '.join(checks))

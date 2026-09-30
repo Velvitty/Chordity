@@ -35,4 +35,5 @@ const { chromium } = require('playwright');
   ok(lab === '템포(점4분)', `겹박자 곡: 이름 ${lab}`);
   console.log(`겹박자 곡(${met}): ${lab} ${val}`);
   console.log(`통과 ${pass}, 실패 ${fail} | 오류 ${errors.length ? errors : '없음'}`); await b.close();
+  if (fail || errors.length) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

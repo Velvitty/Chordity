@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   for (const [file, w] of [['chordity.html', 1180], ['chordity.html', 390], ['information.html', 1180], ['information.html', 390]]) {
     const p = await (await b.newContext({ viewport: { width: w, height: 700 } })).newPage();
     p.on('pageerror', e => errors.push(e.message));
-    await p.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', '')).href + file); await p.waitForTimeout(200);
+    await p.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', file)).href); await p.waitForTimeout(200);
     const r = await p.evaluate(() => {
       const v = document.querySelector('.brand .ver'), n = v.previousElementSibling, vr = v.getBoundingClientRect(), nr = n.getBoundingClientRect();
       return { text: v.textContent, gap: Math.round(vr.left - nr.right), sameLine: Math.abs((vr.top + vr.bottom) / 2 - (nr.top + nr.bottom) / 2) < 3, overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth };

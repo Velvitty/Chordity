@@ -4,13 +4,14 @@
   "description": "Chordity 개발용(빌드는 Python 3, 시험은 Node.js와 Playwright)",
   "scripts": {
     "build": "python3 tools/build.py && python3 tools/build_info.py",
-    "wavs": "cd tests && node make-wavs.js",
+    "wavs": "cd tests && node make-wavs.js && node mkwav.js && node demo-eb.js",
     "eval": "cd tests && rm -f ev_new.jsonl && sh run3.sh ev_new.jsonl ../src/engine.js && python3 compare2.py 기준 baselines/ev_184.jsonl 새 ev_new.jsonl",
     "test:roman": "cd tests && node roman.js",
     "test:real": "cd tests && node realagree.js X",
     "test:labels": "cd tests && node verify1.js && node verify4.js && node verify6.js",
-    "test:ui": "cd tests && node verify2.js && node e2e-tpo.js && node e2e-hold.js && node verify-theme-app.js",
-    "shots": "cd tests && node shots.js"
+    "test:ui": "cd tests && node verify2.js && node e2e-tpo.js && node e2e-hold.js && node e2e-song.js && node verify-theme-app.js",
+    "test:tex": "python3 tests/texmml_test.py",
+    "shots": "cd tests && node shots.js && node notation-shots-eb.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0"

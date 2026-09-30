@@ -1,3 +1,6 @@
+# 수식 변환기 시험: 도움말에 쓰는 형태의 수식이 예외 없이 MathML 로 바뀌는지(어느 폴더에서 실행해도 됨)
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools'))
 from texmml import tex2mml
 F = [r"y[n] = \sum_{j=0}^{2W-1} x[\,i_n - W + 1 + j\,]\; h(\phi_n + W - 1 - j)",
  r"h(u) = 2f_c\,\mathrm{sinc}(2f_c u)\,w\!\left(\frac{u}{W+1}\right),\quad w(r) = 0.42 + 0.5\cos \pi r + 0.08\cos 2\pi r,\quad f_c = 0.46\,\min\!\left(1, \frac{f_\text{out}}{f_\text{in}}\right)",
@@ -20,3 +23,4 @@ for f in F:
     try: m = tex2mml(f); ok += 1
     except Exception as e: print('실패:', e, '|', f[:60])
 print('변환 성공', ok, '/', len(F)); print(tex2mml(F[3])[:300]); print(tex2mml(r"\tau", False))
+if ok != len(F): sys.exit(1)   # 실패하면 종료 코드 1

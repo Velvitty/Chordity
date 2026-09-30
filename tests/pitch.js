@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
     const orig = AudioBufferSourceNode.prototype.start;
     AudioBufferSourceNode.prototype.start = function () { if (this.buffer && this.buffer.duration > 1 && this.buffer.duration < 10) window.__bufs.add(this.buffer); return orig.apply(this, arguments); };
   });
-  await page.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chord-chart.html')).href);
+  await page.goto(require('url').pathToFileURL(require('path').resolve(__dirname, '..', 'chordity.html')).href);
   await page.setInputFiles('#file', { name: 'x.wav', mimeType: 'audio/wav', buffer: require('fs').readFileSync('test-pop97.wav') });
   await page.waitForSelector('#app:not([hidden])', { timeout: 90000 });
   await page.click('#play'); await page.waitForTimeout(3000);

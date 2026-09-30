@@ -22,7 +22,7 @@ const { chromium } = require('playwright');
   // 도착 박 앞(20마디)에서 재생하며 화면마다 기록
   await p.click('.bar[data-i="19"]'); await p.waitForTimeout(200);
   await p.evaluate(() => {
-    window.__log = []; const pill = [...document.querySelectorAll('.tempochg')].find(x => x.textContent === '63');
+    window.__log = []; const pill = [...document.querySelectorAll('.tempochg')].find(x => /^63(으로)?$/.test(x.textContent));
     const parts = [...document.querySelectorAll('.ramp .rf')], last = parts[parts.length - 1];
     const t0 = performance.now();
     const f = () => { window.__log.push([performance.now() - t0, pill.classList.contains('lit') ? 1 : 0, parseFloat(last.style.opacity || '1'), parseFloat(last.style.width || '0'), document.querySelector('.ramp .rt').textContent]); if (performance.now() - t0 < 6500) requestAnimationFrame(f); };

@@ -6,3 +6,4 @@ tests/*.jsonl
 tests/hold_truth.json
 tests/assets/*
 !tests/assets/README.md
+tests/test-*.json

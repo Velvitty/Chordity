@@ -43,6 +43,7 @@ console.log(`확인한 코드 이름표 ${n}개(전조 직전 V ${modSkip}개는
 console.log(`음높이 틀림 ${pitchBad.length ? pitchBad.slice(0, 5) : 0} | 겹임시표 ${dbl.length ? dbl.slice(0, 5) : 0}`);
 console.log(`근음 글자가 로마 숫자와 다름(대체 아님) ${letterBad.length ? letterBad.slice(0, 6) : 0} | 베이스 글자 틀림 ${bassBad.length ? bassBad.slice(0, 6) : 0}`);
 console.log(`정당한 대체: 겹임시표 피함 ${fallback.dbl}개, 조에 없는 F♭·C♭·E♯·B♯ 피함 ${fallback.white}개`);
+if (pitchBad.length || dbl.length || letterBad.length || bassBad.length) process.exitCode = 1;   // 실패하면 종료 코드 1(npm 사슬이 멈춤)
 const K = (t, m) => ({ tonic: t, mode: m }), S = (r, q, inv) => states.find(s => s.root === r && s.q === q && (s.inv || 0) === inv);
 const ex = [['A 단조 ♭II', K(9, 'minor'), S(10, 'maj', 0)], ['E♭ 장조 V7/ii', K(3, 'major'), S(0, 'dom7', 0), S(5, 'min', 0)], ['E♭ 장조 vii°7/V', K(3, 'major'), S(9, 'dim7', 0), S(10, 'maj', 0)], ['D♭ 장조 ♭VI', K(1, 'major'), S(9, 'maj', 0)], ['F♯ 장조 ♭II', K(6, 'major'), S(7, 'maj', 0)], ['A♭ 장조 ♭II6', K(8, 'major'), S(9, 'maj', 1)], ['G 장조 V/vi', K(7, 'major'), S(11, 'maj', 0), S(4, 'min', 0)], ['B 장조 V7/IV', K(11, 'major'), S(11, 'dom7', 0), S(4, 'maj', 0)]];
 console.log('예: ' + ex.map(([nm, k, s, nx]) => { const rn = I.romanOf(s, k, s.inv || 0, nx || null, nx ? k : null); return nm + ' → ' + I.formatChord(s, I.spelling(k), true, I.spellChord(s, rn, k, nx ? k : null)).text + '(' + rn.text + ')'; }).join(' | '));
