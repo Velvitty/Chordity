@@ -11,6 +11,7 @@
   --sheet: #fbfcf9;        /* 차트 면 */
   --ink: #1b2433;          /* 잉크 */
   --pencil: #6c7480;       /* 연필: 보조 텍스트 */
+  --foot: #666e7b;         /* 맨 아래 안내 글자(종이 위 4.65:1, 읽기 기준 4.5:1 이상) */
   --rule: #c7cdd4;         /* 마디선 */
   --hover: rgba(27, 36, 51, .045);
   --hl: #ffe45c;           /* 형광펜: 지금 마디 */
@@ -28,14 +29,14 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+    --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
     --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b;
     --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --rule: #343b45;
+  --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
   --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b;
   --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
   color-scheme: dark;
@@ -288,8 +289,9 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
 body { display: flex; flex-direction: column; }
 body > header, body > main, body > footer { width: 100%; flex-shrink: 0; }
 body > main { flex: 1 0 auto; }
-/* 맨 아래 안내: 누르면 판단 근거를 정리한 도움말로 */
-.disclaimer { max-width: 1100px; margin: 0 auto; padding: 6px 20px 24px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--pencil); }
+/* 맨 아래 안내: 누르면 판단 근거를 정리한 도움말로. 그 아래 저작권과 이용 조건(LICENSE 요약) */
+.disclaimer { max-width: 1100px; margin: 0 auto; padding: 6px 20px 24px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--foot); word-break: keep-all; overflow-wrap: break-word; }   /* 한국어는 낱말 단위로 줄바꿈 */
+.disclaimer .rights { margin: 6px 0 0; text-wrap: balance; }
 .disclaimer a { color: inherit; text-decoration: none; }
 .disclaimer a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .infohelp { margin: 12px 0 0; font-size: 13px; }
@@ -304,7 +306,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.9.1">v1.9.1</span>
+    <span class="ver" title="Chordity 버전 1.9.2">v1.9.2</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -516,6 +518,7 @@ body > main { flex: 1 0 auto; }
 
 <footer class="disclaimer">
   <a href="information.html#accuracy" target="_blank" rel="noopener">Chordity는 AI이며 실수할 수 있습니다. 중요한 부분은 귀로 들어 다시 한번 확인해 주세요.</a>
+  <p class="rights">© 2026 Velvitty 및 Chordity 공동작업자&nbsp;·&nbsp;기여자. 영리 목적이 아닌 개인 사용은 무료이고, 단체에서 쓰려면 먼저 연락 부탁드립니다. 원본이든 수정한 것이든 공개&nbsp;·&nbsp;배포&nbsp;·&nbsp;판매할 수 없습니다. 자세한 조건은 LICENSE 파일에 있습니다.</p>
 </footer>
 
 <div class="veil" id="veil" hidden><div>놓으면 분석을 시작합니다</div></div>
