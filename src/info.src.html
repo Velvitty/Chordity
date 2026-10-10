@@ -38,16 +38,16 @@ a { color: inherit; text-underline-offset: 3px; }
 
 /* ===== 머리글 ===== */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule); }
-.top .in { max-width: 1180px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+.top .in { max-width: 1180px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; row-gap: 8px; }   /* 아주 좁은 화면에서도 가로로 넘치지 않게, 안 들어가면 다음 줄로 */
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; letter-spacing: -.01em; }
 .brand svg { width: 26px; height: 26px; }
 .brand .ver { margin-left: -4px; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 99px; font-size: 11.5px; font-weight: 700; line-height: 1.45; letter-spacing: 0; color: var(--pencil); font-variant-numeric: tabular-nums; }
-.chip { font-size: 12.5px; font-weight: 700; padding: 2px 10px; border-radius: 99px; border: 1.5px solid var(--ink); }
+.chip { flex: none; white-space: nowrap; font-size: 12.5px; font-weight: 700; padding: 2px 10px; border-radius: 99px; border: 1.5px solid var(--ink); }
 .grow { flex: 1; }
 .btn { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--rule); background: var(--sheet); font-weight: 700; font-size: 14px; text-decoration: none; }
 .btn:hover { border-color: var(--pencil); }
-/* 아주 좁은 화면(370px 이하): 테마 막대가 들어가도록 '도움말' 딱지를 숨김(탭 제목과 본문 제목에 이미 있음) */
-@media (max-width: 370px) { header.top .chip { display: none; } }
+/* 휴대폰 폭(480px 이하)에서는 '도움말' 딱지를 숨김: 자리가 모자라면 딱지 글자가 세로로 눌려 머리글이 두세 줄로 커짐(탭 제목과 본문 제목에 이미 있음) */
+@media (max-width: 480px) { header.top .chip { display: none; } }
 /* 테마 선택 막대(시스템·밝게·어둡게): 코드 표기 막대와 같은 모양, 고른 칸은 글자색으로 채우고 아이콘은 종이색 */
 .tseg { position: relative; display: inline-flex; flex: none; box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; }
 .tseg .thumb { position: absolute; top: 0; left: 0; background: var(--ink); pointer-events: none; will-change: transform; transition: background-color .2s ease; }
@@ -147,8 +147,14 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
   .tocbox[open] > summary { margin-bottom: 10px; }
   .top .in { padding: 10px 16px; }
   .top .btn { display: none; }
+  .top .grow { display: none; }            /* 빈 칸이 사이 간격을 한 번 더 먹지 않게, 테마 막대를 오른쪽 끝으로 */
+  .top .tseg { margin-left: auto; }
   dl.terms { grid-template-columns: 1fr; gap: 2px; }
   dl.terms dd { margin-bottom: 10px; }
+}
+/* 아주 좁은 화면(360px 이하): 앱과 같은 12px 여백 */
+@media (max-width: 360px) {
+  .top .in { padding: 10px 12px; column-gap: 10px; }
 }
 @media print {
   .top, .side, .foot { display: none; }
