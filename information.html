@@ -169,7 +169,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
     <a class="brand" href="chordity.html">
       <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       <span>Chordity</span>
-      <span class="ver" title="Chordity 버전 1.10.3">v1.10.3</span>
+      <span class="ver" title="Chordity 버전 1.10.4">v1.10.4</span>
     </a>
     <span class="chip">도움말</span>
     <span class="grow"></span>
@@ -326,7 +326,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
       <div class="block">
         <h3 id="p-key">조성과 전조</h3>
         <p>조성은 "주로 어떤 음들이 쓰이는가"로 드러납니다. 비트마다 앞뒤 몇 마디의 음 분포를 24개 조성의 전형적인 분포와 비교하고, "조는 잘 바뀌지 않는다"는 규칙을 넣어 조성의 흐름을 찾습니다. 조표가 같은 나란한 장·단조(C 장조와 A 단조) 사이의 이동과 한두 마디 스쳐 가는 다른 조의 화음은 전조로 치지 않습니다. 코드로 조를 다시 정한 뒤 이웃한 구간이 같은 조이거나 나란한 장·단조로 갈리면 한 구간으로 합치고, 나란한 장·단조로 갈린 곡은 장·단조가 애매한 곡이라 합친 구간에서 단조가 뚜렷이 앞설 때만 단조로 적습니다(대중음악은 장조가 흔함).</p>
-        <p>코드를 인식한 뒤에는 코드로 조성을 다시 확인합니다. 코드들이 어느 음계에 들어맞는지, 으뜸화음이 얼마나 오래 나오는지, V → I 마침, 처음과 마지막 코드, 4마디 악구의 첫 코드를 음 분포와 함께 봅니다. 새 조의 딸림화음(예: E 장조의 B7)을 거쳐 넘어가면 악보의 관례대로 새 으뜸화음이 나오는 자리를 전조 위치로 봅니다. 이렇게 다시 정한 조가 이웃한 구간끼리 같으면 한 구간으로 합쳐, 조가 바뀌지 않았는데 전조로 적히는 일이 없게 합니다. 곡 첫 조성 구간이 8마디 이하이고 다음 구간의 버금딸림·딸림 조이면(도입부가 iv나 V에서 시작한 경우) 다음 조에 합치고, 전조가 있는 곡은 조 이름을 가장 긴 구간의 장·단으로 맞춰 한 온음 위로의 전조가 "C 단조 → D 단조"처럼 보이게 적습니다(1.10.3).</p>
+        <p>코드를 인식한 뒤에는 코드로 조성을 다시 확인합니다. 코드들이 어느 음계에 들어맞는지, 으뜸화음이 얼마나 오래 나오는지, V → I 마침, 처음과 마지막 코드, 4마디 악구의 첫 코드를 음 분포와 함께 봅니다. 새 조의 딸림화음(예: E 장조의 B7)을 거쳐 넘어가면 악보의 관례대로 새 으뜸화음이 나오는 자리를 전조 위치로 봅니다. 이렇게 다시 정한 조가 이웃한 구간끼리 같으면 한 구간으로 합쳐, 조가 바뀌지 않았는데 전조로 적히는 일이 없게 합니다. 곡 첫 조성 구간이 8마디 이하이고 다음 구간의 버금딸림·딸림 조이면(도입부가 iv나 V에서 시작한 경우) 다음 조에 합치고, 전조가 있는 곡은 조 이름을 가장 긴 구간의 장·단으로 맞춰 한 온음 위로의 전조가 "C 단조 → D 단조"처럼 보이게 적습니다(1.10.3). 끝으로 전조 경계 뒤 2마디 안에서, 코드 구성음이 앞 조 음계에 더 잘 드는 코드(앞 조의 V7 등)는 앞 조에 남도록 경계를 마디 첫 박 단위로 미루고, 새 조의 첫 박이 N.C.(브레이크)이면 다음 마디부터 새 조로 적습니다(1.10.4).</p>
       </div>
       <div class="block">
         <h3 id="p-metro">어긋나지 않는 메트로놈</h3>
@@ -427,6 +427,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
         <p>국소 박 주기는 8초 창(1초 간격)의 자기상관 <math><mrow><msub><mi>r</mi><mrow><mi>w</mi></mrow></msub></mrow></math> 로 구하고, 7개 창의 중앙값으로 필인 같은 순간적인 흔들림을 거릅니다.</p>
         <div class="eq"><math display="block"><mrow><msub><mi>τ</mi><mrow><mi>w</mi></mrow></msub><mo>=</mo><mi>arg</mi><munder><mi>max</mi><mrow><mi>ℓ</mi><mo>∈</mo><mo stretchy="false">[</mo><mn>0.85</mn><mi>τ</mi><mo>,</mo><mspace width="0.25em"/><mn>1.15</mn><mi>τ</mi><mo stretchy="false">]</mo></mrow></munder><mo stretchy="true" minsize="1.6em" maxsize="1.6em">(</mo><msub><mi>r</mi><mrow><mi>w</mi></mrow></msub><mo stretchy="false">(</mo><mi>ℓ</mi><mo stretchy="false">)</mo><mo>+</mo><mfrac displaystyle="false"><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mspace width="0.1667em"/><msub><mi>r</mi><mrow><mi>w</mi></mrow></msub><mo stretchy="false">(</mo><mn>2</mn><mi>ℓ</mi><mo stretchy="false">)</mo><mo stretchy="true" minsize="1.6em" maxsize="1.6em">)</mo></mrow></math></div>
         <p>찾은 비트는 ±2프레임 안의 온셋 정점으로 옮긴 뒤 포물선 보간하고, 검출 지연 6.5 ms를 보정합니다.</p>
+        <p>악기가 적은 도입부에서는 마디 끝에 앞당겨 친 강세가 박 사이 온셋보다 훨씬 세서, 박이 본 구간보다 조금 느리게 흘러가며 마디선이 반 박쯤 어긋날 수 있습니다. 그래서 곡 첫 48박 안의 어떤 박부터 그 뒤 8박 주기로 일정하게 거꾸로 이은 격자가 지금 박과 4분의 1박 넘게 벌어지면, 도입부 온셋이 8분음표 자리(정박·엇박 모두)에 얼마나 맞는지로 두 격자를 견주어 거꾸로 이은 격자가 뚜렷이 나을 때만 바꾸고, 마디선도 본 구간 위상을 이어 씁니다(1.10.4).</p>
         <div class="eq"><math display="block"><mrow><mover accent="true"><mrow><mi>t</mi></mrow><mo stretchy="false">^</mo></mover><mo>=</mo><mi>j</mi><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo>·</mo><mfrac><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>j</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>−</mo><mi>O</mi><mo stretchy="false">(</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>j</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>−</mo><mn>2</mn><mi>O</mi><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo><mo>+</mo><mi>O</mi><mo stretchy="false">(</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mfrac><mo>,</mo><mspace width="2em"/><mi>b</mi><mo>=</mo><mfrac><mrow><mover accent="true"><mrow><mi>t</mi></mrow><mo stretchy="false">^</mo></mover></mrow><mrow><mi>F</mi></mrow></mfrac><mo>+</mo><mn>6.5</mn><mspace width="0.25em"/><mtext>ms</mtext></mrow></math></div>
       </div>
 
@@ -806,7 +807,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>로마 숫자</td><td>코드 105개 중 10개가 부속화음(ii7/IV, V7/IV, V7/ii 등), 16개가 자리바꿈</td></tr>
           </tbody>
         </table></div>
-        <p>여러 장르의 대중가요 다섯 곡(여자친구 「시간을 달려서」, 「もう恋なんてしない」 커버, あいみょん 「マリーゴールド」, YOASOBI 「夜に駆ける」, 시드 사운드 「여래아」)으로도 확인했습니다(1.10.3). 다섯 곡 모두 템포 층위와 박자가 맞고, 마디 위치는 독립된 분석기(madmom)와 96~100% 일치합니다. 코드는 공개 코드 차트를 음원에 맞춰 정렬한 정답과 비교해 근음 약 90%, 장·단 계열 약 87%가 맞습니다(차트가 있는 네 곡, 같은 방식으로 잰 madmom은 86.5%, 87.3%). 남은 오류는 대부분 노래 선율이 화음 대역에 섞여 공통음이 많은 이웃 코드로 읽히는 것입니다.</p>
+        <p>여러 장르의 대중가요 다섯 곡(여자친구 「시간을 달려서」, 「もう恋なんてしない」 커버, あいみょん 「マリーゴールド」, YOASOBI 「夜に駆ける」, 시드 사운드 「여래아」)으로도 확인했습니다(1.10.3). 다섯 곡 모두 템포 층위와 박자가 맞고, 마디 위치는 독립된 분석기(madmom)와 96~100% 일치합니다. 코드는 공개 코드 차트를 음원에 맞춰 정렬한 정답과 비교해 근음 약 90%, 장·단 계열 약 87%가 맞습니다(차트가 있는 네 곡, 같은 방식으로 잰 madmom은 86.5%, 87.3%). 남은 오류는 대부분 노래 선율이 화음 대역에 섞여 공통음이 많은 이웃 코드로 읽히는 것입니다. 1.10.4에서 「マリーゴールド」 도입부의 마디선과 「夜に駆ける」의 B 단조 전조 위치(102마디 → 후렴이 시작하는 104마디)를 바로잡았습니다.</p>
       </div>
       <div class="block">
         <h3 id="v-browser">브라우저 시험</h3>

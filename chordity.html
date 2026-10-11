@@ -344,7 +344,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.10.3">v1.10.3</span>
+    <span class="ver" title="Chordity 버전 1.10.4">v1.10.4</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -1403,6 +1403,58 @@ const Engine = (function () {
     return Float64Array.from(a);
   }
 
+  // 곡 첫머리 격자 다시 맞추기(INTRO_GRID): 악기가 적은 도입부에서 DP가 센 엇박 강세(마디 끝 당김 등)를 따라가며
+  //  본 구간과 다른 주기로 흘러 위상이 반 박쯤 어긋나는 경우. 본 구간 첫 박 j에서 그 뒤 8박 주기로 일정하게 거꾸로 이은
+  //  격자와 지금 박이 IG_DRIFT 박 넘게 벌어졌으면, 도입부 온셋이 8분음표 자리(정박·엇박 모두)에 얼마나 맞는지로
+  //  두 격자를 비교해 거꾸로 이은 격자가 IG_MARGIN 넘게 나을 때만 바꿈(도입부 템포가 실제로 다르면 원래 박이 더 잘 맞음)
+  function introGrid(b, A) {
+    const n = b.length, J = Math.min(n - 9, 48);
+    if (J < 6) return { beats: b, info: null };
+    const t0 = Math.max(0, A.startT - 0.6), O = A.O;
+    // 첫 소리~tB 온셋 봉우리(±5프레임 국소 최대, 그 구간 최대의 IG_PK 이상), 무게는 세기의 제곱근
+    const peaks = tB => {
+      const fa = Math.max(0, Math.round(A.startT * FPS) - 3), fb = Math.round(tB * FPS) - 3;
+      let om = 0; for (let t = fa; t < fb; t++) if (O[t] > om) om = O[t];
+      const pk = [];
+      for (let t = fa; t < fb; t++) {
+        if (O[t] < P.IG_PK * om) continue;
+        let ok = true; for (let d = -5; d <= 5 && ok; d++) if (d && t + d >= 0 && t + d < O.length && O[t + d] > O[t]) ok = false;
+        if (ok) pk.push({ t: t / FPS, w: Math.sqrt(O[t]) });
+      }
+      return pk;
+    };
+    // 격자의 8분음표 자리(박과 박 사이 가운데, 첫 박 반 박 앞 포함)에 온셋이 맞는 정도(무게 평균, 가우스 폭 IG_SIG)
+    const fit = (g, pk) => {
+      const pts = [g[0] - 0.5 * (g[1] - g[0])];
+      for (let i = 0; i < g.length; i++) { pts.push(g[i]); if (i + 1 < g.length) pts.push(0.5 * (g[i] + g[i + 1])); }
+      let s = 0, ws = 0;
+      for (const o of pk) { let d = Infinity; for (const x of pts) d = Math.min(d, Math.abs(o.t - x)); s += o.w * Math.exp(-0.5 * Math.pow(d / P.IG_SIG, 2)); ws += o.w; }
+      return s / ws;
+    };
+    // j박마다: H1 = j박에서 그 뒤 8박 주기로 일정하게 거꾸로 이은 격자, H0 = 지금 박(첫 박 앞은 첫 간격으로 이어 붙임).
+    //  지금 박이 H1과 IG_DRIFT 박 넘게 벌어진 j만, 첫 소리~j박 온셋으로 비교해 차가 가장 큰 j
+    const p0 = b[1] - b[0];
+    let best = null;
+    for (let j = 4; j <= J - 2; j++) {
+      const p = (b[j + 8] - b[j]) / 8, v = ((b[j] - b[0]) - j * p) / p;
+      if (Math.abs(v) < P.IG_DRIFT) continue;
+      const pk = peaks(b[j]);
+      if (pk.length < 5) continue;
+      const H0 = Array.from(b.slice(0, j + 1)); while (H0[0] - p0 >= t0) H0.unshift(H0[0] - p0);
+      const H1 = [b[j]]; while (H1[0] - p >= t0) H1.unshift(H1[0] - p);
+      const f0 = fit(H0, pk), f1 = fit(H1, pk);
+      if (!best || f1 - f0 > best.f1 - best.f0) best = { j, p, v, f0, f1, np: pk.length };
+    }
+    if (!best) return { beats: b, info: null };
+    const info = { j: best.j, t: +b[best.j].toFixed(2), drift: +best.v.toFixed(3), fit0: +best.f0.toFixed(3), fit1: +best.f1.toFixed(3), peaks: best.np };
+    if (best.f1 - best.f0 < P.IG_MARGIN) return { beats: b, info };
+    const head = []; for (let k = 1; b[best.j] - k * best.p >= A.startT - 0.25 * best.p; k++) head.unshift(b[best.j] - k * best.p);
+    info.applied = true; info.head = head.length;
+    return { beats: Float64Array.from(head.concat(Array.from(b.slice(best.j)))), info };
+  }
+
+
+
   // 정박 판정용 강세 곡선: 저역(킥·베이스) + 중역(스네어) + 화성 변화, 고역은 거의 무시
   function beatSalience(A) {
     const n = A.nF;
@@ -1639,6 +1691,7 @@ const Engine = (function () {
         if (lv2.info.action === 'double') { ph = phaseFix(lv2.beats.length >= 4 ? extendBeats(lv2.beats, startT, endT) : lv2.beats); beats = ph.beats; lv.info.twice = true; }
       }
     }
+    if (P.INTRO_GRID && !P.BAR_POINTER && beats.length >= 16) { const ig = introGrid(beats, A); beats = ig.beats; A.introGrid = ig.info; }
     A.phase = { on: ph.on, off: ph.off, flipped: ph.flipped };
     A.level = lv.info;
     A.beats = beats;
@@ -1812,8 +1865,12 @@ const Engine = (function () {
     KEY_MODE: true,                                      // 전조가 있으면 조 이름을 곡의 주된 갈래(장·단)로 통일(나란한조 이름만 바꿈: C 단조 → F 장조를 C 단조 → D 단조로)
     KEY_INTRO: true, KI_BARS: 8,                         // 곡 첫 조성 구간이 KI_BARS 마디 이하이고 다음 구간과 같은 갈래의 5도 관계(버금딸림·딸림 조)면 다음 조에 합침
                                                          //  (도입부가 iv·V에서 시작해 악구 첫 코드로 조를 정하면 "B♭ 단조 → F 단조"처럼 거짓 전조가 됨)
+    // 도입부 격자·전조 경계(1.10.4): 둘 다 켬(「マリーゴールド」 도입부 마디선, 「夜に駆ける」·「고민중독」 전조 위치가 정답 쪽으로. 다른 시험 묶음 결과는 모두 같음)
+    INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
+    KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득(박))
+    KE_BREAK: true,                                      //  KEY_EDGE 안: 새 조 첫 박이 N.C.(브레이크)면 다음 마디 첫 박부터 새 조
     // 비교했지만 넣지 않음(끔)
-    HDIM: false,                                         //  기본 어휘에 반감7(m7♭5): ii°7이 위 3화음으로 읽히던 곡은 나아지나 다른 곡의 m7·dim을 바꿔 5곡 합계가 나빠짐
+    HDIM: false,                                        //  기본 어휘에 반감7(m7♭5): ii°7이 위 3화음으로 읽히던 곡은 나아지나 다른 곡의 m7·dim을 바꿔 5곡 합계가 나빠짐
     BASS_LAM: false, BL_K: 0.5,                          //  마디 안 바뀜 벌점을 베이스 움직임만큼 줄임: 5곡 모두 조금 나빠짐(스쳐 가는 베이스까지 코드 바뀜으로)
     TREB_HI: false, TH_FROM: 72, TH_W: 0.5,              //  높은 음역(노래 선율) 비중 낮춤: 5곡 근음 +0.6~1.1%p지만 합성 R&B 발라드 근음 −10~14, GuitarSet 장단 −1.5~2.6%p, 「세월이 가면」 일치 97.7→83~89%
     FLICKER: false,                                      //  같은 코드 사이 한 박 코드(베이스 같고 새 음 하나 이하)를 앞뒤 코드로: 시험 곡에서 거의 안 일어남
@@ -2624,6 +2681,14 @@ const Engine = (function () {
         if (ds[k] - ds[k - 1] < m && ds[k] % m === 0) { for (let i = 0; i < ds[k]; i++) pos[i] = i % m; break; }
       }
     }
+    // INTRO_GRID로 다시 이은 도입부: 본 구간의 마디 위상을 거꾸로 이어 씀(박을 일정한 주기로 이었으므로 마디도 그대로 이어짐.
+    //  도입부의 첫 박 증거는 마디 끝 당김 같은 엇박 강세에 끌려 한 박 앞으로 잡히거나 긴 마디가 생기기 쉬움)
+    if (P.INTRO_GRID && A.introGrid && A.introGrid.applied && !set.downShift && !(set.ops && set.ops.length)) {
+      const j = A.introGrid.head;
+      if (j > 0 && j < n && !(mOf && mOf[j] !== m)) {
+        for (let i = 0; i < j; i++) { pos[i] = ((pos[j] - (j - i)) % m + m) % m; if (mOf) mOf[i] = m; }
+      }
+    }
 
     // 최종 코드 (1박 또는 ½박 해상도)
     const res = set.res === 2 ? 2 : 1, nS = n * res;
@@ -2795,6 +2860,25 @@ const Engine = (function () {
       let main = segs[0]; for (const g of segs) if (g.end - g.start > main.end - main.start) main = g;
       const mode = main.key.mode;
       for (const g of segs) if (g.key.mode !== mode) g.key = mode === 'major' ? { tonic: (g.key.tonic + 3) % 12, mode: 'major', score: g.key.score } : { tonic: (g.key.tonic + 9) % 12, mode: 'minor', score: g.key.score };
+    }
+    // 전조 경계 다듬기(KEY_EDGE): 경계는 음 분포 창으로 정해 새 조 쪽으로 몇 박 일찍 오기 쉬움(앞 조의 V7처럼 두 조에 걸친 음이 많은 코드).
+    //  최종 코드의 구성음이 앞 조·새 조 음계에 드는 비율 차를 박마다 더해, 경계 뒤 KE_BARS 마디 안의 마디 첫 박 중 앞 조 코드를
+    //  가장 많이 앞 조에 남기는 곳으로 미룸(KE_MARGIN 박 넘게 나을 때만. 앞으로는 옮기지 않음: 새 조 V를 거쳐 I부터 새 조로 둔 것과 부딪힘).
+    //  새 조 첫 박이 코드 없는 곳(브레이크)이면 그 마디의 소리는 다음 악절의 못갖춘 시작으로 보고 다음 마디 첫 박부터 새 조
+    if (P.KEY_EDGE && segs.length > 1) {
+      const fitK = (st, sc) => st.root < 0 ? 0 : st.pcs.filter(q => sc.has(q)).length / st.pcs.length;
+      for (let g = 1; g < segs.length; g++) {
+        const a0 = segs[g - 1], b1 = segs[g], scA = new Set(keyScale(a0.key)), scB = new Set(keyScale(b1.key));
+        const s0 = b1.start, mb = mOf ? mOf[s0] : m, hi = Math.min(b1.end - mb, s0 + P.KE_BARS * mb);
+        const dAt = i => { let v = 0; for (let r = 0; r < res; r++) { const st = states[lab[i * res + r]]; v += fitK(st, scA) - fitK(st, scB); } return v / res; };
+        let c = s0, best = 0, gain = 0;
+        for (let i = s0; i < hi; i++) { gain += 2 * dAt(i); if (pos[i + 1] === 0 && i + 1 <= hi && gain > best + 1e-9) { best = gain; c = i + 1; } }
+        if (best < P.KE_MARGIN) c = s0;
+        const cMax = b1.end - mb;
+        if (P.KE_BREAK) while (states[lab[c * res]].root < 0) { let k = c + 1; while (k < cMax && pos[k] !== 0) k++; if (k >= cMax) break; c = k; }
+        if (c !== s0) { a0.end = c; b1.start = c; }
+      }
+      indexSegs();
     }
     // 코드 이름 다듬기(경계·조성은 그대로, 이름만): 6화음으로 읽히는 m7 자리바꿈과 3음이 뚜렷한 sus4.
     //  조성을 코드로 다시 정한 뒤에 하므로 조성 판정에는 영향이 없고, 조성은 확정된 그 자리의 조를 씀
