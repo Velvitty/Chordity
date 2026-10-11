@@ -169,7 +169,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
     <a class="brand" href="chordity.html">
       <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       <span>Chordity</span>
-      <span class="ver" title="Chordity 버전 1.10.1">v1.10.1</span>
+      <span class="ver" title="Chordity 버전 1.10.2">v1.10.2</span>
     </a>
     <span class="chip">도움말</span>
     <span class="grow"></span>
@@ -661,7 +661,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
           </tbody>
         </table></div>
         <p>비트 시각은 샘플 시간으로 계산되고 오디오 시계로 옮겨집니다. 재생 버퍼와 분석 신호가 같은 디코딩 결과에서 나오고 리샘플러의 지연이 0이므로, 두 시간축 사이에 어긋남이 없습니다.</p>
-        <p>재생하는 동안 지금 울리는 코드는 노란 형광펜 상자가 감쌉니다. 상자는 그 코드를 친 박부터 다음 코드가 나오는 곳까지, 같은 코드를 끌어 두는 동안(회색 코드)은 다음 마디까지 이어 걸치고, 줄이 바뀌면 줄마다 한 조각씩 그립니다. 코드가 바뀌면 상자의 두 끝 <math><mrow><mi>x</mi></mrow></math> 가 각각 용수철처럼 <math><mrow><mfrac><mrow><msup><mi>d</mi><mrow><mn>2</mn></mrow></msup><mi>x</mi></mrow><mrow><mi>d</mi><msup><mi>t</mi><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo>=</mo><msup><mi>ω</mi><mrow><mn>2</mn></mrow></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo>*</mo></mrow></msup><mo>−</mo><mi>x</mi><mo stretchy="false">)</mo><mo>−</mo><mn>2</mn><mi>ζ</mi><mi>ω</mi><mfrac><mrow><mi>d</mi><mi>x</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mrow></math> 를 따라 다음 코드 자리 <math><mrow><msup><mi>x</mi><mrow><mo>*</mo></mrow></msup></mrow></math> 로 갑니다. 가는 쪽 끝(<math><mrow><mi>ω</mi><mo>=</mo><mn>24</mn></mrow></math> rad/s, <math><mrow><mi>ζ</mi><mo>=</mo><mn>0.42</mn></mrow></math>)은 목표를 조금 지나쳤다 돌아오고, 반대쪽 끝(<math><mrow><mi>ω</mi><mo>=</mo><mn>16</mn></mrow></math> rad/s, <math><mrow><mi>ζ</mi><mo>=</mo><mn>1</mn></mrow></math>)은 지나치지 않고 뒤따릅니다. 지금 코드의 이름은 0.1초 만에 커졌다가 다음 코드로 넘어가면 0.7초에 걸쳐 줄어들며, 다음 이름에 닿지 않을 만큼만(많아야 1.3배) 커집니다. 상자 색은 상자 위와 바탕 위 어디서나 코드 이름이 읽히도록 골라(밝은 테마 연한 노랑, 어두운 테마 차분한 노랑), 상자가 움직이는 동안에도 글자색을 바꾸지 않습니다. 기기의 움직임 줄이기 설정을 따르면 움직임 없이 바로 바뀝니다.</p>
+        <p>재생하는 동안 지금 울리는 코드는 노란 형광펜 상자가 감쌉니다. 상자는 그 코드를 친 박부터 다음 코드가 나오는 곳까지, 같은 코드를 끌어 두는 동안(회색 코드)은 다음 마디까지 이어 걸치고, 줄이 바뀌면 줄마다 한 조각씩 그립니다. 상자 안은 진행 막대처럼 그 코드에서 지금까지 연주된 만큼 주황색으로 차오르며, 채움 끝은 그 마디의 박 자리 사이를 박 안 위치로 나눈 재생 위치입니다. 코드가 바뀌면 상자의 두 끝 <math><mrow><mi>x</mi></mrow></math> 가 각각 용수철처럼 <math><mrow><mfrac><mrow><msup><mi>d</mi><mrow><mn>2</mn></mrow></msup><mi>x</mi></mrow><mrow><mi>d</mi><msup><mi>t</mi><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo>=</mo><msup><mi>ω</mi><mrow><mn>2</mn></mrow></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo>*</mo></mrow></msup><mo>−</mo><mi>x</mi><mo stretchy="false">)</mo><mo>−</mo><mn>2</mn><mi>ζ</mi><mi>ω</mi><mfrac><mrow><mi>d</mi><mi>x</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mrow></math> 를 따라 다음 코드 자리 <math><mrow><msup><mi>x</mi><mrow><mo>*</mo></mrow></msup></mrow></math> 로 갑니다. 가는 쪽 끝(<math><mrow><mi>ω</mi><mo>=</mo><mn>24</mn></mrow></math> rad/s, <math><mrow><mi>ζ</mi><mo>=</mo><mn>0.42</mn></mrow></math>)은 목표를 조금 지나쳤다 돌아오고, 반대쪽 끝(<math><mrow><mi>ω</mi><mo>=</mo><mn>16</mn></mrow></math> rad/s, <math><mrow><mi>ζ</mi><mo>=</mo><mn>1</mn></mrow></math>)은 지나치지 않고 뒤따릅니다. 지금 코드의 이름은 0.1초 만에 커졌다가 다음 코드로 넘어가면 0.7초에 걸쳐 줄어들며, 다음 이름에 닿지 않을 만큼만(많아야 1.3배) 커집니다. 상자와 채움 색은 채움·상자·바탕 위 어디서나 코드 이름이 읽히도록 골라(밝은 테마 연한 노랑과 주황, 어두운 테마 차분한 노랑과 짙은 주황), 상자가 움직이는 동안에도 글자색을 바꾸지 않습니다. 기기의 움직임 줄이기 설정을 따르면 움직임 없이 바로 바뀝니다.</p>
       </div>
       <div class="block">
         <h3 id="s-audio">오디오 그래프</h3>
@@ -818,7 +818,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>×2, ÷2, 첫 박 이동, 박자 지정</td><td>간격과 첫 박 강조가 기대대로 바뀜</td></tr>
             <tr><td>클릭 타이밍 +30 ms</td><td>클릭이 29.2 ms 늦게 예약됨</td></tr>
             <tr><td>화면</td><td>콘솔 오류 0, 데스크톱과 휴대폰 폭에서 가로 넘침 0 px</td></tr>
-            <tr><td>지금 코드 상자와 이름 확대</td><td>재생 중 매 프레임(세 곡, 약 1,000프레임) 커진 이름은 하나이고 재생 위치의 코드와 일치, 재생 중 위치를 옮겨도 앞 코드가 비치지 않음, 줄을 넘는 코드는 줄마다 한 조각이고 떠난 줄의 상자는 다시 자라지 않음, 두 테마에서 회색 코드와 N.C.까지 모든 이름이 상자·바탕 위 모두 4.5:1 이상, 모든 이름을 확대해도 이웃 이름·알약·빗금과 새로 겹친 픽셀 0</td></tr>
+            <tr><td>지금 코드 상자와 이름 확대</td><td>재생 중 매 프레임(세 곡, 약 1,000프레임) 커진 이름은 하나이고 재생 위치의 코드와 일치, 재생 중 위치를 옮겨도 앞 코드가 비치지 않음, 줄을 넘는 코드는 줄마다 한 조각이고 떠난 줄의 상자는 다시 자라지 않음, 진행 채움 끝이 매 프레임 재생 위치와 1.1px 안에서 일치, 두 테마에서 회색 코드와 N.C.까지 모든 이름이 채움·상자·바탕 위 모두 4.5:1 이상, 모든 이름을 확대해도 이웃 이름·알약·빗금과 새로 겹친 픽셀 0</td></tr>
           </tbody>
         </table></div>
       </div>
