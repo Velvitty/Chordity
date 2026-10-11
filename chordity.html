@@ -186,6 +186,7 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 .empty-msg { padding: 28px 14px; color: var(--pencil); }
 .line { display: grid; grid-template-columns: 36px minmax(0, 1fr); }
 .line + .line { margin-top: 2px; }
+.line + .line.kp { margin-top: 5px; }   /* 검은 알약(top -4px)이 윗줄 템포 줄(틀·흰 알약)에 닿지 않게 */
 .line .num { font-size: 11.5px; color: var(--pencil); text-align: right; padding: 8px 8px 0 0; font-variant-numeric: tabular-nums; }
 .bars { display: grid; grid-template-columns: repeat(var(--per), minmax(0, 1fr)); border-left: 1.5px solid var(--rule); }
 .bar { position: relative; height: 86px; border-right: 1.5px solid var(--rule); cursor: pointer; outline-offset: -2px; }
@@ -207,14 +208,25 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 .chord .sec { font-size: .8em; }
 .chord.sm { font-size: 19px; }
 .chord.xs { font-size: 15px; }
+.chord.xxs { font-size: 12px; }
+.chord.xxxs { font-size: 10px; }
+.chord.r1, .chord.r2 { line-height: 17px; height: 17px; }   /* 두 줄로 놓은 마디: 위 줄 0~17px, 아래 줄 17~34px(레인 높이 안). 15px 이하에서 첨자까지 제 줄 안 */
+.chord.r2 { top: 17px; }
+.chord.cut { overflow: hidden; }   /* 가장 작은 크기로도 안 들어가는 이름(폭은 max-width, 전체 이름은 title). "…"은 줄인 꼴에 직접 붙임 */
 .chord.tied { color: var(--pencil); font-weight: 600; }
 .chord.nc { font-family: var(--ui-font); font-size: 14px; font-weight: 600; color: var(--pencil); letter-spacing: .02em; }
+.chord.nc.sm { font-size: 13px; } .chord.nc.xs { font-size: 12px; } .chord.nc.xxs { font-size: 11px; } .chord.nc.xxxs { font-size: 10px; }   /* N.C.도 크기 단계를 따름(두 줄 마디 등) */
+.chord .more { font-size: .75em; letter-spacing: -.05em; margin-left: .5px; }   /* 줄인 이름 끝 "…"(좁게) */
 .bar.cur .chord { color: var(--hl-ink); }
 .slashes i { position: absolute; bottom: 0; width: 3.5px; height: 15px; margin-left: 5px; background: var(--pencil); border-radius: 1px; transform: skewX(-24deg); opacity: .5; }
 .slashes i.off { height: 8px; width: 2.5px; opacity: .3; }
 .bar.cur .slashes i { opacity: .8; }
+/* 코드를 새로 치는 박(검은 글자 코드가 놓인 박·반 박)의 빗금: 두껍고 진하게. 가운데는 보통 빗금과 같은 자리(코드 이름 정렬 유지) */
+.slashes i.ch { width: 6.5px; margin-left: 3.5px; opacity: .9; }
+.slashes i.off.ch { width: 4.5px; margin-left: 4px; height: 11px; opacity: .9; }
+.bar.cur .slashes i.ch { opacity: 1; }
 .slashes i.hit { background: var(--ink); opacity: 1 !important; height: 19px; }
-.bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; color: var(--pencil); font-variant-numeric: tabular-nums; background: var(--sheet); padding: 0 3px; border-radius: 3px; }
+.bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; line-height: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; background: var(--sheet); padding: 0 3px; border-radius: 3px; }   /* 상자 아래 끝이 코드 칸 위(12px)를 넘지 않게 */
 .bar.pickup .tag { right: auto; left: 10px; }
 .bar .pillrow { position: absolute; top: -4px; z-index: 3; display: flex; gap: 4px; }
 .bar .pillrow .keychg { position: static; }
@@ -276,6 +288,10 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
   .chord { font-size: 21px; }
   .chord.sm { font-size: 16px; }
   .chord.xs { font-size: 13px; }
+  .chord.xxs { font-size: 11px; }
+  .chord.xxxs { font-size: 10px; }
+  .chord.r1, .chord.r2 { line-height: 16px; height: 16px; }   /* 마디 78px: 아래 줄이 재생 중 커지는 빗금(19px)에 닿지 않게 줄 높이를 1px 줄임 */
+  .chord.r2 { top: 16px; }
   .grp { grid-template-columns: minmax(0, 1fr); gap: 6px; }   /* 긴 선택 상자가 칸을 넓히지 않게 */
   .grp .ctl select { max-width: 100%; box-sizing: border-box; min-height: 36px; }   /* 안쪽 여백·테두리까지 칸 안에(높이는 전과 같은 36px) */
   .intro { min-height: 440px; }
@@ -314,7 +330,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.9.4">v1.9.4</span>
+    <span class="ver" title="Chordity 버전 1.10.0">v1.10.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -608,6 +624,13 @@ const Engine = (function () {
     if (!(s > 1e-12)) return o;
     for (let i = 0; i < a.length; i++) o[i] = (a[i] - m) / s;
     return o;
+  }
+  // 자기상관(표준화한 열, 지연 L): 길이가 L+4 이하이면 0
+  function acorr(a, L) {
+    const n = a.length; if (n <= L + 4) return 0;
+    const x = standardize(a); let s = 0;
+    for (let i = 0; i + L < n; i++) s += x[i] * x[i + L];
+    return s / (n - L);
   }
   function hannWin(N) {
     const w = new Float64Array(N);
@@ -953,7 +976,23 @@ const Engine = (function () {
     return out;
   }
   // 트레블 크로마: 기본은 피크 크로마, NNLS 를 켜면 음 분해 크로마
-  const trebleOf = (A, t0, t1) => P.NNLS && A.harm.trebleMidi ? nnlsChroma(aggregateN(A.harm.trebleMidi, NN_B, A.harm.hopT, t0, t1), t0.length) : aggregate(A.harm.treble, A.harm.hopT, t0, t1);
+  const trebleOf = (A, t0, t1) => P.NNLS && A.harm.trebleMidi ? nnlsChroma(aggregateN(A.harm.trebleMidi, NN_B, A.harm.hopT, t0, t1), t0.length) : aggregate(A.harm.treble, A.harm.hopT, t0, t1, P.DRUM_GATE && A.drum ? drumGateW(A) : null);
+  // 드럼 타격 가중(DRUM_GATE): 트레블 프레임의 분석 창(±93 ms)에 스네어 타격(광대역 온셋)이나 그 잔향이 들어 있으면
+  //  박 집계에서 그 프레임의 비중을 줄임(음정 있는 스네어의 부분음이 코드 음처럼 섞이는 것을 막음). 잔향은 지수 감쇠(DG_TAU 초)
+  function drumGateW(A) {
+    const key = P.DG_G + ':' + P.DG_TAU;
+    if (A._dg && A._dg.key === key) return A._dg.w;
+    const Sn = A.drum.Sn, nR = Sn.length, e = new Float64Array(nR), dec = Math.exp(-1 / (FPS * P.DG_TAU));
+    for (let f = 0; f < nR; f++) e[f] = Math.max(Sn[f], f ? e[f - 1] * dec : 0);
+    const q = quantile(Sn, 0.95) || 1, hop = A.harm.hopT, nT = A.harm.treble.length / 12, w = new Float64Array(nT), half = 0.093;
+    for (let j = 0; j < nT; j++) {
+      const f0 = Math.max(0, Math.floor((j * hop - half) * FPS)), f1 = Math.min(nR - 1, Math.ceil((j * hop + half) * FPS));
+      let d = 0; for (let f = f0; f <= f1; f++) if (e[f] > d) d = e[f];
+      w[j] = 1 / (1 + P.DG_G * d / q);
+    }
+    A._dg = { key, w };
+    return w;
+  }
 
   async function harmonyFeatures(x, tick, p0, p1) {
     const pm = p0 + (p1 - p0) * 0.45;
@@ -1428,13 +1467,35 @@ const Engine = (function () {
     const sg = kp[0] >= kp[1] ? 1 : -1;
     info.dK = sg * skew(kp); info.dSn = sg * skew(sp); info.dNov = sg * skew(np);
     const sameSide = info.dK >= 0.15 && info.dSn >= 0.15 && info.dNov > 0 && info.r2 >= 1.3;
-    if (!walkOnly && (info.r2 >= 2.4 || sameSide) && bpm >= 110 && bpm / 2 >= 55) {
+    const c2 = (A.tempo && A.tempo.cands || []).find(c => Math.abs(c.bpm / bpm - 2) < 0.08);
+    info.c2 = c2 ? c2.rel : 0;                              // 두 배 템포 후보의 세기(1위 후보 대비)
+    // 절반으로 내리기 전 확인(스위치):
+    //  · HV_KOM: 비트가 8분음표라면 비트 사이 가운데는 16분음표 자리라 저음(킥·베이스) 타격이 드묾.
+    //    박 위/박 사이 저음 비가 낮으면(박 사이에도 저음이 자주 옴) 비트 사이가 8분음표 자리 = 비트가 제 박이므로 내리지 않음
+    //  · HV_NOBB: 짝/홀 세기 차(r2)만으로 내릴 때, 스네어가 킥의 반대쪽 박에 몰려 있으면(백비트) 비트가 제 박이므로 내리지 않음.
+    //    8분음표로 잡힌 느린 곡이라면 2·4박 스네어도 킥과 같은 쪽(짝수 비트)에 오기 때문
+    const hvKom = !P.HV_KOM || info.kickOnMid >= P.HV_KOM_MIN;
+    const hvR2 = info.r2 >= 2.4 && (!P.HV_NOBB || info.dSn > P.HV_NOBB_DSN);
+    if (!walkOnly && (hvR2 || sameSide) && hvKom && bpm >= 110 && bpm / 2 >= 55) {
       const keep = e >= o ? 0 : 1;
       info.action = 'halve';
       return { beats: beats.filter((_, i) => i % 2 === keep), info };
     }
     if (!walkOnly && bpm <= 100 && bpm * 2 <= 210 && info.snareMidOn >= 1.3 && info.kickOnMid >= 2) {
       info.action = 'double';
+      return { beats: doubleBeats(beats, A), info };
+    }
+    // 빠른 곡이 한 층위 느리게, 그것도 뒷박(2·4박 스네어) 자리에 잡힘(BB_DOUBLE): 박 위엔 스네어가 박마다 고르게, 박 사이엔 킥.
+    //  제 템포의 느린 곡이라면 킥이 박 위(1·3박)에 오고 스네어는 한 박 건너(2·4박) 오므로 이 모양이 나오지 않음
+    if (P.BB_DOUBLE && !walkOnly && bpm <= 100 && bpm * 2 <= P.BBD_MAX && info.c2 >= P.BBD_C2
+      && info.snareMidOn <= P.BBD_SN && info.kickOnMid <= P.BBD_K && Math.abs(skew(sp)) <= P.BBD_SKS) {
+      info.action = 'double'; info.why = 'backbeat';
+      return { beats: doubleBeats(beats, A), info };
+    }
+    // 하프타임 느낌의 빠른 곡(HT_DOUBLE): 킥은 박 위, 스네어는 박 사이에도 박 위만큼 옴
+    if (P.HT_DOUBLE && !walkOnly && bpm <= 100 && bpm * 2 <= P.HTD_MAX && info.c2 >= P.HTD_C2
+      && info.snareMidOn >= P.HTD_SN && info.kickOnMid >= P.HTD_K && info.kickOnMid <= P.HTD_KMAX) {
+      info.action = 'double'; info.why = 'halftime';
       return { beats: doubleBeats(beats, A), info };
     }
     // 한 층위 느리게 잡힘(워킹 베이스 등): 느린 템포인데 저음이 박 사이에도 박 위 못지않게 울리고,
@@ -1613,7 +1674,7 @@ const Engine = (function () {
   // 비트/슬롯 동기 집계
   // ---------------------------------------------------------------
   // 프레임 크로마를 [t0,t1) 구간별로 가중 평균(구간 가운데일수록 큰 가중치)
-  function aggregate(C, hopSec, t0, t1) {
+  function aggregate(C, hopSec, t0, t1, fw) {        // fw: 프레임별 추가 가중(없으면 1)
     const nS = t0.length, nF = C.length / 12;
     const out = new Float64Array(nS * 12);
     for (let s = 0; s < nS; s++) {
@@ -1625,7 +1686,7 @@ const Engine = (function () {
       let ws = 0;
       for (let j = j0; j <= j1; j++) {
         const u = Math.min(1, Math.max(0, (j * hopSec - a) / L));
-        const w = 0.1 + Math.sin(Math.PI * u);
+        const w = (0.1 + Math.sin(Math.PI * u)) * (fw ? fw[j] : 1);
         for (let k = 0; k < 12; k++) out[s * 12 + k] += w * C[j * 12 + k];
         ws += w;
       }
@@ -1702,10 +1763,39 @@ const Engine = (function () {
   const P = {
     GAMMA: 0.45, BETA: 30, BB: 1.5, NDELTA: 0.12, KEY: 0.6, RHO: 0.25,
     DB_EPS: 3e-4,
-    METER_CHANGE: true, METER_MU: 1e-6, METER_MIN_BARS: 4,
+    METER_CHANGE: true, METER_MU: 1e-7, METER_MIN_BARS: 4,   // METER_MU 1e-6→1e-7: 곡 끝맺음에서 코드가 한 박 앞서 바뀌는 곳을 3/4로 바꾸지 않음(실제 녹음). 합성곡 박자 변화 4곡 그대로, GTZAN 거의 같음
     RESTRIKE: true, RESTRIKE_TH: 1.2,                     // 마디 첫머리 '이어짐'(회색)은 새로 치지 않은 코드만: 구성음 세기가 박 직후 이만큼 뛰면 새로 친 것
     EDGE_ATTACK: true, EDGE_OLD: 1.3, EDGE_EM: 2.5,          // 경계 다듬기: 약박 바뀜을 앞 강박으로(옛 코드 고유음이 다시 쳐지지 않고 점수 차가 작을 때)
+    RAMP_TIDY: true,                                     // 서서히 바뀌는 구간이 서로 겹치지 않게(같은 방향은 합침, 반대 방향은 템포 극점에서 나눔)
+    KEY_MERGE: true,                                     // 코드로 다시 정한 조가 같은 이웃 조성 구간은 하나로(같은 조로의 전조 표시 없앰)
+    KEY_REL_MERGE: true, KEY_REL_MAJ: 0.2,               // 나란한 장·단조(C 장조와 A 단조)로 갈린 이웃 구간도 하나로 합쳐 조를 다시 정함(나란한조 이동은 전조로 적지 않음).
+                                                         //  합친 구간은 장·단조 판단이 애매한 곡이라, 단조 점수가 나란한 장조를 이만큼 넘게 앞설 때만 단조(대중음악은 장조가 흔함)
+    // 박 단계(1.10.0): 빠른 곡을 절반 템포로 잡은 경우 두 배로(두 갈래 모두 템포 추정이 두 배 템포를 거의 같은 세기의 후보로 낼 때만), 절반으로 내리기는 더 엄격히
+    BB_DOUBLE: true, BBD_SN: 0.8, BBD_K: 0.95, BBD_SKS: 0.25, BBD_C2: 0.8, BBD_MAX: 200,   // 뒷박형: 박 위엔 스네어, 박 사이엔 킥. 켜기, 박 사이/박 위 스네어 비 상한, 박 위/박 사이 킥 비 상한, 스네어 짝·홀 치우침 상한, 두 배 후보 세기 하한, 두 배 템포 상한
+    HT_DOUBLE: true, HTD_SN: 0.9, HTD_K: 1.0, HTD_KMAX: 10, HTD_C2: 0.85, HTD_MAX: 210,  // 하프타임형: 킥은 박 위, 스네어는 박 사이에도 박 위만큼. 켜기, 스네어 비 하한, 킥 비 하한·상한(박 사이 저음 타격이 거의 없으면 드럼이 아님), 두 배 후보 세기 하한, 두 배 템포 상한
+    HV_KOM: true, HV_KOM_MIN: 2.0,                       // 절반으로 내리기: 비트 사이(16분음표 자리여야 함) 저음이 드물 때만(박 위/박 사이 킥 비 하한)
+    HV_NOBB: true, HV_NOBB_DSN: -0.1,                    // 절반으로 내리기: 짝/홀 세기 차만으로 내릴 때 백비트(스네어가 킥 반대쪽, 치우침이 이 값 이하)면 내리지 않음
+    PUSH_DB: false, PD_W: 0.6,                           // 당김(코드가 첫 박 8분음표 앞에서 바뀜)을 다음 박의 첫 박 증거로: 켜기, 비중. 아래 박자 보정 위에서도 GuitarSet Rock 첫 박 −0.032라 끔
+    DRUM_DB: false, DD_W: 0.6, DD_GATE: 0.1,              // 첫 박 증거에 드럼(킥 +, 스네어 −): 켜기, 비중, 킥·스네어가 박마다 엇갈리는 정도의 문턱
+    // 첫 박·박자 튼튼하게(대중음악): 아래 넷을 켬(GTZAN 대중 6장르 첫 박 F +0.042, 4박 곡을 3·5·7박으로 잡은 것 176→72곡, 합성곡·「세월이 가면」 그대로)
+    METER_AC: true,                                      // 3·5·7박은 첫 박 증거의 자기상관이 그 마디 길이(m+2m)에서 4박(4+8)보다 클 때만 4박을 대신함(짧은 곡에서 드문 큰 봉우리만 골라 대비도가 부푸는 것을 막음)
+    DRUM_PAR: true, DP_W: 1.0, DP_WIN: 8,                // 드럼 짝·홀 사전: 켜기, 비중, 국소 창(앞뒤 박 수)
+    DP_BOTH: true, DP_TH: 0.3,                           //  킥 엇갈림과 스네어 엇갈림이 국소적으로 각각 뚜렷하고(문턱) 서로 반대 박일 때만(드럼 백비트, 독주 기타 스트로크 제외)
+    DP_SNARE: true, DP_FB: 0.2, DP_STH: 0.5,             //  백비트가 곡의 DP_FB 이상에서 확인되면 킥이 흐린 구간은 스네어 엇갈림(DP_STH 이상)만으로(리프의 당김 베이스 강세)
+    DP_EVEN: true, DP_EVEN_FB: 0.3,                      //  백비트가 곡의 DP_EVEN_FB 이상이면 고정 박자 후보에서 3·5·7박 제외(박자 변화 모델은 그대로)
+    DD_HALF_RAW: true,                                   // 2박 대 4박(반 마디·12/8 대 6/8) 판정은 드럼·당김을 더하기 전 화성 증거로(킥·짝홀 사전은 1·3박을 똑같이 올림)
+    // 비교했지만 넣지 않음(끔)
+    DP_GATE: false,                                      //  DRUM_PAR를 곡 전체 (킥−스네어) 자기상관 '고른 백비트'(DD_AC1·AC2) 곡에만: 리프에만 백비트가 뚜렷한 실제 록 녹음을 놓침
+    DD_REG: false, DD_AC1: 0.2, DD_AC2: 0.2,             //  DRUM_DB 문을 짝·홀 치우침 대신 위 자기상관으로: DRUM_DB 자체가 컨트리·디스코를 깎아 끔
+    DD_EVEN: false,                                      //  고른 백비트(DD_REG 기준) 곡은 짝수 박자만(박자 변화도 막음): 5/4 합성곡을 4/4로, 박자 변화 합성곡 4곡을 지움
+    METER_AC_VM: false,                                  //  박자 변화의 바뀐 구간에도 METER_AC 확인: 시험 묶음 어디에서도 결과가 바뀌지 않음
     DBG_ATTACK: false,   // 박자 변화: 켜기, 박자 바뀜 확률, 표시할 최소 마디 수
+    // 코드 이름 다듬기(1.10.0): 경계·조성은 그대로 두고 이름만
+    M7_BASSREL: true, M7_SHARE: 0.5, M7_CONS: 0.75,   // M7_SIXTH는 베이스를 믿을 수 있을 때만: 그 음이 구간 베이스의 절반 이상이거나, 박의 3/4 이상에서 가장 센 음일 때
+    M7_NEIGHBOR: true,                                   // M7_SIXTH는 같은 코드 사이에 잠깐 낀(스쳐 가는) m7에는 쓰지 않음
+    M7_SIXTH: true, M7_BASSTOP: true,                    // 조성 안 m7의 3음 베이스(ii7/IV, vi7/I, iii7/V)는 같은 음의 6화음이므로 베이스 위 장3화음으로(Am7/C → C), 베이스 크로마에서 그 음이 가장 셀 때만
+    DRUM_GATE: false, DG_G: 2, DG_TAU: 0.08,              // 드럼 타격 가중: 켜기, 세기(1/(1+G·타격/상위5%)), 잔향 감쇠(초). 넣지 않음(비교용): 실제 록 녹음 코드 그대로, GuitarSet 대중음악 근음 −0.005·장단 −0.008(G=3)
+    SUS_GATE: true, SUS_RATIO: 0.7,                      // sus4 구간에서 3음(장·단 중 큰 것)이 4음의 이 비율 이상 울리면 3화음으로(원 트레블 크로마 합). 0.7 = 정답이 sus4 인 알려진 구간(합성곡·GuitarSet 연주 정답·세월이 가면)의 최댓값 0.65 바로 위
     KEY_WIN: 6, KEY_SWITCH: 6, KEY_MIN: 24,              // 전조 추적: 창(±박), 조 바꿈 벌점, 최소 구간(박)
     KEY_CHROMA_W: 1.2,                                   // 코드로 조성을 정할 때 섞는 음 분포 상관의 비중(18곡 시험으로 정함)
     TIGHT_K: 2000,                                       // DP 간격 벌점 강도 α = k·τ²(τ: 박 주기, 초)
@@ -2118,10 +2208,11 @@ const Engine = (function () {
 
   // 박자 변화(변박): 상태 = (박자, 마디 안 위치). 마디가 끝날 때만 아주 작은 확률 μ로 다른 박자로 넘어감.
   // 새 박자가 4마디 이상 이어질 때만 '박자 변화'로 보고(한두 마디짜리는 불규칙 마디), 그런 변화가 없으면 null
-  function variableMeter(z, mMain, alpha, eps) {
+  function variableMeter(z, mMain, alpha, eps, exclude) {
     alpha = alpha || 1.5; eps = eps || P.DB_EPS;
     const n = z.length; if (n < 16) return null;
-    const Ms = [mMain].concat([3, 4, 5, 7].filter(x => x !== mMain)), off = []; let S = 0;
+    const Ms = [mMain].concat([3, 4, 5, 7].filter(x => x !== mMain && !(exclude && exclude.includes(x)))), off = []; let S = 0;
+    if (Ms.length < 2) return null;
     for (const m of Ms) { off.push(S); S += m; }
     const le = Math.log(eps), ln = Math.log(1 - 2 * eps), lmu = Math.log(P.METER_MU);
     const emit = (i, m, p) => p === 0 ? alpha * z[i] : ((m >= 4 && m % 2 === 0 && p === m / 2) ? 0.3 * alpha * z[i] : 0);
@@ -2235,11 +2326,12 @@ const Engine = (function () {
   const targetNumeral = (t, key) => degreeNumeral(t.root, key, !!RN_LOWER[t.q], dimFam(t)) + (t.q === 'dim' ? '°' : '');
   // 코드로 조성 정하기: 구간의 코드들이 어느 조성 음계에 들어맞는지(시간 비율)에, 으뜸화음이 차지하는 시간,
   // V(7)→I 종지 수, 처음·마지막 코드가 으뜸화음인지를 더해 24개 조성 중 고름(음 분포 조성은 동점 가르기에만)
-  function keyFromChords(runs, chromaR, phraseSt) {
+  function keyFromChords(runs, chromaR, phraseSt, majPref) {   // majPref: 단조가 나란한 장조를 이만큼 넘게 앞설 때만 단조(0이면 그대로)
     const total = runs.reduce((a, r) => a + r.dur, 0);
     if (!total) return null;
     const isTonic = (st, t, mode) => st.root === t && (mode === 'major' ? (st.q === 'maj' || st.q === 'maj7') : (st.q === 'min' || st.q === 'min7'));
     let best = null;
+    const sc12 = new Float64Array(24);
     for (let t = 0; t < 12; t++) for (const mode of ['major', 'minor']) {
       const sc = new Set(keyScale({ tonic: t, mode }));
       let cover = 0, ton = 0, cad = 0;
@@ -2257,6 +2349,11 @@ const Engine = (function () {
       if (phraseSt && phraseSt.length) v += 0.4 * phraseSt.filter(st => isTonic(st, t, mode)).length / phraseSt.length;
       if (chromaR) v += P.KEY_CHROMA_W * chromaR[mode === 'major' ? t : 12 + t];   // 음 분포(조성 프로필 상관)와 섞음
       if (!best || v > best.score) best = { tonic: t, mode, score: v };
+      sc12[(mode === 'major' ? 0 : 12) + t] = v;
+    }
+    if (majPref > 0 && best.mode === 'minor') {
+      const rt = (best.tonic + 3) % 12;
+      if (best.score - sc12[rt] < majPref) return { tonic: rt, mode: 'major', score: sc12[rt] };
     }
     return best;
   }
@@ -2314,6 +2411,41 @@ const Engine = (function () {
     return { ops: [], meter: 'auto', downShift: 0, vocab: 'standard', res: 1, slash: true };
   }
 
+  // 서서히 바뀌는 구간 정리(RAMP_TIDY): 시작을 4박 앞으로, 끝을 최대 16박 뒤로 늘려 잡으므로 이웃 구간끼리 겹칠 수 있음.
+  //  시작 순서로 보며, 앞 구간과 겹치지 않을 때까지(맞닿음은 반대 방향만 허용) 되풀이해 정리:
+  //   같은 방향이 겹치거나 맞닿으면 한 구간으로 합침(합친 구간이 조건을 못 채우면 둘 중 변화가 큰 쪽만).
+  //   반대 방향이 겹치면 겹친 박 안의 템포 극점(빨라지다 느려지면 가장 빠른 박)에서 나눔. 나눈 두 구간이 모두 조건을 채우지 못하면
+  //   나누지 않고 변화가 큰 원래 구간 하나만. 한 구간이 다른 구간 안에 통째로 들면 변화가 큰 쪽만.
+  //  조건: 16박 이상, 8% 이상, 안에 갑자기 바뀐 곳(템포 표시)이 없음. 바꾼 구간은 양 끝 템포를 다시 읽음
+  //  ramps: [{ startBeat, endBeat, from, to, sgn }] (시작 순서), 결과도 같은 꼴
+  function tidyRamps(ramps, bpmAt, tempoMarks) {
+    const ok = r => r.endBeat - r.startBeat >= 16 && Math.abs(Math.log(r.to / r.from)) >= 0.08 && !tempoMarks.some(t => t.startBeat > r.startBeat && t.startBeat <= r.endBeat);
+    const mag = r => Math.abs(Math.log(r.to / r.from));
+    const out = [];
+    for (const r0 of ramps) {
+      let r = Object.assign({}, r0);
+      for (;;) {
+        const q = out[out.length - 1];
+        if (!q || r.startBeat > q.endBeat) break;                          // 겹치지 않음
+        if (r.sgn === q.sgn) {                                             // 같은 방향: 합침
+          const u = { startBeat: Math.min(q.startBeat, r.startBeat), endBeat: Math.max(q.endBeat, r.endBeat), sgn: q.sgn };
+          u.from = bpmAt[u.startBeat]; u.to = bpmAt[u.endBeat];
+          out.pop(); r = ok(u) ? u : (mag(r) > mag(q) ? r : q);
+          continue;                                                        // 합친 구간을 그 앞 구간과 다시 비교
+        }
+        if (r.startBeat === q.endBeat) break;                              // 반대 방향 맞닿음은 그대로(극점에서 나눈 결과)
+        if (r.endBeat <= q.endBeat || r.startBeat <= q.startBeat) { out.pop(); r = mag(r) > mag(q) ? r : q; continue; }   // 한쪽이 다른 쪽 안에 듦
+        let c = r.startBeat;                                               // 반대 방향 겹침: 겹친 박 안의 극점
+        for (let k = r.startBeat; k <= q.endBeat; k++) if (q.sgn * (bpmAt[k] - bpmAt[c]) > 0) c = k;
+        const qs = Object.assign({}, q, { endBeat: c, to: bpmAt[c] }), rs = Object.assign({}, r, { startBeat: c, from: bpmAt[c] });
+        if (ok(qs) && ok(rs)) { out[out.length - 1] = qs; r = rs; break; }
+        out.pop(); r = mag(r) > mag(q) ? r : q;                            // 나누면 조건을 못 채움: 변화가 큰 원래 구간 하나만(그 앞과 다시 비교)
+      }
+      if (ok(r)) out.push(r);
+    }
+    return out;
+  }
+
   function buildTimeline(A, userSet) {
     const set = Object.assign(defaultSettings(), userSet || {});
     const beats = applyOps(A, set.ops);
@@ -2337,6 +2469,56 @@ const Engine = (function () {
     // 박자·다운비트
     const sub = subdivision(beats, A.O);
     const z = downbeatEvidence(F, st0, lab0, keyAtBeat);
+    const zRaw = Float64Array.from(z);                   // 드럼·당김을 더하기 전 화성 증거(반 마디 판정용)
+    // 당김 첫 박 증거(PUSH_DB): 박 i−1의 뒤 반(8분음표 뒤)에서 화음이 바뀌어 박 i까지 이어지면, 그 바뀜은 박 i(마디 첫 박)를 앞당긴 것으로 봄.
+    //  박 단위 특징은 바뀜을 i−1과 i에 반씩 나눠 보여 첫 박이 한 박 앞으로 끌려갈 수 있음
+    if (P.PUSH_DB && n >= 16) {
+      const h0 = new Float64Array(n), h1 = new Float64Array(n);
+      for (let i = 0; i < n; i++) { h0[i] = F.t0[i]; h1[i] = 0.5 * (F.t0[i] + F.t1[i]); }
+      const A1 = trebleOf(A, h0, h1), B1 = trebleOf(A, h1, F.t1);           // 앞 반, 뒤 반
+      const an = rowsNorm(A1), bnm = rowsNorm(B1), wn = rowsNorm(F.treb);
+      const dotX = (X, i, Y, j) => { let s2 = 0; for (let k = 0; k < 12; k++) s2 += X[i * 12 + k] * Y[j * 12 + k]; return s2; };
+      const pz = new Float64Array(n);
+      for (let i = 1; i < n; i++) pz[i] = Math.max(0, (1 - dotX(an, i - 1, bnm, i - 1)) - (1 - dotX(bnm, i - 1, wn, i)));   // 박 i−1 안에서 바뀌고, 뒤 반이 박 i와 같음
+      const zp = standardize(pz);
+      for (let i = 0; i < n; i++) z[i] += P.PD_W * zp[i];
+    }
+    // 드럼 첫 박 증거(DRUM_DB): 킥은 첫 박(과 3박), 스네어는 2·4박. 킥과 스네어가 박마다 엇갈려 오는 곡(록·팝 백비트)에서만
+    //  DD_REG: '엇갈림'을 곡 전체 짝·홀 치우침 대신 (킥−스네어) 박 열의 자기상관으로 판정(1박 뒤는 반대, 2박 뒤는 같음). 3박자·박 미끄러짐에 강함
+    let bbReg = false, fbBoth = 0;                       // fbBoth: 킥·스네어 백비트가 국소적으로 확인된 박의 비율(DP_BOTH)
+    if ((P.DRUM_DB || P.DD_EVEN || P.DRUM_PAR) && n >= 16) {
+      const kk = new Float64Array(n), ss = new Float64Array(n), kp = [0, 0], sp = [0, 0];
+      for (let i = 0; i < n; i++) { const f = timeToFrame(beats[i]); kk[i] = sampleMax(A.drum.K, f, 2); ss[i] = sampleMax(A.drum.Sn, f, 2); kp[i % 2] += kk[i]; sp[i % 2] += ss[i]; }
+      const skK = (kp[0] - kp[1]) / (kp[0] + kp[1] + 1e-12), skS = (sp[0] - sp[1]) / (sp[0] + sp[1] + 1e-12);
+      const alt = skK * skS < 0 ? Math.min(Math.abs(skK), Math.abs(skS)) : 0;      // 킥·스네어가 서로 다른 박(짝/홀)에 몰린 정도
+      const zk = standardize(kk), zs = standardize(ss), bb = new Float64Array(n);
+      for (let i = 0; i < n; i++) bb[i] = zk[i] - zs[i];
+      const a1 = acorr(bb, 1), a2 = acorr(bb, 2);
+      bbReg = a1 <= -P.DD_AC1 && a2 >= P.DD_AC2;
+      const gate = P.DD_REG ? bbReg : alt >= P.DD_GATE;
+      if (P.DRUM_DB && gate) for (let i = 0; i < n; i++) z[i] += P.DD_W * bb[i];
+      // 드럼 짝·홀 사전(DRUM_PAR): 고른 백비트 곡에서 첫 박은 킥 쪽 박(1·3박), 스네어 쪽 박(2·4박)이 아님.
+      //  박마다 앞뒤 DP_WIN박 안의 (킥−스네어)×(−1)^j 합을 절댓값 합으로 나눈 국소 일관도(−1~1)로 그 박이 킥 쪽인지 정함.
+      //  드럼 세기 자체는 쓰지 않음(1·3박 구분은 화성 증거에 맡김). 박이 한 칸 미끄러지거나 3·5박 마디가 끼면 국소 일관도가 0 가까이로 떨어져 스스로 약해짐
+      if (P.DRUM_PAR && (bbReg || !P.DP_GATE)) {
+        const W = P.DP_WIN, sg = i => (i % 2 ? -1 : 1), par = new Float64Array(n);
+        // 국소 일관도: 앞뒤 W박 안에서 x×(−1)^j 합 / |x| 합, 박 i 쪽으로 부호를 맞춤(+면 박 i가 x가 큰 쪽)
+        const loc = x => { const c = new Float64Array(n);
+          for (let i = 0; i < n; i++) { let s1 = 0, s2 = 0; for (let j = Math.max(0, i - W); j <= Math.min(n - 1, i + W); j++) { s1 += sg(j) * x[j]; s2 += Math.abs(x[j]); } c[i] = sg(i) * (s2 > 1e-9 ? s1 / s2 : 0); }
+          return c; };
+        if (P.DP_BOTH) {
+          // 킥 엇갈림과 스네어 엇갈림이 각각 뚜렷하고(DP_TH 이상) 서로 반대 박에 있을 때만(드럼 백비트). 기타 스트로크처럼 한쪽만 엇갈리면 0
+          const ck = loc(zk), cs = loc(Float64Array.from(zs, v => -v));
+          let nb = 0;
+          for (let i = 0; i < n; i++) if (Math.abs(ck[i]) >= P.DP_TH && Math.abs(cs[i]) >= P.DP_TH && ck[i] * cs[i] > 0) { par[i] = Math.sign(ck[i]) * Math.min(Math.abs(ck[i]), Math.abs(cs[i])); nb++; }
+          // DP_SNARE: 곡의 DP_FB 이상에서 킥·스네어 백비트가 확인되면(드럼 세트가 있음), 킥이 흐린 구간(저역에 베이스·당김 강세)에서는
+          //  스네어 엇갈림만으로(DP_STH 이상) 짝·홀을 정함. 드럼 없는 독주 기타(스트로크 강세)는 백비트 확인이 안 돼 쓰지 않음
+          fbBoth = nb / n;
+          if (P.DP_SNARE && nb >= P.DP_FB * n) for (let i = 0; i < n; i++) if (!par[i] && Math.abs(cs[i]) >= P.DP_STH) par[i] = cs[i];
+        } else par.set(loc(bb));
+        for (let i = 0; i < n; i++) z[i] += P.DP_W * par[i];
+      }
+    }
     let met, alt = null;
     if (set.meter === 'auto') {
       // 4박을 기본으로, 다른 박자는 첫 박 대비도가 충분히 앞설 때만(드문 박자일수록 큰 차이를 요구)
@@ -2344,8 +2526,25 @@ const Engine = (function () {
       const margin = sub.triple ? { 4: 0, 2: 0.3 } : { 4: 0, 3: 0.25, 5: 0.3, 7: 0.3 };
       const r = cands.map(m => downbeatViterbi(z, m));
       met = r[0];
+      // 홀수 박자(3·5·7) 거부: 고른 백비트(DD_EVEN), 또는 첫 박 증거가 그 마디 길이로 되풀이되지 않음(METER_AC: 자기상관 m+2m ≤ 4+8)
+      const oddVeto = mm => {
+        if (sub.triple || mm % 2 === 0) return false;
+        if (P.DD_EVEN && bbReg) return true;
+        if (P.DP_EVEN && fbBoth >= P.DP_EVEN_FB) return true;
+        if (P.METER_AC && acorr(z, mm) + acorr(z, 2 * mm) <= acorr(z, 4) + acorr(z, 8)) return true;
+        return false;
+      };
       // 다른 박자는 대비도가 충분히 앞서고, 마디 길이를 억지로 늘이거나 줄여 맞춘 마디가 적을 때만
-      for (const x of r.slice(1)) if ((sub.triple || !P.METERS_EXT || x.irr <= 0.15) && x.contrast - margin[x.m] > met.contrast - margin[met.m]) met = x;
+      // 2박 대 4박(겹박자 12/8 대 6/8)은 드럼 짝·홀 사전이 1·3박을 똑같이 올려 가르지 못하므로, DD_HALF_RAW면 더하기 전 화성 증거의 대비도로 견줌
+      const rawC = x => { let s0 = 0, c0 = 0, s1 = 0, c1 = 0; for (let i = 0; i < n; i++) { if (x.pos[i] === 0) { s0 += zRaw[i]; c0++; } else { s1 += zRaw[i]; c1++; } } return (c0 ? s0 / c0 : 0) - (c1 ? s1 / c1 : 0); };
+      const cOf = (x, y) => (P.DD_HALF_RAW && (P.DRUM_PAR || P.DRUM_DB || P.PUSH_DB) && x.m % 2 === 0 && y.m % 2 === 0) ? rawC(x) : x.contrast;
+      for (const x of r.slice(1)) if ((sub.triple || !P.METERS_EXT || x.irr <= 0.15) && cOf(x, met) - margin[x.m] > cOf(met, x) - margin[met.m] && !oddVeto(x.m)) met = x;
+      // 반 마디 판정을 화성 증거만으로(DD_HALF_RAW): 킥(1·3박)이 셋째 박 증거를 첫째 박만큼 올려 2박으로 오판하지 않게
+      if (P.DD_HALF_RAW && met.m === 4 && (P.DRUM_DB || P.PUSH_DB || P.DRUM_PAR)) {
+        let s0 = 0, c0 = 0, sh = 0, ch = 0;
+        for (let i = 0; i < n; i++) { if (met.pos[i] === 0) { s0 += zRaw[i]; c0++; } else if (met.pos[i] === 2) { sh += zRaw[i]; ch++; } }
+        met = Object.assign({}, met, { half: ch && c0 ? (sh / ch) / Math.max(1e-9, s0 / c0) : 0 });
+      }
       // 4박에서 셋째 박(반 마디)의 첫 박 증거가 첫째 박과 거의 같으면 실제 마디는 2박(반 층위로 잡힌 템포 등)
       if (P.METERS_EXT && !sub.triple && met.m === 4 && met.half >= P.HALF_BAR) {
         const pos2 = Int8Array.from(met.pos, p => p % 2);
@@ -2365,8 +2564,24 @@ const Engine = (function () {
     let pos = met.pos;
     // 박자 변화가 확연할 때만 박자 변화 모델의 결과를 씀(없으면 위의 결과 그대로)
     let mOf = null, meterSegs = null;
-    if (P.METER_CHANGE && set.meter === 'auto' && !sub.triple && !set.downShift && !(P.BAR_POINTER && A.dbn)) {
-      const vm = variableMeter(z, m);
+    if (P.METER_CHANGE && set.meter === 'auto' && !sub.triple && !set.downShift && !(P.BAR_POINTER && A.dbn) && !(P.DD_EVEN && bbReg)) {
+      let vm = variableMeter(z, m);
+      // METER_AC_VM: 바뀐 박자 구간마다 첫 박 증거가 그 마디 길이로 되풀이되는지(자기상관 m+2m > 주 박자 M+2M, 구간 앞뒤 한 마디 포함) 확인.
+      //  뒷받침되지 않는 박자는 빼고 다시 풂(예: 끝맺음에서 코드가 한 박 앞서 바뀌어 3/4로 잡히는 것)
+      if (P.METER_AC_VM && vm) {
+        const excl = [];
+        for (let it = 0; it < 4 && vm; it++) {
+          let bad = 0;
+          for (let k = 0; k < vm.segs.length; k++) {
+            const g = vm.segs[k]; if (g.m === m) continue;
+            const end = k + 1 < vm.segs.length ? vm.segs[k + 1].startBeat : n;
+            const zs = z.slice(Math.max(0, g.startBeat - m), Math.min(n, end + m));
+            if (acorr(zs, g.m) + acorr(zs, 2 * g.m) <= acorr(zs, m) + acorr(zs, 2 * m)) { if (!excl.includes(g.m)) excl.push(g.m); bad++; }
+          }
+          if (!bad) break;
+          vm = variableMeter(z, m, undefined, undefined, excl);
+        }
+      }
       if (vm) { pos = vm.pos; mOf = vm.mk; meterSegs = vm.segs; }
     }
     if (set.downShift) {
@@ -2454,7 +2669,7 @@ const Engine = (function () {
     }
     indexSegs();
     // 구간마다 인식된 코드로 조성을 다시 정함(음 분포만으로는 나란한조·5도 관계 조를 헷갈릴 수 있음)
-    segs.forEach(g => {
+    const decideKey = (g, majPref) => {
       const runs = [];
       for (let s2 = g.start * res; s2 < g.end * res; s2++) {
         const st = states[lab[s2]];
@@ -2475,9 +2690,79 @@ const Engine = (function () {
         bc++;
         if (bc % 4 === 0 && st.root >= 0) phraseSt.push(st);
       }
-      const k = runs.length >= 3 ? keyFromChords(runs, chromaR, phraseSt) : null;
+      const k = runs.length >= 3 ? keyFromChords(runs, chromaR, phraseSt, majPref) : null;
       if (k) g.key = { tonic: k.tonic, mode: k.mode, score: g.key.score };
-    });
+    };
+    segs.forEach(g => decideKey(g, 0));
+    // 나란한 장·단조로 갈린 이웃 구간은 하나로 합쳐 조를 다시 정함(KEY_REL_MERGE): 조표가 같아 코드 철자는 같고,
+    //  나란한조 사이 이동(C 장조 ↔ A 단조)은 전조로 적지 않는다는 관례대로. 합친 구간 전체의 코드로 장·단조를 고름
+    if (P.KEY_REL_MERGE) {
+      const rel = (a, b) => a.mode !== b.mode && (a.mode === 'major' ? a.tonic === (b.tonic + 3) % 12 : b.tonic === (a.tonic + 3) % 12);
+      for (let changed = true; changed;) {
+        changed = false;
+        for (let g = segs.length - 1; g > 0; g--) {
+          if (!rel(segs[g - 1].key, segs[g].key)) continue;
+          segs[g - 1].end = segs[g].end; segs.splice(g, 1);
+          indexSegs(); decideKey(segs[g - 1], P.KEY_REL_MAJ); changed = true;
+        }
+      }
+      indexSegs();
+    }
+    // 같은 조가 이웃한 구간은 하나로(KEY_MERGE): 구간을 나눈 조표 부류는 달라도 코드로 다시 정한 조가 같을 수 있음.
+    //  그대로 두면 바뀌지 않았는데 "C 장조 → C 장조"처럼 전조로 적힘. 코드·이름 철자는 두 구간이 같은 조라 그대로
+    if (P.KEY_MERGE) {
+      for (let g = segs.length - 1; g > 0; g--) {
+        const a = segs[g - 1].key, b = segs[g].key;
+        if (a.tonic === b.tonic && a.mode === b.mode) { segs[g - 1].end = segs[g].end; segs.splice(g, 1); }
+      }
+      indexSegs();
+    }
+    // 코드 이름 다듬기(경계·조성은 그대로, 이름만): 6화음으로 읽히는 m7 자리바꿈과 3음이 뚜렷한 sus4.
+    //  조성을 코드로 다시 정한 뒤에 하므로 조성 판정에는 영향이 없고, 조성은 확정된 그 자리의 조를 씀
+    if (P.M7_SIXTH || P.SUS_GATE) {
+      const idx = new Map(); states.forEach((x, k) => idx.set(x.id, k));
+      const keyFin = s2 => segs[segOfBeat[Math.floor(s2 / res)]].key;
+      // M7_SIXTH: 조성 안 m7(ii7·iii7·vi7 등)이 3음을 베이스로 오래 머물면(스쳐 가는 베이스는 앞에서 이미 합침) 그 음은 같은 구성음의
+      //  6화음(Am7/C = C6)의 근음이므로, 악보 관례대로 베이스 위 장3화음으로 적는다(조성 밖 m7, 예: E♭ 장조의 A♭m7/C♭ 는 그대로).
+      //  베이스 크로마에서 그 음이 구간 합으로 가장 셀 때만(베이스가 불확실하면 근음을 바꾸지 않음).
+      //  바로 앞뒤에 같은 m7 이 다른 베이스로 붙어 있으면(Gm7/B♭ → Gm7) 한 코드 안에서 베이스만 움직인 것이라 그대로 둔다
+      if (P.M7_SIXTH) for (let s2 = 0; s2 < nS;) {
+        const x = states[lab[s2]];
+        let e = s2; while (e < nS && lab[e] === lab[s2]) e++;
+        const same = q => q >= 0 && q < nS && states[lab[q]].baseId === x.baseId;
+        if (x.q === 'min7' && x.inv === 1 && inKeyAll(x, keyFin(s2)) && !same(s2 - 1) && !same(e)) {
+          const bs = new Float64Array(12);
+          for (let q = s2; q < e; q++) for (let k = 0; k < 12; k++) bs[k] += bass[q * 12 + k];
+          let top = 0; for (let k = 1; k < 12; k++) if (bs[k] > bs[top]) top = k;
+          const k = idx.get('maj:' + x.bass + '/' + x.bass);
+          // 베이스를 믿을 수 있을 때만(M7_BASSREL): 구간 베이스에서 그 음의 몫이 M7_SHARE 미만이면서 박마다 가장 센 음이 그 음인 칸이
+          //  M7_CONS 비율 미만이면(여러 음이 섞여 흐릿함) 베이스를 잘못 들었을 수 있으므로 근음을 바꾸지 않는다
+          let bsum = 0, nTop = 0;
+          for (let q = s2; q < e; q++) { let tq = 0, es = 0; for (let kk = 0; kk < 12; kk++) { es += bass[q * 12 + kk]; if (bass[q * 12 + kk] > bass[q * 12 + tq]) tq = kk; } if (es > 0 && tq === x.bass) nTop++; }
+          for (let kk = 0; kk < 12; kk++) bsum += bs[kk];
+          const bassOk = !P.M7_BASSREL || bs[x.bass] >= P.M7_SHARE * bsum || nTop >= P.M7_CONS * (e - s2);
+          // 같은 코드 사이에 잠깐 낀 m7(M7_NEIGHBOR, 예: Em7 – F♯m7/A – Em7)은 스쳐 가는 화음이라 근음을 바꾸면 없는 근음 진행이 생김
+          const passing = P.M7_NEIGHBOR && s2 > 0 && e < nS && states[lab[s2 - 1]].baseId === states[lab[e]].baseId;
+          if (k !== undefined && bassOk && !passing && (!P.M7_BASSTOP || (top === x.bass && bs[top] > 0))) for (let q = s2; q < e; q++) lab[q] = k;
+        }
+        s2 = e;
+      }
+      // SUS_GATE: sus4 로 이어진 구간마다 원 트레블 크로마의 4음 합과 장3·단3음 합을 견줘, 3음이 4음의 SUS_RATIO 배 이상이면
+      //  (4음이 3음을 뚜렷이 앞서지 않으면) 선율·드럼에 섞인 4음으로 보고 같은 근음의 3화음(더 센 3음 쪽)으로 적는다
+      if (P.SUS_GATE) for (let s2 = 0; s2 < nS;) {
+        const x = states[lab[s2]];
+        let e = s2; while (e < nS && lab[e] === lab[s2]) e++;
+        if (x.q === 'sus4') {
+          const r = x.root; let s4 = 0, M3 = 0, m3 = 0;
+          for (let k = s2; k < e; k++) { s4 += treb[k * 12 + (r + 5) % 12]; M3 += treb[k * 12 + (r + 4) % 12]; m3 += treb[k * 12 + (r + 3) % 12]; }
+          if (Math.max(M3, m3) >= P.SUS_RATIO * s4) {
+            const k = idx.get((M3 >= m3 ? 'maj:' : 'min:') + r + '/' + r);
+            if (k !== undefined) for (let q = s2; q < e; q++) lab[q] = k;
+          }
+        }
+        s2 = e;
+      }
+    }
     const namesSeg = segs.map(g => spelling(g.key));   // 구간마다 그 조성에 맞는 ♯/♭ 표기
 
     // 마디 구성
@@ -2584,9 +2869,10 @@ const Engine = (function () {
         const sgn = dir[i];
         for (let k = j + 1; k < Math.min(n, j + 17); k++) if (sgn * Math.log(bpmAt[k] / bpmAt[b2]) > 0.01) b2 = k;
         const from = bpmAt[a2], to = bpmAt[b2];
-        if (b2 - a2 >= 16 && Math.abs(Math.log(to / from)) >= 0.08 && !tempoMarks.some(t => t.startBeat > a2 && t.startBeat <= b2)) ramps.push({ startBeat: a2, endBeat: b2, from, to });
+        if (b2 - a2 >= 16 && Math.abs(Math.log(to / from)) >= 0.08 && !tempoMarks.some(t => t.startBeat > a2 && t.startBeat <= b2)) ramps.push({ startBeat: a2, endBeat: b2, from, to, sgn });
         i = j + 1;
       }
+      if (P.RAMP_TIDY && ramps.length > 1) { const t = tidyRamps(ramps, bpmAt, tempoMarks); ramps.length = 0; ramps.push(...t); }
     }
     return {
       empty: false, beats, pos, barOfBeat, bars, res,
@@ -2620,7 +2906,7 @@ const Engine = (function () {
     const kn = x => x.replace(/♯/g, '#').replace(/♭/g, 'b');
     const cam = !!(meta && meta.notation === 'camelot');            // 카멜롯 표기
     const kstr = k => cam ? kn(k.name) + '(' + k.cam + ')' : kn(k.name);
-    const keys = TL.keys && TL.keys.length ? TL.keys : [TL.key];
+    const keys = (TL.keys && TL.keys.length ? TL.keys : [TL.key]).filter((k, i, a) => i === 0 || k.name !== a[i - 1].name);   // 곧바로 이어지는 같은 조는 하나로
     const tps = TL.tempos || [], mts = TL.meters || [];
     head.push('BPM ' + (tps.length > 1 ? tps.map(t => Math.round(t.bpm)).join(' → ') : TL.bpm.toFixed(1)), '박자 ' + (mts.length > 1 ? mts.map(x => x.label).join(' → ') : TL.meter.label), '조성 ' + keys.map(kstr).join(' → '));
     out.push('# ' + head.join('  |  '));
@@ -2650,7 +2936,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     // 테스트용 내부 함수
-    _: { camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
+    _: { tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
   };
 })();
 
@@ -2732,12 +3018,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     flat: [], flatT: new Float64Array(0), barT0: new Float64Array(0), barEls: [],
     strikes: [], strikeT: new Float64Array(0),
     cur: { bar: -1, beat: -1, ev: -2, sec: -1 }, ledN: 0, scrub: null, width: 0,
+    trow: { ramps: [], pills: [] },                      // 템포 줄(슬래시 아래)에 그릴 서서히 구간과 흰 알약
   };
   let loadToken = 0;
 
   // ---------------- 오디오 ----------------
   const AC = window.AudioContext || window.webkitAudioContext;
-  let ctx = null, master = null, musicGain = null, clickGain = null, pianoGain = null, pianoBus = null, clickHi = null, clickLo = null;
+  let ctx = null, master = null, musicGain = null, clickGain = null, pianoGain = null, pianoBus = null, clickHi = null, clickLo = null, clickSub = null;
   function ensureCtx() {
     if (ctx) return ctx;
     ctx = new AC();
@@ -2750,13 +3037,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     musicGain.connect(master); clickGain.connect(master); pianoGain.connect(master);
     musicGain.gain.value = prefs.musicVol; clickGain.gain.value = prefs.clickVol; pianoGain.gain.value = prefs.pianoVol;
     pianoBus = buildPianoChain(pianoGain);
-    clickHi = makeClick(1850, 0.9);
-    clickLo = makeClick(1250, 0.6);
+    clickHi = makeClick(1850, 0.9);                     // 첫 박 '띡'
+    clickLo = makeClick(1250, 0.6);                     // 나머지 박 '딱'
+    clickSub = makeClick(2600, 0.3, 0.008, 0.25);       // ½박 단위일 때 박 사이 '틱': 높고 작고 짧게(박 클릭과 헷갈리지 않게)
     ctx.onstatechange = () => { if (ctx.state !== 'running' && player.playing) player.pause(); };
     return ctx;
   }
-  // 클릭 소리: 샘플 0에서 곧바로 시작(발음 지연 없음) + 짧은 감쇠
-  function makeClick(freq, amp) {
+  // 클릭 소리: 샘플 0에서 곧바로 시작(발음 지연 없음) + 짧은 감쇠(tau 초), nz: 어택 잡음 세기
+  function makeClick(freq, amp, tau = 0.016, nzAmp = 0.5) {
     const sr = ctx.sampleRate, n = Math.round(sr * 0.06);
     const b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
     let seed = 12345;
@@ -2764,8 +3052,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     for (let i = 0; i < n; i++) {
       const t = i / sr;
       const tone = Math.sin(2 * Math.PI * freq * t) + 0.3 * Math.sin(2 * Math.PI * freq * 2.02 * t);
-      const nz = t < 0.002 ? rnd() * (1 - t / 0.002) * 0.5 : 0;   // 어택을 또렷하게
-      d[i] = amp * (0.75 * tone * Math.exp(-t / 0.016) + nz);
+      const nz = t < 0.002 ? rnd() * (1 - t / 0.002) * nzAmp : 0;   // 어택을 또렷하게
+      d[i] = amp * (0.75 * tone * Math.exp(-t / tau) + nz);
     }
     return b;
   }
@@ -3017,7 +3305,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
   // 클릭은 setInterval 타이밍이 아니라 AudioContext 시계에 미리(200 ms 앞) 예약한다.
   // 음악 소스와 같은 시계를 쓰므로 클릭 = startCtx + (비트 시각 − 재생 시작 위치) 로 샘플 단위 정렬된다.
   const player = {
-    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, timer: 0, clicks: [],
+    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, timer: 0, clicks: [], subFrom: -1,
     dur() { return S.buffer ? S.buffer.duration : 0; },
     // 시작 예약(60 ms) 전에는 이동한 지점으로 고정: 그래야 → 키를 연달아(자동 반복) 눌러도 다음 마디로 계속 넘어감
     pos() { return this.playing ? this.startOff + Math.max(0, ctx.currentTime - this.startCtx) : this.pausedAt; },
@@ -3081,24 +3369,39 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       const off = prefs.offsetMs / 1000;
       const t = this.playing ? Math.max(this.startOff, this.pos()) : this.pausedAt;
       this.next = lastLE(S.TL.beats, t - off - 1e-4) + 1;
+      this.subFrom = this.next - 1;                       // 지금 위치가 들어 있는 박의 뒤쪽 '틱'(½박 단위)은 아직 남았을 수 있음
+    },
+    // 클릭 하나를 곡 시각 t(클릭 타이밍 보정 포함)에 예약. 이미 지난 시각이나 곡 밖이면 건너뜀
+    tick(t, buf, now) {
+      const when = this.startCtx + (t - this.startOff);
+      if (t < 0 || t > this.dur() || when < now - 0.004) return;
+      const s = ctx.createBufferSource();
+      s.buffer = buf;
+      s.connect(clickGain);
+      s.start(Math.max(when, now));
+      s.onended = () => { const k = this.clicks.indexOf(s); if (k >= 0) this.clicks.splice(k, 1); try { s.disconnect(); } catch (e) { } };
+      this.clicks.push(s);
+    },
+    // ½박 단위일 때 박 i 뒤의 박 사이(다음 박과의 한가운데, 마지막 박은 앞 간격의 절반 뒤) 시각
+    subAfter(i) {
+      const b = S.TL.beats;
+      if (i < 0 || i >= b.length) return -1;
+      if (i + 1 < b.length) return 0.5 * (b[i] + b[i + 1]);
+      return b.length > 1 ? b[i] + 0.5 * (b[i] - b[i - 1]) : -1;
     },
     schedule() {
       if (!this.playing || !S.TL) return;
       const beats = S.TL.beats, off = prefs.offsetMs / 1000, now = ctx.currentTime;
       const horizon = this.pos() + (document.hidden ? 1.5 : 0.2);   // 백그라운드 탭은 타이머가 느려지므로 길게
+      // ½박 단위(코드 변화 단위 ½박)면 박 사이에도 작은 '틱': 띡(첫 박)·틱·딱·틱·딱·틱·딱·틱
+      //  박을 예약할 때 그 박 뒤의 '틱'을 함께 예약(박보다 반 박 늦으므로 느린 곡에서도 늦지 않음)
+      const sub = prefs.metro && S.TL.res === 2;
+      if (this.subFrom >= 0) { const ts = this.subAfter(this.subFrom); if (sub && ts >= 0) this.tick(ts + off, clickSub, now); this.subFrom = -1; }
       while (this.next < beats.length) {
         const bt = beats[this.next] + off;
         if (bt > horizon) break;
-        const when = this.startCtx + (bt - this.startOff);
-        if (prefs.metro && bt >= 0 && bt <= this.dur() && when >= now - 0.004) {
-          const acc = prefs.accent && S.TL.pos[this.next] === 0;
-          const s = ctx.createBufferSource();
-          s.buffer = acc ? clickHi : clickLo;
-          s.connect(clickGain);
-          s.start(Math.max(when, now));
-          s.onended = () => { const k = this.clicks.indexOf(s); if (k >= 0) this.clicks.splice(k, 1); try { s.disconnect(); } catch (e) { } };
-          this.clicks.push(s);
-        }
+        if (prefs.metro) this.tick(bt, prefs.accent && S.TL.pos[this.next] === 0 ? clickHi : clickLo, now);
+        if (sub) { const ts = this.subAfter(this.next); if (ts >= 0) this.tick(ts + off, clickSub, now); }
         this.next++;
       }
       // 코드 연주: 음악 시각 그대로 예약(클릭 타이밍 보정은 적용하지 않음)
@@ -3137,7 +3440,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     $('intro').hidden = true; $('app').hidden = true; $('busy').hidden = false;
     $('busyFile').textContent = file.name;
     setProgress(0, '파일 읽는 중');
-    const restore = () => { $('busy').hidden = true; if (S.buffer) $('app').hidden = false; else $('intro').hidden = false; };
+    const restore = () => {
+      $('busy').hidden = true;
+      if (!S.buffer) { $('intro').hidden = false; return; }
+      $('app').hidden = false;
+      // 숨겨진 사이 화면 모드(좁은 화면)나 폭이 바뀌었으면 다시 그림(숨겨진 동안에는 다시 그리지 않으므로)
+      if (S.TL && (S.renderNarrow !== narrow.matches || Math.abs($('chart').clientWidth - S.width) > 30)) { renderChart(); S.cur.bar = -1; S.cur.beat = -1; }
+    };
     let buf;
     try {
       const ab = await readFile(file);
@@ -3181,6 +3490,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
   // 설정이 바뀔 때마다: 타임라인 재구성 → 화면 갱신 → 메트로놈 재동기화
   function rebuild() {
     S.TL = Engine.buildTimeline(S.A, S.set);
+    S.trow = planTempoRow(S.TL);
     buildFlat();
     buildStrikes();
     S.cur = { bar: -1, beat: -1, ev: -2, sec: -1 };
@@ -3226,6 +3536,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     return h;
   }
   const keyShown = k => (camMode() ? k.name + '(' + k.cam + ')' : k.name);
+  // 화면에 적을 조성 목록: 곧바로 이어지는 같은 조는 하나로(엔진이 같은 조 구간을 나눠 주더라도 "C 장조 → C 장조"로 적지 않음)
+  const keysShown = TL => (TL.keys && TL.keys.length ? TL.keys : [TL.key]).filter((k, i, a) => i === 0 || k.name !== a[i - 1].name);
   function chordHTML(l) {
     if (l.nc) return 'N.C.';
     if (romMode() && l.rn) return rnHTML(l.rn);
@@ -3233,8 +3545,6 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     return esc(l.root) + (l.base ? '<span class="q">' + esc(l.base) + '</span>' : '') +
       (l.ext ? '<sup>' + esc(l.ext) + '</sup>' : '') + (l.bass ? '<span class="bs">/' + esc(l.bass) + '</span>' : '');
   }
-  // 대략적인 글자 폭(em): 근음 1em, 성질 0.8em, 첨자 0.6em
-  const labelEm = l => l.nc ? 2.2 : (romMode() && l.rn) ? 0.58 * (l.rn.acc + l.rn.num).length + 0.4 * l.rn.qual.length + (l.rn.fig.length === 2 ? 0.34 : 0.34 * l.rn.fig.length) + 0.34 * l.rn.sus.length + (l.rn.sec ? 0.46 * (1 + l.rn.sec.length) : 0) : (camMode() && l.cam) ? 0.56 * l.cam.code.length + 0.34 * l.cam.ext.length : 0.56 * l.root.length + 0.46 * l.base.length + 0.34 * l.ext.length + (l.bass ? 0.46 * (1 + l.bass.length) : 0);
 
   function renderFacts() {
     const TL = S.TL, A = S.A;
@@ -3255,7 +3565,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     $('fBpm').title = tps && tps.length > 1 ? '템포 ' + tps.map(t => Math.round(t.bpm)).join(' → ') + ': ' + tps.slice(1).map(t => t.barNum + '마디 ' + t.beat + '박부터 ' + Math.round(t.bpm)).join(', ') : '';
     $('fMeter').textContent = mts && mts.length > 1 ? mts.map(x => x.label).join(' → ') : TL.meter.label;
     $('fMeter').title = mts && mts.length > 1 ? mts.slice(1).map(x => x.barNum + '마디부터 ' + x.label).join(', ') : '';
-    const ks = TL.keys && TL.keys.length ? TL.keys : [TL.key];
+    const ks = keysShown(TL);
     $('fKey').textContent = ks.map(keyShown).join(' → ');
     $('fKey').title = ks.length > 1 ? ks.slice(1).map(k => k.barNum + '마디 ' + k.beat + '박부터 ' + keyShown(k)).join(', ') : '';
     const full = TL.bars.filter(b => !b.pickup).length;
@@ -3265,6 +3575,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
 
   function renderChart() {
     const chart = $('chart'), TL = S.TL;
+    if (!TL.empty) measureChords(TL);                    // 차트를 비우기 전(문서가 깨끗할 때) 이름 폭을 잼
     chart.textContent = '';
     S.barEls = [];
     if (TL.empty) {
@@ -3276,33 +3587,313 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     }
     const per = narrow.matches ? 2 : 4;
     chart.style.setProperty('--per', per);
-    const numW = narrow.matches ? 26 : 36;
-    const barW = Math.max(60, (chart.clientWidth - numW) / per - 22);
-    const fontPx = narrow.matches ? 21 : 25;
-    S.width = chart.clientWidth;
+    S.width = chart.clientWidth; S.renderNarrow = narrow.matches;
     const m = TL.meter.m, res = TL.res;
     S.meterAt = {}; (TL.meters || []).slice(1).forEach(x => { S.meterAt[x.bar] = x; });           // 박자가 바뀌는 마디
-    S.tempoAt = {}; (TL.tempos || []).forEach(x => { (S.tempoAt[x.bar] = S.tempoAt[x.bar] || []).push(x); });   // 템포 표시(곡 시작 포함)
-    // 서서히 바뀌는 구간: 틀 글자는 겹치는 박이 가장 많은 마디에 한 번만, 다 바뀐 박에는 흰 알약(처음부터 붙어 있음)
-    S.rampText = []; S.rampTextBar = []; S.rampParts = []; S.rampPill = [];
-    (TL.ramps || []).forEach((r, k) => {
+    S.tempoAt = {}; S.trow.pills.forEach(x => { (S.tempoAt[x.bar] = S.tempoAt[x.bar] || []).push(x); });   // 흰 알약(곡 시작·급변·도착), 박마다 하나
+    // 서서히 바뀌는 구간: 틀 글자는 겹치는 박이 가장 많은 마디에 한 번만(줄 배치에서 알약에 밀려 안 들어가면 다른 조각으로)
+    S.rampText = []; S.rampTextBar = []; S.rampTextHome = []; S.rampTextMode = []; S.rampParts = []; S.rampPill = []; S.rampTips = [];
+    S.rampNeed = null; S.trowMoved = null;               // 새로 그린 이름표: 글자 폭은 다시 재고, 되돌릴 목록은 비움
+    S.barLabels = [];                                    // 마디마다 코드 이름(크기·줄은 잰 폭으로 layoutChords가 정함)
+    S.trow.ramps.forEach((r, k) => {
       let best = -1, bestN = -1;
       for (let bi = r.bar; bi <= r.endBar; bi++) { const b0 = TL.bars[bi], n0 = Math.min(r.endBeat, b0.startBeat + b0.nBeats) - Math.max(r.startBeat, b0.startBeat); if (n0 > bestN) { bestN = n0; best = bi; } }
       S.rampTextBar[k] = best;
-      (S.tempoAt[r.endBar] = S.tempoAt[r.endBar] || []).push({ bpm: r.to, startBeat: r.endBeat, bar: r.endBar, barNum: r.endBarNum, beat: r.endBeatNum, ramp: k });
     });
     S.keyAt = {};                                        // 마디 번호(인덱스) → 그 마디에서 시작하는 조성들
-    (TL.keys || []).slice(1).forEach(k => { (S.keyAt[k.bar] = S.keyAt[k.bar] || []).push(k); });
+    keysShown(TL).slice(1).forEach(k => { (S.keyAt[k.bar] = S.keyAt[k.bar] || []).push(k); });
     const frag = document.createDocumentFragment();
     for (let i = 0; i < TL.bars.length; i += per) {
       const line = document.createElement('div'); line.className = 'line';
+      for (let j = i; j < Math.min(i + per, TL.bars.length); j++) if (S.keyAt[j] || S.meterAt[j]) line.classList.add('kp');   // 검은 알약이 위로 삐져나오므로 윗줄과 간격을 띄움
       const num = document.createElement('div'); num.className = 'num'; num.textContent = TL.bars[i].num;
       const row = document.createElement('div'); row.className = 'bars';
-      for (let j = i; j < Math.min(i + per, TL.bars.length); j++) row.appendChild(makeBar(TL.bars[j], j, j === TL.bars.length - 1, m, res, barW, fontPx));
+      for (let j = i; j < Math.min(i + per, TL.bars.length); j++) row.appendChild(makeBar(TL.bars[j], j, j === TL.bars.length - 1, m, res));
       line.appendChild(num); line.appendChild(row); frag.appendChild(line);
     }
+    S.laneAdj = 0; const cw0 = chart.clientWidth; layoutChords(cw0);   // 차트를 붙이기 전에 크기·줄을 정함(붙인 뒤 다시 배치하지 않게)
     chart.appendChild(frag);
+    layoutTempoRow();
+    // 붙인 뒤 확인: 차트 폭이 바뀌었거나(스크롤바가 생기는 등) 계산한 레인 폭이 실제보다 크면 다시 정함
+    const bl0 = S.barLabels.find(b => b && !b.final), cw1 = chart.clientWidth;
+    if (bl0) { const adj = bl0.lane.getBoundingClientRect().width - laneWidth(cw1, false); if (adj < -0.05 || cw1 !== cw0) { S.laneAdj = Math.min(0, adj); layoutChords(cw1); } }
+    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { chordWCache.clear(); S.rampNeed = null; measureChords(S.TL); layoutChords(); layoutTempoRow(); });
   }
+
+  // 템포 줄에 그릴 것을 박 단위로 정리: 엔진이 겹치는 구간을 주더라도 화면에는 겹쳐 그리지 않음
+  //  구간: 시작 순서로 보고 앞 구간과 겹치면 뺌(맞닿는 것은 둠: 맞닿은 박의 알약은 줄 배치에서 틀이 비킴).
+  //        급변 표시가 안에 든 구간도 뺌(엔진 규칙과 같음)
+  //  알약: 박마다 하나. 곡 시작·급변 표시가 먼저, 도착 알약은 그 박이 비어 있을 때만(급변이 있으면 틀 글자가 도착 템포를 보여 줌)
+  function planTempoRow(TL) {
+    if (!TL || TL.empty) return { ramps: [], pills: [] };
+    const n = TL.beats.length, marks = (TL.tempos || []).filter(t => t.startBeat >= 0 && t.startBeat < n);
+    const ramps = [];
+    for (const r of (TL.ramps || []).slice().sort((a, b) => a.startBeat - b.startBeat || b.endBeat - a.endBeat)) {
+      if (!(r.endBeat > r.startBeat && r.startBeat >= 0 && r.endBeat < n)) continue;
+      const q = ramps[ramps.length - 1];
+      if (q && r.startBeat < q.endBeat) continue;
+      if (marks.some(t => t.startBeat > r.startBeat && t.startBeat < r.endBeat)) continue;
+      ramps.push(r);
+    }
+    const pills = [], used = new Set();
+    for (const t of marks) if (!used.has(t.startBeat)) { used.add(t.startBeat); pills.push(t); }
+    ramps.forEach((r, k) => { if (!used.has(r.endBeat)) { used.add(r.endBeat); pills.push({ bpm: r.to, startBeat: r.endBeat, bar: r.endBar, barNum: r.endBarNum, beat: r.endBeatNum, ramp: k }); } });
+    return { ramps, pills };
+  }
+
+  // 코드 이름 배치(그린 뒤와 차트 폭이 바뀔 때마다): 실제 폭을 재서 다음 코드 이름과 겹치지 않는 가장 큰 크기를 고름.
+  //  한 줄: 보통 → sm → xs. xs로도 안 들어가는 이름이 있는 마디는 두 줄(위·아래 번갈아, 줄 높이 17px)로 놓고 xs → xxs → xxxs.
+  //  마디 마지막 박의 이름은 줄을 나눠도 세로줄까지만 쓸 수 있어, 가장 작은 크기로도 안 들어가면 끝을 "…"으로 줄임(전체 이름은 title)
+  //  폭은 그린 직후 크기 단계마다 한 번씩 실제로 잼(글꼴이 그대로인 동안 같음. 좁은 화면으로 바뀌면 다시 그려 다시 잼).
+  //  이름의 왼쪽 자리는 박 위치라 크기와 무관하므로, 폭이 바뀔 때는 자리만 다시 셈
+  const CH_GAP = 3, CH_SIZES = ['', 'sm', 'xs', 'xxs', 'xxxs'], ONE_ROW = ['', 'sm', 'xs'], TWO_ROW = ['xs', 'xxs', 'xxxs'];
+  // 마디 레인 폭(px)을 차트 폭으로 계산: 줄 = 번호 칸(36·좁은 화면 26px) + 마디들(왼쪽 테두리 1.5px), 마디마다 오른쪽 테두리 1.5px
+  //  (곡 끝 마디는 없음), 레인은 마디 안쪽에서 왼쪽 12px·오른쪽 10px을 뺀 폭. 테두리가 화면 배율에 따라 1px로 그려지면 실제 레인이
+  //  계산보다 조금 넓음(이름 자리를 작게 보는 쪽이라 겹치지 않음). 계산이 실제보다 크면 S.laneAdj(음수)로 줄임
+  const laneWidth = (cw, final) => (cw - (narrow.matches ? 26 : 36) - 1.5) / (narrow.matches ? 2 : 4) - (final ? 0 : 1.5) - 22 + (S.laneAdj || 0);
+  function layoutChords(cw) {
+    const chart = $('chart');
+    cw = cw || chart.clientWidth;
+    if (!S.TL || S.TL.empty || !S.barLabels || !cw) return;
+    // 폭은 지금 화면 모드(좁은 화면이면 글씨가 작음)로 찾음: 앱이 숨겨진 사이 모드가 바뀌어도 지금 CSS와 맞게
+    for (const bl of S.barLabels) if (bl) for (const l of bl.labs) { if (!chordWCache.has(chordKey(l.base, l.html))) { measureChords(S.TL); break; } }
+    for (const bl of S.barLabels) if (bl) for (const l of bl.labs) { const m = chordWCache.get(chordKey(l.base, l.html)); l.w = m.w; l.sw = m.sw; }
+    const W = (l, s) => l.w[s];
+    const plan = [];
+    for (const bl of S.barLabels) {
+      if (!bl || !bl.labs.length) continue;
+      const lw = laneWidth(cw, bl.final), n = bl.labs.length;   // 이름 자리는 레인 왼쪽에서 잼(폭만 알면 됨, 화면을 읽지 않음)
+      const x = bl.labs.map(l => lw * l.f), lim = lw + (bl.final ? 2 : 9);   // 마지막 이름은 마디 세로줄 1px 앞까지(곡 끝은 겹세로줄 앞)
+      const roomOf = step => bl.labs.map((l, i) => (i + step < n ? x[i + step] - CH_GAP : lim) - x[i]);
+      const one = roomOf(1), r1 = bl.labs.map((l, i) => ONE_ROW.find(s => W(l, s) <= one[i]));
+      const bad = r1.map((s2, i) => (s2 === undefined ? i : -1)).filter(i => i >= 0);
+      if (!bad.some(i => i < n - 1)) {
+        // 한 줄. 마디 끝 이름만 안 들어가면 그 이름만 더 작게(두 줄로 해도 그 자리는 세로줄까지라 늘지 않음), 그래도 안 되면 줄임
+        const sLast = bad.length ? TWO_ROW.slice(1).find(s2 => W(bl.labs[n - 1], s2) <= one[n - 1]) : null;
+        plan.push([bl, bl.labs.map((l, i) => (bad.length && i === n - 1 ? { size: sLast || 'xxxs', row: 0, cut: !sLast, room: one[i] } : { size: r1[i], row: 0, cut: false, room: one[i] }))]);
+        continue;
+      }
+      // 두 줄: 마디 안 이름은 모두 같은 크기(다 들어가는 가장 큰 크기), 마디 끝 세로줄에 막힌 마지막 두 이름만 따로 더 작게
+      const two = roomOf(2), inner = bl.labs.map((l, i) => i + 2 < n);
+      const sIn = TWO_ROW.find(s2 => bl.labs.every((l, i) => !inner[i] || W(l, s2) <= two[i])) || 'xxxs', k0 = TWO_ROW.indexOf(sIn);
+      plan.push([bl, bl.labs.map((l, i) => {
+        const s2 = inner[i] ? (W(l, sIn) <= two[i] ? sIn : undefined) : TWO_ROW.slice(k0).find(s3 => W(l, s3) <= two[i]);
+        return { size: s2 || 'xxxs', row: i % 2 ? 2 : 1, cut: !s2, room: two[i] };
+      })]);
+    }
+    for (const [bl, pl] of plan) bl.labs.forEach((l, i) => {
+      const p = pl[i], cut = p.cut;                      // cut: 가장 작은 크기로도 안 들어감(마디 끝 박의 긴 이름)
+      const cls = l.base + (p.size ? ' ' + p.size : '') + (p.row ? ' r' + p.row : '') + (cut ? ' cut' : '');
+      if (cls !== l.cls) { l.el.className = cls; l.cls = cls; }
+      const mw = cut ? Math.max(8, p.room).toFixed(1) + 'px' : '';
+      if (l.el.style.maxWidth !== mw) l.el.style.maxWidth = mw;
+      if (cut) {                                         // 덜 중요한 부분부터 뺀 꼴 가운데 들어가는 첫 꼴(N.C.는 "NC"), 없으면 마지막 꼴을 CSS 말줄임으로. 전체 이름은 title과 마디 설명에
+        const f = l.sw.find(o => o.w <= p.room + 0.5) || l.sw[l.sw.length - 1];
+        const h = f ? f.html : chordHTML(l.lab);
+        if (l.short !== h) { l.el.innerHTML = h; l.short = h; l.el.title = shown(l.lab); }
+      } else if (l.short) { l.el.innerHTML = chordHTML(l.lab); l.short = false; l.el.removeAttribute('title'); }
+    });
+  }
+  // 코드 이름 폭 재기: 곡에 나오는 서로 다른 이름(보통 수십 개)만 문서 끝의 숨은 작은 상자에 크기 단계별로, 줄인 꼴(가장 작은 크기)까지
+  //  한꺼번에 넣고 한 번에 잼. 차트를 크기마다 다시 배치하지 않음. 잰 폭은 (화면 모드, 기본 클래스, 이름 HTML)별로 기억해 다시 씀
+  //  (글꼴이 늦게 들어오면 비움). renderChart가 차트를 비우기 전에 불러, 문서가 깨끗할 때 상자만 배치함.
+  //  상자는 폭·높이 0에 넘침 숨김이라 화면 넘침에 끼지 않음
+  const chordWCache = new Map();
+  const chordKey = (base, html) => (narrow.matches ? 'n|' : 'w|') + base + '|' + html;
+  function measureChords(TL) {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden';
+    const span = (cls, html) => { const e = document.createElement('span'); e.className = cls; e.innerHTML = html; box.appendChild(e); return e; };
+    const todo = new Map();
+    for (const bar of TL.bars) for (const ev of bar.events) {
+      const base = 'chord' + (ev.label.nc ? ' nc' : '') + (ev.tied ? ' tied' : ''), html = chordHTML(ev.label), key = chordKey(base, html);
+      if (chordWCache.has(key) || todo.has(key)) continue;
+      todo.set(key, {
+        sizes: CH_SIZES.map(sz => span(base + (sz ? ' ' + sz : ''), html)),
+        shorts: (ev.label.nc ? ['NC'] : shortForms(ev.label).map(v => chordHTML(v) + '<span class="more">…</span>').concat(rootOnly(ev.label))).map(h => ({ html: h, el: span(base + ' xxxs', h) })),
+      });
+    }
+    if (!todo.size) return;
+    document.body.appendChild(box);
+    for (const [key, m] of todo) { const w = {}; CH_SIZES.forEach((sz, k) => { w[sz] = m.sizes[k].getBoundingClientRect().width; }); chordWCache.set(key, { w, sw: m.shorts.map(o => ({ html: o.html, w: o.el.getBoundingClientRect().width })) }); }
+    box.remove();
+  }
+  // 가장 짧은 꼴: 근음(임시표 포함)만, "…" 없이(이것도 안 들어가면 상자 폭에서 잘림). 로마 숫자는 도수, 카멜롯은 번호
+  const rootOnly = L => [romMode() && L.rn ? esc(L.rn.acc + L.rn.num) : camMode() && L.cam ? esc(L.cam.code) : esc(L.root)];
+  // 줄인 꼴(앞에서부터 차례로 시도): 음이름은 베이스(/F♯) → 첨자(7) → 성질(m), 로마 숫자는 /IV → sus → 자리바꿈 숫자, 카멜롯은 첨자
+  function shortForms(L) {
+    if (L.nc) return [];
+    if (romMode() && L.rn) { const r = L.rn, a = []; if (r.sec) a.push({ ...r, sec: '' }); if (r.sus) a.push({ ...r, sec: '', sus: '' }); if (r.fig) a.push({ ...r, sec: '', sus: '', fig: '' }); return a.map(rn => ({ ...L, rn })); }
+    if (camMode() && L.cam) return L.cam.ext ? [{ ...L, cam: { ...L.cam, ext: '' } }] : [];
+    const a = []; if (L.bass) a.push({ ...L, bass: '' }); if (L.ext) a.push({ ...L, bass: '', ext: '' }); if (L.base) a.push({ ...L, bass: '', ext: '', base: '' });
+    return a;
+  }
+
+  // 이름표 줄 배치(그린 뒤와 차트 폭이 바뀔 때마다): 실제 폭을 재서 마디 위·아래 이름표가 서로 겹치거나 줄 밖으로 나가지 않게.
+  //  아래(템포 줄): 1) 처음 배치로 되돌리고 잼  2) 줄마다 흰 알약을 제 박 자리에 두되 줄 안으로 들이고, 서로 겹치면 도착 알약이 비킴
+  //     (끝내 자리가 없으면 우선순위 낮은 알약을 숨김. 마디 설명에는 남음)  3) 틀은 알약에 닿는 쪽 끝을 잘라 비키고,
+  //     너무 좁아진 조각은 숨김. 시작·끝 삼각형은 남은 첫·끝 조각으로  4) 틀 글자는 다 들어가는 조각에
+  //     (처음 마디가 우선, 안 되면 가장 넓은 조각), 어디에도 안 들어가면 숫자만, 그래도 안 되면 글자 없이(도착 알약이 숫자를 보여 줌)
+  //  위(조성·박자 검은 알약, "N박" 표시): 검은 알약은 흰 알약과 같은 방식으로 줄 안에서 비키고, "N박" 표시는 알약이 없는 쪽 끝으로
+  //     (양쪽 다 막히면 숨김: 슬래시 수가 박 수를 보여 줌). 윗줄 템포 줄과의 세로 겹침은 검은 알약이 있는 줄의 위 간격으로 막음(.line.kp)
+  const TROW_GAP = 3, TIP_W = 7;
+  const partOfEl = new WeakMap(), left0 = new WeakMap();   // 틀 조각 → 조각 정보, 알약 → 처음 left
+  // 한 줄 안 1차원 배치: 이름표마다 제자리(a)에 두되 줄 안([lo, hi])으로 들이고, 서로 겹치면 우선순위(pr) 낮은 쪽이 비킴
+  //  (왼쪽이 낮고 왼쪽에 자리가 있으면 왼쪽으로, 아니면 오른쪽 이름표를 오른쪽으로). 끝내 자리가 없으면 낮은 쪽을 숨김(on = false)
+  function placeRow(items, lo, hi) {
+    items.sort((p, q) => p.a - q.a);
+    const lower = (A, B) => (A.pr < B.pr || (A.pr === B.pr && A.a > B.a) ? A : B);
+    for (const p of items) p.on = true;
+    for (;;) {
+      const on = items.filter(p => p.on);
+      for (const p of on) p.x = Math.min(Math.max(p.a, lo), hi - p.w);
+      // 낮은 쪽이 비킴: 왼쪽 이름표가 우선순위가 낮으면(도착 알약 등) 먼저 왼쪽으로
+      for (let i = 0; i + 1 < on.length; i++) { const A = on[i], B = on[i + 1], d = A.x + A.w + TROW_GAP - B.x; if (d > 0 && A.pr < B.pr) A.x = Math.max(lo, A.x - d); }
+      // 앞에서부터 겹치면 오른쪽으로 밀고, 뒤에서부터 줄 끝을 넘으면 왼쪽으로 당김(앞 이름표들도 줄줄이)
+      for (let i = 1; i < on.length; i++) on[i].x = Math.max(on[i].x, on[i - 1].x + on[i - 1].w + TROW_GAP);
+      for (let i = on.length - 1; i >= 0; i--) on[i].x = Math.min(on[i].x, (i + 1 < on.length ? on[i + 1].x - TROW_GAP : hi) - on[i].w);
+      if (!on.length || on[0].x >= lo - 0.01) break;    // 다 들어감
+      on.reduce((v, p) => lower(v, p)).on = false;       // 줄에 다 안 들어감: 우선순위가 가장 낮은(같으면 뒤쪽) 이름표 하나를 숨기고 다시
+    }
+    return items;
+  }
+  const boxItem = (el, pr) => { const r = el.getBoundingClientRect(); return { el, a: r.left, x: r.left, w: r.width, pr, on: true }; };
+  function layoutTempoRow() {
+    const chart = $('chart');
+    if (!S.TL || S.TL.empty || !S.rampParts || !chart.firstChild) return;
+    // 1) 직전 배치에서 옮긴 것만 처음 배치로 되돌림(폭이 바뀔 때마다 도므로 손대지 않은 이름표는 건드리지 않음)
+    const ly = S.trowMoved || (S.trowMoved = { pills: [], tags: [], ramps: [] });
+    for (const p of ly.pills) { p.style.left = left0.get(p); p.hidden = false; }
+    for (const t of ly.tags) { t.style.left = t.style.right = ''; t.hidden = false; }
+    for (const k of ly.ramps) {
+      for (const pt of S.rampParts[k] || []) { pt.el.style.left = pt.L0; pt.el.style.width = pt.W0; pt.el.hidden = false; pt.b0 = pt.B0; pt.b1 = pt.B1; pt.tipS = pt.tipE = null; }
+      const tp = S.rampTips[k];
+      if (tp && tp.s) { tp.homeS.el.insertBefore(tp.s, tp.homeS.el.firstChild); tp.homeS.tipS = tp.s.querySelector('.tf'); }
+      if (tp && tp.e) { tp.homeE.el.appendChild(tp.e); tp.homeE.tipE = tp.e.querySelector('.tf'); }
+      S.rampTextMode[k] = 'full';
+      const tx = S.rampText[k];
+      if (tx) { tx.hidden = false; if (tx.parentNode !== S.rampTextHome[k]) S.rampTextHome[k].appendChild(tx); tx.textContent = rampLabel(k, curBeat()); }
+    }
+    ly.pills = []; ly.tags = []; ly.ramps = [];
+    if (!chart.clientWidth) return;
+    // 틀 글자 폭(넓은 꼴: "여기까지 N"과 재생 중 "현재 N" 중 넓은 쪽, 숫자만): 글꼴이 그대로라 그린 뒤 한 번만 잼
+    const need = S.rampNeed || (S.rampNeed = S.trow.ramps.map((r, k) => {
+      const tx = S.rampText[k]; if (!tx) return null;
+      let mx = 0; for (let b = r.startBeat; b <= r.endBeat; b++) mx = Math.max(mx, Math.round(S.TL.bpmAt[b]));
+      const keep = tx.textContent, dg = '8'.repeat(String(Math.max(mx, Math.round(r.to))).length), w = s => { tx.textContent = s; return tx.getBoundingClientRect().width; };
+      const o = { full: Math.max(w('여기까지 ' + Math.round(r.to)), w('현재 ' + dg)), num: w(dg) };
+      tx.textContent = keep;
+      return o;
+    }));
+    // 2)~3) 줄마다 계산(읽기만 먼저 하고 쓰기는 뒤에 몰아서)
+    const pillPos = [], tagPos = [], pieceVis = new Map();
+    for (const line of chart.querySelectorAll('.line')) {
+      const row = line.querySelector('.bars'); if (!row) continue;
+      // 줄 안 범위: 실제 마디가 차지한 폭(마지막 줄은 마디가 줄보다 짧게 끝남). 곡 끝 마디는 겹세로줄(7px) 안쪽까지
+      if (!row.querySelector('.tempochg, .pillrow, .keychg, .tag, .ramp')) continue;   // 이름표가 없는 줄은 건너뜀
+      const bs = row.querySelectorAll('.bar'); if (!bs.length) continue;
+      const lb = bs[bs.length - 1], lo = bs[0].getBoundingClientRect().left + 1, hi = lb.getBoundingClientRect().right - (lb.classList.contains('final') ? 9 : 2.5);
+      // 위: 검은 알약(마디 첫머리 묶음이 우선) 배치 뒤 "N박" 표시는 막히지 않은 쪽 끝으로
+      const tops = placeRow([...row.querySelectorAll('.pillrow')].map(el => boxItem(el, 3)).concat([...row.querySelectorAll('.bar > .keychg')].map(el => boxItem(el, 2))), lo, hi);
+      for (const p of tops) pillPos.push(p);
+      const topOn = tops.filter(p => p.on);
+      for (const tg of row.querySelectorAll('.bar .tag')) {
+        const r = tg.getBoundingClientRect(), br = tg.parentNode.getBoundingClientRect(), pick = tg.parentNode.classList.contains('pickup');
+        const free = x => !topOn.some(p => x < p.x + p.w + TROW_GAP && p.x < x + r.width + TROW_GAP);
+        const alt = pick ? br.right - 1.5 - 12 - r.width : br.left + 10;
+        tagPos.push({ el: tg, side: free(r.left) ? 0 : free(alt) ? (pick ? 'R' : 'L') : null });
+      }
+      // 아래: 흰 알약(곡 시작·급변이 도착 알약보다 우선)
+      const pills = placeRow([...row.querySelectorAll('.tempochg')].map(el => boxItem(el, el.dataset.ramp != null ? 1 : 2)), lo, hi);
+      for (const p of pills) pillPos.push(p);
+      const shown = pills.filter(p => p.on);
+      // 틀: 구간마다 이 줄 조각들을 이은 [L, R]에서 알약에 닿는 쪽을 잘라 냄
+      const segs = new Map();
+      for (const el of row.querySelectorAll('.ramp')) {
+        const pt = partOfEl.get(el); if (!pt) continue;
+        const r = el.getBoundingClientRect(), br = el.parentNode.getBoundingClientRect();
+        pt.px = { l: r.left, r: r.right, bar: br.left };
+        if (!segs.has(pt.k)) segs.set(pt.k, []);
+        segs.get(pt.k).push(pt);
+      }
+      for (const [, parts] of segs) {
+        let L = parts[0].px.l, R = parts[parts.length - 1].px.r;
+        for (const p of shown) {
+          const pl = p.x, pr = p.x + p.w;
+          if (pr <= L - TROW_GAP || pl >= R + TROW_GAP) continue;
+          if ((pl + pr) / 2 <= (L + R) / 2) L = Math.max(L, pr + TROW_GAP); else R = Math.min(R, pl - TROW_GAP);
+        }
+        for (const pt of parts) pieceVis.set(pt, { l: Math.max(pt.px.l, L), r: Math.min(pt.px.r, R) });
+      }
+    }
+    // 삼각형 자리와 최소 폭: 보이는 첫 조각에 시작 삼각형, 끝 조각에 끝 삼각형. 삼각형과 몸통이 다 안 들어가는 조각은 숨기고 다시
+    const tipAt = [];
+    S.rampParts.forEach((parts, k) => {
+      if (!parts) return;
+      const tp = S.rampTips[k] || {};
+      let vis = parts.filter(pt => { const v = pieceVis.get(pt); return v && v.r - v.l > 0.5; }), first, last;
+      for (;;) {
+        first = tp.s ? vis[0] : null; last = tp.e ? vis[vis.length - 1] : null;
+        const bad = vis.find(pt => { const v = pieceVis.get(pt); return v.r - v.l < (pt === first ? TIP_W : 0) + (pt === last ? TIP_W : 0) + 4; });
+        if (!bad) break;
+        vis = vis.filter(pt => pt !== bad);
+      }
+      tipAt[k] = { vis, first, last };
+    });
+    // 4) 틀 글자 자리
+    const textAt = S.trow.ramps.map((r, k) => {
+      const nd = need[k], ta = tipAt[k]; if (!nd || !ta) return null;
+      const bodyW = pt => { const v = pieceVis.get(pt); return v.r - v.l - (pt === ta.first ? TIP_W : 0) - (pt === ta.last ? TIP_W : 0); };
+      const home = ta.vis.find(pt => pt.body === S.rampTextHome[k]);
+      const wide = ta.vis.slice().sort((a, b) => bodyW(b) - bodyW(a))[0];
+      for (const [mode, w] of [['full', nd.full], ['num', nd.num]]) for (const pt of [home, wide]) if (pt && bodyW(pt) >= w + 4) return { pt, mode };
+      return { pt: null, mode: 'none' };
+    });
+    // 쓰기
+    for (const p of pillPos) {                         // transform으로 옮기면 Chromium이 옮기기 전 자리로 화면 넘침을 계산해 left로 옮김
+      if (p.on && Math.abs(p.x - p.a) <= 0.01) continue;
+      if (!left0.has(p.el)) left0.set(p.el, p.el.style.left);
+      if (!p.on) p.el.hidden = true; else p.el.style.left = 'calc(' + left0.get(p.el) + ' + ' + (p.x - p.a).toFixed(2) + 'px)';
+      ly.pills.push(p.el);
+    }
+    for (const t of tagPos) {
+      if (t.side === 0) continue;
+      if (t.side === null) t.el.hidden = true; else if (t.side === 'L') { t.el.style.left = '10px'; t.el.style.right = 'auto'; } else { t.el.style.left = 'auto'; t.el.style.right = '12px'; }
+      ly.tags.push(t.el);
+    }
+    S.rampParts.forEach((parts, k) => {
+      if (!parts) return;
+      const ta = tipAt[k], tp = S.rampTips[k] || {};
+      let moved = false;                               // 이 구간에서 처음 배치와 달라진 것이 있으면 다음 배치 때 되돌림
+      for (const pt of parts) {
+        if (!ta.vis.includes(pt)) { pt.el.hidden = true; moved = true; continue; }
+        const v = pieceVis.get(pt); if (!v) continue;
+        if (Math.abs(v.l - pt.px.l) > 0.01 || Math.abs(v.r - pt.px.r) > 0.01) {
+          pt.el.style.left = (v.l - pt.px.bar).toFixed(2) + 'px'; pt.el.style.width = (v.r - v.l).toFixed(2) + 'px';
+          const span = pt.px.r - pt.px.l;                  // 채움(재생 표시)이 남은 조각 폭에 맞게 박 범위도 줄임
+          if (span > 0) { pt.b0 = pt.B0 + (v.l - pt.px.l) / span * (pt.B1 - pt.B0); pt.b1 = pt.B0 + (v.r - pt.px.l) / span * (pt.B1 - pt.B0); }
+          moved = true;
+        }
+      }
+      if (tp.s && ta.first && ta.first !== tp.homeS) { tp.homeS.tipS = null; ta.first.el.insertBefore(tp.s, ta.first.el.firstChild); ta.first.tipS = tp.s.querySelector('.tf'); moved = true; }
+      if (tp.e && ta.last && ta.last !== tp.homeE) { tp.homeE.tipE = null; ta.last.el.appendChild(tp.e); ta.last.tipE = tp.e.querySelector('.tf'); moved = true; }
+      const tx = S.rampText[k], at = textAt[k];
+      if (tx && at && (at.mode !== 'full' || at.pt !== null && at.pt.body !== tx.parentNode || !at.pt)) {
+        S.rampTextMode[k] = at.mode;
+        if (!at.pt) tx.hidden = true;
+        else if (at.pt.body !== tx.parentNode) at.pt.body.appendChild(tx);
+        tx.textContent = rampLabel(k, curBeat());
+        moved = true;
+      }
+      if (moved) ly.ramps.push(k);
+    });
+  }
+  // 틀 글자: 재생 위치(박 번호 i)가 구간 안이면 "현재 N", 밖이면 "여기까지 N"(좁은 틀은 숫자만)
+  function rampLabel(k, i) {
+    const r = S.trow.ramps[k], inside = i >= r.startBeat && i < r.endBeat, v = Math.round(inside ? S.TL.bpmAt[i] : r.to);
+    return S.rampTextMode[k] === 'num' ? String(v) : (inside ? '현재 ' : '여기까지 ') + v;
+  }
+  const curBeat = () => S.cur.bar >= 0 && S.TL.bars[S.cur.bar] ? S.TL.bars[S.cur.bar].startBeat + Math.max(0, S.cur.beat) : -1;
 
   // 서서히 바뀌는 템포의 재생 표시(매 화면): 구간 안이면 틀이 재생 위치까지 형광펜 색으로 차고,
   // 도착 박에 닿으면 가득 찬 채로 0.8초 동안 흰색으로 옅어짐. 도착 알약은 도착 박에서 한 박 × 1.1 + 0.06초 동안 켜짐
@@ -3325,10 +3916,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
 
   const RAMP_FADE = 0.8, PILL_MUL = 1.1, PILL_ADD = 0.06;
   function updateRamps(t, i) {
-    const TL = S.TL; if (!TL || !TL.ramps || !TL.ramps.length || !S.rampParts) return;
+    const TL = S.TL; if (!TL || !S.trow.ramps.length || !S.rampParts) return;
     const b = TL.beats, ivAt = j => (j + 1 < b.length ? b[j + 1] - b[j] : b[j] - b[j - 1]);
     const pos = i >= 0 ? i + Math.min(1, Math.max(0, (t - b[i]) / ivAt(i))) : -1;
-    TL.ramps.forEach((r, k) => {
+    S.trow.ramps.forEach((r, k) => {
       const tA = b[r.endBeat];
       let prog = -1, op = 1;
       if (pos >= r.startBeat && pos < r.endBeat) prog = pos;
@@ -3346,7 +3937,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     });
   }
 
-  function makeBar(bar, idx, isLast, m, res, barW, fontPx) {
+  function makeBar(bar, idx, isLast, m, res) {
     const el = document.createElement('div');
     el.className = 'bar' + (bar.pickup ? ' pickup' : '') + (isLast ? ' final' : '');
     el.setAttribute('role', 'listitem');
@@ -3357,24 +3948,22 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     const band = document.createElement('div'); band.className = 'band'; el.appendChild(band);
     const lane = document.createElement('div'); lane.className = 'lane';
     const names = [];
-    bar.events.forEach((ev, k) => {
+    const labs = [];                                     // 코드 이름: 기본 크기로 만들고, 크기·줄은 그린 뒤 layoutChords가 실제 폭으로 정함
+    bar.events.forEach(ev => {
       const c = document.createElement('span');
-      const last = k === bar.events.length - 1;
-      const avail = ev.dur / slots * barW + (last ? 8 : -4);
-      const need = labelEm(ev.label) * fontPx;
-      let cls = 'chord';
-      if (ev.label.nc) cls += ' nc';
-      else if (need > avail) cls += need * 0.76 <= avail ? ' sm' : ' xs';
-      if (ev.tied) cls += ' tied';
-      c.className = cls;
-      c.style.left = ((shift + ev.off) / slots * 100) + '%';
-      c.innerHTML = chordHTML(ev.label);
+      const base = 'chord' + (ev.label.nc ? ' nc' : '') + (ev.tied ? ' tied' : ''), f = (shift + ev.off) / slots;
+      const html = chordHTML(ev.label);
+      c.className = base;
+      c.style.left = (f * 100) + '%';
+      c.innerHTML = html;
       lane.appendChild(c);
+      labs.push({ el: c, f, nc: !!ev.label.nc, base, cls: base, lab: ev.label, html });
       names.push(shown(ev.label) + (ev.tied ? ' (이어짐)' : ''));
     });
+    S.barLabels[idx] = { lane, labs, final: isLast };
     el.appendChild(lane);
     const sl = document.createElement('div'); sl.className = 'slashes';
-    const marks = [];
+    const marks = [], halves = [];
     for (let k = 0; k < bar.nBeats; k++) {
       const s = document.createElement('i');
       s.style.left = ((shift + k) / slots * 100) + '%';
@@ -3382,8 +3971,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       if (res === 2) {
         const h = document.createElement('i'); h.className = 'off';
         h.style.left = ((shift + k + 0.5) / slots * 100) + '%';
-        sl.appendChild(h);
+        sl.appendChild(h); halves[k] = h;
       }
+    }
+    // 코드를 새로 치는 자리(검은 글자 코드가 놓인 박·반 박)의 빗금은 두껍게: 어느 리듬에서 코드를 치는지 보이게.
+    // 회색(앞 코드를 새로 치지 않고 끌어 둠)과 N.C.는 치는 코드가 없으므로 보통 빗금
+    for (const ev of bar.events) {
+      if (ev.tied || ev.label.nc) continue;
+      const k = Math.floor(ev.off + 1e-6), mk = ev.off - k > 0.25 ? halves[k] : marks[k];
+      if (mk) mk.classList.add('ch');
     }
     el.appendChild(sl);
     if (!bar.pickup && bar.nBeats !== m) {
@@ -3421,7 +4017,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       names.push(mc.label + '로 박자 변화');
     }
     // 서서히 바뀌는 템포: 슬래시 아래 줄의 틀 조각(시작 조각에 왼쪽 삼각형, 끝 조각에 오른쪽 삼각형, 가운데 사각형 몸통)
-    (S.TL.ramps || []).forEach((r, k) => {
+    S.trow.ramps.forEach((r, k) => {
       const b0 = bar.startBeat, b1 = bar.startBeat + bar.nBeats;
       if (!(r.startBeat < b1 && r.endBeat > b0)) return;
       const isS = r.startBeat >= b0, isE = r.endBeat <= b1;
@@ -3429,7 +4025,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       const X = f => '(12px + (100% - 22px) * ' + f.toFixed(4) + ')';
       const L = isS ? X(fs) : '0px', R = isE ? X(fe) + ' - 5px' : '100%';
       const p = document.createElement('span');
-      p.className = 'ramp';
+      p.className = 'ramp'; p.dataset.ramp = k;
       p.style.left = 'calc(' + L + ')'; p.style.width = 'calc(' + R + ' - ' + L + ')';
       const tip = side => {                            // 삼각형 끝: 흰 바탕 + 형광펜 채움(투명도로 켜고 끔) + 두 변
         const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -3438,18 +4034,21 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
         sv.innerHTML = '<polygon class="tb" points="' + pts + '"/><polygon class="tf" points="' + pts + '" style="opacity:0"/><polyline class="tl" points="' + pts + '"/>';
         return sv;
       };
-      const part = { b0: Math.max(r.startBeat, b0), b1: Math.min(r.endBeat, b1), tipS: null, tipE: null };
-      if (isS) { const sv = tip('L'); p.appendChild(sv); part.tipS = sv.querySelector('.tf'); }
-      const body = document.createElement('span'); body.className = 'rb';
+      const part = { k, el: p, b0: Math.max(r.startBeat, b0), b1: Math.min(r.endBeat, b1), tipS: null, tipE: null, L0: p.style.left, W0: p.style.width };
+      part.B0 = part.b0; part.B1 = part.b1;           // 줄 배치에서 조각을 자르기 전 박 범위
+      const tp = S.rampTips[k] = S.rampTips[k] || {};
+      if (isS) { const sv = tip('L'); p.appendChild(sv); part.tipS = sv.querySelector('.tf'); tp.s = sv; tp.homeS = part; }
+      const body = document.createElement('span'); body.className = 'rb'; part.body = body;
       const fl = document.createElement('span'); fl.className = 'rf'; body.appendChild(fl); part.fill = fl;
       if (S.rampTextBar[k] === idx) {
         const tx = document.createElement('span'); tx.className = 'rt';
         tx.textContent = '여기까지 ' + Math.round(r.to);
-        body.appendChild(tx); S.rampText[k] = tx;
+        body.appendChild(tx); S.rampText[k] = tx; S.rampTextHome[k] = body;
         names.push(r.barNum + '마디부터 ' + r.endBarNum + '마디까지 서서히 템포 ' + Math.round(r.from) + '에서 ' + Math.round(r.to));
       }
       p.appendChild(body);
-      if (isE) { const sv = tip('R'); p.appendChild(sv); part.tipE = sv.querySelector('.tf'); }
+      if (isE) { const sv = tip('R'); p.appendChild(sv); part.tipE = sv.querySelector('.tf'); tp.e = sv; tp.homeE = part; }
+      partOfEl.set(p, part);
       (S.rampParts[k] = S.rampParts[k] || []).push(part);
       p.title = r.barNum + '마디 ' + r.beat + '박부터 ' + r.endBarNum + '마디 ' + r.endBeatNum + '박까지 서서히 ' + Math.round(r.from) + ' → ' + Math.round(r.to);
       el.appendChild(p);
@@ -3461,7 +4060,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       const nb = Math.round(t.bpm), first = S.TL.tempos && t === S.TL.tempos[0];
       p.textContent = first ? nb : nb + josaRo(nb, 'tempo');           // 바뀐 곳은 "132로"·"63으로", 곡 첫 박은 시작 템포라 숫자만
       p.title = t.barNum + '마디 ' + t.beat + '박부터 템포 ' + Math.round(t.bpm) + ' BPM';
-      if (t.ramp != null) S.rampPill[t.ramp] = p;         // 도착 알약(재생 중 도착 박에 잠깐 켜짐)
+      if (t.ramp != null) { S.rampPill[t.ramp] = p; p.dataset.ramp = t.ramp; }   // 도착 알약(재생 중 도착 박에 잠깐 켜짐)
       el.appendChild(p);
       names.push('템포 ' + Math.round(t.bpm));
     }
@@ -3528,12 +4127,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
       if (TL.meter.alt) rows.push(['박자 판정', TL.meter.alt.map(a => a.m + '박 대비도 ' + a.contrast.toFixed(2)).join(', ')]);
       rows.push(['조성 상관', TL.key.score.toFixed(2)]);
-      const kk = TL.keys || [];
+      const kk = keysShown(TL);
       rows.push(['조성 변화', kk.length > 1 ? kk.slice(1).map(k => k.barNum + '마디 ' + k.beat + '박(' + fmtTime(k.t0) + ')부터 ' + keyShown(k)).join(', ') : '없음']);
       const mm = TL.meters || [], tt = TL.tempos || [];
       rows.push(['박자 변화', mm.length > 1 ? mm.slice(1).map(x => x.barNum + '마디(' + fmtTime(x.t0) + ')부터 ' + x.label).join(', ') : '없음']);
       const tchg = tt.slice(1).map(x => x.barNum + '마디 ' + x.beat + '박(' + fmtTime(x.t0) + ')부터 ' + Math.round(x.bpm))
-        .concat((TL.ramps || []).map(r => r.barNum + '마디 ' + r.beat + '박부터 ' + r.endBarNum + '마디 ' + r.endBeatNum + '박까지 서서히 ' + Math.round(r.from) + ' → ' + Math.round(r.to)));
+        .concat(S.trow.ramps.map(r => r.barNum + '마디 ' + r.beat + '박부터 ' + r.endBarNum + '마디 ' + r.endBeatNum + '박까지 서서히 ' + Math.round(r.from) + ' → ' + Math.round(r.to)));
       rows.push(['템포 변화', tchg.length ? tchg.join(', ') : '없음']);
       rows.push(['카멜롯', (kk.length ? kk : [TL.key]).map(k => k.cam).join(' → ')]);
       rows.push(['비트 수', String(TL.beats.length)]);
@@ -3624,9 +4223,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
       S.cur.bar = bi; S.cur.beat = bb;
       const tv = TL.bpmAt && i >= 0 ? Math.round(TL.bpmAt[i]) : (TL.tempos && TL.tempos.length ? Math.round(TL.tempos[0].bpm) : null);
       if (tv != null && tv !== S.bpmShown) { S.bpmShown = tv; $('fBpm').textContent = tv + (TL.meter.triple ? ' (점4분)' : ''); $('tBpm').textContent = tv; }
-      (TL.ramps || []).forEach((r, k) => {
+      S.trow.ramps.forEach((r, k) => {
         const tx = S.rampText && S.rampText[k]; if (!tx) return;
-        const s2 = i >= r.startBeat && i < r.endBeat ? '현재 ' + Math.round(TL.bpmAt[i]) : '여기까지 ' + Math.round(r.to);
+        const s2 = rampLabel(k, i);
         if (tx.textContent !== s2) tx.textContent = s2;
       });
     }
@@ -3845,6 +4444,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     }, 150);
   });
   onMq(narrow, () => { if (S.TL && !$('app').hidden) { renderChart(); S.cur.bar = -1; S.cur.beat = -1; } });
+  // 차트를 다시 그리지 않는 작은 폭 변화(30px 이하, 다시 그리기 전 150ms)에도 알약은 폭이 그대로라 템포 줄 배치를 다시 함
+  if (window.ResizeObserver) { let rw = -1; new ResizeObserver(() => { const w = $('chart').clientWidth; if (w !== rw) { rw = w; layoutChords(); layoutTempoRow(); } }).observe($('chart')); }
   document.addEventListener('visibilitychange', () => { if (player.playing) player.schedule(); });
 
   if (!AC) showError('이 브라우저는 Web Audio API를 지원하지 않아 사용할 수 없습니다.');
