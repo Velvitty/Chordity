@@ -344,7 +344,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.10.2">v1.10.2</span>
+    <span class="ver" title="Chordity 버전 1.10.3">v1.10.3</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -915,7 +915,8 @@ const Engine = (function () {
     return (sx === 0 && sy === 0) ? 0 : Math.atan2(sy, sx) / TAU;
   }
 
-  const TREBLE_W = m => (m < 48 || m > 96) ? 0 : (m < 55 ? (m - 48) / 7 : (m <= 84 ? 1 : (96 - m) / 12));
+  const TREBLE_W0 = m => (m < 48 || m > 96) ? 0 : (m < 55 ? (m - 48) / 7 : (m <= 84 ? 1 : (96 - m) / 12));
+  const TREBLE_W = m => TREBLE_W0(m) * (P.TREB_HI && m >= P.TH_FROM ? P.TH_W : 1);
   const BASS_W = m => (m < 28 || m > 57) ? 0 : (m < 33 ? (m - 28) / 5 : (m <= 48 ? 1 : (57 - m) / 9));
 
   // 피크 목록 → 12음 크로마 (음정이 맞을수록 가중치 큼: cos²)
@@ -1804,6 +1805,19 @@ const Engine = (function () {
     DD_EVEN: false,                                      //  고른 백비트(DD_REG 기준) 곡은 짝수 박자만(박자 변화도 막음): 5/4 합성곡을 4/4로, 박자 변화 합성곡 4곡을 지움
     METER_AC_VM: false,                                  //  박자 변화의 바뀐 구간에도 METER_AC 확인: 시험 묶음 어디에서도 결과가 바뀌지 않음
     DBG_ATTACK: false,   // 박자 변화: 켜기, 박자 바뀜 확률, 표시할 최소 마디 수
+    // 실제 녹음 5곡 검증(1.10.3): 아래 셋을 켬(5곡 근음 +0.4%p, 고민중독 근음·장단 +0.3%p, GTZAN 대중 불규칙 마디 711→695, 합성곡·「세월이 가면」·GuitarSet 그대로)
+    LATE_EDGE: true, LE_EM: 6.5,                         // 마디 끝 박에서 바뀌어 다음 첫 박까지 같은 근음으로 이어지는 코드(앞당겨 친 당김·베이스 접근음)는 첫 박에서 바뀐 것으로.
+                                                         //  그 박에서 새 코드 점수가 옛 코드보다 이 차 넘게 앞서면 그대로(5곡 후보 11곳 중 정답과 맞춘 값: 옮긴 7곳 중 6곳이 정답)
+    INTRO_PHASE: true, IP_BARS: 2,                       // 곡 첫머리 못갖춘마디 뒤 IP_BARS 마디 안의 짧은 마디로 위상을 맞춘 경우(거기까지 박 수가 마디 길이의 배수), 처음부터 온마디로
+    KEY_MODE: true,                                      // 전조가 있으면 조 이름을 곡의 주된 갈래(장·단)로 통일(나란한조 이름만 바꿈: C 단조 → F 장조를 C 단조 → D 단조로)
+    KEY_INTRO: true, KI_BARS: 8,                         // 곡 첫 조성 구간이 KI_BARS 마디 이하이고 다음 구간과 같은 갈래의 5도 관계(버금딸림·딸림 조)면 다음 조에 합침
+                                                         //  (도입부가 iv·V에서 시작해 악구 첫 코드로 조를 정하면 "B♭ 단조 → F 단조"처럼 거짓 전조가 됨)
+    // 비교했지만 넣지 않음(끔)
+    HDIM: false,                                         //  기본 어휘에 반감7(m7♭5): ii°7이 위 3화음으로 읽히던 곡은 나아지나 다른 곡의 m7·dim을 바꿔 5곡 합계가 나빠짐
+    BASS_LAM: false, BL_K: 0.5,                          //  마디 안 바뀜 벌점을 베이스 움직임만큼 줄임: 5곡 모두 조금 나빠짐(스쳐 가는 베이스까지 코드 바뀜으로)
+    TREB_HI: false, TH_FROM: 72, TH_W: 0.5,              //  높은 음역(노래 선율) 비중 낮춤: 5곡 근음 +0.6~1.1%p지만 합성 R&B 발라드 근음 −10~14, GuitarSet 장단 −1.5~2.6%p, 「세월이 가면」 일치 97.7→83~89%
+    FLICKER: false,                                      //  같은 코드 사이 한 박 코드(베이스 같고 새 음 하나 이하)를 앞뒤 코드로: 시험 곡에서 거의 안 일어남
+    DBG_LE: false,                                       //  LATE_EDGE 후보 기록(진단용)
     // 코드 이름 다듬기(1.10.0): 경계·조성은 그대로 두고 이름만
     M7_BASSREL: true, M7_SHARE: 0.5, M7_CONS: 0.75,   // M7_SIXTH는 베이스를 믿을 수 있을 때만: 그 음이 구간 베이스의 절반 이상이거나, 박의 3/4 이상에서 가장 센 음일 때
     M7_NEIGHBOR: true,                                   // M7_SIXTH는 같은 코드 사이에 잠깐 낀(스쳐 가는) m7에는 쓰지 않음
@@ -1858,10 +1872,10 @@ const Engine = (function () {
   };
   const stateCache = new Map();
   function getStates(vocab, inv) {
-    const key = vocab + (inv ? '+inv' : '') + [P.VARIANTS, P.POWER, P.SLASH2, P.NNLS].map(Number).join('');
+    const key = vocab + (inv ? '+inv' : '') + [P.VARIANTS, P.POWER, P.SLASH2, P.NNLS, P.HDIM].map(Number).join('');
     if (stateCache.has(key)) return stateCache.get(key);
     const S = [];
-    for (const q of VOCAB[vocab]) {
+    for (const q of VOCAB[vocab].concat(P.HDIM && vocab === 'standard' ? ['hdim7'] : [])) {
       if ((q === '5' && !P.POWER) || (q === 'sl2' && !P.SLASH2)) continue;
       const Q = QUAL[q];
       for (let r = 0; r < 12; r++) {
@@ -2602,6 +2616,14 @@ const Engine = (function () {
       const sh = ((set.downShift % m) + m) % m;
       pos = pos.map(p => (p - sh + m) % m);
     }
+    // 곡 첫머리: 못갖춘마디(p박) 뒤 IP_BARS 마디 안에 짧은 마디가 있고 거기까지의 박 수가 마디 길이의 배수면, 처음부터 온마디로 다시 셈
+    //  (첫 박 위상을 한 박 늦게 잡았다가 짧은 마디로 맞춘 것: 가짜 못갖춘마디 + 가짜 [3박] 마디)
+    if (P.INTRO_PHASE && !set.downShift && pos[0] !== 0 && !(mOf && mOf.slice(0, (P.IP_BARS + 2) * m).some(x => x !== m))) {
+      const ds = []; for (let i = 0; i < n && ds.length < P.IP_BARS + 2; i++) if (pos[i] === 0) ds.push(i);
+      for (let k = 1; k < ds.length && k <= P.IP_BARS; k++) {
+        if (ds[k] - ds[k - 1] < m && ds[k] % m === 0) { for (let i = 0; i < ds[k]; i++) pos[i] = i % m; break; }
+      }
+    }
 
     // 최종 코드 (1박 또는 ½박 해상도)
     const res = set.res === 2 ? 2 : 1, nS = n * res;
@@ -2613,6 +2635,17 @@ const Engine = (function () {
         t0[s] = a + (b - a) * r / res; t1[s] = a + (b - a) * (r + 1) / res;
         if (r > 0) lam[s] = 6.0;
         else { const mb = mOf ? mOf[i] : m; lam[s] = pos[i] === 0 ? 1.5 : ((mb % 2 === 0 && pos[i] === mb / 2) ? 3.0 : 4.0); }
+      }
+    }
+    if (P.BASS_LAM) {                                    // 마디 안(첫 박 아님) 바뀜 벌점을 베이스 변화(이웃 박 베이스 분포의 코사인 거리)만큼 줄임
+      const bq = aggregate(A.harm.bass, A.harm.hopB, F.t0, F.t1), bE = new Float64Array(n);
+      for (let i = 0; i < n; i++) { let s2 = 0; for (let k = 0; k < 12; k++) s2 += bq[i * 12 + k] * bq[i * 12 + k]; bE[i] = Math.sqrt(s2); }
+      const bRef = median(Array.from(bE).filter(x => x > 0)) || 1;
+      for (let i = 1; i < n; i++) {
+        if (pos[i] === 0) continue;
+        let d = 0; if (bE[i] > 0 && bE[i - 1] > 0) { for (let k = 0; k < 12; k++) d += bq[i * 12 + k] * bq[(i - 1) * 12 + k]; d = 1 - d / (bE[i] * bE[i - 1]); }
+        const w = Math.min(1, Math.min(bE[i], bE[i - 1]) / bRef);             // 베이스가 약하면 덜 믿음
+        lam[i * res] *= 1 - P.BL_K * Math.max(0, Math.min(1, d)) * w;
       }
     }
     // 전조 경계를 마디 위치까지 고려해 비트 단위로 다듬음
@@ -2665,6 +2698,28 @@ const Engine = (function () {
         const move = aOld < P.EDGE_OLD && de >= -P.EDGE_EM;
         if (dbg) dbg.edge.push({ slot: b, t: t0[b], X: states[X].id, Y: states[Y].id, aOld: +aOld.toFixed(2), de: +de.toFixed(2), move });
         if (move && P.EDGE_ATTACK) lab[b - 1] = Y;
+      }
+    }
+    // 마디 끝 박에서 바뀌어 다음 첫 박까지 이어지는 코드(앞당겨 친 당김, 베이스 접근음)는 악보 관례대로 첫 박에서 바뀐 것으로.
+    //  그 박에서 새 코드 점수가 옛 코드보다 LE_EM 넘게 앞서면(정말 그 박에 바뀜) 그대로
+    if (P.LATE_EDGE && res === 1) {
+      const emL = emissions(states, treb, bass, keyOfSlot), K3 = states.length;
+      for (let b = 1; b + 1 < nS; b++) {
+        const mb = mOf ? mOf[b] : m;
+        if (pos[b] !== mb - 1 || pos[b + 1] !== 0) continue;
+        const Y = lab[b], X = lab[b - 1];
+        if (states[Y].root < 0 || states[X].root < 0 || states[lab[b + 1]].root !== states[Y].root || states[Y].root === states[X].root) continue;
+        if (P.DBG_LE) (A._le = A._le || []).push({ t: +t0[b].toFixed(2), X: states[X].id, Y: states[Y].id, de: +(emL[b * K3 + Y] - emL[b * K3 + X]).toFixed(2) });
+        if (emL[b * K3 + Y] - emL[b * K3 + X] <= P.LE_EM) lab[b] = X;
+      }
+    }
+    if (P.FLICKER && res === 1) {
+      for (let b = 1; b + 1 < nS; b++) {
+        const X = lab[b - 1], Y = lab[b];
+        if (lab[b + 1] !== X || Y === X || pos[b] === 0) continue;
+        const sx = states[X], sy = states[Y];
+        if (sx.root < 0 || sy.root < 0 || sx.bass !== sy.bass) continue;
+        if (sy.pcs.filter(p => !sx.pcs.includes(p)).length <= 1) lab[b] = X;
       }
     }
     // 딸림화음을 거쳐 전조하면(새 조의 V·V7·Vsus4 → I), 악보 관례대로 으뜸화음이 오는 자리부터 새 조
@@ -2730,6 +2785,16 @@ const Engine = (function () {
         if (a.tonic === b.tonic && a.mode === b.mode) { segs[g - 1].end = segs[g].end; segs.splice(g, 1); }
       }
       indexSegs();
+    }
+    if (P.KEY_INTRO && segs.length > 1) {
+      const a = segs[0].key, b = segs[1].key, iv = (a.tonic - b.tonic + 12) % 12;
+      const bars0 = pos.slice(segs[0].start, segs[0].end).filter(x => x === 0).length;
+      if (a.mode === b.mode && (iv === 5 || iv === 7) && bars0 <= P.KI_BARS) { segs[1].start = segs[0].start; segs.splice(0, 1); indexSegs(); }
+    }
+    if (P.KEY_MODE && segs.length > 1) {
+      let main = segs[0]; for (const g of segs) if (g.end - g.start > main.end - main.start) main = g;
+      const mode = main.key.mode;
+      for (const g of segs) if (g.key.mode !== mode) g.key = mode === 'major' ? { tonic: (g.key.tonic + 3) % 12, mode: 'major', score: g.key.score } : { tonic: (g.key.tonic + 9) % 12, mode: 'minor', score: g.key.score };
     }
     // 코드 이름 다듬기(경계·조성은 그대로, 이름만): 6화음으로 읽히는 m7 자리바꿈과 3음이 뚜렷한 sus4.
     //  조성을 코드로 다시 정한 뒤에 하므로 조성 판정에는 영향이 없고, 조성은 확정된 그 자리의 조를 씀
