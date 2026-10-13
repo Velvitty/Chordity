@@ -344,7 +344,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.0">v1.11.0</span>
+    <span class="ver" title="Chordity 버전 1.11.1">v1.11.1</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -678,26 +678,96 @@ const Engine = (function () {
     const cN = new Float64Array(M + 1), sN = new Float64Array(M + 1);
     for (let k = 0; k <= M; k++) { cN[k] = Math.cos(TAU * k / N); sN[k] = Math.sin(TAU * k / N); }
     const re = new Float64Array(M), im = new Float64Array(M);
-
-    return function (x, mag) {
-      // 짝/홀 샘플을 실수/허수부로 묶고 비트 역순 배치
-      for (let m = 0; m < M; m++) { const j = rev[m]; re[j] = x[2 * m]; im[j] = x[2 * m + 1]; }
-      // 반복형 radix-2 DIT
-      for (let size = 2; size <= M; size <<= 1) {
-        const half = size >> 1, step = M / size;
-        for (let i = 0; i < M; i += size) {
-          for (let j = 0, k = 0; j < half; j++, k += step) {
-            const a = i + j, b = a + half;
-            const c = cs[k], s = sn[k];
-            const tr = re[b] * c + im[b] * s;
-            const ti = im[b] * c - re[b] * s;
-            re[b] = re[a] - tr; im[b] = im[a] - ti;
-            re[a] += tr; im[a] += ti;
+    // 속도(결과는 원래 반복형 radix-2 DIT와 비트 단위로 같음):
+    //  · 이웃한 두 단(크기 s, 2s)을 한 번에: 원소 4개(a0, a0+s/2, a0+s, a0+3s/2)를 읽어 두 단의 나비 연산을 원래와 같은 순서·같은 식으로 하고 한 번만 씀
+    //    (단마다 배열에 쓰고 다시 읽던 것을 줄임. 중간값은 배열에 넣었다 꺼낸 값과 같은 배정밀도 수)
+    //  · 회전 인자 1(k = 0: cos 1, sin 0)인 나비는 곱셈 없이 더하고 뺌. x·1 + y·0 = x 이므로 다를 수 있는 것은 0의 부호뿐인데,
+    //    +, −, × 만 거치므로 0이 아닌 값과 크기 스펙트럼(√(xr² + xi²))에는 영향이 없음
+    //  · 같은 단 안의 나비는 서로 다른 원소만 다뤄 계산 순서를 바꿔도 결과가 같음: 회전 인자(j) 바깥, 블록(i) 안쪽으로 돌림
+    let levels2 = 0; while ((1 << levels2) < M) levels2++;
+    // 단 쌍(크기 s, 2s)별 회전 인자 표: j마다 [cos·sin(크기 s 단, j), cos·sin(2s 단, j), cos·sin(2s 단, j + s/2)]
+    const tw4 = [];
+    for (let s = 2; s <= M; s <<= 1) {
+      const h = s >> 1, st1 = M / s, st2 = M / (s << 1), T = new Float64Array(6 * Math.max(1, h));
+      if ((s << 1) <= M) for (let j = 0; j < h; j++) {
+        T[6 * j] = cs[j * st1]; T[6 * j + 1] = sn[j * st1]; T[6 * j + 2] = cs[j * st2]; T[6 * j + 3] = sn[j * st2]; T[6 * j + 4] = cs[(j + h) * st2]; T[6 * j + 5] = sn[(j + h) * st2];
+      }
+      tw4[s] = T;
+    }
+    const pass4 = (s) => {                                 // 크기 s 단과 2s 단을 함께
+      const h = s >> 1, s2 = s << 1, st1 = M / s, st2 = M / s2;
+      // j = 0: 크기 s 단의 회전 인자와 2s 단 (a0, a2)의 회전 인자가 1
+      {
+        const c3 = cs[h * st2], s3 = sn[h * st2];
+        for (let i = 0; i < M; i += s2) {
+          const a0 = i, a1 = a0 + h, a2 = a0 + s, a3 = a2 + h;
+          const r0 = re[a0], i0 = im[a0], r1 = re[a1], i1 = im[a1], r2 = re[a2], i2 = im[a2], r3 = re[a3], i3 = im[a3];
+          const u0 = r0 + r1, v0 = i0 + i1, u1 = r0 - r1, v1 = i0 - i1;
+          const u2 = r2 + r3, v2 = i2 + i3, u3 = r2 - r3, v3 = i2 - i3;
+          re[a2] = u0 - u2; im[a2] = v0 - v2; re[a0] = u0 + u2; im[a0] = v0 + v2;
+          const tr = u3 * c3 + v3 * s3, ti = v3 * c3 - u3 * s3;
+          re[a3] = u1 - tr; im[a3] = v1 - ti; re[a1] = u1 + tr; im[a1] = v1 + ti;
+        }
+      }
+      // j ≥ 1: 회전 인자는 단 쌍마다 미리 이어 둔 표(tw4[s])에서 차례로 읽음(cs·sn 값을 옮겨 적은 것이라 같음).
+      //  블록 수(M/2s)가 회전 인자 수보다 적은 뒤쪽 단은 블록 바깥·회전 인자 안쪽으로(반복 한 번당 부담을 줄임)
+      const T = tw4[s];
+      if (M / s2 >= h) {
+        for (let j = 1; j < h; j++) {
+          const o = 6 * j, c1 = T[o], s1 = T[o + 1], c2 = T[o + 2], s2n = T[o + 3], c3 = T[o + 4], s3 = T[o + 5];
+          for (let i = 0; i < M; i += s2) {
+            const a0 = i + j, a1 = a0 + h, a2 = a0 + s, a3 = a2 + h;
+            const r0 = re[a0], i0 = im[a0], r1 = re[a1], i1 = im[a1], r2 = re[a2], i2 = im[a2], r3 = re[a3], i3 = im[a3];
+            let tr = r1 * c1 + i1 * s1, ti = i1 * c1 - r1 * s1;
+            const u1 = r0 - tr, v1 = i0 - ti, u0 = r0 + tr, v0 = i0 + ti;
+            tr = r3 * c1 + i3 * s1; ti = i3 * c1 - r3 * s1;
+            const u3 = r2 - tr, v3 = i2 - ti, u2 = r2 + tr, v2 = i2 + ti;
+            tr = u2 * c2 + v2 * s2n; ti = v2 * c2 - u2 * s2n;
+            re[a2] = u0 - tr; im[a2] = v0 - ti; re[a0] = u0 + tr; im[a0] = v0 + ti;
+            tr = u3 * c3 + v3 * s3; ti = v3 * c3 - u3 * s3;
+            re[a3] = u1 - tr; im[a3] = v1 - ti; re[a1] = u1 + tr; im[a1] = v1 + ti;
+          }
+        }
+      } else {
+        for (let i = 0; i < M; i += s2) {
+          for (let j = 1, o = 6; j < h; j++, o += 6) {
+            const c1 = T[o], s1 = T[o + 1], c2 = T[o + 2], s2n = T[o + 3], c3 = T[o + 4], s3 = T[o + 5];
+            const a0 = i + j, a1 = a0 + h, a2 = a0 + s, a3 = a2 + h;
+            const r0 = re[a0], i0 = im[a0], r1 = re[a1], i1 = im[a1], r2 = re[a2], i2 = im[a2], r3 = re[a3], i3 = im[a3];
+            let tr = r1 * c1 + i1 * s1, ti = i1 * c1 - r1 * s1;
+            const u1 = r0 - tr, v1 = i0 - ti, u0 = r0 + tr, v0 = i0 + ti;
+            tr = r3 * c1 + i3 * s1; ti = i3 * c1 - r3 * s1;
+            const u3 = r2 - tr, v3 = i2 - ti, u2 = r2 + tr, v2 = i2 + ti;
+            tr = u2 * c2 + v2 * s2n; ti = v2 * c2 - u2 * s2n;
+            re[a2] = u0 - tr; im[a2] = v0 - ti; re[a0] = u0 + tr; im[a0] = v0 + ti;
+            tr = u3 * c3 + v3 * s3; ti = v3 * c3 - u3 * s3;
+            re[a3] = u1 - tr; im[a3] = v1 - ti; re[a1] = u1 + tr; im[a1] = v1 + ti;
           }
         }
       }
-      // 후처리: X[k] = Fe[k] + W^k · Fo[k]
-      for (let k = 0; k <= M; k++) {
+    };
+    const pass2 = (size) => {                              // 크기 size 단 하나(원래 식)
+      const half = size >> 1, step = M / size;
+      for (let i = 0; i < M; i += size) {                // j = 0: 회전 인자 1
+        const a = i, b = a + half, tr = re[b], ti = im[b];
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+      }
+      for (let j = 1; j < half; j++) {
+        const c = cs[j * step], s = sn[j * step];
+        for (let i = 0; i < M; i += size) {
+          const a = i + j, b = a + half;
+          const tr = re[b] * c + im[b] * s;
+          const ti = im[b] * c - re[b] * s;
+          re[b] = re[a] - tr; im[b] = im[a] - ti;
+          re[a] += tr; im[a] += ti;
+        }
+      }
+    };
+
+    // 후처리: X[k] = Fe[k] + W^k · Fo[k]. kHi가 있으면 크기 스펙트럼을 0..kHi 칸만 계산(나머지 칸은 건드리지 않음)
+    const post = (mag, kHi) => {
+      const kEnd = kHi === undefined ? M : Math.min(M, kHi);
+      for (let k = 0; k <= kEnd; k++) {
         const k1 = k === M ? 0 : k, k2 = k === 0 ? 0 : M - k;
         const a = re[k1], b = im[k1], c = re[k2], d = im[k2];
         const feR = 0.5 * (a + c), feI = 0.5 * (b - d);
@@ -708,6 +778,52 @@ const Engine = (function () {
         mag[k] = Math.sqrt(xr * xr + xi * xi);
       }
     };
+    const fft = function (x, mag, kHi) {
+      // 짝/홀 샘플을 실수/허수부로 묶고 비트 역순 배치
+      for (let m = 0; m < M; m++) { const j = rev[m]; re[j] = x[2 * m]; im[j] = x[2 * m + 1]; }
+      // 반복형 radix-2 DIT(두 단씩 묶어서). 단 수가 홀수면 첫 단(크기 2)만 따로
+      let size = 2;
+      if (levels2 % 2 === 1) { pass2(2); size = 4; }
+      for (; size <= M; size <<= 2) pass4(size);
+      post(mag, kHi);
+    };
+    // 창 곱하기를 함께: 신호 src[base..base+N)(모두 범위 안)에 창 win을 곱한 프레임의 FFT.
+    //  창을 곱한 값(src·win, 배정밀도)을 프레임 배열에 넣었다가 비트 역순으로 옮기지 않고 첫 단에서 바로 읽음(같은 값이라 결과가 같음)
+    const rv2 = new Uint32Array(M); for (let j = 0; j < M; j++) rv2[j] = 2 * rev[j];   // re[j] = 프레임[2·rev[j]] (rev는 자기 역함수)
+    fft.win = function (src, base, win, mag, kHi) {
+      if (M < 4) {                                         // 아주 작은 크기는 원래 경로로
+        const fr = new Float64Array(N); for (let n = 0; n < N; n++) fr[n] = src[base + n] * win[n];
+        fft(fr, mag, kHi); return;
+      }
+      let size;
+      if (levels2 % 2 === 1) {                             // 첫 단(크기 2, 회전 인자 1)
+        for (let a = 0; a < M; a += 2) {
+          const qa = rv2[a], qb = rv2[a + 1];
+          const ra = src[base + qa] * win[qa], ia = src[base + qa + 1] * win[qa + 1];
+          const rb = src[base + qb] * win[qb], ib = src[base + qb + 1] * win[qb + 1];
+          re[a + 1] = ra - rb; im[a + 1] = ia - ib; re[a] = ra + rb; im[a] = ia + ib;
+        }
+        size = 4;
+      } else {                                             // 첫 두 단(크기 2·4): pass4(2)의 j = 0 과 같은 식
+        const c3 = cs[M >> 2], s3 = sn[M >> 2];
+        for (let i = 0; i < M; i += 4) {
+          const q0 = rv2[i], q1 = rv2[i + 1], q2 = rv2[i + 2], q3 = rv2[i + 3];
+          const r0 = src[base + q0] * win[q0], i0 = src[base + q0 + 1] * win[q0 + 1];
+          const r1 = src[base + q1] * win[q1], i1 = src[base + q1 + 1] * win[q1 + 1];
+          const r2 = src[base + q2] * win[q2], i2 = src[base + q2 + 1] * win[q2 + 1];
+          const r3 = src[base + q3] * win[q3], i3 = src[base + q3 + 1] * win[q3 + 1];
+          const u0 = r0 + r1, v0 = i0 + i1, u1 = r0 - r1, v1 = i0 - i1;
+          const u2 = r2 + r3, v2 = i2 + i3, u3 = r2 - r3, v3 = i2 - i3;
+          re[i + 2] = u0 - u2; im[i + 2] = v0 - v2; re[i] = u0 + u2; im[i] = v0 + v2;
+          const tr = u3 * c3 + v3 * s3, ti = v3 * c3 - u3 * s3;
+          re[i + 3] = u1 - tr; im[i + 3] = v1 - ti; re[i + 1] = u1 + tr; im[i + 1] = v1 + ti;
+        }
+        size = 8;
+      }
+      for (; size <= M; size <<= 2) pass4(size);
+      post(mag, kHi);
+    };
+    return fft;
   }
 
   // ---------------------------------------------------------------
@@ -742,21 +858,42 @@ const Engine = (function () {
     }
     const nOut = Math.floor((x.length - 1) * ratio) + 1;
     const y = new Float32Array(nOut);
-    const Dq = Math.floor(D / L), Dr = D % L, nx = x.length;
-    let i0 = 0, rem = 0;
-    for (let n = 0; n < nOut; n++) {
-      const p = P === L ? rem : Math.floor(rem * P / L);
-      const kb = p * taps, k = i0 - W + 1;
+    const nx = x.length;
+    // 출력 하나: 탭 순서대로 더함(가장자리는 범위 안 샘플만)
+    const one = (k, kb) => {
       let acc = 0;
       if (k >= 0 && k + taps <= nx) {
         for (let j = 0; j < taps; j++) acc += x[k + j] * ker[kb + j];
       } else {
         for (let j = 0; j < taps; j++) { const kk = k + j; if (kk >= 0 && kk < nx) acc += x[kk] * ker[kb + j]; }
       }
-      y[n] = acc;
-      i0 += Dq; rem += Dr;
-      if (rem >= L) { rem -= L; i0++; }
-      if ((n & 32767) === 0) await tick(p0 + (p1 - p0) * n / nOut);
+      return acc;
+    };
+    // 출력 n의 입력 위치 ⌊nD/L⌋ − W + 1과 위상 nD mod L. 출력 n+qL은 위상이 같고 입력 위치만 qD 뒤
+    //  → 같은 위상 출력 8개(n, n+L, …, n+7L)를 한 번에 계산(커널 값을 한 번 읽어 8번 씀).
+    //  출력마다 누적 변수를 따로 두고 탭 순서(j)도 그대로라 더하는 순서가 원래와 같아 결과가 비트 단위로 같음.
+    //  (출력 하나의 덧셈 사슬은 앞 덧셈이 끝나야 다음을 할 수 있어 느린데, 서로 다른 출력의 사슬은 함께 진행할 수 있음)
+    const B = 8 * L, D2 = 2 * D, D3 = 3 * D, D4 = 4 * D, D5 = 5 * D, D6 = 6 * D, D7 = 7 * D;
+    let n0 = 0, tk = -1;
+    for (; n0 + B <= nOut; n0 += B) {
+      for (let r = 0; r < L; r++) {
+        const n = n0 + r, t = n * D, rm = t % L, k = (t - rm) / L - W + 1, kb = (P === L ? rm : Math.floor(rm * P / L)) * taps;
+        if (k >= 0 && k + D7 + taps <= nx) {
+          let a0 = 0, a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0;
+          for (let j = 0; j < taps; j++) {
+            const c = ker[kb + j], q = k + j;
+            a0 += x[q] * c; a1 += x[q + D] * c; a2 += x[q + D2] * c; a3 += x[q + D3] * c;
+            a4 += x[q + D4] * c; a5 += x[q + D5] * c; a6 += x[q + D6] * c; a7 += x[q + D7] * c;
+          }
+          y[n] = a0; y[n + L] = a1; y[n + 2 * L] = a2; y[n + 3 * L] = a3; y[n + 4 * L] = a4; y[n + 5 * L] = a5; y[n + 6 * L] = a6; y[n + 7 * L] = a7;
+        } else for (let q = 0; q < 8; q++) y[n + q * L] = one(k + q * D, kb);
+      }
+      const tq = Math.floor(n0 / 32768);
+      if (tq !== tk) { tk = tq; await tick(p0 + (p1 - p0) * n0 / nOut); }
+    }
+    for (let n = n0; n < nOut; n++) {
+      const t = n * D, rm = t % L;
+      y[n] = one((t - rm) / L - W + 1, (P === L ? rm : Math.floor(rm * P / L)) * taps);
     }
     return y;
   }
@@ -781,23 +918,32 @@ const Engine = (function () {
     const nx = x.length;
     for (let t = 0; t < nF; t++) {
       const c = t * hop, base = c - H;
-      if (base >= 0 && base + N <= nx) for (let n = 0; n < N; n++) frame[n] = x[base + n] * win[n];
-      else for (let n = 0; n < N; n++) { const i = base + n; frame[n] = (i >= 0 && i < nx) ? x[i] * win[n] : 0; }
       let e = 0, ce = 0;
       const ea = Math.max(0, c - (hop >> 1)), eb = Math.min(nx, c + (hop >> 1));
       for (let i = ea; i < eb; i++) { e += x[i] * x[i]; ce++; }
       rms[t] = ce ? Math.sqrt(e / ce) : 0;
-      fft(frame, mag);
+      // 쓰는 칸(0..k1+1)만. 곡 안쪽 프레임은 창 곱하기를 FFT 첫 단에서 함께
+      if (base >= 0 && base + N <= nx) fft.win(x, base, win, mag, k1 + 1);
+      else { for (let n = 0; n < N; n++) { const i = base + n; frame[n] = (i >= 0 && i < nx) ? x[i] * win[n] : 0; } fft(frame, mag, k1 + 1); }
       const cur = ring[t % 3];
       for (let k = 0; k <= k1 + 1; k++) cur[k] = Math.log(1 + sc * mag[k]);
       if (t >= LAG) {
         const prev = ring[(t - LAG) % 3];
         let sl = 0, sm = 0, sh = 0;
-        for (let k = k0; k <= k1; k++) {
-          // 이전 프레임에 주파수 방향 최대값 필터(비브라토 억제)
-          const ref = Math.max(prev[k - 1], prev[k], prev[k + 1]);
-          const d = cur[k] - ref;
-          if (d > 0) { if (k < kL) sl += d; else if (k < kM) sm += d; else sh += d; }
+        // 이전 프레임에 주파수 방향 최대값 필터(비브라토 억제). 대역마다 따로 돌림(대역 안 더하는 순서는 같음).
+        //  값은 log(1 + 크기) ≥ +0 이라 NaN·−0이 없어 Math.max 대신 비교로 골라도 같음
+        const e1 = Math.min(kL, k1 + 1), e2 = Math.min(kM, k1 + 1);
+        for (let k = k0; k < e1; k++) {
+          const p0 = prev[k - 1], p1 = prev[k], p2 = prev[k + 1], r01 = p0 > p1 ? p0 : p1, ref = r01 > p2 ? r01 : p2;
+          const d = cur[k] - ref; if (d > 0) sl += d;
+        }
+        for (let k = Math.max(k0, kL); k < e2; k++) {
+          const p0 = prev[k - 1], p1 = prev[k], p2 = prev[k + 1], r01 = p0 > p1 ? p0 : p1, ref = r01 > p2 ? r01 : p2;
+          const d = cur[k] - ref; if (d > 0) sm += d;
+        }
+        for (let k = Math.max(k0, kM); k <= k1; k++) {
+          const p0 = prev[k - 1], p1 = prev[k], p2 = prev[k + 1], r01 = p0 > p1 ? p0 : p1, ref = r01 > p2 ? r01 : p2;
+          const d = cur[k] - ref; if (d > 0) sh += d;
         }
         const ti = t - 1;                                // 비교 구간의 가운데 프레임에 기록
         fl[ti] = sl / (kL - k0); fm[ti] = sm / (kM - kL); fh[ti] = sh / (k1 - kM + 1);
@@ -834,18 +980,22 @@ const Engine = (function () {
     const scale = 4 / N;
     const topA = new Float64Array(K), topM = new Float64Array(K);
     const nx = x.length, R = 6;
+    const kPre = Math.min(H, kmax + R);                   // 피크 고르기가 읽는 크기 칸의 끝(주변 평균 창 끝)
     // 화성·타악기 분리(FitzGerald 2010): 시간 방향 중앙값(±4 프레임)은 지속음을, 주파수 방향 중앙값(±4 칸)은 드럼을 살림.
     // 마스크 H²/(H²+P²)를 곱한 크기에서 피크를 골라 드럼·심벌 잡음이 크로마에 섞이지 않게 함(4 프레임 늦게 처리)
     const useH = P.HPSS, D = 4, RL = 2 * D + 1;
     const ring = useH ? Array.from({ length: RL }, () => new Float64Array(H + 1)) : null;
     const hm = new Float64Array(H + 1), m9 = new Float64Array(9);
     const pick = (t, m) => {
-      let mx = 0;
-      for (let k = kmin; k <= kmax; k++) if (m[k] > mx) mx = m[k];
-      let nTop = 0;
+      // 최대값(kmin..kmax)과 누적합을 한 번에 훑음. 누적합은 읽는 데(kmax+R)까지만, 앞에서부터 같은 순서로 더하므로 값이 같음
+      //  (원래는 최대값이 1e-9 이하면 누적합을 건너뛰었으나, 그때는 누적합을 읽지 않으므로 미리 계산해도 결과가 같음)
+      let mx = 0, sp = 0;
+      pre[0] = 0;
+      for (let k = 0; k < kmin; k++) { sp += m[k]; pre[k + 1] = sp; }
+      for (let k = kmin; k <= kmax; k++) { const v = m[k]; if (v > mx) mx = v; sp += v; pre[k + 1] = sp; }
+      for (let k = kmax + 1; k <= kPre; k++) { sp += m[k]; pre[k + 1] = sp; }
+      let nTop = 0, mi = -1;                              // mi: 상위 K가 찼을 때 가장 작은 칸(첫 번째) — 바뀔 때만 다시 찾음(원래는 후보마다 찾았으나 같은 칸)
       if (mx > 1e-9) {
-        pre[0] = 0;
-        for (let k = 0; k <= H; k++) pre[k + 1] = pre[k] + m[k];
         const thr = mx * 0.0056;                          // 프레임 최대 대비 −45 dB
         for (let k = kmin; k <= kmax; k++) {
           const v = m[k];
@@ -861,9 +1011,8 @@ const Engine = (function () {
           const mm = 69 + 12 * Math.log2(f / 440);
           if (nTop < K) { topA[nTop] = A; topM[nTop] = mm; nTop++; }
           else {
-            let mi = 0;
-            for (let q = 1; q < K; q++) if (topA[q] < topA[mi]) mi = q;
-            if (A > topA[mi]) { topA[mi] = A; topM[mi] = mm; }
+            if (mi < 0) { mi = 0; for (let q = 1; q < K; q++) if (topA[q] < topA[mi]) mi = q; }
+            if (A > topA[mi]) { topA[mi] = A; topM[mi] = mm; mi = -1; }
           }
         }
       }
@@ -873,10 +1022,11 @@ const Engine = (function () {
     for (let t = 0; t < nF + (useH ? D : 0); t++) {
       if (t < nF) {
         const base = t * hop - H;
-        if (base >= 0 && base + N <= nx) for (let n = 0; n < N; n++) frame[n] = x[base + n] * win[n];
-        else for (let n = 0; n < N; n++) { const i = base + n; frame[n] = (i >= 0 && i < nx) ? x[i] * win[n] : 0; }
-        fft(frame, mag);
-        if (useH) ring[t % RL].set(mag); else pick(t, mag);
+        const inside = base >= 0 && base + N <= nx;
+        if (!inside) for (let n = 0; n < N; n++) { const i = base + n; frame[n] = (i >= 0 && i < nx) ? x[i] * win[n] : 0; }
+        // 화성·타악기 분리를 끄면 0..kPre 칸만. 곡 안쪽 프레임은 창 곱하기를 FFT 첫 단에서 함께
+        if (useH) { if (inside) fft.win(x, base, win, mag); else fft(frame, mag); ring[t % RL].set(mag); }
+        else { if (inside) fft.win(x, base, win, mag, kPre); else fft(frame, mag, kPre); pick(t, mag); }
       }
       if (useH) {
         const tc = t - D;
@@ -1712,41 +1862,70 @@ const Engine = (function () {
   // ---------------------------------------------------------------
   // 1단계 분석(무거운 부분): 신호 → 특징 → 자동 비트
   // ---------------------------------------------------------------
+  // 채널 섞기: 가운데(모노) = 채널 평균(채널 순서대로 float32에 더함), wantSide면 곁 신호 (L−R)/2와 두 신호의 에너지 합도.
+  //  속도: 2채널은 한 번에 훑음(원래처럼 채널마다 따로 더한 float32 값·같은 순서의 에너지 합이라 결과가 같음). 3채널 이상은 원래 방식
+  function mixChannels(chans, len, wantSide) {
+    // 메모리(검증 제안): 곁 신호 배열은 여기서 만들지 않고 에너지 합(es, em)만 같은 순서로 구함. 배열은 가운데 리샘플링 뒤 sideOf로
+    const mono = new Float32Array(len), inv = 1 / chans.length;
+    if (chans.length === 2) {
+      const c0 = chans[0], c1 = chans[1];
+      if (!wantSide) { for (let i = 0; i < len; i++) mono[i] = Math.fround(0 + c0[i] * inv) + c1[i] * inv; return { mono }; }
+      let es = 0, em = 0;
+      for (let i = 0; i < len; i++) {
+        const a = c0[i], b = c1[i], m = Math.fround(Math.fround(0 + a * inv) + b * inv), d = 0.5 * (a - b);
+        mono[i] = m; es += d * d; em += m * m;
+      }
+      return { mono, es, em };
+    }
+    if (chans.length === 1) { const c0 = chans[0]; for (let i = 0; i < len; i++) mono[i] = 0 + c0[i] * inv; return { mono }; }
+    for (const ch of chans) for (let i = 0; i < len; i++) mono[i] += ch[i] * inv;
+    if (!wantSide) return { mono };
+    let es = 0, em = 0;
+    for (let i = 0; i < len; i++) { const d = 0.5 * (chans[0][i] - chans[1][i]); es += d * d; em += mono[i] * mono[i]; }
+    return { mono, es, em };
+  }
+  function sideOf(chans, len) { const side = new Float32Array(len), c0 = chans[0], c1 = chans[1]; for (let i = 0; i < len; i++) side[i] = 0.5 * (c0[i] - c1[i]); return side; }
+
+  // 큰 배열 훑기는 작은 함수로(한 번만 도는 async 함수 본문보다 빨리 최적화됨, 계산은 같음)
+  function absMax(x) { let pk = 0; for (let i = 0; i < x.length; i++) { const v = Math.abs(x[i]); if (v > pk) pk = v; } return pk; }
+  function scaleBy(x, g) { for (let i = 0; i < x.length; i++) x[i] *= g; }
+
   async function analyze(input, onProgress) {
     const tStart = nowMs();
     const tick = makeTicker(onProgress);
     const chans = input.channels, srIn = input.sampleRate;
     const len = chans[0].length, duration = len / srIn;
     await tick.force(0.005, '신호 준비');
-    const mono = new Float32Array(len);
-    const inv = 1 / chans.length;
-    for (const ch of chans) for (let i = 0; i < len; i++) mono[i] += ch[i] * inv;
+    const wantSide = P.SIDE_CHROMA && chans.length >= 2;
+    let MX = mixChannels(chans, len, wantSide), mono = MX.mono;   // 메모리: 다 쓴 큰 배열은 참조를 끊음(async 함수 안 지역 변수는 끝까지 살아 있을 수 있음)
 
     await tick.force(0.01, '리샘플링');
-    const x22 = await resample(mono, srIn, ANA_SR, tick, 0.01, 0.12);
-    const x11 = await resample(x22, ANA_SR, HAR_SR, tick, 0.12, 0.17);
+    let x22 = await resample(mono, srIn, ANA_SR, tick, 0.01, 0.12);
+    mono = null; MX.mono = null;
+    let x11 = await resample(x22, ANA_SR, HAR_SR, tick, 0.12, 0.17);
     // 곁 신호(SIDE_CHROMA): 스테레오 (L−R)/2. 가운데 정위(대개 리드 보컬·선율)는 지워지고 좌우로 벌린 반주만 남음.
     //  모노·거의 모노(곁/가운데 에너지가 SC_MIN_DB 미만)면 만들지 않음(그대로 기존 동작)
     let s11 = null;
-    if (P.SIDE_CHROMA && chans.length >= 2) {
-      const side = new Float32Array(len);
-      let es = 0, em = 0;
-      for (let i = 0; i < len; i++) { const d = 0.5 * (chans[0][i] - chans[1][i]); side[i] = d; es += d * d; em += mono[i] * mono[i]; }
-      if (em > 0 && 10 * Math.log10(es / em + 1e-12) >= P.SC_MIN_DB) s11 = await resample(side, srIn, HAR_SR, tick, 0.17, 0.17);   // 화성 분석 샘플레이트로 한 번에(두 단계보다 빠름)
+    if (!wantSide) MX = null;
+    if (wantSide) {
+      const es = MX.es, em = MX.em; let side = null;
+      MX = null;
+      if (em > 0 && 10 * Math.log10(es / em + 1e-12) >= P.SC_MIN_DB) { side = sideOf(chans, len); s11 = await resample(side, srIn, HAR_SR, tick, 0.17, 0.17); }   // 화성 분석 샘플레이트로 한 번에(두 단계보다 빠름)
+      side = null;
     }
-    let pk = 0;
-    for (let i = 0; i < x22.length; i++) { const v = Math.abs(x22[i]); if (v > pk) pk = v; }
+    const pk = absMax(x22);
     if (pk > 1e-9) {
       const g = 1 / pk;
-      for (let i = 0; i < x22.length; i++) x22[i] *= g;
-      for (let i = 0; i < x11.length; i++) x11[i] *= g;
-      if (s11) for (let i = 0; i < s11.length; i++) s11[i] *= g;
+      scaleBy(x22, g); scaleBy(x11, g);
+      if (s11) scaleBy(s11, g);
     }
 
     await tick.force(0.17, '리듬 특징 추출');
     const R = await rhythmFeatures(x22, tick, 0.17, 0.42);
+    x22 = null;
     await tick.force(0.42, '화성 특징 추출');
     const Hm = await harmonyFeatures(x11, tick, 0.42, 0.86, s11);
+    x11 = null; s11 = null;
 
     await tick.force(0.87, '템포 추정');
     const O = onsetEnvelope(R);
@@ -1996,6 +2175,14 @@ const Engine = (function () {
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
     KE_BREAK: true,                                      //  KEY_EDGE 안: 새 조 첫 박이 N.C.이고 그 마디의 절반 이상이 N.C.(브레이크)면 다음 마디 첫 박부터 새 조(KE_BARS 안에서)
+    // 코드로 조성 다시 정하기 고침(1.11.1): 1.11.0의 SC_ROOT가 남긴 섞지 않은 크로마의 7화음 이름이 조성 투표를 흔듦
+    //  (고민중독 도입부 D 장조 1.788 대 G 장조 1.781 → 곡 전체가 B 단조 → E 단조 → F 단조로 적힘. 정답 G 장조 → A♭ 장조)
+    //  KEY_TIE 켬: 고민중독만 G 장조 → A♭ 장조로 돌아오고, tune·hold 10곡 조성, GuitarSet 180곡, 합성 37곡·holdout 37곡, 조성·로마 숫자 시험은 그대로.
+    //  GTZAN 1000곡 중 1곡(힙합, 정답과 전후 모두 다름)의 가짜 전조만 사라짐. 1구간이 이웃과 이 차 안인 경우는 전체 자료에서 0.007·0.02·0.036(½박 설정에서 0.041)뿐이고
+    //  다음이 0.13이라 0.05~0.13이면 결과가 같음. ½박 설정의 여유를 두려고 0.1(hold 곡을 보지 않고 정함)
+    KEY_BLEND: false,                                    //  (비교용) 조성 투표에는 곁 신호를 섞은 디코딩(SC_ROOT 전)의 코드 이름을 씀: 근음·장단 계열을 고른 그 증거로 조도 정함(스테레오만).
+                                                         //   넣지 않음: KEY_TIE와 함께면 더 바뀌는 곳이 없고, ½박 설정에서는 고민중독을 오히려 틀리게 하거나 KEY_TIE의 고침을 되돌림
+    KEY_TIE: true, KTI_M: 0.1,                          //  한 구간이 고른 조가 이웃 구간의 조(또는 그 나란한 조)보다 코드 점수로 KTI_M 미만만 앞서면 이웃 조로(거의 동점인 전조 거르기)
     // 비교했지만 넣지 않음(끔)
     HDIM: false,                                        //  기본 어휘에 반감7(m7♭5): ii°7이 위 3화음으로 읽히던 곡은 나아지나 다른 곡의 m7·dim을 바꿔 5곡 합계가 나빠짐
     BASS_LAM: false, BL_K: 0.5,                          //  마디 안 바뀜 벌점을 베이스 움직임만큼 줄임: 5곡 모두 조금 나빠짐(스쳐 가는 베이스까지 코드 바뀜으로)
@@ -2046,6 +2233,25 @@ const Engine = (function () {
     REP_CONS: 0,                                         //  투표 전 코드로 잰 짝끼리 근음 일치 비율(가중)이 이 값 미만인 곡은 투표하지 않음(「세월이 가면」 0.81, 키트 곡 0.79~0.83이라 못 가름)
     REP_MINP: 1, REP_AGREE: 1,                           //  정족수: 박마다 짝 수 하한, 짝들이 고른 갈래(1위)의 최다 득표 하한(AGREE 3: 「세월이 가면」 94.5%, 이득 절반)
     DBG_REP: false,                                      //  반복 짝 기록(진단용)
+    // 코드 성질 다듬기(1.11.1): 경계·근음·조성은 그대로 두고 이름만(조성을 정한 뒤, SUS_GATE 다음)
+    DIM_HDIM: true, DH_TH: 0.5,                          //  dim으로 적은 구간에 단7음(근음+10)이 (3화음 구성음 평균의) DH_TH 배 이상이면 m7♭5로(기본 어휘에 m7♭5가 없어 ii°7이 dim으로 적힘).
+                                                         //   켬(1.11.1): GuitarSet 연주 정답 성질 59.37→60.28%(+97/−3 표본, 대중 장르 +69/−0), 근음·장단·조성·박 그대로, 합성곡 그대로.
+                                                         //   어휘에 m7♭5를 넣는 HDIM(아래, 끔)과 달리 다른 코드의 m7·dim은 건드리지 않음
+    SUS_SIDE: false, SUS_SD: 0.4, SUS_REL: 0.05,         //  스테레오만: sus4 구간에서 곁 신호(L−R)의 3음(장·단 중 큰 것)이 4음의 SUS_SD 배 이상이면 3화음으로(4음이 가운데(노래)에만 있음).
+                                                         //   SUS_REL: 곁 신호 믿음 하한(곁/가운데 근음·5음 세기 비, 반주를 가운데로 모은 편곡은 건너뜀).
+                                                         //   넣지 않음(hold 판정): tune 5곡 장단 +1.09%p였으나 hold 6곡에서 「세월이 가면」 성질 −0.58%p(진짜 sus4를 잃음). 진짜 sus4 근거가 11구간뿐
+    // 딸림7 과다(장3화음을 X7로): 딸림7 템플릿은 7음(단7도)의 3배음이 4음(11음) 칸에 떨어져, 노래 선율·지속음의 4음(V 위의 으뜸음 등)을
+    //  7음의 증거처럼 받아들임(7음 칸 자체는 약해도 딸림7이 이김). 아래 둘은 이 흡수를 막는 비교용 스위치(모노에도 작동)
+    D7_CAP: false, D7C_K: 0.5,  D7C_M: 0,                //  이름만: 딸림7 구간마다 4음 칸을 7음 칸의 D7C_K 배(7음 자신의 3배음으로 설명되는 만큼: HARM에서 (0.36+0.078)/(1+0.6+0.216) ≈ 0.24)로
+                                                         //   덮어 두고 같은 베이스의 장3화음과 방출 점수(템플릿·사전·자리바꿈·조성)를 다시 견줘, 딸림7이 구간 합(박 평균)으로 D7C_M 넘게 앞서지 못하면 장3화음으로.
+                                                         //   7음 베이스(A7/G) 구간은 그대로(베이스의 7음은 그 자체로 증거)
+                                                         //   (D7C_K 0.24에서 tune 5곡 성질 46.65→49.42(75%가 한 곡), 근음·장단·조성 그대로. GuitarSet 연주 정답 −2표본, 합성 37 그대로, holdout −2표본.
+                                                         //    0.5면 holdout·koi 손실 없음). 넣지 않음(hold 판정, D7C_K 0.5): hold 6곡 성질 +0.32%p였으나 「바다의 왕자」 −3.07%p(진짜 딸림7을 3화음으로)
+    D7C_EARLY: false,                                    //   D7_CAP 비교용: 이름 단계 대신 조성을 코드로 다시 정하기 전에(이름 단계 D7_CAP은 하지 않음). 「고민중독」 조성은 그대로 틀리고,
+                                                         //   어휘 'extended'·½박·베이스 표기 끔 설정에서는 맞던 고민중독 조성을 틀리게 해 넣지 않음
+    T7_FUND: false, T7F_ALL: false,                      //  템플릿: 7화음의 7음은 기본음·옥타브 배음만(3·5배음을 빼서 4음·9음 칸을 흡수하지 못하게). T7F_ALL: 딸림7뿐 아니라 m7·maj7·m7♭5도.
+                                                         //   넣지 않음: 4음이 sus4로 옮겨 가 tune 5곡 장단 90.39→87.19, GuitarSet 대중 근음 −0.6·장단 −1.2%p, 합성 특수 장르 67.1→64.9
+    DBG_Q7: false,                                       //  진단용: 이름 다듬기를 마친 박별 코드·트레블(섞기 전)·베이스·조성 기록(A._q7)
     // 코드 이름 다듬기(1.10.0): 경계·조성은 그대로 두고 이름만
     M7_BASSREL: true, M7_SHARE: 0.5, M7_CONS: 0.75,   // M7_SIXTH는 베이스를 믿을 수 있을 때만: 그 음이 구간 베이스의 절반 이상이거나, 박의 3/4 이상에서 가장 센 음일 때
     M7_NEIGHBOR: true,                                   // M7_SIXTH는 같은 코드 사이에 잠깐 낀(스쳐 가는) m7에는 쓰지 않음
@@ -2075,12 +2281,12 @@ const Engine = (function () {
     INV: [0, -0.7, -1.0, -1.0],                          // 근음/3음/5음/7음 베이스
   };
 
-  function notePattern(pc, out, w) {
-    for (const [o, h] of (P.NNLS ? [[0, 1]] : HARM)) out[(pc + o) % 12] += w * h;
+  function notePattern(pc, out, w, octOnly) {          // octOnly: 기본음·옥타브 배음만(T7_FUND)
+    for (const [o, h] of (P.NNLS ? [[0, 1]] : HARM)) if (!octOnly || o % 12 === 0) out[(pc + o) % 12] += w * h;
   }
-  function makeTemplate(pcs, bassPc) {
+  function makeTemplate(pcs, bassPc, octPc = -1) {      // octPc: 배음을 옥타브로만 둘 음(T7_FUND의 7음, 없으면 −1)
     const v = new Float64Array(12);
-    for (const pc of pcs) notePattern(pc, v, 1);
+    for (const pc of pcs) notePattern(pc, v, 1, pc === octPc);
     if (bassPc >= 0) notePattern(bassPc, v, P.RHO);      // 베이스 배음의 트레블 누설
     let mx = 0; for (let k = 0; k < 12; k++) if (v[k] > mx) mx = v[k];
     let q = 0;
@@ -2100,7 +2306,7 @@ const Engine = (function () {
   };
   const stateCache = new Map();
   function getStates(vocab, inv) {
-    const key = vocab + (inv ? '+inv' : '') + [P.VARIANTS, P.POWER, P.SLASH2, P.NNLS, P.HDIM].map(Number).join('');
+    const key = vocab + (inv ? '+inv' : '') + [P.VARIANTS, P.POWER, P.SLASH2, P.NNLS, P.HDIM, P.T7_FUND, P.T7F_ALL].map(Number).join('');
     if (stateCache.has(key)) return stateCache.get(key);
     const S = [];
     for (const q of VOCAB[vocab].concat(P.HDIM && vocab === 'standard' ? ['hdim7'] : [])) {
@@ -2111,7 +2317,7 @@ const Engine = (function () {
         const invs = (!inv || Q.noInv) ? [0] : Q.iv.map((_, i) => i);
         for (const vi of invs) {
           const bass = Q.bassOff ? (r + Q.bassOff) % 12 : pcs[vi];
-          const T = makeTemplate(pcs, bass);
+          const T = makeTemplate(pcs, bass, P.T7_FUND && (q === 'dom7' || (P.T7F_ALL && (q === 'min7' || q === 'maj7' || q === 'hdim7'))) ? pcs[3] : -1);
           const Tv = [{ T, pen: 0 }].concat(P.VARIANTS ? (VARIANTS[q] || []).map(([iv, pen]) => ({ T: makeTemplate(iv.map(i => (r + i) % 12), bass), pen })) : []);
           S.push({ q, root: r, pcs, bass, inv: vi,
             id: q + ':' + r + '/' + bass, baseId: q + ':' + r, T, Tv });
@@ -2299,8 +2505,16 @@ const Engine = (function () {
     };
     const pri = new Float64Array(K);
     for (let i = 0; i < K; i++) if (states[i].root >= 0) pri[i] = (P.PRI[states[i].q] || 0) + P.INV[states[i].inv];
-    const o = new Float64Array(12), bn = new Float64Array(12);
+    const o = new Float64Array(12), bn = new Float64Array(12), lb = new Float64Array(12);
     const base0 = Math.log(0.06 + 1 / 12), sq12 = Math.sqrt(12);
+    // 속도: 상태마다 같은 식을 미리 모아 둠(값은 같음) — 변형이 하나(VARIANTS 끔)면 템플릿을 한 배열로, 베이스 로그는 음 12개만 계산
+    const one = states.every(st => st.root < 0 || st.Tv.length === 1);
+    const TT = new Float64Array(K * 12), pen0 = new Float64Array(K), qq = new Uint8Array(K), bq = new Int32Array(K);
+    for (let i = 0; i < K; i++) {
+      const st = states[i]; if (st.root < 0) continue;
+      if (one) { TT.set(st.Tv[0].T, i * 12); pen0[i] = st.Tv[0].pen; }
+      qq[i] = st.q === '5' ? 1 : st.q === 'sl2' ? 2 : 0; bq[i] = st.bass;
+    }
     for (let s = 0; s < nS; s++) {
       const inKey = inKeyFor(keyAt(s));
       let mx = 0;
@@ -2314,6 +2528,28 @@ const Engine = (function () {
       const quiet = rel < 0.02 ? 12 : (rel < 0.08 ? 6 * (0.08 - rel) / 0.06 : 0);  // 조용할수록 N 선호
       const bRel = Math.min(1, bE[s] / (0.5 * bRef));
       for (let k = 0; k < 12; k++) bn[k] = bE[s] > 0 ? bass[s * 12 + k] / bE[s] : 1 / 12;
+      for (let k = 0; k < 12; k++) lb[k] = Math.log(0.06 + bn[k]) - base0;
+      const bw = P.BB * bRel;
+      if (one) {                                           // 위와 같은 식·같은 순서(변형 하나)
+        for (let i = 0; i < K; i++) {
+          let e;
+          if (states[i].root < 0) e = P.BETA * (flat - P.NDELTA) + quiet;
+          else {
+            const b12 = i * 12;
+            let d = 0; for (let k = 0; k < 12; k++) d += o[k] * TT[b12 + k];
+            let best = -Infinity; const sc = P.BETA * d + pen0[i]; if (sc > best) best = sc;
+            const qi = qq[i], bp = bq[i];
+            if (qi === 1) {
+              const r0 = states[i].root, other = o[(r0 + 2) % 12] + o[(r0 + 3) % 12] + o[(r0 + 4) % 12] + o[(r0 + 5) % 12];
+              best -= P.POWER_PEN * Math.max(0, other - P.POWER_TOL * (o[r0] + o[(r0 + 7) % 12]));
+            }
+            if (qi === 2 && bn[bp] < 0.3) best -= 3;
+            e = best + pri[i] + (inKey && inKey[i] ? P.KEY : 0) + bw * lb[bp];
+          }
+          E[s * K + i] = e;
+        }
+        continue;
+      }
       for (let i = 0; i < K; i++) {
         const st = states[i];
         let e;
@@ -2386,6 +2622,14 @@ const Engine = (function () {
     const bRef = quantile(bE, 0.6) || 1e-12, wb = P.REP_BASS;
     const hasB = new Uint8Array(nS); for (let s = 0; s < nS; s++) hasB[s] = bE[s] > 0.1 * bRef ? 1 : 0;
     const sim = (s, j, t) => {                           // j의 음 q가 s의 음 q+t에 해당
+      if (t === 0) {                                     // 옮김 없음(대부분): (k − 0 + 12) % 12 = k 라 나머지 연산 없이 같은 순서로
+        let a = 0;
+        for (let k = 0; k < 12; k++) a += X[s * 12 + k] * X[j * 12 + k];
+        if (!(wb > 0 && hasB[s] && hasB[j])) return a;
+        let b = 0;
+        for (let k = 0; k < 12; k++) b += Bn[s * 12 + k] * Bn[j * 12 + k];
+        return (a + wb * b) / (1 + wb);
+      }
       let a = 0;
       for (let k = 0; k < 12; k++) a += X[s * 12 + k] * X[j * 12 + (k - t + 12) % 12];
       if (!(wb > 0 && hasB[s] && hasB[j])) return a;
@@ -2396,7 +2640,7 @@ const Engine = (function () {
     const W = Math.max(1, Math.round(P.REP_WIN * res)), h = W >> 1, Lmin = Math.max(1, Math.round(P.REP_MINLAG * res));
     const LW = Math.round(P.REP_LOCW * res);
     // diag[L]: 짝 (a, a+L)의 박 단위 유사도 d와 창 평균 o (a = 앞 슬롯). 지연은 박 단위(res 슬롯)로만
-    const diag = new Map(), smp = [], keepD = P.REP_LOC > 0 || P.REP_BLOC > 0 || P.DBG_REP;   // 메모리: 슬롯² 크기라 필요할 때만
+    const diag = [], smp = [], keepD = P.REP_LOC > 0 || P.REP_BLOC > 0 || P.DBG_REP;   // 메모리: 슬롯² 크기라 필요할 때만
     for (let L = Lmin; L < nS; L += res) {
       const m = nS - L;
       // 창 평균: 짝 (a, a+L)을 가운데로. 창이 절반도 안 남는 끝자리는 짝으로 쓰지 않음
@@ -2427,13 +2671,13 @@ const Engine = (function () {
         }
       }
       for (let a = 0; a < m; a += 3) if (a - h >= 0 && a - h + W <= m) smp.push(g.o[a]);     // 분위수는 온전한 창만으로
-      diag.set(L, { d: keepD ? g.d : null, o: g.o, ts });
+      diag[L] = { d: keepD ? g.d : null, o: g.o, ts };   // 속도: Map 대신 지연 L 번호 배열(없는 지연은 undefined로 Map과 같음)
     }
     if (!smp.length) return null;
     const thr = Math.max(P.REP_TABS, quantile(smp, P.REP_Q));
     const span = Math.max(0.05, 0.5 * (1 - thr));
-    const ov = (L, a) => { const g = diag.get(L); return g && a >= 0 && a < g.o.length ? g.o[a] : -Infinity; };
-    const loc = (L, a) => { const g = diag.get(L); let s = 0, c = 0; for (let u = -LW; u <= LW; u++) if (a + u >= 0 && a + u < g.d.length) { s += g.d[a + u]; c++; } return c ? s / c : 0; };
+    const ov = (L, a) => { const g = diag[L]; return g && a >= 0 && a < g.o.length ? g.o[a] : -Infinity; };
+    const loc = (L, a) => { const g = diag[L]; let s = 0, c = 0; for (let u = -LW; u <= LW; u++) if (a + u >= 0 && a + u < g.d.length) { s += g.d[a + u]; c++; } return c ? s / c : 0; };
     const start = new Int32Array(nS + 1), pj = [], pw = [], pt = [];
     for (let s = 0; s < nS; s++) {
       const cand = [];
@@ -2457,7 +2701,7 @@ const Engine = (function () {
         if (posOf && posOf(s) !== posOf(j)) continue;
         if (P.REP_LOC > 0 && loc(L, a) < P.REP_LOC) continue;
         if (P.REP_BLOC > 0) {                            // 그 박 앞뒤 REP_LOCW 박의 베이스가 짝과 다르면(베이스가 둘 다 뚜렷한 박끼리) 다르게 화성을 붙인 반복으로 봄
-          const tg = diag.get(L).ts, t0 = tg ? tg[a] : 0, tt = j === a ? t0 : (12 - t0) % 12;
+          const tg = diag[L].ts, t0 = tg ? tg[a] : 0, tt = j === a ? t0 : (12 - t0) % 12;
           let sb = 0, cb = 0;
           for (let u = -LW; u <= LW; u++) {
             const x = s + u, y = j + u;
@@ -2467,7 +2711,7 @@ const Engine = (function () {
           }
           if (cb && sb / cb < P.REP_BLOC) continue;
         }
-        const tg = diag.get(L).ts, t = tg ? tg[a] : 0;      // tg[a]: 앞 슬롯 a의 음 q가 뒤 슬롯 a+L의 음 q+t
+        const tg = diag[L].ts, t = tg ? tg[a] : 0;      // tg[a]: 앞 슬롯 a의 음 q가 뒤 슬롯 a+L의 음 q+t
         pj.push(j); pw.push(P.REP_W * Math.min(1, (v - thr) / span)); pt.push(j === a ? t : (12 - t) % 12); c++;
       }
     }
@@ -2499,6 +2743,14 @@ const Engine = (function () {
     for (let k = 0; k < K; k++) { const fk = famKey(states[k]); if (!fIdx.has(fk)) fIdx.set(fk, fIdx.size); famId[k] = fIdx.get(fk); }
     const nF = fIdx.size, Fs = new Float64Array(nF), Fa = new Float64Array(nF), Fj = new Float64Array(nF);
     const famMax = (x, pm, dst) => { dst.fill(-Infinity); for (let k = 0; k < K; k++) { const v = E[x * K + (pm ? pm[k] : k)]; if (v > dst[famId[k]]) dst[famId[k]] = v; } };
+    // 속도: 짝 슬롯 j(옮김 t)의 갈래별 최고 점수는 여러 슬롯이 함께 빌려 가므로 (j, t)마다 한 번만 계산해 둠(같은 값)
+    const fmRows = [];                                   // fmRows[t][j]: 계산해 둔 갈래별 최고 점수(없으면 undefined)
+    const famMaxOf = (j, t) => {
+      const rows = fmRows[t] || (fmRows[t] = new Array(nS));
+      let row = rows[j];
+      if (!row) { row = rows[j] = new Float64Array(nF); famMax(j, permOf(t), row); }
+      return row;
+    };
     for (let s = 0; s < nS; s++) {
       let ws = 1;
       for (let k = 0; k < K; k++) out[s * K + k] = E[s * K + k];
@@ -2524,7 +2776,7 @@ const Engine = (function () {
         let fb = 0; for (let f = 1; f < nF; f++) if (Fs[f] > Fs[fb]) fb = f;
         for (let p = rp.start[s]; p < rp.start[s + 1]; p++) {
           const j = rp.pj[p]; let w = rp.pw[p]; if (!(w > 0)) continue;
-          famMax(j, permOf(rp.pt[p]), Fj);
+          const Fj = famMaxOf(j, rp.pt[p]);
           if (P.REP_GAP > 0) {                           // 짝이 고른 갈래를 이 박 자신이 크게(REP_GAP 넘게) 밀어내면 그 짝은 따르지 않음(다르게 화성을 붙인 반복)
             let jb = 0; for (let f = 1; f < nF; f++) if (Fj[f] > Fj[jb]) jb = f;
             const gap = Fs[fb] - Fs[jb];
@@ -2792,8 +3044,9 @@ const Engine = (function () {
     }
     if (majPref > 0 && best.mode === 'minor') {
       const rt = (best.tonic + 3) % 12;
-      if (best.score - sc12[rt] < majPref) return { tonic: rt, mode: 'major', score: sc12[rt] };
+      if (best.score - sc12[rt] < majPref) return { tonic: rt, mode: 'major', score: sc12[rt], sc: sc12 };
     }
+    best.sc = sc12;                                             // 24개 조 점수(0~11 장조, 12~23 단조): KEY_TIE가 이웃 조와 견줄 때 씀
     return best;
   }
   // st: 이 코드, key: 이 자리의 조성, inv: 자리바꿈(0~3), nx: 다음에 오는 다른 코드(없으면 null), nxKey: 그 코드 자리의 조성
@@ -3129,6 +3382,38 @@ const Engine = (function () {
     };
     let { st: states0, lb: lab } = decode(treb);
     states = states0;
+    // D7_CAP: 딸림7 구간(같은 근음, 자리바꿈 무관)마다 박별 크로마(섞기 전)의 4음 칸을 7음 칸 × D7C_K 이하로 덮고
+    //  emissions()와 같은 식(압축·정규화한 크로마와 템플릿의 내적 × BETA + 사전 + 자리바꿈 + 조성)으로 딸림7과 같은 베이스의 장3화음을 견줌.
+    //  7음이 정말 울리면 4음 칸은 그 3배음만큼은 남아 점수가 거의 그대로이고, 7음이 약한데 4음(선율·지속음)이 센 구간만 장3화음이 앞섬.
+    //  keyAt: 박(슬롯)의 조성(이름 단계는 확정된 조, D7C_EARLY는 판정 때의 조)
+    const capDom7 = (trD, keyAt) => {
+      const idx2 = new Map(); states.forEach((x, k) => idx2.set(x.id, k));
+      const o = new Float64Array(12);
+      const emT = (st, kSc) => { let d = 0; const T = st.Tv[0].T; for (let k = 0; k < 12; k++) d += o[k] * T[k]; return P.BETA * d + (P.PRI[st.q] || 0) + P.INV[st.inv] + (st.pcs.every(p => kSc.has(p)) ? P.KEY : 0); };
+      for (let s2 = 0; s2 < nS;) {
+        const x = states[lab[s2]];
+        let e = s2; while (e < nS && states[lab[e]].baseId === x.baseId) e++;
+        if (x.q === 'dom7') {
+          const r = x.root, p4 = (r + 5) % 12, p7 = (r + 10) % 12;
+          let d = 0, ok = true;
+          for (let q = s2; q < e; q++) {
+            const y = states[lab[q]], km = idx2.get('maj:' + r + '/' + y.bass);
+            if (y.bass === p7 || km === undefined) { ok = false; break; }      // 7음 베이스(A7/G)는 그대로
+            for (let k = 0; k < 12; k++) o[k] = trD[q * 12 + k];
+            o[p4] = Math.min(o[p4], P.D7C_K * o[p7]);
+            let mx = 0; for (let k = 0; k < 12; k++) if (o[k] > mx) mx = o[k];
+            let n2 = 0; for (let k = 0; k < 12; k++) { o[k] = mx > 0 ? Math.pow(o[k] / mx, P.GAMMA) : 1; n2 += o[k] * o[k]; }
+            n2 = Math.sqrt(n2) || 1; for (let k = 0; k < 12; k++) o[k] /= n2;
+            const kSc = new Set(keyScale(keyAt(q)));
+            d += emT(y, kSc) - emT(states[km], kSc);
+          }
+          if (ok && d / (e - s2) < P.D7C_M) for (let q = s2; q < e; q++) lab[q] = idx2.get('maj:' + r + '/' + states[lab[q]].bass);
+        }
+        s2 = e;
+      }
+    };
+    // KEY_BLEND: SC_ROOT가 이름을 바꾸기 전, 섞은 크로마로 읽은 코드(조성 투표용). 섞지 않은 크로마의 7음(노래·9·11음 배음)이 조를 흔들지 않게
+    const labK = P.KEY_BLEND && P.SC_ROOT && altOn(A) ? Int32Array.from(lab) : null;
     // SC_ROOT: 곁 신호를 섞은 크로마는 근음·장단 계열을 고를 때만 씀. 섞지 않은 크로마로 읽은 코드와 근음·장단이 같으면
     //  그쪽 이름(7화음·자리바꿈)을 그대로 둠(곁 신호에만 있는 반주 음이 7음 등 성질을 바꾸지 않게)
     if (P.SC_ROOT && altOn(A)) {
@@ -3155,6 +3440,7 @@ const Engine = (function () {
         else if (ctr && !(x.root >= 0 && states[lab[i]].root >= 0 && melodyMade(i, x, states[lab[i]]))) lab[i] = k;
       }
     }
+    if (P.D7_CAP && P.D7C_EARLY) capDom7(altOn(A) ? trebleOf(A, t0, t1, false) : treb, s2 => keyOfSlot(s2));   // D7C_EARLY: 조성을 코드로 다시 정하기 전에
     // 베이스 근음 우선(BASS_ROOT): 비터비가 고른 자리바꿈 코드 가운데 대중음악 반주에 드문 꼴은, 베이스 음을 근음으로 하는 기본형 코드가
     //  위 성부(트레블)를 거의 같게 설명하면 그 코드로 바꿈(옛 4곡·고민중독에서 이 꼴은 정답 근음이 베이스 음인 경우가 대부분). 대상:
     //   · m7의 5음 베이스(2전위): 베이스 음의 화음(딸림화음 등)에 다음 코드 음이 먼저 얹힌 것 (Cm7/G → G7, 다음 박 Cm7).
@@ -3211,7 +3497,8 @@ const Engine = (function () {
     // 새로 쳐지지 않았고(옛 코드를 다시 확인하는 소리가 없음) 그 강박에서 새 코드 점수가 옛 코드와 거의 같으면, 바뀜을 앞 강박으로.
     // 예: 분산화음 반주에서 Esus4 → E의 G♯이 4박에야 울려 4박으로 판정된 것을 3박으로. 옛 코드가 다시 쳐졌거나 울리고 있으면 그대로
     if ((P.EDGE_ATTACK || dbg) && res === 1) {
-      const emF = rp && P.REP_EDGE ? emitF(states, treb) : emissions(states, treb, bass, keyOfSlot), K2 = states.length;
+      // 반복 짝이 없으면 emitF가 곧 섞지 않은 방출 점수라 최종 비터비 때 계산해 둔 것을 그대로 씀(같은 값)
+      const emF = rp && !P.REP_EDGE ? emissions(states, treb, bass, keyOfSlot) : emitF(states, treb), K2 = states.length;
       for (let b = 2; b < nS; b++) {
         const Y = lab[b], X = lab[b - 1], mb = mOf ? mOf[b] : m;
         if (states[Y].baseId === states[X].baseId || lab[b - 2] !== X || states[Y].root < 0 || states[X].root < 0) continue;
@@ -3227,7 +3514,7 @@ const Engine = (function () {
     // 마디 끝 박에서 바뀌어 다음 첫 박까지 이어지는 코드(앞당겨 친 당김, 베이스 접근음)는 악보 관례대로 첫 박에서 바뀐 것으로.
     //  그 박에서 새 코드 점수가 옛 코드보다 LE_EM 넘게 앞서면(정말 그 박에 바뀜) 그대로
     if (P.LATE_EDGE && res === 1) {
-      const emL = rp && P.REP_EDGE ? emitF(states, treb) : emissions(states, treb, bass, keyOfSlot), K3 = states.length;
+      const emL = rp && !P.REP_EDGE ? emissions(states, treb, bass, keyOfSlot) : emitF(states, treb), K3 = states.length;
       for (let b = 1; b + 1 < nS; b++) {
         const mb = mOf ? mOf[b] : m;
         if (pos[b] !== mb - 1 || pos[b + 1] !== 0) continue;
@@ -3262,10 +3549,11 @@ const Engine = (function () {
     }
     indexSegs();
     // 구간마다 인식된 코드로 조성을 다시 정함(음 분포만으로는 나란한조·5도 관계 조를 헷갈릴 수 있음)
+    const keySt = s2 => labK ? states[labK[s2]] : states[lab[s2]];   // 조성 투표에 쓰는 코드(KEY_BLEND면 SC_ROOT 전 섞은 디코딩)
     const decideKey = (g, majPref) => {
       const runs = [];
       for (let s2 = g.start * res; s2 < g.end * res; s2++) {
-        const st = states[lab[s2]];
+        const st = keySt(s2);
         if (st.root < 0) continue;
         if (runs.length && runs[runs.length - 1].st.baseId === st.baseId && runs[runs.length - 1].end === s2) { runs[runs.length - 1].dur++; runs[runs.length - 1].end = s2 + 1; }
         else runs.push({ st, dur: 1, end: s2 + 1 });
@@ -3278,15 +3566,32 @@ const Engine = (function () {
       let bc = -1;
       for (let i = g.start; i < g.end; i++) {
         if (pos[i] !== 0) continue;
-        const st = states[lab[i * res]];
+        const st = keySt(i * res);
         if (bc < 0 && st.root < 0) continue;
         bc++;
         if (bc % 4 === 0 && st.root >= 0) phraseSt.push(st);
       }
       const k = runs.length >= 3 ? keyFromChords(runs, chromaR, phraseSt, majPref) : null;
-      if (k) g.key = { tonic: k.tonic, mode: k.mode, score: g.key.score };
+      if (k) { g.key = { tonic: k.tonic, mode: k.mode, score: g.key.score }; g.sc = k.sc; }
     };
     segs.forEach(g => decideKey(g, 0));
+    // 거의 동점인 전조 거르기(KEY_TIE): 한 구간이 고른 조가 이웃 구간의 조(또는 그 나란한 조 가운데 이 구간에서 점수가 높은 쪽)보다
+    //  KTI_M 미만으로만 앞서면 이 구간도 이웃의 그 조로 봄. 근거가 거의 없는 5도 관계 조가 나란한조 합치기(KEY_REL_MERGE)를 막아
+    //  곡 전체 조성이 연쇄로 어긋나는 것을 막음. 이웃 하나와 이미 같거나 나란한 조면 그대로(다음 단계에서 합쳐짐)
+    if (P.KEY_TIE && segs.length > 1) {
+      const ki = k => (k.mode === 'major' ? 0 : 12) + k.tonic;
+      const relK = k => k.mode === 'major' ? { tonic: (k.tonic + 9) % 12, mode: 'minor' } : { tonic: (k.tonic + 3) % 12, mode: 'major' };
+      const same = (a, b) => a.tonic === b.tonic && a.mode === b.mode;
+      for (let g = 0; g < segs.length; g++) {
+        const G = segs[g]; if (!G.sc) continue;
+        for (const h of [g - 1, g + 1]) {
+          if (h < 0 || h >= segs.length) continue;
+          const nk = segs[h].key; if (same(G.key, nk) || same(G.key, relK(nk))) break;
+          const c = G.sc[ki(nk)] >= G.sc[ki(relK(nk))] ? nk : relK(nk);
+          if (G.sc[ki(G.key)] - G.sc[ki(c)] < P.KTI_M) { G.key = { tonic: c.tonic, mode: c.mode, score: G.key.score }; break; }
+        }
+      }
+    }
     // 나란한 장·단조로 갈린 이웃 구간은 하나로 합쳐 조를 다시 정함(KEY_REL_MERGE): 조표가 같아 코드 철자는 같고,
     //  나란한조 사이 이동(C 장조 ↔ A 단조)은 전조로 적지 않는다는 관례대로. 합친 구간 전체의 코드로 장·단조를 고름
     if (P.KEY_REL_MERGE) {
@@ -3394,6 +3699,63 @@ const Engine = (function () {
         }
         s2 = e;
       }
+    }
+    // 코드 성질 다듬기(비교용 스위치, 이름만): 조성을 정한 뒤라 조성·경계·근음에는 영향이 없음
+    if ((P.SUS_SIDE && A.harm.trebleSide && P.SIDE_CHROMA) || P.DIM_HDIM || P.D7_CAP) {
+      const idx2 = new Map(); states.forEach((x, k) => idx2.set(x.id, k));
+      const trD = altOn(A) ? trebleOf(A, t0, t1, false) : treb;   // 곁 신호 섞기 전 크로마
+      // SUS_SIDE(스테레오만): sus4 구간에서 곁 신호(L−R, 가운데 노래가 빠진 반주)의 3음(장·단 중 큰 것)이 4음의 SUS_SD 배 이상이면
+      //  4음은 가운데(노래)에만 있는 음으로 보고 3화음으로. 곁 신호의 근음+5음이 섞기 전 크로마의 SUS_REL 배 미만이면(곁 신호를 믿기 어려움) 그대로
+      if (P.SUS_SIDE && A.harm.trebleSide && P.SIDE_CHROMA) {
+        const sd = aggregate(A.harm.trebleSide, A.harm.hopT, t0, t1);
+        for (let s2 = 0; s2 < nS;) {
+          const x = states[lab[s2]];
+          let e = s2; while (e < nS && states[lab[e]].baseId === x.baseId) e++;
+          if (x.q === 'sus4') {
+            const r = x.root; let s4 = 0, M3 = 0, m3 = 0, den = 0, mden = 0;
+            for (let q = s2; q < e; q++) {
+              s4 += sd[q * 12 + (r + 5) % 12]; M3 += sd[q * 12 + (r + 4) % 12]; m3 += sd[q * 12 + (r + 3) % 12];
+              den += sd[q * 12 + r] + sd[q * 12 + (r + 7) % 12]; mden += trD[q * 12 + r] + trD[q * 12 + (r + 7) % 12];
+            }
+            const rel = mden > 0 ? den / mden : 0, drop = rel >= P.SUS_REL && s4 > 0 && Math.max(M3, m3) >= P.SUS_SD * s4;
+            if (drop) { const k = idx2.get((M3 >= m3 ? 'maj:' : 'min:') + r + '/' + r); if (k !== undefined) for (let q = s2; q < e; q++) lab[q] = k; }
+          }
+          s2 = e;
+        }
+      }
+      // D7_CAP(이름 단계): 7음이 약한데 4음(선율·지속음)이 센 딸림7 구간은 장3화음으로(capDom7 설명 참고)
+      if (P.D7_CAP && !P.D7C_EARLY) capDom7(trD, s2 => segs[segOfBeat[Math.floor(s2 / res)]].key);
+      // DIM_HDIM: 기본 어휘에는 m7♭5가 없어 반감7화음(ii°7)이 dim으로 적힘. dim 구간에 단7음이 뚜렷하면 m7♭5로 이름만 바꿈
+      //  (비터비·조성에는 영향 없음, 캐시된 상태 목록은 건드리지 않고 사본에 덧붙임)
+      if (P.DIM_HDIM) {
+        let extra = null;
+        for (let s2 = 0; s2 < nS;) {
+          const x = states[lab[s2]];
+          let e = s2; while (e < nS && lab[e] === lab[s2]) e++;
+          if (x.q === 'dim') {
+            const r = x.root; let num = 0, den = 0;
+            for (let q = s2; q < e; q++) { num += trD[q * 12 + (r + 10) % 12]; den += (trD[q * 12 + r] + trD[q * 12 + (r + 3) % 12] + trD[q * 12 + (r + 6) % 12]) / 3; }
+            if (den > 0 && num / den >= P.DH_TH) {
+              if (!extra) extra = new Map();
+              let k = extra.get(r);
+              if (k === undefined) {
+                const pcs = QUAL.hdim7.iv.map(i => (r + i) % 12);
+                const st = { q: 'hdim7', root: r, pcs, bass: r, inv: 0, id: 'hdim7:' + r + '/' + r, baseId: 'hdim7:' + r, T: null, Tv: [] };
+                states = states.concat([st]); k = states.length - 1; extra.set(r, k);
+              }
+              for (let q = s2; q < e; q++) lab[q] = k;
+            }
+          }
+          s2 = e;
+        }
+      }
+    }
+    if (P.DBG_Q7) {                                      // 진단용 기록: 박별 최종 코드, 섞기 전 트레블, 베이스, 곁 신호, 조성
+      const trD = altOn(A) ? trebleOf(A, t0, t1, false) : treb;
+      const sd = A.harm.trebleSide ? aggregate(A.harm.trebleSide, A.harm.hopT, t0, t1) : null;
+      const r4 = v => Array.from(v, x => +x.toFixed(5));
+      A._q7 = { t0: r4(t0), t1: r4(t1), id: Array.from(lab, k => states[k].id), treb: r4(trD), bass: r4(bass), side: sd ? r4(sd) : null,
+        key: Array.from(lab, (_, s2) => { const k = segs[segOfBeat[Math.floor(s2 / res)]].key; return k.tonic + (k.mode === 'major' ? 'M' : 'm'); }) };
     }
     const namesSeg = segs.map(g => spelling(g.key));   // 구간마다 그 조성에 맞는 ♯/♭ 표기
 
