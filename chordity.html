@@ -344,7 +344,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.10.5">v1.10.5</span>
+    <span class="ver" title="Chordity 버전 1.11.0">v1.11.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -991,7 +991,54 @@ const Engine = (function () {
     return out;
   }
   // 트레블 크로마: 기본은 피크 크로마, NNLS 를 켜면 음 분해 크로마
-  const trebleOf = (A, t0, t1) => P.NNLS && A.harm.trebleMidi ? nnlsChroma(aggregateN(A.harm.trebleMidi, NN_B, A.harm.hopT, t0, t1), t0.length) : aggregate(A.harm.treble, A.harm.hopT, t0, t1, P.DRUM_GATE && A.drum ? drumGateW(A) : null);
+  // alt: 곁 신호 섞기·선율 줄이기를 쓸지(false 면 원래 트레블)
+  const trebleOf = (A, t0, t1, alt = true) => P.NNLS && A.harm.trebleMidi ? nnlsChroma(aggregateN(A.harm.trebleMidi, NN_B, A.harm.hopT, t0, t1), t0.length) : (alt ? sideBlend : (a, b, c, x) => x)(A, t0, t1, aggregate(alt && P.MEL_SUP && A.harm.trebleMel ? A.harm.trebleMel : A.harm.treble, A.harm.hopT, t0, t1, P.DRUM_GATE && A.drum ? drumGateW(A) : null));
+  const altOn = A => (P.SIDE_CHROMA && A.harm.trebleSide) || (P.MEL_SUP && A.harm.trebleMel);
+  // 곁 신호 섞기(SIDE_CHROMA): 구간 트레블 크로마에 곁 신호 크로마를 SC_K 배로 더함.
+  //  (L+R)/2 와 (L−R)/2 에서 한쪽으로 벌린 악기는 같은 세기로, 가운데 선율은 앞쪽에만 있으므로 더하면 반주 비중이 (1+SC_K)배.
+  //  곁 신호가 약한 구간(가운데로 모은 편곡)은 더해지는 양이 작아 저절로 원래 크로마에 가까움
+  function sideBlend(A, t0, t1, treb) {
+    if (!P.SIDE_CHROMA || !A.harm.trebleSide) return treb;
+    const sd = aggregate(A.harm.trebleSide, A.harm.hopT, t0, t1, P.DRUM_GATE && A.drum ? drumGateW(A) : null);
+    if (P.SC_MODE !== 'gate') {
+      // 베이스는 대개 가운데 정위라 곁 신호에는 베이스 음의 배음이 빠짐 → 섞으면 베이스 음(대개 근음)이 상대적으로 약해져
+      //  Gm7 → B♭ 처럼 근음 없는 이웃 코드로 기욺. SC_BK > 0 이면 이 구간 베이스 크로마에서 센 음의 트레블 성분도 반주처럼 (1+SC_K)배로
+      let bq = null;
+      if (P.SC_BK > 0) { bq = aggregate(A.harm.bass, A.harm.hopB, t0, t1); subFloor(bq, bassFloor(bq)); }
+      const nS = treb.length / 12;
+      for (let s = 0; s < nS; s++) {
+        let bm = 0; if (bq) for (let k = 0; k < 12; k++) bm = Math.max(bm, bq[s * 12 + k]);
+        for (let k = 0; k < 12; k++) {
+          const b = bm > 0 ? P.SC_BK * Math.pow(bq[s * 12 + k] / bm, 2) : 0;
+          treb[s * 12 + k] += P.SC_K * (sd[s * 12 + k] + b * treb[s * 12 + k]);
+        }
+      }
+      return treb;
+    }
+    // 'gate': 더하지 않고 '가운데에만 있는 음'만 줄임. 곡 전체 곁/가운데 비 ρ0 에 견줘 이 구간 음 k 의 곁/가운데 비가 SC_TH·ρ0 보다 작으면
+    //  (반주는 그 음을 거의 안 치고 가운데 선율만 그 음을 냄) 그만큼 깎음. 구간 전체 곁 신호가 약하면(가운데로 모은 편곡) 덜 깎음
+    const r0 = sideRatio(A), nS = treb.length / 12;
+    for (let s = 0; s < nS; s++) {
+      let sm = 0, ss = 0;
+      for (let k = 0; k < 12; k++) { sm += treb[s * 12 + k]; ss += sd[s * 12 + k]; }
+      if (!(sm > 0)) continue;
+      const rel = Math.min(1, ss / sm / r0);                 // 이 구간 곁 신호의 믿음(곡 평균 대비)
+      for (let k = 0; k < 12; k++) {
+        const m = treb[s * 12 + k]; if (!(m > 0)) continue;
+        const rk = sd[s * 12 + k] / m / r0;                  // 1이면 곡 평균만큼 넓게 퍼진 음, 0이면 가운데에만 있는 음
+        const c = Math.max(0, 1 - rk / P.SC_TH);
+        treb[s * 12 + k] = m * (1 - P.SC_G * c * rel);
+      }
+    }
+    return treb;
+  }
+  // 곡 전체 곁/가운데 트레블 크로마 비(소리 나는 프레임 합)
+  function sideRatio(A) {
+    if (A.harm._r0) return A.harm._r0;
+    const C = A.harm.treble, D = A.harm.trebleSide; let a = 0, b = 0;
+    for (let i = 0; i < C.length; i++) { a += C[i]; b += D[i]; }
+    return (A.harm._r0 = a > 0 && b > 0 ? b / a : 1);
+  }
   // 드럼 타격 가중(DRUM_GATE): 트레블 프레임의 분석 창(±93 ms)에 스네어 타격(광대역 온셋)이나 그 잔향이 들어 있으면
   //  박 집계에서 그 프레임의 비중을 줄임(음정 있는 스네어의 부분음이 코드 음처럼 섞이는 것을 막음). 잔향은 지수 감쇠(DG_TAU 초)
   function drumGateW(A) {
@@ -1009,15 +1056,80 @@ const Engine = (function () {
     return w;
   }
 
-  async function harmonyFeatures(x, tick, p0, p1) {
-    const pm = p0 + (p1 - p0) * 0.45;
+  // 주 선율(노래) 찾기와 배음 깎기(MEL_SUP)
+  //  1) 짧은 창(1024, 93 ms) 피크로 프레임마다 기본음 후보(MIDI ML_LO~ML_HI 피크)의 배음 합(6배음, 0.8^(h−1))을 재고 가장 큰 것을 고름.
+  //     배음 합이 프레임 피크 합의 ML_DOM 이상일 때만(두드러진 선율)
+  //  2) 이웃 프레임 음높이 차가 0.6반음 안이면 한 줄기로 잇고, ML_MINF 프레임 이상인 줄기만
+  //  3) 줄기의 음높이 흔들림(7프레임 이동 평균을 뺀 나머지의 표준편차, 센트)이 ML_VIB 이상이면 노래(비브라토·꺾기)로 봄.
+  //     건반·기타·합성음처럼 음높이가 고정된 소리는 흔들림이 작아 건드리지 않음
+  //  4) 노래 줄기 프레임에서 트레블 피크 가운데 기본음의 배음(±ML_TOL 반음)에 걸리는 것을 (1−ML_G)배로
+  function melodySuppress(Tm, T, tuning) {
+    const nF = Math.min(Tm.nF, T.nF), f0 = new Float64Array(nF).fill(-1);
+    const HL = [0, 12, 19.02, 24, 27.86, 31.02];
+    for (let t = 0; t < nF; t++) {
+      const c = Tm.cnt[t], base = t * Tm.K; let tot = 0;
+      for (let q = 0; q < c; q++) tot += Tm.amp[base + q];
+      let best = 0, bm = -1;
+      for (let q = 0; q < c; q++) {
+        const m0 = Tm.midi[base + q] - tuning; if (m0 < P.ML_LO || m0 > P.ML_HI) continue;
+        let sc = 0, pw = 0, pm = 0;
+        for (let h = 0; h < HL.length; h++) {
+          let a = 0, mh = 0;
+          for (let r = 0; r < c; r++) if (Math.abs(Tm.midi[base + r] - tuning - m0 - HL[h]) < 0.4 && Tm.amp[base + r] > a) { a = Tm.amp[base + r]; mh = Tm.midi[base + r] - tuning - HL[h]; }
+          sc += a * Math.pow(0.8, h);
+          if (a > 0) { const w = a * (h + 1); pw += w; pm += w * mh; }   // 높은 배음일수록 음높이가 정밀(반음 대비 칸 폭이 좁음)
+        }
+        if (sc > best) { best = sc; bm = pw > 0 ? pm / pw : m0; }
+      }
+      if (bm >= 0 && tot > 0 && best >= P.ML_DOM * tot) f0[t] = bm;
+    }
+    // 줄기 잇기와 흔들림 판정
+    const vocal = new Uint8Array(nF);
+    let nC = 0, nV = 0, fV = 0;
+    for (let t = 0; t < nF;) {
+      if (f0[t] < 0) { t++; continue; }
+      let e = t + 1; while (e < nF && f0[e] >= 0 && Math.abs(f0[e] - f0[e - 1]) < 0.6) e++;
+      const L = e - t;
+      if (L >= P.ML_MINF) {
+        nC++;
+        let ss = 0;
+        for (let j = t; j < e; j++) {
+          let a = 0, n = 0; for (let k = Math.max(t, j - 3); k <= Math.min(e - 1, j + 3); k++) { a += f0[k]; n++; }
+          const d = (f0[j] - a / n) * 100; ss += d * d;
+        }
+        if (Math.sqrt(ss / L) >= P.ML_VIB) { nV++; fV += L; for (let j = t; j < e; j++) vocal[j] = 1; }
+      }
+      t = e;
+    }
+    // 배음 깎기(트레블 피크 크기 사본)
+    const amp = Float32Array.from(T.amp);
+    for (let t = 0; t < nF; t++) {
+      if (!vocal[t]) continue;
+      const base = t * T.K;
+      for (let q = 0; q < T.cnt[t]; q++) {
+        const d = T.midi[base + q] - tuning - f0[t];
+        for (let h = 0; h < HL.length; h++) if (Math.abs(d - HL[h]) < P.ML_TOL) { amp[base + q] *= 1 - P.ML_G; break; }
+      }
+    }
+    return { T: { nF: T.nF, K: T.K, midi: T.midi, amp, cnt: T.cnt }, info: { contours: nC, vocal: nV, vocalFrac: +(fV / Math.max(1, nF)).toFixed(3) } };
+  }
+
+  async function harmonyFeatures(x, tick, p0, p1, side) {
+    const pm = p0 + (p1 - p0) * 0.45, ps = side ? p0 + (p1 - p0) * 0.78 : p1;
     const B = await peakSTFT(x, 4096, 512, 32, 1400, 24, tick, p0, pm);   // 주파수 해상도 우선(베이스·튜닝)
-    const T = await peakSTFT(x, 2048, 256, 110, 4200, 36, tick, pm, p1);  // 시간 해상도 우선(트레블)
+    const T = await peakSTFT(x, 2048, 256, 110, 4200, 36, tick, pm, ps);  // 시간 해상도 우선(트레블)
     const tuning = estimateTuning(B);
+    // 곁 신호 트레블 크로마(SIDE_CHROMA): 가운데 정위 선율이 빠진 반주 화성
+    const Ts = side ? await peakSTFT(side, 2048, 256, 110, 4200, 36, tick, ps, p1) : null;
+    // 노래 선율 줄이기(MEL_SUP): 짧은 창으로 가장 두드러진 음높이 줄기를 따라가 음높이가 흔들리는(노래) 줄기의 배음만 트레블에서 깎음
+    let mel = null;
+    if (P.MEL_SUP) { const Tm = await peakSTFT(x, 1024, 256, 140, 4200, 24, tick, p1, p1); mel = melodySuppress(Tm, T, tuning); }
     return {
       tuning,
       bass: chromaFromPeaks(B, tuning, BASS_W), hopB: 512 / HAR_SR,
       treble: chromaFromPeaks(T, tuning, TREBLE_W), hopT: 256 / HAR_SR,
+      trebleSide: Ts ? chromaFromPeaks(Ts, tuning, TREBLE_W) : null,
+      trebleMel: mel ? chromaFromPeaks(mel.T, tuning, TREBLE_W) : null, melInfo: mel ? mel.info : null,
       trebleMidi: P.NNLS ? midiSpecFromPeaks(T, tuning) : null,
     };
   }
@@ -1544,7 +1656,10 @@ const Engine = (function () {
     //    8분음표로 잡힌 느린 곡이라면 2·4박 스네어도 킥과 같은 쪽(짝수 비트)에 오기 때문
     const hvKom = !P.HV_KOM || info.kickOnMid >= P.HV_KOM_MIN;
     const hvR2 = info.r2 >= 2.4 && (!P.HV_NOBB || info.dSn > P.HV_NOBB_DSN);
-    if (!walkOnly && (hvR2 || sameSide) && hvKom && bpm >= 110 && bpm / 2 >= 55) {
+    // 느린 발라드가 8분음표로 잡힘(HV_BALLAD): 스네어(2·4박)와 화성 변화가 킥과 같은 쪽 비트에 몰리고, 절반 템포가 발라드 빠르기.
+    //  킥 치우침(dK)과 박 사이 저음 비(HV_KOM)는 보지 않음: 발라드는 피아노·베이스가 16분음표 자리(8분음표 비트 사이)에도 자주 울림
+    const ballad = P.HV_BALLAD && info.dSn >= P.HB_DSN && info.dNov >= P.HB_NOV && info.r2 >= 1.3 && bpm / 2 <= P.HB_MAX;
+    if (!walkOnly && ((hvR2 || sameSide) && hvKom || ballad) && bpm >= 110 && bpm / 2 >= 55) {
       const keep = e >= o ? 0 : 1;
       info.action = 'halve';
       return { beats: beats.filter((_, i) => i % 2 === keep), info };
@@ -1610,18 +1725,28 @@ const Engine = (function () {
     await tick.force(0.01, '리샘플링');
     const x22 = await resample(mono, srIn, ANA_SR, tick, 0.01, 0.12);
     const x11 = await resample(x22, ANA_SR, HAR_SR, tick, 0.12, 0.17);
+    // 곁 신호(SIDE_CHROMA): 스테레오 (L−R)/2. 가운데 정위(대개 리드 보컬·선율)는 지워지고 좌우로 벌린 반주만 남음.
+    //  모노·거의 모노(곁/가운데 에너지가 SC_MIN_DB 미만)면 만들지 않음(그대로 기존 동작)
+    let s11 = null;
+    if (P.SIDE_CHROMA && chans.length >= 2) {
+      const side = new Float32Array(len);
+      let es = 0, em = 0;
+      for (let i = 0; i < len; i++) { const d = 0.5 * (chans[0][i] - chans[1][i]); side[i] = d; es += d * d; em += mono[i] * mono[i]; }
+      if (em > 0 && 10 * Math.log10(es / em + 1e-12) >= P.SC_MIN_DB) s11 = await resample(side, srIn, HAR_SR, tick, 0.17, 0.17);   // 화성 분석 샘플레이트로 한 번에(두 단계보다 빠름)
+    }
     let pk = 0;
     for (let i = 0; i < x22.length; i++) { const v = Math.abs(x22[i]); if (v > pk) pk = v; }
     if (pk > 1e-9) {
       const g = 1 / pk;
       for (let i = 0; i < x22.length; i++) x22[i] *= g;
       for (let i = 0; i < x11.length; i++) x11[i] *= g;
+      if (s11) for (let i = 0; i < s11.length; i++) s11[i] *= g;
     }
 
     await tick.force(0.17, '리듬 특징 추출');
     const R = await rhythmFeatures(x22, tick, 0.17, 0.42);
     await tick.force(0.42, '화성 특징 추출');
-    const Hm = await harmonyFeatures(x11, tick, 0.42, 0.86);
+    const Hm = await harmonyFeatures(x11, tick, 0.42, 0.86, s11);
 
     await tick.force(0.87, '템포 추정');
     const O = onsetEnvelope(R);
@@ -1789,7 +1914,7 @@ const Engine = (function () {
       t0[i] = beats[i];
       t1[i] = i + 1 < n ? beats[i + 1] : beats[i] + (n > 1 ? beats[n - 1] - beats[n - 2] : 0.5);
     }
-    const treb = trebleOf(A, t0, t1);
+    const treb = trebleOf(A, t0, t1, !P.SC_FINAL);
     const bassRaw = aggregate(A.harm.bass, A.harm.hopB, t0, t1);
     const floor = bassFloor(bassRaw);
     const bass = subFloor(bassRaw, floor);
@@ -1843,6 +1968,7 @@ const Engine = (function () {
     BB_DOUBLE: true, BBD_SN: 0.8, BBD_K: 0.95, BBD_SKS: 0.25, BBD_C2: 0.8, BBD_MAX: 200,   // 뒷박형: 박 위엔 스네어, 박 사이엔 킥. 켜기, 박 사이/박 위 스네어 비 상한, 박 위/박 사이 킥 비 상한, 스네어 짝·홀 치우침 상한, 두 배 후보 세기 하한, 두 배 템포 상한
     HT_DOUBLE: true, HTD_SN: 0.9, HTD_K: 1.0, HTD_KMAX: 10, HTD_C2: 0.85, HTD_MAX: 210,  // 하프타임형: 킥은 박 위, 스네어는 박 사이에도 박 위만큼. 켜기, 스네어 비 하한, 킥 비 하한·상한(박 사이 저음 타격이 거의 없으면 드럼이 아님), 두 배 후보 세기 하한, 두 배 템포 상한
     HV_KOM: true, HV_KOM_MIN: 2.0,                       // 절반으로 내리기: 비트 사이(16분음표 자리여야 함) 저음이 드물 때만(박 위/박 사이 킥 비 하한)
+    HV_BALLAD: false, HB_DSN: 0.15, HB_NOV: 0.15, HB_MAX: 80,   // 느린 발라드 절반으로: 스네어·화성 변화 같은 쪽 치우침 하한, 절반 템포 상한(BPM)
     HV_NOBB: true, HV_NOBB_DSN: -0.1,                    // 절반으로 내리기: 짝/홀 세기 차만으로 내릴 때 백비트(스네어가 킥 반대쪽, 치우침이 이 값 이하)면 내리지 않음
     PUSH_DB: false, PD_W: 0.6,                           // 당김(코드가 첫 박 8분음표 앞에서 바뀜)을 다음 박의 첫 박 증거로: 켜기, 비중. 아래 박자 보정 위에서도 GuitarSet Rock 첫 박 −0.032라 끔
     DRUM_DB: false, DD_W: 0.6, DD_GATE: 0.1,              // 첫 박 증거에 드럼(킥 +, 스네어 −): 켜기, 비중, 킥·스네어가 박마다 엇갈리는 정도의 문턱
@@ -1873,9 +1999,53 @@ const Engine = (function () {
     // 비교했지만 넣지 않음(끔)
     HDIM: false,                                        //  기본 어휘에 반감7(m7♭5): ii°7이 위 3화음으로 읽히던 곡은 나아지나 다른 곡의 m7·dim을 바꿔 5곡 합계가 나빠짐
     BASS_LAM: false, BL_K: 0.5,                          //  마디 안 바뀜 벌점을 베이스 움직임만큼 줄임: 5곡 모두 조금 나빠짐(스쳐 가는 베이스까지 코드 바뀜으로)
+    // 코드 정확도(1.11.0): 아래 노래 선율 줄이기(SIDE_CHROMA)와 반복 구간 투표(REP, 갈래는 근음만: REP_FAMR)를 함께 켬.
+    //  실제 녹음 10곡(정렬한 코드 차트 정답) 근음 90.4→93.8%·장단 88.2→91.6%, 값을 고를 때 보지 않은 5곡 91.3→93.9%, 「세월이 가면」 정답 88.4→94.7%,
+    //  고민중독 85.9→93.3%, GuitarSet 대중 근음 +0.6%p·장단 +0.75%p, 합성곡 근음 +0.3%p(곡별 퇴행 없음). 박·첫 박·조성·로마 숫자 시험 그대로
+    // 노래 선율 줄이기(코드 판정의 트레블 크로마에서 가운데 정위 선율의 비중 낮춤). 켜면 아래 하위 설정이 함께 쓰임
+    SIDE_CHROMA: true, SC_K: 1.0, SC_MIN_DB: -30,       //  스테레오 곁 신호(L−R) 트레블 크로마를 SC_K 배로 더함: 켜기, 섞는 배율, 곁/가운데 에너지 하한(dB, 이보다 작으면 모노로 보고 건너뜀)
+    SC_BK: 0.5,                                          //  곁 신호에 빠진 가운데 베이스 음의 트레블 배음을 되살리는 비중(구간 베이스 크로마 최대 대비 제곱 가중)
+    SC_ROOT: true,                                       //  섞은 크로마는 근음·장단 계열을 고를 때만(같으면 섞지 않은 크로마의 7화음·자리바꿈 이름 그대로)
+    SC_FINAL: true,                                      //  최종 코드 판정에만 섞음(박·첫 박·박자·조성 추정용 박 단위 특징은 그대로)
+    SC_MODE: 'add', SC_TH: 0.5, SC_G: 0.7,               //  비교용 'gate': 더하지 않고 곁 신호에 없는 음만 깎기 — OLD4 근음이 오히려 내려가 넣지 않음
+    SC_CTR: false, SC_CTH: 0.5, SC_CBASS: 0.5,           //  비교용: 근음이 바뀐 곳은 옛 코드에만 있는 음이 '가운데에만 있는 음'일 때만 받아들임 — 이득이 절반으로 줄어 넣지 않음
+    MEL_SUP: false, ML_LO: 52, ML_HI: 84, ML_DOM: 0.3, ML_MINF: 6, ML_VIB: 15, ML_TOL: 0.5, ML_G: 0.7,   //  비교용: 주 선율 줄기(음높이가 흔들리는 것)의 배음 깎기(모노에도 작동). 켜기, 기본음 범위(MIDI), 두드러짐 하한, 최소 줄기 길이(프레임), 흔들림 하한(센트), 배음 허용(반음), 깎는 비율.
+                                                         //   짧은 창 음높이로는 노래와 기타 반주의 흔들림이 갈리지 않고(GuitarSet 펑크 반주도 흔들림 큼) 이득이 곁 신호의 절반 이하라 넣지 않음
     TREB_HI: false, TH_FROM: 72, TH_W: 0.5,              //  높은 음역(노래 선율) 비중 낮춤: 5곡 근음 +0.6~1.1%p지만 합성 R&B 발라드 근음 −10~14, GuitarSet 장단 −1.5~2.6%p, 「세월이 가면」 일치 97.7→83~89%
     FLICKER: false,                                      //  같은 코드 사이 한 박 코드(베이스 같고 새 음 하나 이하)를 앞뒤 코드로: 시험 곡에서 거의 안 일어남
     DBG_LE: false,                                       //  LATE_EDGE 후보 기록(진단용)
+    // 베이스 근음 우선(BASS_ROOT, 비교용으로 추가·기본 끔): 대중음악 반주에 드문 m7 자리바꿈(5음 베이스 Cm7/G, 7음 베이스 Bm7/A)을
+    //  베이스 음이 근음인 기본형 코드로(G7, A7). 옛 4곡 근음 +1.6%p·장단 +1.4%p, 고민중독·합성곡·GuitarSet·「세월이 가면」 그대로,
+    //  따로 둔 새 5곡은 근음 −0.04%p·장단 −0.09%p(이득이 옮겨 가지 않음)라 끔
+    BASS_ROOT: false, BR_EM: 4, BR_SH: 0.4,              //  켜기, 허용 점수 차(박당: 대안 ≥ 지금 − BR_EM), 베이스 뚜렷함(그 음이 베이스 크로마에서 차지하는 몫 하한)
+    // 넓힌 대상(비교용, 끔)
+    BR_D5: false, BR_RES: true,                          //  딸림7·maj7의 5음 베이스도(C7/G → G): 기타 독주 반주의 5음 베이스 보이싱(GuitarSet 펑크·록)을 바꿔 GuitarSet 대중 근음 −0.24%p.
+                                                         //   BR_RES: 그중 바로 뒤에 같은 근음의 기본형이 올 때만(C7/G 다음 C면 C7/G를 G로)
+    BR_TRI: false,                                       //  3화음 6/4(D/A → A): 맞고 틀림이 반반
+    BR_SUS: false,                                       //  sus4를 대안으로: 근음은 같아도 장단 계열을 깎음
+    BR_MAJ7_3: false,                                    //  maj7의 3음 베이스(Dmaj7/F♯ → F♯m): 「세월이 가면」 E♭maj7/G를 Gm으로 바꿔 일치 97.7→96.1%
+    // 반복 구간 투표(REP): 되풀이되는 구간(1·2절, 후렴)은 코드가 같고 선율·필인만 다르다는 점을 써서, 최종 코드 비터비 전에
+    //  박마다 코드 점수를 맞춘 반복 박들의 점수와 섞음(선율·지속음에 끌린 이웃 코드 오류를 다른 반복이 눌러 줌).
+    //  켬(1.11.0): 혼자 켜도 실제 녹음 4곡 근음 +3.4%p·장단 +4.7%p, 고민중독 +6.1/+5.4, GuitarSet 대중 +0.55/+1.0, 합성곡 퇴행 없음.
+    //  「세월이 가면」은 옛 엔진(1.4.2) 결과와의 일치가 97.7→85.9%로 내려가지만 정답 기준으로는 근음 88.4→91.9%(1.4.2가 틀렸던 곳을 고침). 아래 값은 켤 때의 조합
+    REP: true, REP_W: 0.7, REP_WIN: 8, REP_MINLAG: 16, REP_Q: 0.97, REP_TABS: 0, REP_K: 6, REP_BASS: 1.0, REP_MAXS: 3000,
+    //  켜기, 반복 하나의 가중(자기 1 대비), 대각선 평균 창(박), 최소 지연(박), 유사도 문턱(곡 안 분위수, 절대 하한), 박마다 짝 수 상한, 베이스 유사도 비중
+    REP_POS: true,                                       //  짝은 마디 안 박 위치가 같을 때만(끄면 고민중독 장단 −5%p)
+    REP_FAM: true,                                       //  짝에게서는 근음+3화음 갈래별 점수만 빌림(7음·자리바꿈은 그 박 자신의 소리로: 끄면 합성곡 G→G7 등 퇴행)
+    REP_TR: true, REP_TR0: true,                         //  조가 바뀐 구간 사이에는 조성 차만큼 옮겨서도 비교·투표(전조한 마지막 후렴). REP_TR0: 옮기지 않은 비교와 견줘 나은 쪽(거짓 조성 구간 대비)
+    REP_FULL: true,                                      //  곡 끝에서 잘린 창은 짝으로 쓰지 않음(끝의 지속음이 구간 경계 박과 짝이 되던 것)
+    REP_EDGE: true,                                      //  경계 다듬기(EDGE_ATTACK·LATE_EDGE)도 섞은 점수로(차이 거의 없음)
+    //  비교한 하위 스위치(REP_FAMR만 켬, 나머지는 끔·0)
+    REP_BOTH: false,                                     //  짝 앞뒤 반 창이 둘 다 문턱을 넘어야
+    REP_CENTER: false,                                   //  유사도 특징에서 곡 평균 크로마를 뺌
+    REP_LOC: 0, REP_LOCW: 1,                             //  박 단위(앞뒤 REP_LOCW 박 평균) 유사도가 이 값 미만인 짝은 뺌
+    REP_BLOC: 0,                                         //  박 단위 베이스 유사도(앞뒤 REP_LOCW 박 평균)가 이 값 미만인 짝은 뺌(베이스가 둘 다 뚜렷한 박끼리)
+    REP_FAMR: true,                                      //  REP_FAM 안: 갈래를 근음만으로(장·단·7·sus 구별은 그 박 자신의 소리로). 켬(1.11.0): 끄면 합성곡 V7/V(D7)가 ii7(Dm7)로 바뀌어 로마 숫자 시험이 달라지고, 「세월이 가면」 코드 성질(maj7·sus) 정확도가 떨어짐
+    REP_GAP: 0,                                          //  REP_FAM 안: 짝이 고른 갈래가 이 박 자신의 1위보다 이만큼 낮으면 그 짝의 가중을 0으로(선형으로 줄임)
+    REP_MARGIN: 0,                                       //  자기 점수의 1·2위(다른 코드) 차가 이 값 미만인 애매한 박에만 투표를 섞음
+    REP_CONS: 0,                                         //  투표 전 코드로 잰 짝끼리 근음 일치 비율(가중)이 이 값 미만인 곡은 투표하지 않음(「세월이 가면」 0.81, 키트 곡 0.79~0.83이라 못 가름)
+    REP_MINP: 1, REP_AGREE: 1,                           //  정족수: 박마다 짝 수 하한, 짝들이 고른 갈래(1위)의 최다 득표 하한(AGREE 3: 「세월이 가면」 94.5%, 이득 절반)
+    DBG_REP: false,                                      //  반복 짝 기록(진단용)
     // 코드 이름 다듬기(1.10.0): 경계·조성은 그대로 두고 이름만
     M7_BASSREL: true, M7_SHARE: 0.5, M7_CONS: 0.75,   // M7_SIXTH는 베이스를 믿을 수 있을 때만: 그 음이 구간 베이스의 절반 이상이거나, 박의 3/4 이상에서 가장 센 음일 때
     M7_NEIGHBOR: true,                                   // M7_SIXTH는 같은 코드 사이에 잠깐 낀(스쳐 가는) m7에는 쓰지 않음
@@ -2193,6 +2363,189 @@ const Engine = (function () {
       }
       i = j;
     }
+  }
+
+  // 반복 구간 투표(REP) 1단계: 슬롯마다 반복 짝(짝 슬롯, 가중, 옮김 반음)을 찾음.
+  //  유사도: √크로마 단위벡터의 내적(트레블 + 베이스 REP_BASS 비중. 어느 한쪽 베이스가 약하면 트레블만).
+  //  같은 지연 L(대각선)에서 REP_WIN 박 창 평균이 곡 안 분위수 REP_Q와 절대 하한 REP_TABS 이상이고, 지연 방향으로 국소 최대(맞춤 위치)인 곳을 짝으로.
+  //  한 슬롯의 짝은 유사도 순으로 REP_K개까지. 지연은 REP_MINLAG 박 이상(가까운 이웃 마디끼리 섞어 진짜 바뀜을 지우지 않게)
+  //  posOf: 있으면 마디 안 위치가 같은 짝만, shiftOf(s, j): j를 몇 반음 올려야 s와 같은 조인지(전조한 반복, 없으면 0)
+  function repPartners(treb, bass, nS, res, posOf, shiftOf) {
+    const X = rowsNorm(treb), Bn = rowsNorm(bass);
+    if (P.REP_CENTER) for (const Y of [X, Bn]) {          // 곡 평균을 빼고 다시 단위벡터로
+      const mu = new Float64Array(12);
+      for (let s = 0; s < nS; s++) for (let k = 0; k < 12; k++) mu[k] += Y[s * 12 + k] / nS;
+      for (let s = 0; s < nS; s++) {
+        let q = 0;
+        for (let k = 0; k < 12; k++) { Y[s * 12 + k] -= mu[k]; q += Y[s * 12 + k] * Y[s * 12 + k]; }
+        q = Math.sqrt(q) || 1; for (let k = 0; k < 12; k++) Y[s * 12 + k] /= q;
+      }
+    }
+    const bE = new Float64Array(nS);
+    for (let s = 0; s < nS; s++) { let a = 0; for (let k = 0; k < 12; k++) a += bass[s * 12 + k]; bE[s] = a; }
+    const bRef = quantile(bE, 0.6) || 1e-12, wb = P.REP_BASS;
+    const hasB = new Uint8Array(nS); for (let s = 0; s < nS; s++) hasB[s] = bE[s] > 0.1 * bRef ? 1 : 0;
+    const sim = (s, j, t) => {                           // j의 음 q가 s의 음 q+t에 해당
+      let a = 0;
+      for (let k = 0; k < 12; k++) a += X[s * 12 + k] * X[j * 12 + (k - t + 12) % 12];
+      if (!(wb > 0 && hasB[s] && hasB[j])) return a;
+      let b = 0;
+      for (let k = 0; k < 12; k++) b += Bn[s * 12 + k] * Bn[j * 12 + (k - t + 12) % 12];
+      return (a + wb * b) / (1 + wb);
+    };
+    const W = Math.max(1, Math.round(P.REP_WIN * res)), h = W >> 1, Lmin = Math.max(1, Math.round(P.REP_MINLAG * res));
+    const LW = Math.round(P.REP_LOCW * res);
+    // diag[L]: 짝 (a, a+L)의 박 단위 유사도 d와 창 평균 o (a = 앞 슬롯). 지연은 박 단위(res 슬롯)로만
+    const diag = new Map(), smp = [], keepD = P.REP_LOC > 0 || P.REP_BLOC > 0 || P.DBG_REP;   // 메모리: 슬롯² 크기라 필요할 때만
+    for (let L = Lmin; L < nS; L += res) {
+      const m = nS - L;
+      // 창 평균: 짝 (a, a+L)을 가운데로. 창이 절반도 안 남는 끝자리는 짝으로 쓰지 않음
+      const winMean = ts => {
+        const d = new Float32Array(m), cs = new Float64Array(m + 1), o = new Float32Array(m);
+        for (let a = 0; a < m; a++) { d[a] = sim(a + L, a, ts ? ts[a] : 0); cs[a + 1] = cs[a] + d[a]; }
+        for (let a = 0; a < m; a++) {
+          const lo = Math.max(0, a - h), hi = Math.min(m, a - h + W);
+          if (P.REP_FULL && hi - lo < W) { o[a] = -Infinity; continue; }        // 곡 처음·끝자리: 창이 잘리면 한쪽만 맞는 짝이 생김(처음 약 반 창은 짝 없음)
+          if (P.REP_BOTH) {                                                     // 짝 앞뒤 반 창이 둘 다 비슷해야(구간 경계에서 한쪽만 맞는 짝 제외)
+            const l0 = Math.max(0, a - h), r1 = Math.min(m, a + h + 1);
+            o[a] = Math.min((cs[a + 1] - cs[l0]) / (a + 1 - l0), (cs[r1] - cs[a]) / (r1 - a));
+            if (r1 - l0 < W / 2) o[a] = -Infinity;
+            continue;
+          }
+          o[a] = hi - lo >= W / 2 ? (cs[hi] - cs[lo]) / (hi - lo) : -Infinity;
+        }
+        return { d, o };
+      };
+      let g = winMean(null), ts = null;
+      if (shiftOf) {                                     // 조가 다른 구간 사이: 조성 차만큼 옮긴 비교(REP_TR0이면 옮기지 않은 비교와 견줘 나은 쪽)
+        ts = new Int8Array(m); let any = false;
+        for (let a = 0; a < m; a++) { ts[a] = shiftOf(a + L, a); if (ts[a]) any = true; }
+        if (any) {
+          const g2 = winMean(ts);
+          if (P.REP_TR0) { for (let a = 0; a < m; a++) if (g2.o[a] > g.o[a]) { g.o[a] = g2.o[a]; g.d[a] = g2.d[a]; } else ts[a] = 0; }
+          else g = g2;
+        }
+      }
+      for (let a = 0; a < m; a += 3) if (a - h >= 0 && a - h + W <= m) smp.push(g.o[a]);     // 분위수는 온전한 창만으로
+      diag.set(L, { d: keepD ? g.d : null, o: g.o, ts });
+    }
+    if (!smp.length) return null;
+    const thr = Math.max(P.REP_TABS, quantile(smp, P.REP_Q));
+    const span = Math.max(0.05, 0.5 * (1 - thr));
+    const ov = (L, a) => { const g = diag.get(L); return g && a >= 0 && a < g.o.length ? g.o[a] : -Infinity; };
+    const loc = (L, a) => { const g = diag.get(L); let s = 0, c = 0; for (let u = -LW; u <= LW; u++) if (a + u >= 0 && a + u < g.d.length) { s += g.d[a + u]; c++; } return c ? s / c : 0; };
+    const start = new Int32Array(nS + 1), pj = [], pw = [], pt = [];
+    for (let s = 0; s < nS; s++) {
+      const cand = [];
+      for (let L = Lmin; L < nS; L += res) {
+        // 앞쪽 짝 j = s+L (a = s), 뒤쪽 짝 j = s−L (a = s−L)
+        if (s + L < nS) {
+          const v = ov(L, s);
+          if (v >= thr && v >= ov(L - res, s) && v >= ov(L + res, s)) cand.push([s + L, v, L, s]);
+        }
+        if (s - L >= 0) {
+          const a = s - L, v = ov(L, a);
+          if (v >= thr && v >= ov(L + res, a - res) && v >= ov(L - res, a + res)) cand.push([a, v, L, a]);
+        }
+      }
+      cand.sort((x, y) => y[1] - x[1]);
+      start[s] = pj.length;
+      let c = 0;
+      for (const [j, v, L, a] of cand) {
+        if (c >= P.REP_K) break;
+        if (!(v > thr)) continue;                        // 문턱과 같으면 가중 0: 짝 수(REP_K)만 차지하므로 뺌
+        if (posOf && posOf(s) !== posOf(j)) continue;
+        if (P.REP_LOC > 0 && loc(L, a) < P.REP_LOC) continue;
+        if (P.REP_BLOC > 0) {                            // 그 박 앞뒤 REP_LOCW 박의 베이스가 짝과 다르면(베이스가 둘 다 뚜렷한 박끼리) 다르게 화성을 붙인 반복으로 봄
+          const tg = diag.get(L).ts, t0 = tg ? tg[a] : 0, tt = j === a ? t0 : (12 - t0) % 12;
+          let sb = 0, cb = 0;
+          for (let u = -LW; u <= LW; u++) {
+            const x = s + u, y = j + u;
+            if (x < 0 || y < 0 || x >= nS || y >= nS || !hasB[x] || !hasB[y]) continue;
+            let b = 0; for (let k = 0; k < 12; k++) b += Bn[x * 12 + k] * Bn[y * 12 + (k - tt + 12) % 12];
+            sb += b; cb++;
+          }
+          if (cb && sb / cb < P.REP_BLOC) continue;
+        }
+        const tg = diag.get(L).ts, t = tg ? tg[a] : 0;      // tg[a]: 앞 슬롯 a의 음 q가 뒤 슬롯 a+L의 음 q+t
+        pj.push(j); pw.push(P.REP_W * Math.min(1, (v - thr) / span)); pt.push(j === a ? t : (12 - t) % 12); c++;
+      }
+    }
+    start[nS] = pj.length;
+    return { start, pj: Int32Array.from(pj), pw: Float64Array.from(pw), pt: Int8Array.from(pt), thr };
+  }
+  // 반복 구간 투표 2단계: 슬롯마다 방출 점수를 짝들의 점수와 가중 평균(자기 가중 1). 옮긴 짝은 근음·베이스를 옮긴 같은 종류의 상태 점수로.
+  //  REP_FAM: 짝에게서는 '근음 + 3화음 갈래(장·단·sus·dim…)'별 최고 점수만 빌려 그 갈래 전체를 같은 만큼 올리고 내림
+  //   (7음·자리바꿈처럼 갈래 안의 구별은 그 박 자신의 소리로: 다른 반복의 선율음이 G를 G7로 바꾸지 않게)
+  const REP_FAMOF = { maj: 'M', dom7: 'M', maj7: 'M', min: 'm', min7: 'm', sus4: 's', sus2: 's', dim: 'd', hdim7: 'd', dim7: 'd', aug: 'a', '5': '5', sl2: 'S' };
+  function repApply(E, states, rp, nS) {
+    const K = states.length, out = new Float64Array(E.length);
+    const idx = new Map(); states.forEach((st, k) => idx.set(st.id, k));
+    const perms = new Map();
+    const permOf = t => {                                // s의 상태 k ↔ j의 상태(근음·베이스를 t 반음 내림)
+      if (perms.has(t)) return perms.get(t);
+      const pm = new Int32Array(K);
+      for (let k = 0; k < K; k++) {
+        const st = states[k];
+        if (st.root < 0 || !t) { pm[k] = k; continue; }
+        const id = st.q + ':' + ((st.root - t + 12) % 12) + '/' + ((st.bass - t + 12) % 12);
+        pm[k] = idx.has(id) ? idx.get(id) : k;
+      }
+      perms.set(t, pm); return pm;
+    };
+    // 갈래 번호: 근음 × 갈래(N은 따로)
+    const famKey = st => st.root < 0 ? 'N' : P.REP_FAMR ? String(st.root) : st.root + ':' + (REP_FAMOF[st.q] || st.q);
+    const famId = new Int32Array(K), fIdx = new Map();
+    for (let k = 0; k < K; k++) { const fk = famKey(states[k]); if (!fIdx.has(fk)) fIdx.set(fk, fIdx.size); famId[k] = fIdx.get(fk); }
+    const nF = fIdx.size, Fs = new Float64Array(nF), Fa = new Float64Array(nF), Fj = new Float64Array(nF);
+    const famMax = (x, pm, dst) => { dst.fill(-Infinity); for (let k = 0; k < K; k++) { const v = E[x * K + (pm ? pm[k] : k)]; if (v > dst[famId[k]]) dst[famId[k]] = v; } };
+    for (let s = 0; s < nS; s++) {
+      let ws = 1;
+      for (let k = 0; k < K; k++) out[s * K + k] = E[s * K + k];
+      if (P.REP_MARGIN > 0) {                            // 자기 점수가 뚜렷한 박(1위와 다른 코드 2위의 차가 큼)은 그대로
+        let b1 = 0;
+        for (let k = 1; k < K; k++) if (E[s * K + k] > E[s * K + b1]) b1 = k;
+        let v2 = -Infinity;
+        for (let k = 0; k < K; k++) if (states[k].baseId !== states[b1].baseId && E[s * K + k] > v2) v2 = E[s * K + k];
+        if (E[s * K + b1] - v2 >= P.REP_MARGIN) continue;
+      }
+      if (rp.start[s] === rp.start[s + 1]) continue;
+      if (P.REP_MINP > 1 || P.REP_AGREE > 1) {          // 정족수: 짝(다른 반복)이 REP_MINP개 이상이고, 짝들이 고른 갈래 가운데 가장 많은 것이 REP_AGREE개 이상일 때만
+        let np = 0; const cnt = new Map();               //  (두 번만 나오는 구간이 서로 다르면 어느 쪽이 맞는지 알 수 없음: 오류인지 화성을 바꿔 붙인 것인지)
+        for (let p = rp.start[s]; p < rp.start[s + 1]; p++) {
+          if (!(rp.pw[p] > 0)) continue; np++;
+          if (P.REP_AGREE > 1) { famMax(rp.pj[p], permOf(rp.pt[p]), Fj); let jb = 0; for (let q = 1; q < nF; q++) if (Fj[q] > Fj[jb]) jb = q; cnt.set(jb, (cnt.get(jb) || 0) + 1); }
+        }
+        if (np < P.REP_MINP) continue;
+        if (P.REP_AGREE > 1 && Math.max(0, ...cnt.values()) < P.REP_AGREE) continue;
+      }
+      if (P.REP_FAM) {
+        famMax(s, null, Fs); Fa.set(Fs);
+        let fb = 0; for (let f = 1; f < nF; f++) if (Fs[f] > Fs[fb]) fb = f;
+        for (let p = rp.start[s]; p < rp.start[s + 1]; p++) {
+          const j = rp.pj[p]; let w = rp.pw[p]; if (!(w > 0)) continue;
+          famMax(j, permOf(rp.pt[p]), Fj);
+          if (P.REP_GAP > 0) {                           // 짝이 고른 갈래를 이 박 자신이 크게(REP_GAP 넘게) 밀어내면 그 짝은 따르지 않음(다르게 화성을 붙인 반복)
+            let jb = 0; for (let f = 1; f < nF; f++) if (Fj[f] > Fj[jb]) jb = f;
+            const gap = Fs[fb] - Fs[jb];
+            w *= Math.max(0, 1 - gap / P.REP_GAP);
+            if (!(w > 0)) continue;
+          }
+          for (let f = 0; f < nF; f++) Fa[f] += w * Fj[f];
+          ws += w;
+        }
+        for (let k = 0; k < K; k++) { const f = famId[k]; out[s * K + k] += Fa[f] / ws - Fs[f]; }
+        continue;
+      }
+      for (let p = rp.start[s]; p < rp.start[s + 1]; p++) {
+        const j = rp.pj[p], w = rp.pw[p]; if (!(w > 0)) continue;
+        const pm = permOf(rp.pt[p]);
+        for (let k = 0; k < K; k++) out[s * K + k] += w * E[j * K + pm[k]];
+        ws += w;
+      }
+      if (ws !== 1) for (let k = 0; k < K; k++) out[s * K + k] /= ws;
+    }
+    return out;
   }
 
   // 전이: 유지 0, 변경 −λ(메트릭 위치별) → O(T·K) 비터비
@@ -2561,7 +2914,7 @@ const Engine = (function () {
     if (P.PUSH_DB && n >= 16) {
       const h0 = new Float64Array(n), h1 = new Float64Array(n);
       for (let i = 0; i < n; i++) { h0[i] = F.t0[i]; h1[i] = 0.5 * (F.t0[i] + F.t1[i]); }
-      const A1 = trebleOf(A, h0, h1), B1 = trebleOf(A, h1, F.t1);           // 앞 반, 뒤 반
+      const A1 = trebleOf(A, h0, h1, !P.SC_FINAL), B1 = trebleOf(A, h1, F.t1, !P.SC_FINAL);           // 앞 반, 뒤 반
       const an = rowsNorm(A1), bnm = rowsNorm(B1), wn = rowsNorm(F.treb);
       const dotX = (X, i, Y, j) => { let s2 = 0; for (let k = 0; k < 12; k++) s2 += X[i * 12 + k] * Y[j * 12 + k]; return s2; };
       const pz = new Float64Array(n);
@@ -2730,14 +3083,113 @@ const Engine = (function () {
     const bass = subFloor(aggregate(A.harm.bass, A.harm.hopB, t0, t1), F.floor);
     let states = getStates(set.vocab, true);
     const keyOfSlot = s => keyAtBeat(Math.floor(s / res));
-    let lab = viterbiChords(emissions(states, treb, bass, keyOfSlot), nS, states.length, lam);
-    // 파워 코드는 곡 안에서 충분히 자주(16박 이상, 8% 이상) 나올 때만 적음: 발라드의 sus4 등이 드문드문 파워 코드로 오판되는 것을 막음
-    if (P.POWER) {
-      let c5 = 0; for (let i = 0; i < nS; i++) if (states[lab[i]].q === '5') c5++;
-      if (c5 > 0 && (c5 < 16 * res || c5 < 0.08 * nS)) {
-        P.POWER = false;
-        try { states = getStates(set.vocab, true); lab = viterbiChords(emissions(states, treb, bass, keyOfSlot), nS, states.length, lam); }
-        finally { P.POWER = true; }
+    // 반복 구간 투표(REP): 반복 짝을 한 번 찾아 두고, 최종 방출 점수마다 짝들과 섞음
+    let rp = null;
+    if (P.REP && nS >= 3 * P.REP_MINLAG * res && nS <= P.REP_MAXS) {   // 아주 긴 입력은 건너뜀(유사도 표가 슬롯² 크기)
+      const sig = k => k.mode === 'major' ? k.tonic : (k.tonic + 3) % 12;          // 조표 기준음(나란한 장조 으뜸음)
+      rp = repPartners(treb, bass, nS, res,
+        P.REP_POS ? (s => pos[Math.floor(s / res)] * res + s % res) : null,
+        P.REP_TR && segs.length > 1 ? ((s, j) => (sig(keyOfSlot(s)) - sig(keyOfSlot(j)) + 12) % 12) : null);
+      if (P.DBG_REP) A._rep = { rp, t0: Array.from(t0), t1: Array.from(t1), pos: Array.from(pos), res, treb: Array.from(treb), bass: Array.from(bass) };
+    }
+    let emCache = new Map(), repOn = !!rp, consDone = false;
+    // 방출 점수(트레블 크로마 tr별): 반복 구간 투표를 켰으면 짝들과 섞음. SIDE_CHROMA(SC_ROOT)가 두 크로마로 따로 판정해도 둘 다 투표
+    const emitF = (st, tr) => {
+      const key = st.length + ':' + (tr === treb ? 'b' : 'o');
+      const hit = emCache.get(key); if (hit && hit.st === st) return hit.E;
+      let e = emissions(st, tr, bass, keyOfSlot);
+      // 반복 일관성(REP_CONS): 투표 전 코드로 짝끼리 근음이 같은 비율(가중). 반복마다 화성을 바꿔 붙이는 곡(재화성 발라드)은 낮음 → 투표하지 않음
+      if (repOn && !consDone && (P.REP_CONS > 0 || P.DBG_REP)) {
+        consDone = true;
+        const l0 = viterbiChords(e, nS, st.length, lam);
+        let sw = 0, sa = 0;
+        for (let x = 0; x < nS; x++) for (let p = rp.start[x]; p < rp.start[x + 1]; p++) {
+          const a = st[l0[x]], b = st[l0[rp.pj[p]]]; if (a.root < 0 || b.root < 0) continue;
+          sw += rp.pw[p]; if (a.root === (b.root + rp.pt[p]) % 12) sa += rp.pw[p];
+        }
+        const C = sw > 0 ? sa / sw : 1;
+        A._repCons = { C: +C.toFixed(4), w: +sw.toFixed(1) };
+        if (C < P.REP_CONS) repOn = false;
+      }
+      if (repOn) e = repApply(e, st, rp, nS);
+      emCache.set(key, { st, E: e }); return e;
+    };
+    const decode = tr => {
+      let st = getStates(set.vocab, true), lb = viterbiChords(emitF(st, tr), nS, st.length, lam);
+      // 파워 코드는 곡 안에서 충분히 자주(16박 이상, 8% 이상) 나올 때만 적음: 발라드의 sus4 등이 드문드문 파워 코드로 오판되는 것을 막음
+      if (P.POWER) {
+        let c5 = 0; for (let i = 0; i < nS; i++) if (st[lb[i]].q === '5') c5++;
+        if (c5 > 0 && (c5 < 16 * res || c5 < 0.08 * nS)) {
+          P.POWER = false;
+          try { st = getStates(set.vocab, true); lb = viterbiChords(emitF(st, tr), nS, st.length, lam); }
+          finally { P.POWER = true; }
+        }
+      }
+      return { st, lb };
+    };
+    let { st: states0, lb: lab } = decode(treb);
+    states = states0;
+    // SC_ROOT: 곁 신호를 섞은 크로마는 근음·장단 계열을 고를 때만 씀. 섞지 않은 크로마로 읽은 코드와 근음·장단이 같으면
+    //  그쪽 이름(7화음·자리바꿈)을 그대로 둠(곁 신호에만 있는 반주 음이 7음 등 성질을 바꾸지 않게)
+    if (P.SC_ROOT && altOn(A)) {
+      const trebO = trebleOf(A, t0, t1, false), o = decode(trebO);
+      const famOf = x => x.root < 0 ? 'N' : x.root + ':' + (x.q === 'min' || x.q === 'min7' ? 'm' : (x.q === 'maj' || x.q === 'dom7' || x.q === 'maj7' || x.q === 'sl2') ? 'M' : x.q);
+      const idx = new Map(states.map((x, k) => [x.id, k]));
+      // SC_CTR: 근음·장단이 바뀐 곳은 '옛 코드에만 있는 음' 가운데 하나가 가운데에만 있는 음(곁/가운데 비가 곡 평균의 SC_CTH 배 미만)이고
+      //  베이스 음이 아닐 때만(노래 선율이 옛 코드를 만든 경우) 새 코드로. 아니면(곁 신호에만 있는 반주 음, 가운데 베이스 배음 탓) 옛 코드 그대로
+      const ctr = P.SC_CTR && P.SIDE_CHROMA && A.harm.trebleSide;
+      const mT = ctr ? trebleOf(A, t0, t1, false) : null, sT = ctr ? aggregate(A.harm.trebleSide, A.harm.hopT, t0, t1) : null, r0 = ctr ? sideRatio(A) : 1;
+      const melodyMade = (i, x, y) => {
+        let bm = 0; for (let k = 0; k < 12; k++) bm = Math.max(bm, bass[i * 12 + k]);
+        for (const p of x.pcs) {
+          if (y.pcs.includes(p)) continue;
+          if (bm > 0 && bass[i * 12 + p] >= P.SC_CBASS * bm) continue;          // 베이스 음(가운데 정위 베이스의 배음)
+          const m = mT[i * 12 + p]; if (!(m > 0)) continue;
+          if (sT[i * 12 + p] / m / r0 < P.SC_CTH) return true;
+        }
+        return false;
+      };
+      for (let i = 0; i < nS; i++) {
+        const x = o.st[o.lb[i]], k = idx.get(x.id); if (k === undefined) continue;
+        if (famOf(x) === famOf(states[lab[i]])) lab[i] = k;
+        else if (ctr && !(x.root >= 0 && states[lab[i]].root >= 0 && melodyMade(i, x, states[lab[i]]))) lab[i] = k;
+      }
+    }
+    // 베이스 근음 우선(BASS_ROOT): 비터비가 고른 자리바꿈 코드 가운데 대중음악 반주에 드문 꼴은, 베이스 음을 근음으로 하는 기본형 코드가
+    //  위 성부(트레블)를 거의 같게 설명하면 그 코드로 바꿈(옛 4곡·고민중독에서 이 꼴은 정답 근음이 베이스 음인 경우가 대부분). 대상:
+    //   · m7의 5음 베이스(2전위): 베이스 음의 화음(딸림화음 등)에 다음 코드 음이 먼저 얹힌 것 (Cm7/G → G7, 다음 박 Cm7).
+    //     자리바꿈 다듬기(INV_SMOOTH)가 5음 베이스를 기본형(Cm7)으로 합쳐 바뀜이 앞당겨지기 전에 함
+    //   · m7의 7음 베이스: 베이스 음 위의 sus·add9 울림 (Bm7/A → A7)
+    //   · 비교용(끔): BR_D5 딸림7·maj7의 5음 베이스, BR_TRI 3화음 6/4, BR_MAJ7_3 maj7의 3음 베이스
+    //  3화음·딸림7화음의 3음 베이스(C/E, C7/E), 딸림7화음의 7음 베이스(E♭7/D♭), m7의 3음 베이스(M7_SIXTH가 이름으로 다룸), 온음 위 베이스(F/G)는 그대로.
+    //  같은 코드가 이어진 구간마다 (대안 점수 합 ≥ 지금 점수 합 − BR_EM × 박 수)이고 베이스가 그 구간에서 뚜렷할 때(베이스 크로마에서
+    //  그 음의 몫이 BR_SH 이상인 박이 절반 이상)만. 대안은 베이스 음이 근음인 기본형 상태 중 구간 점수 합이 가장 큰 것
+    //  (파워 코드·온음 위 베이스 제외, BR_SUS가 꺼져 있으면 sus4도 제외). 대안과 지금 코드의 베이스가 같아 점수 차는 트레블 적합·사전분포 차뿐
+    if (P.BASS_ROOT) {
+      const emB = emissions(states, treb, bass, keyOfSlot), KB = states.length;
+      const target = st => {
+        if (st.root < 0 || st.q === 'sl2' || st.bass === st.root) return false;
+        const iv = (st.bass - st.root + 12) % 12;
+        return (iv === 7 && (st.q === 'min7' || (P.BR_D5 && st.pcs.length > 3) || P.BR_TRI)) || (st.q === 'min7' && iv === 10) || (P.BR_MAJ7_3 && st.q === 'maj7' && iv === 4);
+      };
+      const altOf = []; for (let k = 0; k < KB; k++) if (states[k].root >= 0 && states[k].bass === states[k].root && states[k].q !== '5' && states[k].q !== 'sl2' && (P.BR_SUS || states[k].q !== 'sus4')) altOf.push(k);
+      for (let a = 0; a < nS;) {
+        let e = a + 1; while (e < nS && lab[e] === lab[a]) e++;
+        const X = states[lab[a]];
+        // BR_RES(BR_D5 안): m7이 아닌 5음 베이스는 바로 뒤에 같은 근음의 기본형이 올 때만(베이스가 5음 → 근음으로 가며 위 성부는 이미 다음 코드)
+        const res5 = X.q === 'min7' || !P.BR_RES || (X.bass - X.root + 12) % 12 !== 7 || (e < nS && states[lab[e]].root === X.root && states[lab[e]].bass === X.root);
+        if (target(X) && res5) {
+          let clear = 0;
+          for (let s2 = a; s2 < e; s2++) { let tot = 0; for (let k = 0; k < 12; k++) tot += bass[s2 * 12 + k]; if (tot > 0 && bass[s2 * 12 + X.bass] / tot >= P.BR_SH) clear++; }
+          if (2 * clear >= e - a) {
+            let cur = 0; for (let s2 = a; s2 < e; s2++) cur += emB[s2 * KB + lab[a]];
+            let best = -Infinity, bk = -1;
+            for (const k of altOf) { if (states[k].root !== X.bass) continue; let v = 0; for (let s2 = a; s2 < e; s2++) v += emB[s2 * KB + k]; if (v > best) { best = v; bk = k; } }
+            const move = bk >= 0 && best >= cur - P.BR_EM * (e - a);
+            if (move) for (let s2 = a; s2 < e; s2++) lab[s2] = bk;
+          }
+        }
+        a = e;
       }
     }
     if (P.INV_SMOOTH && set.slash) smoothInversions(lab, states, res);
@@ -2759,7 +3211,7 @@ const Engine = (function () {
     // 새로 쳐지지 않았고(옛 코드를 다시 확인하는 소리가 없음) 그 강박에서 새 코드 점수가 옛 코드와 거의 같으면, 바뀜을 앞 강박으로.
     // 예: 분산화음 반주에서 Esus4 → E의 G♯이 4박에야 울려 4박으로 판정된 것을 3박으로. 옛 코드가 다시 쳐졌거나 울리고 있으면 그대로
     if ((P.EDGE_ATTACK || dbg) && res === 1) {
-      const emF = emissions(states, treb, bass, keyOfSlot), K2 = states.length;
+      const emF = rp && P.REP_EDGE ? emitF(states, treb) : emissions(states, treb, bass, keyOfSlot), K2 = states.length;
       for (let b = 2; b < nS; b++) {
         const Y = lab[b], X = lab[b - 1], mb = mOf ? mOf[b] : m;
         if (states[Y].baseId === states[X].baseId || lab[b - 2] !== X || states[Y].root < 0 || states[X].root < 0) continue;
@@ -2775,7 +3227,7 @@ const Engine = (function () {
     // 마디 끝 박에서 바뀌어 다음 첫 박까지 이어지는 코드(앞당겨 친 당김, 베이스 접근음)는 악보 관례대로 첫 박에서 바뀐 것으로.
     //  그 박에서 새 코드 점수가 옛 코드보다 LE_EM 넘게 앞서면(정말 그 박에 바뀜) 그대로
     if (P.LATE_EDGE && res === 1) {
-      const emL = emissions(states, treb, bass, keyOfSlot), K3 = states.length;
+      const emL = rp && P.REP_EDGE ? emitF(states, treb) : emissions(states, treb, bass, keyOfSlot), K3 = states.length;
       for (let b = 1; b + 1 < nS; b++) {
         const mb = mOf ? mOf[b] : m;
         if (pos[b] !== mb - 1 || pos[b + 1] !== 0) continue;
@@ -2928,12 +3380,13 @@ const Engine = (function () {
       }
       // SUS_GATE: sus4 로 이어진 구간마다 원 트레블 크로마의 4음 합과 장3·단3음 합을 견줘, 3음이 4음의 SUS_RATIO 배 이상이면
       //  (4음이 3음을 뚜렷이 앞서지 않으면) 선율·드럼에 섞인 4음으로 보고 같은 근음의 3화음(더 센 3음 쪽)으로 적는다
+      const trS = P.SUS_GATE && altOn(A) ? trebleOf(A, t0, t1, false) : treb;   // 곁 신호 섞기 전 크로마
       if (P.SUS_GATE) for (let s2 = 0; s2 < nS;) {
         const x = states[lab[s2]];
         let e = s2; while (e < nS && lab[e] === lab[s2]) e++;
         if (x.q === 'sus4') {
           const r = x.root; let s4 = 0, M3 = 0, m3 = 0;
-          for (let k = s2; k < e; k++) { s4 += treb[k * 12 + (r + 5) % 12]; M3 += treb[k * 12 + (r + 4) % 12]; m3 += treb[k * 12 + (r + 3) % 12]; }
+          for (let k = s2; k < e; k++) { s4 += trS[k * 12 + (r + 5) % 12]; M3 += trS[k * 12 + (r + 4) % 12]; m3 += trS[k * 12 + (r + 3) % 12]; }
           if (Math.max(M3, m3) >= P.SUS_RATIO * s4) {
             const k = idx.get((M3 >= m3 ? 'maj:' : 'min:') + r + '/' + r);
             if (k !== undefined) for (let q = s2; q < e; q++) lab[q] = k;

@@ -169,7 +169,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
     <a class="brand" href="chordity.html">
       <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       <span>Chordity</span>
-      <span class="ver" title="Chordity 버전 1.10.5">v1.10.5</span>
+      <span class="ver" title="Chordity 버전 1.11.0">v1.11.0</span>
     </a>
     <span class="chip">도움말</span>
     <span class="grow"></span>
@@ -465,6 +465,11 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
         <p class="note"><math><mrow><mi>β</mi><mo>=</mo><mn>30</mn></mrow></math>, <math><mrow><mi>κ</mi><mo>=</mo><mn>0.6</mn></mrow></math>, <math><mrow><mi>η</mi><mo>=</mo><mn>1.5</mn></mrow></math>. 사전 점수는 장·단3화음 0, 7·m7 −0.4, maj7 −0.6, sus4 −1.2, dim −1.3, aug −1.8 등이고, 자리바꿈은 3음 베이스 −0.7, 5음·7음 베이스 −1.0입니다.</p>
         <p>코드는 유지하면 벌점 0, 바꾸면 자리에 따라 <math><mrow><msub><mi>λ</mi><mrow><mi>s</mi></mrow></msub></mrow></math> 를 빼는 비터비 알고리즘으로 곡 전체에서 한 번에 고릅니다. 마디 첫 박 1.5, 가운데 박 3.0, 그 밖의 박 4.0, 박 사이(½박) 6.0입니다.</p>
         <div class="eq"><math display="block"><mrow><msub><mi>V</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>e</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>+</mo><mi>max</mi><mo stretchy="true" minsize="1.6em" maxsize="1.6em">(</mo><msub><mi>V</mi><mrow><mi>s</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>,</mo><mspace width="0.25em"/><munder><mi>max</mi><mrow><mi>c</mi><mo>′</mo></mrow></munder><msub><mi>V</mi><mrow><mi>s</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo>′</mo><mo stretchy="false">)</mo><mo>−</mo><msub><mi>λ</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="true" minsize="1.6em" maxsize="1.6em">)</mo></mrow></math></div>
+        <p><b>노래 선율 줄이기(1.11.0).</b> 노래 선율이 화음 대역에 섞이면 공통음이 많은 이웃 코드로 읽히기 쉽습니다. 대중음악 녹음은 보통 노래를 가운데에, 반주를 좌우로 벌려 두므로, 곁 신호 <math><mrow><mi>S</mi><mo>=</mo><mo stretchy="false">(</mo><mi>L</mi><mo>−</mo><mi>R</mi><mo stretchy="false">)</mo><mo>/</mo><mn>2</mn></mrow></math> 에서는 노래가 거의 지워집니다. 최종 코드 판정에서는 가운데 신호의 트레블 크로마에 곁 신호의 트레블 크로마를 더하고(가운데에 있어 곁 신호에서 빠지는 베이스 음의 배음은 반 비중으로 되살림), 고른 근음·장단 갈래가 더하기 전과 같으면 7화음·자리바꿈 이름은 더하기 전 쪽을 씁니다. 박·첫 박·박자·조성에는 쓰지 않고, 모노이거나 두 채널이 거의 같은 파일은 그대로입니다.</p>
+        <div class="eq"><math display="block"><mrow><msub><mi>C</mi><mrow><mtext>treble</mtext></mrow></msub><mo>=</mo><msub><mi>C</mi><mrow><mi>M</mi></mrow></msub><mo>+</mo><msub><mi>C</mi><mrow><mi>S</mi></mrow></msub><mo>+</mo><mn>0.5</mn><mspace width="0.1667em"/><msub><mi>C</mi><mrow><mtext>bass→treble</mtext></mrow></msub><mo>,</mo><mspace width="2em"/><mfrac><mrow><msub><mi>E</mi><mrow><mi>S</mi></mrow></msub></mrow><mrow><msub><mi>E</mi><mrow><mi>M</mi></mrow></msub></mrow></mfrac><mo>&lt;</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>3</mn></mrow></msup><mspace width="0.2778em"/><mo>⇒</mo><mspace width="0.2778em"/><msub><mi>C</mi><mrow><mi>S</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow></math></div>
+        <p><b>되풀이 맞추기(1.11.0).</b> 1·2절과 후렴처럼 같은 진행이 되풀이되면 선율과 필인만 바뀝니다. 박마다 트레블·베이스 크로마로 곡 안 유사도를 재고, 8박 창 평균이 곡 안 상위 3%에 드는 자리(16박 이상 떨어지고 마디 안 박 위치가 같은 곳, 박마다 6개까지)를 되풀이 짝 <math><mrow><mi>j</mi></mrow></math> 로 삼습니다. 마지막 후렴처럼 조가 바뀐 곳은 조 차이만큼 옮겨 비교합니다. 비터비 전에 근음별 최고 점수 <math><mrow><mi>M</mi></mrow></math> 만 짝들과 가중 평균해 같은 근음의 코드 점수를 함께 올리고 내리므로, 장·단·7·sus 같은 성질은 그 박 자신의 소리로 정해집니다.</p>
+        <div class="eq"><math display="block"><mrow><msub><mover accent="true"><mrow><mi>e</mi></mrow><mo stretchy="false">~</mo></mover><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>e</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>+</mo><mfrac><mrow><msub><mi>M</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>r</mi><mrow><mi>c</mi></mrow></msub><mo stretchy="false">)</mo><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi></mrow></munder><msub><mi>w</mi><mrow><mi>s</mi><mi>j</mi></mrow></msub><mspace width="0.1667em"/><msub><mi>M</mi><mrow><mi>j</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>r</mi><mrow><mi>c</mi></mrow></msub><mo stretchy="false">)</mo></mrow><mrow><mn>1</mn><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi></mrow></munder><msub><mi>w</mi><mrow><mi>s</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo>−</mo><msub><mi>M</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>r</mi><mrow><mi>c</mi></mrow></msub><mo stretchy="false">)</mo><mo>,</mo><mspace width="2em"/><msub><mi>M</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>r</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mi>max</mi><mrow><mi>c</mi><mo>′</mo><mo>:</mo><mspace width="0.25em"/><msub><mi>r</mi><mrow><mi>c</mi><mo>′</mo></mrow></msub><mo>=</mo><mi>r</mi></mrow></munder><msub><mi>e</mi><mrow><mi>s</mi></mrow></msub><mo stretchy="false">(</mo><mi>c</mi><mo>′</mo><mo stretchy="false">)</mo><mo>,</mo><mspace width="2em"/><msub><mi>w</mi><mrow><mi>s</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>0.7</mn><mspace width="0.1667em"/><mi>min</mi><mo stretchy="true" minsize="1.6em" maxsize="1.6em">(</mo><mn>1</mn><mo>,</mo><mfrac><mrow><msub><mi>v</mi><mrow><mi>s</mi><mi>j</mi></mrow></msub><mo>−</mo><mi>θ</mi></mrow><mrow><mi>δ</mi></mrow></mfrac><mo stretchy="true" minsize="1.6em" maxsize="1.6em">)</mo></mrow></math></div>
+        <p class="note"><math><mrow><msub><mi>v</mi><mrow><mi>s</mi><mi>j</mi></mrow></msub></mrow></math> 는 짝 자리의 8박 창 평균 유사도, <math><mrow><mi>θ</mi></mrow></math> 는 곡 안 97백분위수, <math><mrow><mi>δ</mi><mo>=</mo><mi>max</mi><mo stretchy="false">(</mo><mn>0.05</mn><mo>,</mo><mspace width="0.25em"/><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>/</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math>. 유사도 표가 박 수의 제곱 크기라 3,000슬롯이 넘는 아주 긴 입력에는 쓰지 않습니다.</p>
       </div>
 
       <div class="block">
@@ -698,6 +703,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>마디 첫 박</td><td>박자가 정해진 곡 모두 100%</td></tr>
             <tr><td>코드(베이스까지 일치)</td><td>88.8 ~ 100%</td></tr>
             <tr><td>조성</td><td>조성이 분명한 18곡 모두 맞음, 전조 위치 오차 0박</td></tr>
+            <tr><td>코드 근음(실제 대중가요 10곡)</td><td>93.7%, 장·단까지 91.3%(같은 방식으로 잰 madmom 87.4%, 87.4%)</td></tr>
             <tr><td>메트로놈(브라우저)</td><td>예약된 클릭 모두 정박, 첫 박 강조 모두 실제 첫 박. ½박 단위에서는 이웃한 두 박 사이마다 작은 클릭이 한가운데 하나</td></tr>
           </tbody>
         </table></div>
@@ -796,7 +802,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
 
       <div class="block">
         <h3 id="v-real">실제 녹음</h3>
-        <p>상업 녹음 한 곡(최호섭 「세월이 가면」, 3분 50초)으로 시험했습니다. 정답 박 표시가 없으므로, 템포가 일정한 스튜디오 녹음이라는 점을 이용해 구간마다 비트를 직선에 맞춘 잔차를 추적 오차의 대리 지표로 썼습니다.</p>
+        <p>상업 녹음 한 곡(기현 「세월이 가면」, 응답하라 1988 OST, 3분 50초)으로 시험했습니다. 정답 박 표시가 없으므로, 템포가 일정한 스튜디오 녹음이라는 점을 이용해 구간마다 비트를 직선에 맞춘 잔차를 추적 오차의 대리 지표로 썼습니다.</p>
         <div class="tbl"><table>
           <thead><tr><th>항목</th><th>결과</th></tr></thead>
           <tbody>
@@ -805,9 +811,20 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>필인 구간 클릭 간격</td><td class="num">0.86 ~ 0.90 s(목표 0.88 s)</td></tr>
             <tr><td>전조</td><td>45마디 1박(2:37)부터 E♭ 장조 → E 장조, 이후 G♯m7·C♯7로 표기</td></tr>
             <tr><td>로마 숫자</td><td>코드 105개 중 10개가 부속화음(ii7/IV, V7/IV, V7/ii 등), 16개가 자리바꿈</td></tr>
+            <tr><td>사람이 맞춘 정답과 비교(1.11.0)</td><td>코드 근음 94.7%, 장·단 91.2%, 비트 F 0.948, 첫 박 F 0.937(1.10.5는 근음 88.4%, 장·단 84.8%)</td></tr>
           </tbody>
         </table></div>
         <p>여러 장르의 대중가요 다섯 곡(여자친구 「시간을 달려서」, 「もう恋なんてしない」 커버, あいみょん 「マリーゴールド」, YOASOBI 「夜に駆ける」, 시드 사운드 「여래아」)으로도 확인했습니다(1.10.3). 다섯 곡 모두 템포 층위와 박자가 맞고, 마디 위치는 독립된 분석기(madmom)와 96~100% 일치합니다. 코드는 공개 코드 차트를 음원에 맞춰 정렬한 정답과 비교해 근음 약 90%, 장·단 계열 약 87%가 맞습니다(차트가 있는 네 곡, 같은 방식으로 잰 madmom은 86.5%, 87.3%). 남은 오류는 대부분 노래 선율이 화음 대역에 섞여 공통음이 많은 이웃 코드로 읽히는 것입니다. 1.10.4에서 「マリーゴールド」 도입부의 마디선과 「夜に駆ける」의 B 단조 전조 위치(102마디 → 후렴이 시작하는 104마디)를 바로잡았습니다.</p>
+        <p>1.11.0에서는 장르와 빠르기가 다른 대중가요 다섯 곡(김종국 「이 사람이다」, 015B 「이젠 안녕」, 박명수 「바다의 왕자」 라이브 커버, 디셈버 「별이 될게」·피노키오 「사랑과 우정 사이」 여성 보컬 커버)과 「세월이 가면」을 더해, 코드 정답이 있는 실제 녹음 10곡으로 검증했습니다. 뒤의 여섯 곡은 규칙과 값을 고를 때 보지 않고 마지막에만 쟀습니다.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>묶음</th><th>코드 근음 / 장·단 1.10.5 → 1.11.0</th><th>madmom</th></tr></thead>
+          <tbody>
+            <tr><td>앞의 4곡(값을 고른 곡)</td><td class="num">89.7% / 87.2% → 93.3% / 91.0%</td><td class="num">86.5% / 87.3%</td></tr>
+            <tr><td>뒤의 6곡(값을 고를 때 안 본 곡)</td><td class="num">90.8% / 88.6% → 94.0% / 91.5%</td><td class="num">88.0% / 87.5%</td></tr>
+            <tr><td>10곡 전체</td><td class="num">90.4% / 88.0% → 93.7% / 91.3%</td><td class="num">87.4% / 87.4%</td></tr>
+          </tbody>
+        </table></div>
+        <p>10곡 모두 근음이 올랐고, 공통음이 많은 이웃 코드로 읽은 표본은 5.0%에서 3.6%로 줄었습니다. 장·단은 두 곡(「별이 될게」 −1.3%p, 「사랑과 우정 사이」 −0.4%p)에서 조금 내려갔습니다. 박·첫 박·조성은 10곡 모두 그대로입니다. 「이젠 안녕」(71 BPM)과 「사랑과 우정 사이」(64 BPM)는 두 배 템포로 잡히는 한계가 남아 있습니다.</p>
       </div>
       <div class="block">
         <h3 id="v-browser">브라우저 시험</h3>
