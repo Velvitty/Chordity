@@ -345,7 +345,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.5">v1.11.5</span>
+    <span class="ver" title="Chordity 버전 1.11.6">v1.11.6</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -1913,10 +1913,11 @@ const Engine = (function () {
     return { nov: idx(nov), low: idx(low) };
   }
 
-  // 4:3 박 단계 검증(LEVEL43): 박 안이 셋으로 쪼개져(12/8) 보이는 곡이 실은 16분음표가 촘촘한 4/4인데,
-  //  템포 사전확률 때문에 박을 점8분음표(16분음표 셋) 길이로, 곧 4/3배 빠른 템포로 잡은 경우.
-  //  4/3배 느린 템포로 다시 잡아 보고, 사전확률 없는 템포 점수·새 박의 2분할·타텀 묶음 단위가 모두 그쪽을 가리킬 때만 바꿈.
-  //  track(tau) = 주어진 박 주기로 추적 → 위상 검증한 { beats, on, off, flipped }
+  // 4:3·3:2 박 단계 검증(LEVEL43, LEVEL32): 박 안이 셋으로 쪼개져(12/8) 보이는 곡이 실은 16분음표가 촘촘한 4/4인데,
+  //  템포 사전확률 때문에 박을 점8분음표(16분음표 셋) 길이로, 곧 4/3배 빠른 템포로 잡은 경우(4:3).
+  //  또는 8분음표가 고른 곡인데 8분음표 셋(점4분음표)을 한 박으로, 곧 2/3배 느린 템포로 잡은 경우(3:2, 기타 반주 등).
+  //  4/3배 느린 템포로 먼저, 안 바꿨으면 3/2배 빠른 템포로 다시 잡아 보고, 사전확률 없는 템포 점수·새 박의 2분할·타텀 묶음 단위
+  //  (3:2는 새 박 위치 강세도)가 모두 그쪽을 가리킬 때만 바꿈. track(tau) = 주어진 박 주기로 추적 → 위상 검증한 { beats, on, off, flipped }
   // 박 위 대 박 사이 가운데(½박)의 평균 세기 비(곡선 x, 박 b)
   function onOffRatio(x, b) {
     let on = 0, off = 0;
@@ -1933,10 +1934,12 @@ const Engine = (function () {
     Object.assign(info, { curBpm: +curBpm.toFixed(2), d2d3: sub.d3 > 0 ? +(sub.d2 / sub.d3).toFixed(3) : 0, nov: +tg.nov.toFixed(3), low: +tg.low.toFixed(3), alts: [] });
     const alts = [];
     let pick = null;
-    // 4/3 = 박을 16분음표 셋 → 넷으로(느리게). 진단(L43_PROBE)에서는 2/3(8분음표 셋 → 둘, 빠르게)도 함께 봄
-    for (const ratio of (P.L43_PROBE ? [4 / 3, 2 / 3] : [4 / 3])) {
+    // 4/3 = 박을 16분음표 셋 → 넷으로(느리게). 2/3 = 8분음표 셋 → 둘로(빠르게, LEVEL32: 4/3로 바꾸지 않았을 때만). 진단(L43_PROBE)에서는 둘 다 봄
+    for (const ratio of (P.L43_PROBE || P.LEVEL32 ? [4 / 3, 2 / 3] : [4 / 3])) {
+      if (pick && !P.L43_PROBE) break;
       const pk = rawPeak(A.tempo, curBpm / ratio, 0.04);
-      const x = { ratio: +ratio.toFixed(4), bpm: pk.bpm, rawRatio: cur.s > 0 ? +(pk.s / cur.s).toFixed(3) : 0, out: pk.bpm < P.L43_MIN || pk.bpm > P.L43_MAX };
+      const x = { ratio: +ratio.toFixed(4), bpm: pk.bpm, rawRatio: cur.s > 0 ? +(pk.s / cur.s).toFixed(3) : 0,
+        out: ratio > 1 ? pk.bpm < P.L43_MIN || pk.bpm > P.L43_MAX : pk.bpm < P.L32_MIN || pk.bpm > P.L32_MAX };
       // 사전확률까지 곱한 점수 비(새/지금): 처음 템포 추정에서 두 후보가 얼마나 비겼는지
       x.w = cur.s > 0 ? +(pk.s * tempoPrior(pk.bpm) / (cur.s * tempoPrior(curBpm))).toFixed(3) : 0;
       info.alts.push(x);
@@ -1946,17 +1949,19 @@ const Engine = (function () {
       const s2 = subdivision(b, A.O), ps = phaseScores(b, A.S), iv2 = [];
       for (let i = 1; i < b.length; i++) iv2.push(b[i] - b[i - 1]);
       Object.assign(x, { trackBpm: +(60 / median(iv2)).toFixed(2), triple: s2.triple, d2d3: s2.d3 > 0 ? +(s2.d2 / s2.d3).toFixed(3) : 9, sal: ps0.on > 0 ? +(ps.on / ps0.on).toFixed(3) : 0,
-        sn: +onOffRatio(A.drum.Sn, b).toFixed(3), k: +onOffRatio(A.drum.K, b).toFixed(3) });
+        sn: +onOffRatio(A.drum.Sn, b).toFixed(3), k: +onOffRatio(A.drum.K, b).toFixed(3), po: ps.off > 0 ? +(ps.on / ps.off).toFixed(3) : 9 });
       if (P.L43_PROBE) { x.lv = levelCheck(A, b).info.action; x.mh = +onOffRatio(A.fm, b).toFixed(3); }
       // 백비트 위상(L43_FLIP): 새 박 사이 가운데에 스네어가 더 몰리고 박 위엔 킥이 더 오면(킥만 따라 엇박에 붙음) ½박 옮김
       const doFlip = P.L43_FLIP && x.sn < P.L43_FLIP_SN && x.k > 1;
-      const phF = (doFlip || P.L43_PROBE) ? { beats: flip(b), on: ph.on, off: ph.off, flipped: ph.flipped } : null;   // 정박 검증 표시는 phaseFix 판정 그대로(옮김은 A.level43.alts[0].flip)
+      const phF = (doFlip || P.L43_PROBE) ? { beats: flip(b), on: ph.on, off: ph.off, flipped: ph.flipped } : null;   // 정박 검증 표시는 phaseFix 판정 그대로(옮김은 A.level43.flip)
       x.flip = doFlip;
       alts.push({ ratio: x.ratio, ph, phF });
-      const ok = ratio > 1 && !x.out && !s2.triple && x.rawRatio >= P.L43_RAW && x.w >= P.L43_W && x.d2d3 >= P.L43_D2 && tg.nov >= P.L43_NOV && tg.low >= P.L43_LOW && x.sal >= P.L43_SAL;
-      if (ok && !pick && !P.L43_PROBE) pick = doFlip ? phF : ph;
+      const ok = ratio > 1 ? !x.out && !s2.triple && x.rawRatio >= P.L43_RAW && x.w >= P.L43_W && x.d2d3 >= P.L43_D2 && tg.nov >= P.L43_NOV && tg.low >= P.L43_LOW && x.sal >= P.L43_SAL
+        : P.LEVEL32 && !x.out && !s2.triple && x.rawRatio >= P.L32_RAW && x.w >= P.L32_W && x.d2d3 >= P.L32_D2 && tg.nov >= P.L32_NOV && x.po >= P.L32_PO;
+      x.ok = ok;
+      if (ok && !pick && !P.L43_PROBE) { pick = doFlip ? phF : ph; info.ratio = x.ratio; info.toBpm = x.trackBpm; info.flip = doFlip; }
     }
-    if (pick) { info.applied = true; info.toBpm = info.alts[0].trackBpm; }
+    if (pick) info.applied = true;
     return { info, ph: pick, alts };
   }
 
@@ -2097,7 +2102,7 @@ const Engine = (function () {
         if (lv2.info.action === 'double') { ph = phaseFix(lv2.beats.length >= 4 ? extendBeats(lv2.beats, startT, endT) : lv2.beats); beats = ph.beats; lv.info.twice = true; }
       }
     }
-    // 4:3 박 단계 검증(LEVEL43): 셋잇단으로 보이는 박이 16분음표 셋(점8분음표)이면 4/3배 느린 템포로 다시 잡음
+    // 4:3·3:2 박 단계 검증(LEVEL43, 그 안의 LEVEL32): 셋잇단으로 보이는 박이 16분음표 셋(점8분음표)이면 4/3배 느리게, 8분음표 셋이면 3/2배 빠르게 다시 잡음
     if (P.LEVEL43 && !P.BAR_POINTER && beats.length >= 16) {
       const r = level43(A, beats, tau => phaseFix(trackAt(tau)), b => {
         const perF = b[1] - b[0];
@@ -2307,6 +2312,10 @@ const Engine = (function () {
     //  새 박의 2분할 대 3분할 세기 비(L43_D2), 타텀 화음 바뀜 묶음 지표(L43_NOV). L43_PROBE는 진단용(바꾸지 않고 후보만 남김)
     //  비교했지만 문턱으로 쓰지 않음: 저음 묶음 지표(L43_LOW), 새 박 위 강세 비(L43_SAL) — 좋아지는 곡과 나빠지는 곡을 가르지 못함
     LEVEL43: true, L43_MIN: 50, L43_MAX: 140, L43_RAW: 0.93, L43_W: 0.85, L43_D2: 1.4, L43_NOV: 0, L43_LOW: -Infinity, L43_SAL: 0, L43_PROBE: false,
+    // 3:2 박 단계(LEVEL32): 12/8로 보이는 곡을(4:3로 바꾸지 않았으면) 3/2배 빠른 템포(8분음표 둘 = 한 박)로 다시 잡을지. 문턱은 LEVEL43과 같은 뜻에
+    //  새 박 위치 대 반 박 위치 강세 비(L32_PO, 엇박에 붙은 격자 거르기). 반 박 옮김 규칙(L43_FLIP)은 같이 씀
+    //  LEVEL43 안에서만 작동(LEVEL43을 끄면 3:2도 보지 않음). L32_MIN 90: 지금 템포 60 BPM 미만의 느린 12/8은 대개 진짜 셋잇단
+    LEVEL32: true, L32_MIN: 90, L32_MAX: 240, L32_RAW: 0.93, L32_W: 0, L32_D2: 1.4, L32_NOV: 0.05, L32_PO: 1.05,
     L43_FLIP: true, L43_FLIP_SN: 0.9,                    //  새 박이 킥만 따라 엇박에 붙었으면 ½박 옮김(박 위 대 박 사이 가운데 스네어 세기 비 문턱: 이보다 작고 킥 비가 1보다 크면 옮김)
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
@@ -5413,9 +5422,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     const lv = A.level;
     const act = { none: '그대로 유지', halve: '두 배로 잡혀 절반으로 교정', double: '절반으로 잡혀 두 배로 교정' }[lv.action] || lv.action;
     rows.push(['박 단계 검증', act + ' (짝·홀 박 드럼 세기 비 ' + lv.r2.toFixed(2) + ', 박 사이 스네어 비 ' + lv.snareMidOn.toFixed(2) + ')']);
-    // 4:3 박 단계(셋잇단으로 보인 곡만): 점8분음표를 박으로 잡았다고 보고 4/3배 느리게 다시 잡았는지
+    // 4:3·3:2 박 단계(셋잇단으로 보인 곡만): 점8분음표(4/3배 느리게)나 8분음표 셋(3/2배 빠르게)을 박으로 잡았다고 보고 다시 잡았는지
     const l43 = A.level43;
-    if (l43 && l43.triple) rows.push(['4:3 박 단계', l43.applied ? '점8분음표를 박으로 잡았다고 보고 다시 잡음 (' + l43.curBpm.toFixed(1) + ' → ' + l43.toBpm.toFixed(1) + ' BPM' + (l43.alts && l43.alts[0] && l43.alts[0].flip ? ', 스네어 자리로 반 박 옮김' : '') + ')' : '그대로 유지']);
+    if (l43 && l43.triple) rows.push(['4:3·3:2 박 단계', l43.applied ? (l43.ratio < 1 ? '8분음표 셋을 박으로 잡았다고 보고 3/2배 빠르게' : '점8분음표(16분음표 셋)를 박으로 잡았다고 보고 4/3배 느리게')
+      + ' 다시 잡음 (' + l43.curBpm.toFixed(1) + ' → ' + l43.toBpm.toFixed(1) + ' BPM' + (l43.flip ? ', 스네어 자리로 반 박 옮김' : '') + ')' : '그대로 유지']);
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
       if (TL.meter.alt) rows.push(['박자 판정', TL.meter.alt.map(a => a.m + '박 대비도 ' + a.contrast.toFixed(2)).join(', ')]);
