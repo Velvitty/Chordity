@@ -345,7 +345,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.4">v1.11.4</span>
+    <span class="ver" title="Chordity 버전 1.11.5">v1.11.5</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -1348,7 +1348,7 @@ const Engine = (function () {
     const interp = xx => { const i = Math.floor(xx), f = xx - i; return i + 1 >= rs.length ? rs[rs.length - 1] : rs[i] * (1 - f) + rs[i + 1] * f; };
     const peakNear = (xx, tol) => { let b = -Infinity; for (let d = -tol; d <= tol + 1e-9; d += 0.25) { const v = interp(xx + d); if (v > b) b = v; } return b; };
     const CW = [1, 0.5, 0.33, 0.25];
-    const bpms = [], sc = [];
+    const bpms = [], sc = [], raw = [];                   // raw: 템포 사전확률을 곱하기 전 점수(LEVEL43이 4:3 후보를 견줄 때)
     for (let bpm = 40; bpm <= (P.TEMPO300 ? 300 : 240) + 1e-4; bpm += 0.25) {
       const tau = 60 * FPS / bpm;
       let s = 0;
@@ -1358,7 +1358,7 @@ const Engine = (function () {
         s += CW[k - 1] * peakNear(L, k === 1 ? 0.5 : 0.5 + 0.004 * L);
       }
       const prior = Math.exp(-0.5 * Math.pow(Math.log2(bpm / 110), 2));
-      bpms.push(bpm); sc.push(Math.max(0, s) * prior);
+      bpms.push(bpm); sc.push(Math.max(0, s) * prior); raw.push(Math.max(0, s));
     }
     let bi = 0;
     for (let i = 1; i < sc.length; i++) if (sc[i] > sc[bi]) bi = i;
@@ -1372,7 +1372,17 @@ const Engine = (function () {
     for (let i = 1; i < sc.length - 1; i++) if (sc[i] > sc[i - 1] && sc[i] >= sc[i + 1]) peaks.push({ bpm: bpms[i], s: sc[i] });
     peaks.sort((p, q) => q.s - p.s);
     const top = peaks.slice(0, 3).map(p => ({ bpm: p.bpm, rel: sc[bi] > 0 ? p.s / sc[bi] : 0 }));
-    return { bpm, tau: 60 * FPS / bpm, cands: top };
+    return { bpm, tau: 60 * FPS / bpm, cands: top, raw: Float64Array.from(raw) };
+  }
+  // 템포 사전확률(estimateTempo와 같은 식)
+  const tempoPrior = bpm => Math.exp(-0.5 * Math.pow(Math.log2(bpm / 110), 2));
+  // 사전확률 없는 템포 점수에서 bpm의 ±tol(비율) 안 가장 큰 값과 그 bpm(raw 격자: 40 BPM부터 0.25 간격)
+  function rawPeak(tempo, bpm, tol) {
+    const r = tempo.raw; let best = -1, bb = bpm;
+    if (!r) return { s: 0, bpm };
+    const i0 = Math.max(0, Math.ceil((bpm * (1 - tol) - 40) / 0.25)), i1 = Math.min(r.length - 1, Math.floor((bpm * (1 + tol) - 40) / 0.25));
+    for (let i = i0; i <= i1; i++) if (r[i] > best) { best = r[i]; bb = 40 + 0.25 * i; }
+    return { s: Math.max(0, best), bpm: bb };
   }
 
   // 국소 템포 곡선: 8초 창마다 자기상관으로 박 주기를 찾고(전체 주기 ±15% 안, 2배 지연도 함께 봄),
@@ -1860,6 +1870,96 @@ const Engine = (function () {
     return { triple, d2, d3: 0.5 * (d3a + d3b), base };
   }
 
+  // 박/3 격자(타텀) 위 화음 바뀜·저음 온셋의 자기상관으로 본 묶음 단위: (지연 8 + 16) − (12 + 24).
+  //  양수 = 화음이 8·16타텀(4/4의 반 마디·마디)마다 바뀜, 음수 = 6·12타텀(셋잇단 박 12/8의 반 마디·마디)마다 바뀜(지연 12·24에서 되풀이)
+  function tatumGrouping(A, beats) {
+    const tt = [];
+    for (let i = 0; i + 1 < beats.length; i++) for (let k = 0; k < 3; k++) tt.push(beats[i] + (beats[i + 1] - beats[i]) * k / 3);
+    tt.push(beats[beats.length - 1]);
+    // 타텀마다 크로마 평균(제곱근·정규화)
+    const agg = (C, hop) => {
+      const out = [];
+      for (let k = 0; k + 1 < tt.length; k++) {
+        const a = Math.floor(tt[k] / hop), b = Math.max(a + 1, Math.floor(tt[k + 1] / hop)), v = new Float64Array(12);
+        let c = 0;
+        for (let j = a; j < b && j * 12 < C.length; j++) { for (let q = 0; q < 12; q++) v[q] += C[j * 12 + q]; c++; }
+        let s = 0;
+        for (let q = 0; q < 12; q++) { v[q] = Math.sqrt(v[q] / Math.max(1, c)); s += v[q] * v[q]; }
+        s = Math.sqrt(s) || 1;
+        for (let q = 0; q < 12; q++) v[q] /= s;
+        out.push(v);
+      }
+      return out;
+    };
+    const cb = agg(A.harm.bass, A.harm.hopB), ct = agg(A.harm.treble, A.harm.hopT), W = 4, nT = cb.length, nov = new Float64Array(nT);
+    // 앞뒤 4타텀(트레블·베이스)의 코사인 거리 = 화음 바뀜
+    for (let k = W; k + W <= nT; k++) {
+      const a = new Float64Array(24), b = new Float64Array(24);
+      for (let d = 0; d < W; d++) for (let q = 0; q < 12; q++) { a[q] += ct[k - 1 - d][q]; a[12 + q] += cb[k - 1 - d][q]; b[q] += ct[k + d][q]; b[12 + q] += cb[k + d][q]; }
+      let ab = 0, aa = 0, bb = 0;
+      for (let q = 0; q < 24; q++) { ab += a[q] * b[q]; aa += a[q] * a[q]; bb += b[q] * b[q]; }
+      nov[k] = 1 - ab / Math.sqrt(aa * bb + 1e-12);
+    }
+    const low = Float64Array.from(tt.slice(0, nT), t => sampleMax(A.fl, Math.round(t * FPS), 2));
+    const ac = (x, L) => {
+      const n = x.length; if (n <= L + 1) return 0;
+      let mu = 0; for (const v of x) mu += v; mu /= n;
+      let s = 0, s0 = 0;
+      for (let i = 0; i < n; i++) s0 += (x[i] - mu) ** 2;
+      for (let i = 0; i + L < n; i++) s += (x[i] - mu) * (x[i + L] - mu);
+      return s0 > 0 ? s / s0 * n / (n - L) : 0;
+    };
+    const idx = x => ac(x, 8) + ac(x, 16) - ac(x, 12) - ac(x, 24);
+    return { nov: idx(nov), low: idx(low) };
+  }
+
+  // 4:3 박 단계 검증(LEVEL43): 박 안이 셋으로 쪼개져(12/8) 보이는 곡이 실은 16분음표가 촘촘한 4/4인데,
+  //  템포 사전확률 때문에 박을 점8분음표(16분음표 셋) 길이로, 곧 4/3배 빠른 템포로 잡은 경우.
+  //  4/3배 느린 템포로 다시 잡아 보고, 사전확률 없는 템포 점수·새 박의 2분할·타텀 묶음 단위가 모두 그쪽을 가리킬 때만 바꿈.
+  //  track(tau) = 주어진 박 주기로 추적 → 위상 검증한 { beats, on, off, flipped }
+  // 박 위 대 박 사이 가운데(½박)의 평균 세기 비(곡선 x, 박 b)
+  function onOffRatio(x, b) {
+    let on = 0, off = 0;
+    for (let i = 0; i + 1 < b.length; i++) { on += sampleMax(x, timeToFrame(b[i]), 2); off += sampleMax(x, timeToFrame(0.5 * (b[i] + b[i + 1])), 2); }
+    return off > 0 ? on / off : 9;
+  }
+  function level43(A, beats, track, flip) {
+    const sub = subdivision(beats, A.O);
+    const info = { triple: sub.triple, applied: false };
+    if (!sub.triple || !A.tempo || !A.tempo.raw) return { info, alts: [] };
+    const iv = [];
+    for (let i = 1; i < beats.length; i++) iv.push(beats[i] - beats[i - 1]);
+    const curBpm = 60 / median(iv), cur = rawPeak(A.tempo, curBpm, 0.02), tg = tatumGrouping(A, beats), ps0 = phaseScores(beats, A.S);
+    Object.assign(info, { curBpm: +curBpm.toFixed(2), d2d3: sub.d3 > 0 ? +(sub.d2 / sub.d3).toFixed(3) : 0, nov: +tg.nov.toFixed(3), low: +tg.low.toFixed(3), alts: [] });
+    const alts = [];
+    let pick = null;
+    // 4/3 = 박을 16분음표 셋 → 넷으로(느리게). 진단(L43_PROBE)에서는 2/3(8분음표 셋 → 둘, 빠르게)도 함께 봄
+    for (const ratio of (P.L43_PROBE ? [4 / 3, 2 / 3] : [4 / 3])) {
+      const pk = rawPeak(A.tempo, curBpm / ratio, 0.04);
+      const x = { ratio: +ratio.toFixed(4), bpm: pk.bpm, rawRatio: cur.s > 0 ? +(pk.s / cur.s).toFixed(3) : 0, out: pk.bpm < P.L43_MIN || pk.bpm > P.L43_MAX };
+      // 사전확률까지 곱한 점수 비(새/지금): 처음 템포 추정에서 두 후보가 얼마나 비겼는지
+      x.w = cur.s > 0 ? +(pk.s * tempoPrior(pk.bpm) / (cur.s * tempoPrior(curBpm))).toFixed(3) : 0;
+      info.alts.push(x);
+      if (x.out && !P.L43_PROBE) continue;
+      const ph = track(60 * FPS / pk.bpm), b = ph.beats;
+      if (b.length < 16) { x.short = true; continue; }
+      const s2 = subdivision(b, A.O), ps = phaseScores(b, A.S), iv2 = [];
+      for (let i = 1; i < b.length; i++) iv2.push(b[i] - b[i - 1]);
+      Object.assign(x, { trackBpm: +(60 / median(iv2)).toFixed(2), triple: s2.triple, d2d3: s2.d3 > 0 ? +(s2.d2 / s2.d3).toFixed(3) : 9, sal: ps0.on > 0 ? +(ps.on / ps0.on).toFixed(3) : 0,
+        sn: +onOffRatio(A.drum.Sn, b).toFixed(3), k: +onOffRatio(A.drum.K, b).toFixed(3) });
+      if (P.L43_PROBE) { x.lv = levelCheck(A, b).info.action; x.mh = +onOffRatio(A.fm, b).toFixed(3); }
+      // 백비트 위상(L43_FLIP): 새 박 사이 가운데에 스네어가 더 몰리고 박 위엔 킥이 더 오면(킥만 따라 엇박에 붙음) ½박 옮김
+      const doFlip = P.L43_FLIP && x.sn < P.L43_FLIP_SN && x.k > 1;
+      const phF = (doFlip || P.L43_PROBE) ? { beats: flip(b), on: ph.on, off: ph.off, flipped: ph.flipped } : null;   // 정박 검증 표시는 phaseFix 판정 그대로(옮김은 A.level43.alts[0].flip)
+      x.flip = doFlip;
+      alts.push({ ratio: x.ratio, ph, phF });
+      const ok = ratio > 1 && !x.out && !s2.triple && x.rawRatio >= P.L43_RAW && x.w >= P.L43_W && x.d2d3 >= P.L43_D2 && tg.nov >= P.L43_NOV && tg.low >= P.L43_LOW && x.sal >= P.L43_SAL;
+      if (ok && !pick && !P.L43_PROBE) pick = doFlip ? phF : ph;
+    }
+    if (pick) { info.applied = true; info.toBpm = info.alts[0].trackBpm; }
+    return { info, ph: pick, alts };
+  }
+
   // ---------------------------------------------------------------
   // 1단계 분석(무거운 부분): 신호 → 특징 → 자동 비트
   // ---------------------------------------------------------------
@@ -1996,6 +2096,21 @@ const Engine = (function () {
         const lv2 = levelCheck(A, beats, true);
         if (lv2.info.action === 'double') { ph = phaseFix(lv2.beats.length >= 4 ? extendBeats(lv2.beats, startT, endT) : lv2.beats); beats = ph.beats; lv.info.twice = true; }
       }
+    }
+    // 4:3 박 단계 검증(LEVEL43): 셋잇단으로 보이는 박이 16분음표 셋(점8분음표)이면 4/3배 느린 템포로 다시 잡음
+    if (P.LEVEL43 && !P.BAR_POINTER && beats.length >= 16) {
+      const r = level43(A, beats, tau => phaseFix(trackAt(tau)), b => {
+        const perF = b[1] - b[0];
+        return extendBeats(snapTimes(midpoints(b, duration), O).filter(t => t >= startT - 0.25 * perF), startT, endT);
+      });
+      A.level43 = r.info;
+      if (r.ph) { ph = r.ph; beats = ph.beats; }
+      // 진단: 다른 박 단계 후보를 도입부 격자까지 맞춰 남김(A.l43alt[k] = 그 후보로 바꿨을 때의 박)
+      if (P.L43_PROBE) A.l43alt = [].concat(...r.alts.map(x => [x.ph, x.phF].map((q, j) => {
+        let b = q.beats, ig = null;
+        if (P.INTRO_GRID && b.length >= 16) { const g = introGrid(b, A); b = g.beats; ig = g.info; }
+        return { ratio: x.ratio, flip: j === 1, beats: b, phase: { on: q.on, off: q.off, flipped: q.flipped }, introGrid: ig };
+      })));
     }
     if (P.INTRO_GRID && !P.BAR_POINTER && beats.length >= 16) { const ig = introGrid(beats, A); beats = ig.beats; A.introGrid = ig.info; }
     A.phase = { on: ph.on, off: ph.off, flipped: ph.flipped };
@@ -2187,6 +2302,12 @@ const Engine = (function () {
     KEY_INTRO: true, KI_BARS: 8,                         // 곡 첫 조성 구간이 KI_BARS 마디 이하이고 다음 구간과 같은 갈래의 5도 관계(버금딸림·딸림 조)면 다음 조에 합침
                                                          //  (도입부가 iv·V에서 시작해 악구 첫 코드로 조를 정하면 "B♭ 단조 → F 단조"처럼 거짓 전조가 됨)
     // 도입부 격자·전조 경계(1.10.4): 둘 다 켬(「マリーゴールド」 도입부 마디선, 「夜に駆ける」·「고민중독」 전조 위치가 정답 쪽으로. 다른 시험 묶음 결과는 모두 같음)
+    // 4:3 박 단계(LEVEL43): 12/8로 보이는 곡을 4/3배 느린 템포(16분음표 넷 = 한 박)로 다시 잡을지.
+    //  문턱: 새 템포 범위(L43_MIN~MAX), 사전확률 없는 템포 점수 비 새/지금(L43_RAW), 사전확률까지 곱한 점수 비(L43_W),
+    //  새 박의 2분할 대 3분할 세기 비(L43_D2), 타텀 화음 바뀜 묶음 지표(L43_NOV). L43_PROBE는 진단용(바꾸지 않고 후보만 남김)
+    //  비교했지만 문턱으로 쓰지 않음: 저음 묶음 지표(L43_LOW), 새 박 위 강세 비(L43_SAL) — 좋아지는 곡과 나빠지는 곡을 가르지 못함
+    LEVEL43: true, L43_MIN: 50, L43_MAX: 140, L43_RAW: 0.93, L43_W: 0.85, L43_D2: 1.4, L43_NOV: 0, L43_LOW: -Infinity, L43_SAL: 0, L43_PROBE: false,
+    L43_FLIP: true, L43_FLIP_SN: 0.9,                    //  새 박이 킥만 따라 엇박에 붙었으면 ½박 옮김(박 위 대 박 사이 가운데 스네어 세기 비 문턱: 이보다 작고 킥 비가 1보다 크면 옮김)
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
     KE_BREAK: true,                                      //  KEY_EDGE 안: 새 조 첫 박이 N.C.이고 그 마디의 절반 이상이 N.C.(브레이크)면 다음 마디 첫 박부터 새 조(KE_BARS 안에서)
@@ -4066,7 +4187,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     // 테스트용 내부 함수
-    _: { tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
+    _: { subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
   };
 })();
 
@@ -5292,6 +5413,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
     const lv = A.level;
     const act = { none: '그대로 유지', halve: '두 배로 잡혀 절반으로 교정', double: '절반으로 잡혀 두 배로 교정' }[lv.action] || lv.action;
     rows.push(['박 단계 검증', act + ' (짝·홀 박 드럼 세기 비 ' + lv.r2.toFixed(2) + ', 박 사이 스네어 비 ' + lv.snareMidOn.toFixed(2) + ')']);
+    // 4:3 박 단계(셋잇단으로 보인 곡만): 점8분음표를 박으로 잡았다고 보고 4/3배 느리게 다시 잡았는지
+    const l43 = A.level43;
+    if (l43 && l43.triple) rows.push(['4:3 박 단계', l43.applied ? '점8분음표를 박으로 잡았다고 보고 다시 잡음 (' + l43.curBpm.toFixed(1) + ' → ' + l43.toBpm.toFixed(1) + ' BPM' + (l43.alts && l43.alts[0] && l43.alts[0].flip ? ', 스네어 자리로 반 박 옮김' : '') + ')' : '그대로 유지']);
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
       if (TL.meter.alt) rows.push(['박자 판정', TL.meter.alt.map(a => a.m + '박 대비도 ' + a.contrast.toFixed(2)).join(', ')]);

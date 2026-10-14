@@ -170,7 +170,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
     <a class="brand" href="chordity.html">
       <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       <span>Chordity</span>
-      <span class="ver" title="Chordity 버전 1.11.4">v1.11.4</span>
+      <span class="ver" title="Chordity 버전 1.11.5">v1.11.5</span>
     </a>
     <span class="chip">도움말</span>
     <span class="grow"></span>
@@ -245,7 +245,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>템포가 크게 흔들리는 곳에서 박을 놓친다</td><td>곡 중간의 템포 변화는 새 템포가 10초 넘게 이어질 때 따라갑니다. 몇 초짜리 급변과 심한 루바토에는 한두 박 늦게 따라갑니다.</td><td>해당 구간은 클릭보다 원곡을 기준으로 들어 주세요.</td></tr>
             <tr><td>마디가 두 배로 길게 적힌다</td><td>보사노바처럼 두 박 단위로 느끼는 곡이나, 드럼 모양으로 가를 수 없는 아주 빠른 곡(160 BPM 이상)은 박을 한 층위 느리게 잡을 수 있습니다.</td><td><b>두 배 빠르게 ×2</b></td></tr>
             <tr><td>파워 코드(E5)가 E나 Em으로 나온다</td><td>파워 코드는 곡 안에서 충분히 자주 나올 때만 적습니다(발라드의 sus4 오판 방지). 디스토션이 아주 강하면 3음 대역까지 채워져 3화음으로 읽힙니다.</td><td>원곡의 기타 소리를 들어 3음이 없는지 확인하세요.</td></tr>
-            <tr><td>느린 곡이 12/8, 4/3배 빠른 템포로 나오고 코드가 마디 중간에 들쭉날쭉 놓인다</td><td>16분음표로 쪼개지는 느린 곡에서 16분음표 셋(점8분음표)을 한 박으로 잡은 경우입니다. 박 층위는 두 배·절반만 다시 확인하고 4:3 관계는 확인하지 않습니다. 분석 정보의 템포 후보에 맞는 템포(예: 69)가 보이면 이 경우입니다.</td><td>보정 버튼으로는 고칠 수 없습니다(알려진 한계)</td></tr>
+            <tr><td>느린 곡이 12/8, 4/3배 빠른 템포로 나오고 코드가 마디 중간에 들쭉날쭉 놓인다</td><td>16분음표로 쪼개지는 느린 곡에서 16분음표 셋(점8분음표)을 한 박으로 잡은 경우입니다. 1.11.5부터 근거가 뚜렷하면 4/3배 느린 템포로 다시 잡지만(분석 정보의 '4:3 박 단계'), 근거가 약하면 그대로 남습니다. 분석 정보의 템포 후보에 맞는 템포(예: 69)가 보이면 이 경우입니다.</td><td>보정 버튼으로는 고칠 수 없습니다(알려진 한계)</td></tr>
             <tr><td>박자 변화가 표시되지 않는다</td><td>새 박자가 4마디 이상 이어질 때만 박자 변화로 적습니다. 한두 마디짜리 변박은 불규칙 마디로 두고 차트에 "3박"처럼 표시합니다.</td><td>차트의 "3박" 같은 표시를 참고하세요.</td></tr>
             <tr><td>슬래시 코드가 너무 많다</td><td>경과음이 많은 베이스 라인은 자리바꿈(G/B 등)으로 읽힐 수 있습니다.</td><td><b>코드 종류</b>에서 "베이스음 표기"를 끄면 기본형으로 적습니다.</td></tr>
           </tbody>
@@ -275,6 +275,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
             <tr><td>템포 후보</td><td>박 주기로 가장 그럴듯한 템포 세 개와, 1위 대비 점수입니다. 두 배나 절반 관계인 후보의 점수가 비슷하면 박 단계가 헷갈리기 쉬운 곡입니다.</td></tr>
             <tr><td>정박 검증</td><td>박 위치와 반 박 위치에서 킥·스네어·화성 변화가 얼마나 강한지 비교한 값입니다. 반 박 쪽이 뚜렷하게 강하면 반 박 옮겨 교정합니다.</td></tr>
             <tr><td>박 단계 검증</td><td>8분음표를 박으로 잡았는지(두 배), 2분음표를 박으로 잡았는지(절반) 판정한 결과와 근거입니다.</td></tr>
+            <tr><td>4:3 박 단계</td><td>박이 셋으로 쪼개져 보이는 곡에서만 나옵니다. 점8분음표(16분음표 셋)를 박으로 잡았다고 보고 4/3배 느린 템포로 다시 잡았는지, 다시 잡은 박을 스네어 자리로 반 박 옮겼는지입니다(1.11.5).</td></tr>
             <tr><td>박 세분</td><td>한 박이 둘로 나뉘는지(2분할), 셋으로 나뉘는지(3분할: 6/8, 12/8 같은 겹박자)입니다.</td></tr>
             <tr><td>박자 판정</td><td>2·3·4·5·7박(겹박자면 4와 2) 가정에서 마디 첫 박 증거가 얼마나 뚜렷한지(대비도)입니다. 값이 클수록 그 박자가 분명합니다.</td></tr>
             <tr><td>조성 상관</td><td>곡의 음 분포가 고른 조성의 전형적인 분포와 얼마나 닮았는지입니다. 1에 가까울수록 조성이 분명합니다.</td></tr>
@@ -357,7 +358,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
               <li><b>화성 특징</b><span>스펙트럼 피크, 기준음, 트레블·베이스 크로마, 화성 변화 곡선.</span></li>
               <li><b>템포</b><span>자기상관 콤 점수 × 선호 분포.</span></li>
               <li><b>비트 추적</b><span>국소 템포를 따르는 동적 계획법, 온셋 정점에 맞춤.</span></li>
-              <li><b>검증</b><span>정박 위상, 박 단계(두 배나 절반이면 새 템포로 다시 추적).</span></li>
+              <li><b>검증</b><span>정박 위상, 박 단계(두 배나 절반이면 새 템포로 다시 추적), 박이 셋으로 쪼개져 보이면 4/3배 느린 템포.</span></li>
             </ol>
           </div>
           <div class="stage light"><span class="tag">보정·설정을 바꿀 때마다</span>
@@ -449,6 +450,9 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
           </tbody>
         </table></div>
         <p class="note"><math><mrow><msub><mi>c</mi><mrow><mn>2</mn></mrow></msub></mrow></math> 는 템포 후보 가운데 지금 템포의 두 배인 후보의 점수를 1위 점수로 나눈 값입니다. 절반으로 줄일 때는 박 위 킥이 박 사이 킥의 2배 이상이어야 하고, 짝·홀 세기 비만으로 줄일 때는 스네어가 백비트 쪽(<math><mrow><msub><mi>s</mi><mrow><msub><mi>S</mi><mrow><mi>n</mi></mrow></msub></mrow></msub><mo>≤</mo><mo>−</mo><mn>0.1</mn></mrow></math>)이 아니어야 합니다(1.10.0).</p>
+        <p><b>4:3 박 단계 확인(1.11.5).</b> 16분음표가 촘촘한 느린 4/4 곡은 16분음표 셋(점8분음표)마다 온셋이 되풀이되는 것처럼 보여, 템포 선호 분포(110 BPM 중심) 때문에 실제 템포의 4/3배가 뽑히고 12/8로 적힐 수 있습니다. 박이 셋으로 쪼개져 보이면 지금 템포 <math><mrow><mi>b</mi></mrow></math> 의 3/4 근처(±4%)에서 선호 분포를 곱하기 전 점수 <math><mrow><mi>C</mi></mrow></math> 가 가장 큰 템포 <math><mrow><mi>b</mi><mo>′</mo></mrow></math> 로 다시 추적해 보고, 다음을 모두 만족할 때만 바꿉니다.</p>
+        <div class="eq"><math display="block"><mrow><mfrac><mrow><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo>′</mo><mo stretchy="false">)</mo></mrow><mrow><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>≥</mo><mn>0.93</mn><mo>,</mo><mspace width="2em"/><mfrac><mrow><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo>′</mo><mo stretchy="false">)</mo><mspace width="0.1667em"/><mi>π</mi><mo stretchy="false">(</mo><mi>b</mi><mo>′</mo><mo stretchy="false">)</mo></mrow><mrow><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mspace width="0.1667em"/><mi>π</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>≥</mo><mn>0.85</mn><mo>,</mo><mspace width="2em"/><mfrac><mrow><mi>P</mi><mo>′</mo><mo stretchy="false">(</mo><mfrac displaystyle="false"><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo></mrow><mrow><mfrac displaystyle="false"><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>P</mi><mo>′</mo><mo stretchy="false">(</mo><mfrac displaystyle="false"><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">)</mo><mo>+</mo><mi>P</mi><mo>′</mo><mo stretchy="false">(</mo><mfrac displaystyle="false"><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">)</mo><mo stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></mfrac><mo>≥</mo><mn>1.4</mn><mo>,</mo><mspace width="2em"/><mi>G</mi><mo>=</mo><mi>ρ</mi><mo stretchy="false">(</mo><mn>8</mn><mo stretchy="false">)</mo><mo>+</mo><mi>ρ</mi><mo stretchy="false">(</mo><mn>16</mn><mo stretchy="false">)</mo><mo>−</mo><mi>ρ</mi><mo stretchy="false">(</mo><mn>12</mn><mo stretchy="false">)</mo><mo>−</mo><mi>ρ</mi><mo stretchy="false">(</mo><mn>24</mn><mo stretchy="false">)</mo><mo>≥</mo><mn>0</mn></mrow></math></div>
+        <p class="note"><math><mrow><mi>π</mi></mrow></math> 는 템포 선호 분포, <math><mrow><mi>P</mi><mo>′</mo></mrow></math> 는 새 박으로 잰 박 세분 프로필(새 박이 8분음표 둘로 뚜렷하게 나뉘어야 함), <math><mrow><mi>ρ</mi><mo stretchy="false">(</mo><mi>L</mi><mo stretchy="false">)</mo></mrow></math> 은 지금 박을 셋으로 나눈 16분음표 격자 위 화음 바뀜 열의 지연 <math><mrow><mi>L</mi></mrow></math> 자기상관입니다. <math><mrow><mi>G</mi></mrow></math> 는 화음이 8·16칸(4/4의 반 마디·마디)마다 바뀌면 양수, 6·12칸(12/8의 반 마디·마디)마다 바뀌면 음수입니다. 새 템포는 50~140 BPM이어야 하고, 다시 잡은 박이 킥만 따라 엇박에 붙었으면(박 위 스네어가 박 사이 스네어의 0.9배보다 약하고 킥은 박 위가 셈) 반 박 옮깁니다.</p>
       </div>
 
       <div class="block">
@@ -835,6 +839,7 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Noto 
         <p>10곡 모두 근음이 올랐고, 공통음이 많은 이웃 코드로 읽은 표본은 5.0%에서 3.6%로 줄었습니다. 장·단은 두 곡(「별이 될게」 −1.3%p, 「사랑과 우정 사이」 −0.4%p)에서 조금 내려갔습니다. 박·첫 박·조성은 10곡 모두 그대로입니다. 「이젠 안녕」(71 BPM)과 「사랑과 우정 사이」(64 BPM)는 두 배 템포로 잡히는 한계가 남아 있습니다.</p>
         <p>1.11.1에서는 계산 결과는 그대로 두고(같은 연산을 같은 순서로) 분석을 약 1.8배 빠르게 했고(크롬에서 실제 녹음 5곡 합 20.2초 → 11.3초), 1.11.0에서 「고민중독」 조성이 B 단조 → E 단조 → F 단조로 잘못 적히던 것을 정답과 같은 G 장조 → A♭ 장조로 바로잡았습니다(거의 동점인 전조 거르기). 코드 바뀜 시점과 7화음·sus4 이름을 다듬는 규칙도 시험했지만, 대중음악 곡 하나 이상을 나쁘게 해 넣지 않았습니다(README의 1.11.1 검증 절).</p>
         <p>1.11.4의 세 규칙(박자 변화 확인, 길이가 다른 마디 다시 보기, m7과 6화음이 겹치는 조 이름)은 시험곡 1,268곡(합성 곡 74곡, 실제 녹음 15곡, GTZAN 999곡, GuitarSet 180곡)에서 한 곡도 나빠지지 않게 조건을 정했습니다. 규칙을 끄면 모든 곡이 1.11.3과 같고, 켜면 바뀐 곡은 7곡입니다. 끝 후렴이 5/4로 적히던 4/4 곡(사용자 제보)은 박자 변화가 없어지고 길이가 다른 마디가 27개에서 0개, 조 이름이 장조로 바뀌었습니다. GTZAN 3곡은 첫 박 F가 0.56·0.89·0.81에서 1.00으로, 2곡은 조성이 틀림에서 맞음으로 바뀌었고, 1곡은 전후 모두 틀린 조(정답과의 거리 점수 같음)입니다. 나머지 시험(회귀 18곡, 조성, 로마 숫자, 합성 곡 37곡, 실제 녹음 키트, 「세월이 가면」 정답, GuitarSet)은 1.11.3과 같습니다.</p>
+        <p>1.11.5의 4:3 박 단계 확인도 같은 1,268곡에서 정했습니다. 12/8·6/8로 적히는 125곡마다 4/3배 느린 템포로 다시 잡은 결과를 모두 만들어 보니, 조건 없이 바꾸면 26곡이 좋아지고 96곡이 나빠져서(진짜 셋잇단 곡, 실제 템포가 3/2배 빠른 기타 반주 곡 등), 나빠지는 곡이 없어질 때까지 조건을 더해 좁혔습니다. 바뀐 곡은 6곡입니다. 「아주 먼 옛날」(사용자 제보)은 92 BPM 12/8에서 69 BPM 4/4가 되어 코드가 마디 첫 박·셋째 박에 고르게 놓이고, GTZAN pop.00004·pop.00062·hiphop.00035·rock.00049와 GuitarSet 1곡은 박 F가 0.27~0.30에서 0.98~1.00으로, 첫 박 F는 좋아지거나 같았습니다. 같은 오류가 있는 시험곡 19곡 가운데 나머지 13곡은 그대로입니다. 1,268곡 전체를 1.11.4와 따로 분석해 비교해도 이 6곡 말고는 결과가 같습니다.</p>
       </div>
       <div class="block">
         <h3 id="v-browser">브라우저 시험</h3>
