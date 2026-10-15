@@ -345,7 +345,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.6">v1.11.6</span>
+    <span class="ver" title="Chordity 버전 1.11.7">v1.11.7</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -1718,8 +1718,49 @@ const Engine = (function () {
       const f0 = fit(H0, pk), f1 = fit(H1, pk);
       if (!best || f1 - f0 > best.f1 - best.f0) best = { j, p, v, f0, f1, np: pk.length };
     }
-    if (!best) return { beats: b, info: null };
+    // 국소 어긋남(IG_LOCAL): 누적 밀림은 IG_DRIFT 안이라 박 수는 같은데, 드럼 없는 도입부에서 DP가 16분음표 당김을 박으로 따라가
+    //  박이 군데군데 1/4박쯤 앞당겨진 경우. j박 뒤 8박이 고른 템포(간격이 주기의 ±IG_STEADY 안)이고, 지금 박이 거꾸로 이은 격자에서
+    //  IG_LDEV 박 넘게 벗어난 박이 있으면(도입부 거의 내내 1/4박쯤 앞당겨진 경우 등), 도입부 온셋이 16분음표 자리에 맞는 정도로 비교해 IG_LMARGIN 넘게 나을 때만 바꿈.
+    //  고정 템포로 찍은 곡(DAW)이라는 근거가 있어야 함: 도입부 온셋 봉우리 IG_LMINPK개 이상, 거꾸로 이은 격자의 16분음표 맞춤 IG_LFIT 이상
+    let loc = null;
+    if (P.IG_LOCAL) {
+      const fit16 = (g, pk) => {
+        const pts = [];
+        for (let i = 0; i + 1 < g.length; i++) for (let k = 0; k < 4; k++) pts.push(g[i] + (g[i + 1] - g[i]) * k / 4);
+        pts.push(g[g.length - 1]);
+        let s = 0, ws = 0;
+        for (const o of pk) { let d = Infinity; for (const x of pts) d = Math.min(d, Math.abs(o.t - x)); s += o.w * Math.exp(-0.5 * Math.pow(d / P.IG_SIG, 2)); ws += o.w; }
+        return ws > 0 ? s / ws : 0;
+      };
+      for (let j = 4; j <= J - 2; j++) {
+        const p = (b[j + 8] - b[j]) / 8, v = ((b[j] - b[0]) - j * p) / p;
+        if (Math.abs(v) >= P.IG_DRIFT) continue;
+        let steady = true;
+        for (let i = j; i < j + 8 && steady; i++) if (Math.abs((b[i + 1] - b[i]) / p - 1) > P.IG_STEADY) steady = false;
+        if (!steady) continue;
+        let dev = 0;
+        for (let i = 0; i < j; i++) dev = Math.max(dev, Math.abs(b[i] - (b[j] - (j - i) * p)) / p);
+        if (dev < P.IG_LDEV) continue;
+        const pk = peaks(b[j]);
+        if (pk.length < 5) continue;
+        const H0 = Array.from(b.slice(0, j + 1)), H1 = [];
+        for (let i = 0; i <= j; i++) H1.push(b[j] - (j - i) * p);
+        const f0 = fit16(H0, pk), f1 = fit16(H1, pk);
+        if (!loc || f1 - f0 > loc.f1 - loc.f0) loc = { j, p, v, dev, f0, f1, np: pk.length };
+      }
+    }
+    if (loc && loc.f1 - loc.f0 >= P.IG_LMARGIN && loc.np >= P.IG_LMINPK && loc.f1 >= P.IG_LFIT && (!best || !(best.f1 - best.f0 >= P.IG_MARGIN))) {
+      const info = { local: true, j: loc.j, t: +b[loc.j].toFixed(2), drift: +loc.v.toFixed(3), dev: +loc.dev.toFixed(3), fit0: +loc.f0.toFixed(3), fit1: +loc.f1.toFixed(3), peaks: loc.np, applied: true, head: loc.j };
+      const out = Array.from(b);
+      for (let i = 0; i < loc.j; i++) out[i] = b[loc.j] - (loc.j - i) * loc.p;
+      // 첫 소리 1/4박 앞(0초 아래 아님)보다 이른 박은 버림(extendBeats·위 INTRO_GRID와 같은 하한), head도 그만큼 당김
+      const lo = Math.max(0, A.startT - 0.25 * loc.p); let d = 0; while (d < loc.j && out[d] < lo) d++;
+      info.head = loc.j - d;
+      return { beats: Float64Array.from(out.slice(d)), info };
+    }
+    if (!best) return { beats: b, info: loc ? { local: true, j: loc.j, dev: +loc.dev.toFixed(3), fit0: +loc.f0.toFixed(3), fit1: +loc.f1.toFixed(3) } : null };
     const info = { j: best.j, t: +b[best.j].toFixed(2), drift: +best.v.toFixed(3), fit0: +best.f0.toFixed(3), fit1: +best.f1.toFixed(3), peaks: best.np };
+    if (loc) info.loc = { j: loc.j, dev: +loc.dev.toFixed(3), fit0: +loc.f0.toFixed(3), fit1: +loc.f1.toFixed(3) };
     if (!(best.f1 - best.f0 >= P.IG_MARGIN)) return { beats: b, info };
     const lo = Math.max(0, A.startT - 0.25 * best.p), head = [];
     for (let k = 1; b[best.j] - k * best.p >= lo; k++) head.unshift(b[best.j] - k * best.p);
@@ -2317,6 +2358,9 @@ const Engine = (function () {
     //  LEVEL43 안에서만 작동(LEVEL43을 끄면 3:2도 보지 않음). L32_MIN 90: 지금 템포 60 BPM 미만의 느린 12/8은 대개 진짜 셋잇단
     LEVEL32: true, L32_MIN: 90, L32_MAX: 240, L32_RAW: 0.93, L32_W: 0, L32_D2: 1.4, L32_NOV: 0.05, L32_PO: 1.05,
     L43_FLIP: true, L43_FLIP_SN: 0.9,                    //  새 박이 킥만 따라 엇박에 붙었으면 ½박 옮김(박 위 대 박 사이 가운데 스네어 세기 비 문턱: 이보다 작고 킥 비가 1보다 크면 옮김)
+    // 도입부 국소 어긋남(IG_LOCAL, 1.11.7): 드럼 없는 도입부에서 16분음표 당김을 박으로 따라가 박이 군데군데 앞당겨진 경우(INTRO_GRID 안).
+    //  뒤 8박 고른 템포 허용 폭, 벗어남 문턱(박), 16분음표 자리 맞춤 차 문턱, 도입부 온셋 봉우리 최소 수, 거꾸로 이은 격자의 16분음표 맞춤 최소
+    IG_LOCAL: true, IG_STEADY: 0.03, IG_LDEV: 0.15, IG_LMARGIN: 0, IG_LMINPK: 30, IG_LFIT: 0.85,
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
     KE_BREAK: true,                                      //  KEY_EDGE 안: 새 조 첫 박이 N.C.이고 그 마디의 절반 이상이 N.C.(브레이크)면 다음 마디 첫 박부터 새 조(KE_BARS 안에서)
