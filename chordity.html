@@ -345,7 +345,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.7">v1.11.7</span>
+    <span class="ver" title="Chordity 버전 1.11.8">v1.11.8</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2360,6 +2360,9 @@ const Engine = (function () {
     L43_FLIP: true, L43_FLIP_SN: 0.9,                    //  새 박이 킥만 따라 엇박에 붙었으면 ½박 옮김(박 위 대 박 사이 가운데 스네어 세기 비 문턱: 이보다 작고 킥 비가 1보다 크면 옮김)
     // 도입부 국소 어긋남(IG_LOCAL, 1.11.7): 드럼 없는 도입부에서 16분음표 당김을 박으로 따라가 박이 군데군데 앞당겨진 경우(INTRO_GRID 안).
     //  뒤 8박 고른 템포 허용 폭, 벗어남 문턱(박), 16분음표 자리 맞춤 차 문턱, 도입부 온셋 봉우리 최소 수, 거꾸로 이은 격자의 16분음표 맞춤 최소
+    //  마디 첫 박 짧은 코드(1.11.8): 첫 박만 보면 다른 근음 코드가 DBS_EM 넘게 앞서고 그 코드를 첫 박에 새로 쳤으면(DBS_ATK, 어택 비 DBS_A = RESTRIKE_TH와 같은 1.2)
+    //  둘째 박에 원래 코드를 다시 쳤고 베이스가 다르면(DBS_BASS) 첫 박을 그 코드로. DBS_START: 앞 마디에서 이어 온 코드는 보지 않음. DBS_HALF(끔, DBS_HM): 반 박 확인
+    DB_SHORT: true, DBS_EM: 3.5, DBS_START: true, DBS_ATK: true, DBS_A: 1.2, DBS_BASS: true, DBS_HALF: false, DBS_HM: 0,
     IG_LOCAL: true, IG_STEADY: 0.03, IG_LDEV: 0.15, IG_LMARGIN: 0, IG_LMINPK: 30, IG_LFIT: 0.85,
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
@@ -3832,6 +3835,37 @@ const Engine = (function () {
         if (states[Y].root < 0 || states[X].root < 0 || states[lab[b + 1]].root !== states[Y].root || states[Y].root === states[X].root) continue;
         if (P.DBG_LE) (A._le = A._le || []).push({ t: +t0[b].toFixed(2), X: states[X].id, Y: states[Y].id, de: +(emL[b * K3 + Y] - emL[b * K3 + X]).toFixed(2) });
         if (emL[b * K3 + Y] - emL[b * K3 + X] <= P.LE_EM) lab[b] = X;
+      }
+    }
+    // 마디 첫 박 짧은 코드(DB_SHORT): 마디 첫 박부터 같은 코드가 이어 적혔지만(앞 마디에서 이어 오지 않음, 첫 박 = 둘째 박), 첫 박만 보면
+    //  근음이 다른 코드 Z가 DBS_EM 넘게 앞서고 둘째 박에서는 지금 코드 Y가 낫다면, 한 박짜리 첫 박 코드를 둘째 박 바뀜 벌점(4.0)이 덮은 것일 수 있음.
+    //  다만 앞 코드 잔향이 새 코드와 섞여 첫 박에서 다른 코드처럼 보이는 경우(GuitarSet 정답으로 확인)가 더 흔해서, 두 코드를 정말 따로 쳤다는
+    //  근거가 있을 때만 첫 박을 Z로: Z에만 있는 음이 첫 박에 새로 쳐지고 Y에만 있는 음이 둘째 박에 다시 쳐짐(어택 비 DBS_A 이상, DBS_ATK),
+    //  두 코드의 베이스가 다름(DBS_BASS). 예: 「해질녘 예스터데이」 2마디 A♯m7 D♯m7(첫 박 A♯m7이 3.79 앞서는데 둘째 박 벌점 4.0에 밀렸음)
+    //  DBS_HALF(끔): 첫 박 앞·뒤 반 박 모두 Z가 나은지로 거르기 — 이 곡의 A♯m7이 뒤 반 박에서 오히려 약해(0.88) 가르지 못함
+    if ((P.DB_SHORT || P.DBG_DBS) && res === 1) {
+      const emS = rp && !P.REP_EDGE ? emissions(states, treb, bass, keyOfSlot) : emitF(states, treb), K4 = states.length;
+      let eH = null;                                     // 반 박 방출(DBS_HALF일 때만, 한 번)
+      const half = () => { if (eH) return eH; const h0 = new Float64Array(2 * nS), h1 = new Float64Array(2 * nS);
+        for (let i = 0; i < nS; i++) { const a = t0[i], c = t1[i], m2 = (a + c) / 2; h0[2 * i] = a; h1[2 * i] = m2; h0[2 * i + 1] = m2; h1[2 * i + 1] = c; }
+        eH = emissions(states, trebleOf(A, h0, h1), subFloor(aggregate(A.harm.bass, A.harm.hopB, h0, h1), F.floor), s2 => keyOfSlot(s2 >> 1)); return eH; };
+      for (let b = 0; b + 1 < nS; b++) {
+        if (pos[b] !== 0 || lab[b + 1] !== lab[b]) continue;
+        if (P.DBS_START && b > 0 && lab[b - 1] === lab[b]) continue;          // 앞 마디에서 이어 온 코드는 보지 않음
+        const Y = lab[b]; if (states[Y].root < 0) continue;
+        let Z = -1; for (let k = 0; k < K4; k++) if (states[k].root >= 0 && (Z < 0 || emS[b * K4 + k] > emS[b * K4 + Z])) Z = k;
+        if (Z < 0 || states[Z].root === states[Y].root) continue;
+        const gap = emS[b * K4 + Z] - emS[b * K4 + Y], next = emS[(b + 1) * K4 + Y] - emS[(b + 1) * K4 + Z];
+        if (!P.DBG_DBS && (gap < P.DBS_EM || next <= 0)) continue;           // 어택은 문턱을 넘은 곳만 잼
+        const onlyZ = states[Z].pcs.filter(q => !states[Y].pcs.includes(q)), onlyY = states[Y].pcs.filter(q => !states[Z].pcs.includes(q));
+        const aZ = onlyZ.length ? attackT(t0[b], onlyZ) : 0, aY = onlyY.length ? attackT(t0[b + 1], onlyY) : 0;
+        let hm = Infinity;
+        if (P.DBS_HALF) { const H = half(); hm = Math.min(H[2 * b * K4 + Z] - H[2 * b * K4 + Y], H[(2 * b + 1) * K4 + Z] - H[(2 * b + 1) * K4 + Y]); }
+        if (P.DBG_DBS) (A._dbs = A._dbs || []).push({ b, t: +t0[b].toFixed(2), Y: states[Y].id, Z: states[Z].id, gap: +gap.toFixed(2), next: +next.toFixed(2), aZ: +aZ.toFixed(2), aY: +aY.toFixed(2) });
+        if (!P.DB_SHORT || gap < P.DBS_EM || next <= 0 || hm < P.DBS_HM) continue;
+        if (P.DBS_ATK && (aZ < P.DBS_A || aY < P.DBS_A)) continue;            // 첫 박에 Z만의 음을 새로 쳤고, 둘째 박에 Y만의 음을 다시 쳤어야
+        if (P.DBS_BASS && states[Z].bass === states[Y].bass) continue;        // 베이스가 같으면 같은 베이스 위 화음 색채 변화로 봄
+        lab[b] = Z;
       }
     }
     if (P.FLICKER && res === 1) {
