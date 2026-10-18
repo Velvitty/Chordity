@@ -345,7 +345,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.11.8">v1.11.8</span>
+    <span class="ver" title="Chordity 버전 1.11.9">v1.11.9</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -3849,10 +3849,13 @@ const Engine = (function () {
       const half = () => { if (eH) return eH; const h0 = new Float64Array(2 * nS), h1 = new Float64Array(2 * nS);
         for (let i = 0; i < nS; i++) { const a = t0[i], c = t1[i], m2 = (a + c) / 2; h0[2 * i] = a; h1[2 * i] = m2; h0[2 * i + 1] = m2; h1[2 * i + 1] = c; }
         eH = emissions(states, trebleOf(A, h0, h1), subFloor(aggregate(A.harm.bass, A.harm.hopB, h0, h1), F.floor), s2 => keyOfSlot(s2 >> 1)); return eH; };
+      // 판단은 자리바꿈을 다듬은 코드열 L로: 베이스음 표기를 끄면 자리바꿈 다듬기(INV_SMOOTH)를 건너뛰므로, 그 사본을 만들어 표기를 켰을 때와
+      //  같은 코드열로 판단함(표시 설정이 근음 판정을 바꾸지 않게). 표기를 켜면 L이 곧 lab
+      const L = set.slash || !P.INV_SMOOTH ? lab : (() => { const c = lab.slice(); smoothInversions(c, states, res); return c; })();
       for (let b = 0; b + 1 < nS; b++) {
-        if (pos[b] !== 0 || lab[b + 1] !== lab[b]) continue;
-        if (P.DBS_START && b > 0 && lab[b - 1] === lab[b]) continue;          // 앞 마디에서 이어 온 코드는 보지 않음
-        const Y = lab[b]; if (states[Y].root < 0) continue;
+        if (pos[b] !== 0 || L[b + 1] !== L[b]) continue;
+        if (P.DBS_START && b > 0 && L[b - 1] === L[b]) continue;              // 앞 마디에서 이어 온 코드는 보지 않음
+        const Y = L[b]; if (states[Y].root < 0) continue;
         let Z = -1; for (let k = 0; k < K4; k++) if (states[k].root >= 0 && (Z < 0 || emS[b * K4 + k] > emS[b * K4 + Z])) Z = k;
         if (Z < 0 || states[Z].root === states[Y].root) continue;
         const gap = emS[b * K4 + Z] - emS[b * K4 + Y], next = emS[(b + 1) * K4 + Y] - emS[(b + 1) * K4 + Z];
@@ -3865,7 +3868,7 @@ const Engine = (function () {
         if (!P.DB_SHORT || gap < P.DBS_EM || next <= 0 || hm < P.DBS_HM) continue;
         if (P.DBS_ATK && (aZ < P.DBS_A || aY < P.DBS_A)) continue;            // 첫 박에 Z만의 음을 새로 쳤고, 둘째 박에 Y만의 음을 다시 쳤어야
         if (P.DBS_BASS && states[Z].bass === states[Y].bass) continue;        // 베이스가 같으면 같은 베이스 위 화음 색채 변화로 봄
-        lab[b] = Z;
+        lab[b] = Z; L[b] = Z;
       }
     }
     if (P.FLICKER && res === 1) {
