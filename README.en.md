@@ -1,4 +1,4 @@
-[한국어](README.md) · **English** · [日本語](README.ja.md) · [中文](README.zh.md) · [Français](README.fr.md) · [Español](README.es.md)
+[한국어](README.md)&emsp;&emsp;English
 
 > If you have collaborated on or contributed to this project, or would like to, please contact me personally. This project is source-available software that anyone can use free of charge. For personal and non-commercial purposes, you may use it as is at no cost. However, copyright and ownership belong to the original author, collaborators and contributors: without the original author's permission you may not modify it or take any part of it and put it into your own program (even for your own use only), and you may not claim this program as your own or distribute or sell it elsewhere. Uploading modified versions to a GitHub fork is also not permitted. Use by organizations such as schools, private academies, clubs, churches, religious organizations and companies is not automatically free, so please contact me first. The full terms are in [LICENSE](LICENSE).
 
@@ -65,7 +65,7 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
   - [Versioning rules](#versioning)
   - [Chordity 1.x](#chordity-1x)
     - [1.11.10](#11110-2026-10-21), [1.11.9](#1119-2026-10-18), [1.11.8](#1118-2026-10-18), [1.11.7](#1117-2026-10-15), [1.11.6](#1116-2026-10-14), [1.11.5](#1115-2026-10-14), [1.11.4](#1114-2026-10-14), [1.11.3](#1113-2026-10-14), [1.11.2](#1112-2026-10-13), [1.11.1](#1111-2026-10-13), [1.11.0](#1110-2026-10-13), [1.10.5](#1105-2026-10-11), [1.10.4](#1104-2026-10-11), [1.10.3](#1103-2026-10-11), [1.10.2](#1102-2026-10-11), [1.10.1](#1101-2026-10-11), [1.10.0](#1100-2026-10-11), [1.9.4](#194-2026-10-10), [1.9.3](#193-2026-10-10), [1.9.2](#192-2026-10-10), [1.9.1](#191-2026-09-30), [1.9.0](#190-2026-09-30), [1.8.4](#184-2026-09-30), [1.8.3](#183-2026-09-30), [1.8.2](#182-2026-09-30), [1.8.1](#181-2026-09-30), [1.8.0](#180-2026-09-30), [1.7.0](#170-2026-09-30), [1.6.0](#160-2026-09-30), [1.5.0](#150-2026-09-30), [1.4.2](#142-2026-09-27), [1.4.1](#141-2026-09-27), [1.4.0](#140-2026-09-26), [1.3.1](#131-2026-09-26), [1.3.0](#130-2026-09-26), [1.2.0](#120-2026-09-26), [1.1.1](#111-2026-09-26), [1.1.0](#110-2026-09-26), [1.0.0](#100-2026-09-26)
-  - [Development versions 0.x (Madi Code)](#development-versions-0x-마디-코드)
+  - [Development versions 0.x (Madi Code)](#development-versions-0x-madi-code)
     - [0.4.1](#041-2026-09-26), [0.4.0](#040-2026-09-25), [0.3.1](#031-2026-09-25), [0.3.0](#030-2026-09-25), [0.2.1](#021-2026-09-25), [0.2.0](#020-2026-09-25), [0.1.0](#010-2026-09-25)
 
 
@@ -82,8 +82,8 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
 ### How to use it
 
 1. Open the file `chordity.html` in a browser such as Chrome, Edge, Safari or Firefox.
-2. Click **Open file** (“파일 열기”) or drag a music file onto the window. After a few seconds the chord chart appears.
-3. Press the **Play** (“재생”) button. Along with the music, the metronome sounds a "tock" on every beat (a high "tick" on the first beat of each bar, and when the chord change unit is ½ beat, a small "tik" between beats as well), a yellow highlighter box surrounds the chord now sounding, and that chord's name gets bigger. Inside the box, orange fills up like a progress bar as far as it has played, and when the chord changes the box springs over to the next chord. The piano plays the chord wherever the original song strikes it (it strikes again when the chord changes or the same chord is struck anew, and keeps ringing where the chord is held over).
+2. Click **Open file** or drag a music file onto the window. After a few seconds the chord chart appears.
+3. Press the **Play** button. Along with the music, the metronome sounds a "tock" on every beat (a high "tick" on the first beat of each bar, and when the chord change unit is ½ beat, a small "tik" between beats as well), a yellow highlighter box surrounds the chord now sounding, and that chord's name gets bigger. Inside the box, orange fills up like a progress bar as far as it has played, and when the chord changes the box springs over to the next chord. The piano plays the chord wherever the original song strikes it (it strikes again when the chord changes or the same chord is struck anew, and keeps ringing where the chord is held over).
 
 Any file the browser can play will do, such as MP3, WAV, M4A, FLAC or OGG.
 
@@ -102,47 +102,47 @@ Any file the browser can play will do, such as MP3, WAV, M4A, FLAC or OGG.
 | Grey chord | The chord from the previous bar held over without being struck again. Even the same chord is shown in black text if it is struck anew on the first beat of the bar |
 | `N.C.` | A part with no chord (only drums, or silence) |
 | Bar 0 | The part where the song starts in the middle of a bar (a pickup, or anacrusis) |
-| A label such as `2박` above a bar | Only that bar has a different number of beats (`2박` means "2 beats") |
-| Black label `E 장조로` | The key changes from that beat on (modulation); `E 장조로` reads "to E major", with the Korean particle 로/으로 ("to"). The key box at the top also shows it, like `E♭ 장조 → E 장조`. On the first bar of the song, the starting key and meter are attached without the particle (`C 장조` `4/4`, like the key signature and time signature in sheet music) |
-| Black label `3/4으로` | The meter changes from that bar on (meter change); `3/4으로` reads "to 3/4". The meter box at the top also shows it, like `4/4 → 3/4 → 4/4` |
-| White pill `72` `132로` | The tempo from that beat on (BPM, rounded), on the line below the slashes. On the beat where the song starts, the starting tempo is shown as a bare number; where the tempo changes suddenly, the new tempo gets the particle `로/으로` ("to") |
-| White hexagonal frame `여기까지 63` | A section where the tempo changes gradually (on the line below the slashes); `여기까지 63` means "up to here: 63". The length the frame spans is the changing section, and when the playback position is inside the frame, it fills with the highlighter color as far as playback has gone and shows the current tempo, like `현재 67` ("now 67"). When it is completely filled it fades to white, and the white pill on the beat after the end of the frame (the tempo arrived at) lights up briefly |
+| A label such as `2 beats` above a bar | Only that bar has a different number of beats (2 beats in this example) |
+| Black label `to E major` | The key changes from that beat on (modulation); the label means "to E major", using the Korean directional suffix, romanized as ro/euro ("to"). The key box at the top also shows it, like `E♭ major → E major`. On the first bar of the song, the starting key and meter appear without the directional suffix (`C major` `4/4`, like the key signature and time signature in sheet music) |
+| Black label `to 3/4` | The meter changes from that bar on (meter change); the label means "to 3/4". The meter box at the top also shows it, like `4/4 → 3/4 → 4/4` |
+| White pill `72` `to 132` | The tempo from that beat on (BPM, rounded), on the line below the slashes. On the beat where the song starts, the starting tempo is shown as a bare number; where the tempo changes suddenly, the new tempo gets the directional suffix romanized as `ro/euro` ("to") |
+| White hexagonal frame `up to here: 63` | A section where the tempo changes gradually (on the line below the slashes); the label gives the tempo reached at its end. The length the frame spans is the changing section, and when the playback position is inside the frame, it fills with the highlighter color as far as playback has gone and shows the current tempo, like `now 67`. When it is completely filled it fades to white, and the white pill on the beat after the end of the frame (the tempo arrived at) lights up briefly |
 | Tempo (top box and playback bar) | The tempo at the playback position. When the tempo changes gradually, it follows along, like 120, 119, 118 …. The playback bar stays fixed at the very top of the screen even when you scroll, so it is always visible |
 | Names like `8B` or `9A` with small letters attached | Chord names when Camelot notation is selected (see "Viewing in Camelot" below) |
 | Roman numerals such as `I`, `vi`, `V7/ii` | Chord names when Roman numeral notation is selected (see "Viewing in Roman numerals" below) |
 | Circle indicators | Which beat it is now. The largest circle is the first beat of the bar |
-| "Next G" (“다음 G”) at the top | The chord coming up soon |
-| Metronome (“메트로놈”) and chord playback (“코드 연주”) buttons | Toggle on and off each time you press them |
-| Music (“음악”), click (“클릭”) and chord (“코드”) sliders | Adjust the volume of the original song, the metronome and the piano chords separately |
+| "Next G" at the top | The chord coming up soon |
+| Metronome and chord playback buttons | Toggle on and off each time you press them |
+| Music, click and chord sliders | Adjust the volume of the original song, the metronome and the piano chords separately |
 
 ### If the metronome sounds off
 
-Most of the time it lines up on its own, but for some songs different people count the beat differently. Open **Beat not lining up? Correct it** (“박이 안 맞나요? 보정하기”) and try the buttons below. Each takes effect the moment you press it.
+Most of the time it lines up on its own, but for some songs different people count the beat differently. Open **Beat not lining up? Correct it** and try the buttons below. Each takes effect the moment you press it.
 
 | If it sounds like this | Press this button |
 |---|---|
-| The clicks fall between the beats | Shift ½ beat (“½박 옮기기”) |
-| The clicks are too dense | Halve ÷2 (“절반으로 ÷2”) |
-| The clicks are too sparse | Double speed ×2 (“두 배 빠르게 ×2”) |
-| The song feels like 6/8 but there are too many clicks | Group in threes ÷3 (“셋씩 묶기 ÷3”) |
-| The start of the bar is off by one beat | Move one beat earlier (“한 박 앞당기기”), move one beat later (“한 박 늦추기”) |
-| The clicks feel very slightly early or late | Click timing (“클릭 타이밍”) |
-| You want to reset the beat corrections | Reset beat corrections (“박 보정 되돌리기”) |
-| You want to reset settings such as chord type | Restore default settings (“설정 기본값으로”) |
+| The clicks fall between the beats | Shift ½ beat |
+| The clicks are too dense | Halve ÷2 |
+| The clicks are too sparse | Double speed ×2 |
+| The song feels like 6/8 but there are too many clicks | Group in threes ÷3 |
+| The start of the bar is off by one beat | Move one beat earlier, move one beat later |
+| The clicks feel very slightly early or late | Click timing |
+| You want to reset the beat corrections | Reset beat corrections |
+| You want to reset settings such as chord type | Restore default settings |
 
-What you have changed so far is shown under **Active** (“적용 중”) in the same panel, split into "beat corrections" (“박 보정”) and "settings" (“설정”). Even when the panel is collapsed, a summary is visible next to its title.
+What you have changed so far is shown under **Active** in the same panel, split into "beat corrections" and "settings". Even when the panel is collapsed, a summary is visible next to its title.
 
-If you want simpler chords, choose "basic" (“기본”) under **Chord type** (“코드 종류”); if you also want to see chords that change within a beat, choose "half-beat" (“½박 단위”). In half-beat mode the metronome also adds a small, high "tik" between beats (on the eighth notes), playing like "tick-tik-tock-tik-tock-tik-tock-tik".
+If you want simpler chords, choose "basic" under **Chord type**; if you also want to see chords that change within a beat, choose "half-beat". In half-beat mode the metronome also adds a small, high "tik" between beats (on the eighth notes), playing like "tick-tik-tock-tik-tock-tik-tock-tik".
 
 ### Viewing chord names differently
 
-With the **Chord notation** (“코드 표기”) bar right above the chart, you can view the same chords in three ways. The chart, the current and next chord, and the text chart all change the moment you press it, and the chosen style is kept the next time you open the app. From the keyboard, focus the bar and switch with ← and →.
+With the **Chord notation** bar right above the chart, you can view the same chords in three ways. The chart, the current and next chord, and the text chart all change the moment you press it, and the chosen style is kept the next time you open the app. From the keyboard, focus the bar and switch with ← and →.
 
 | Button | Example | Good for |
 |---|---|---|
-| Note names (“음이름”) | E♭, B♭/D, Cm7 | Playing along right away while looking at the chords, or passing chords between players |
-| Camelot (“카멜롯”) | 5B, 6B, 3A⁷ | Finding keys and chords that go well together, or choosing DJ mix points |
-| Roman numerals (“로마 숫자”) | I, V⁶, ii⁷/IV | Analyzing a song's harmonic progression, or transposing it to another key |
+| Note names | E♭, B♭/D, Cm7 | Playing along right away while looking at the chords, or passing chords between players |
+| Camelot | 5B, 6B, 3A⁷ | Finding keys and chords that go well together, or choosing DJ mix points |
+| Roman numerals | I, V⁶, ii⁷/IV | Analyzing a song's harmonic progression, or transposing it to another key |
 
 The three images below show the same 11 bars in E♭ major in each style.
 
@@ -164,7 +164,7 @@ Chords are written with the numbers of the Camelot wheel, which DJs use when ble
 
 - **Reading chords**: a chord is written with the number of the key whose root and character (major or minor) match it, and the chord type is attached in small letters. E♭ is 5B, Cm is 5A, and B♭7 is 6B with a small 7 attached.
 - **Chords outside the key stand out at a glance**: this song is in E♭ major (5B), so most chords cluster around 4 to 6. Only `3A⁷` (B♭m7) in the fourth bar is far away, because it is a chord borrowed briefly to lead to the IV, A♭maj7 (4B).
-- The song's key is also shown with its number, like `E♭ 장조(5B)` ("E♭ major (5B)").
+- The song's key is also shown with its number, like `E♭ major (5B)`.
 - Camelot has no way to write a bass note, so the bass note of a slash chord is omitted (`B♭/D` → `6B`). Chord playback still plays the bass note as it is.
 
 #### Viewing in Roman numerals
@@ -189,14 +189,14 @@ This is the Roman numeral harmonic analysis used in harmony textbooks. Instead o
 
 - The numerals are counted from the key at that point. After a modulation, they are counted again in the new key.
 - If the dominant of the new key appears right before a modulation, it is written as V of the new key (e.g. B7 right before moving to E major is V7).
-- If slash (bass) notation (“베이스음 표기”) is turned off, chords are written in root position without inversion figures.
+- If slash (bass) notation is turned off, chords are written in root position without inversion figures.
 
 ### Hearing chords on the piano
 
-With **Chord playback** (“코드 연주”) turned on, the piano plays each chord at the moment it changes. Listening to it layered over the original lets you check by ear right away whether the written chord is right, and it also guides you when playing along. The piano automatically matches the song's tuning, so it never sounds out of tune against the original.
+With **Chord playback** turned on, the piano plays each chord at the moment it changes. Listening to it layered over the original lets you check by ear right away whether the written chord is right, and it also guides you when playing along. The piano automatically matches the song's tuning, so it never sounds out of tune against the original.
 
 - The volume of the music, the clicks and the chords is set separately with the three sliders at the top.
-- Under **Chord playback** in **Correct it** (“보정하기”), you can choose when chords are struck: follow the song (“곡 따라”; default, restrikes only where the original strikes anew), when the chord changes, again every bar, or every beat.
+- Under **Chord playback** in **Correct it**, you can choose when chords are struck: follow the song (default, restrikes only where the original strikes anew), when the chord changes, again every bar, or every beat.
 - To turn it off, press the **Chord playback** button or the P key.
 
 ### Keyboard shortcuts
@@ -227,11 +227,11 @@ Songs with a clear beat, such as pop, rock, ballads, dance, hip-hop, K-pop and a
 
 ---
 
-<p align="right"><a href="#목차">↑ Back to contents</a></p>
+<p align="right"><a href="#contents">↑ Back to contents</a></p>
 
 ## Part 2. Principles
 
-This program does not use a pretrained AI model. It works with **signal processing** and **probabilistic models** that turn the physical properties of sound and the rules of music into formulas. That is why every decision can be explained, and you can see the evidence yourself under **Analysis info** (“분석 정보”) at the bottom of the screen.
+This program does not use a pretrained AI model. It works with **signal processing** and **probabilistic models** that turn the physical properties of sound and the rules of music into formulas. That is why every decision can be explained, and you can see the evidence yourself under **Analysis info** at the bottom of the screen.
 
 ### 2-1. Turning sound into a picture
 
@@ -301,7 +301,7 @@ The modulation position is refined to the beat. When the music passes through th
 
 ---
 
-<p align="right"><a href="#목차">↑ Back to contents</a></p>
+<p align="right"><a href="#contents">↑ Back to contents</a></p>
 
 ## Part 3. How it works
 
@@ -400,20 +400,20 @@ The analysis is split into a **heavy stage** and a **lightweight stage**.
 
 | Button | Internal operation | Behavior |
 |---|---|---|
-| Shift ½ beat (“½박 옮기기”) | `half` | Builds a new beat list from the midpoints of neighboring beats and snaps them back to onset peaks. Beats that stick out before the music starts are discarded |
-| Double speed ×2 (“두 배 빠르게 ×2”) | `x2` | Adds a midpoint between every pair of beats |
-| Halve ÷2 (“절반으로 ÷2”), group in threes ÷3 (“셋씩 묶기 ÷3”) | `d2`, `d3` | Keeps one of every 2 (3). The position kept is the one with the larger sum of beat accents |
-| Move one beat earlier (“한 박 앞당기기”), later (“늦추기”) | `downShift` ∓1 | Rotates the position-in-bar numbers by one |
-| Meter (“박자”) | `meter` | Re-solves the downbeat HMM with the specified number of beats |
+| Shift ½ beat | `half` | Builds a new beat list from the midpoints of neighboring beats and snaps them back to onset peaks. Beats that stick out before the music starts are discarded |
+| Double speed ×2 | `x2` | Adds a midpoint between every pair of beats |
+| Halve ÷2, group in threes ÷3 | `d2`, `d3` | Keeps one of every 2 (3). The position kept is the one with the larger sum of beat accents |
+| Move one beat earlier, later | `downShift` ∓1 | Rotates the position-in-bar numbers by one |
+| Meter | `meter` | Re-solves the downbeat HMM with the specified number of beats |
 
-Corrections are stored as an **operation log** on the beat list and are reapplied in order from the start each time. "Reset beat corrections" (“박 보정 되돌리기”) clears this log. Chord type, chord playback mode, downbeat accent, auto-scroll and click timing are **settings** saved in the browser rather than with the song, so they are reset separately with "Restore default settings" (“설정 기본값으로”). "Active" (“적용 중”) lists, for both kinds, only what differs from the defaults.
+Corrections are stored as an **operation log** on the beat list and are reapplied in order from the start each time. "Reset beat corrections" clears this log. Chord type, chord playback mode, downbeat accent, auto-scroll and click timing are **settings** saved in the browser rather than with the song, so they are reset separately with "Restore default settings". "Active" lists, for both kinds, only what differs from the defaults.
 
 ### 3-9. Chord playback
 
 | Step | What it does |
 |---|---|
 | Chord segments | For each chord event in a bar, the engine passes on the chord tones (0 = C) together with the bass note to play. When slash notation is turned off, the bass is the root. |
-| Strike list | Built according to when chords are struck. "Follow the song" (“곡 따라”) strikes where the chord changes and, even for the same chord, on downbeats where the original strikes anew (black text in the chart), and keeps ringing where the chord is held over (grey). "When the chord changes" strikes a same chord continuing across bars only once, "again every bar" strikes again on each downbeat, and "every beat" strikes on all beats. On N.C. nothing is struck and the previous chord also stops. |
+| Strike list | Built according to when chords are struck. "Follow the song" strikes where the chord changes and, even for the same chord, on downbeats where the original strikes anew (black text in the chart), and keeps ringing where the chord is held over (grey). "When the chord changes" strikes a same chord continuing across bars only once, "again every bar" strikes again on each downbeat, and "every beat" strikes on all beats. On N.C. nothing is struck and the previous chord also stops. |
 | Voicing | The bass is in D2–C♯3; for the right hand all chord tones are placed in close position, choosing the inversion closest to the center of the previous voicing. |
 | Synthesis and cache | The notes used in the song are synthesized one at a time in advance, in the order they first appear (once per note). If the song's reference pitch changes, they are rebuilt. |
 | Scheduling | The same scheduler as the metronome schedules strikes 0.2 seconds ahead on the audio clock. The click timing correction is not applied; chords are played at the music's time as is. |
@@ -425,7 +425,7 @@ The metronome and chord playback are also resynchronized separately. Turning the
 
 ---
 
-<p align="right"><a href="#목차">↑ Back to contents</a></p>
+<p align="right"><a href="#contents">↑ Back to contents</a></p>
 
 ## Part 4. A closer look
 
@@ -541,7 +541,7 @@ The local beat period $\tau(t)$ is obtained from the autocorrelation $r_w$ of 8-
 
 The backtracking starting point is the last of the local maxima of $C$ that exceeds half of their median. Beats at the start and end of the path whose smoothed local score is below half of the overall RMS are trimmed.
 
-**Intro grid (1.10.4).** In an intro with few instruments, the anticipated accent at the end of a bar (bass or cymbal on the eighth note after beat 4) is much stronger than the onsets between beats, so dynamic programming can take that accent as a beat and drift onto a beat a few % slower than the main section, putting bar lines about half a beat off. So within the first 48 beats of the song, if a grid extended backward at a steady spacing equal to the period of the 8 beats following some beat diverges from the current beats by more than a quarter beat, the two grids are compared. The criterion is how well the onsets from the first sound up to that beat fit the eighth-note positions (both on-beat and offbeat), and the intro beats are replaced with that grid only when the backward grid is better by more than 0.15 (onset-weighted mean, 30 ms wide Gaussian). In that case the bar lines also continue the phase of the main section backward. If the intro really has a different tempo or free tempo, the original beats fit the onsets better and are left as they are. The intro of 「マリーゴールド」 (from the first sound at 0.55 s to the band's entry at 7.34 s) was caught at 0.596-second spacing, as a 3-beat pickup bar + bar lines at 2.55 and 4.94 s, but it changed to three full bars at 0.566-second spacing (0.55, 2.82, 5.08 s). These bar lines match, within 5 ms, the starting points at which the intro riff repeats every 2.26 seconds (4 beats). Among the 1000 GTZAN songs, the rule kicked in for only one reggae song, and the score is unchanged.
+**Intro grid (1.10.4).** In an intro with few instruments, the anticipated accent at the end of a bar (bass or cymbal on the eighth note after beat 4) is much stronger than the onsets between beats, so dynamic programming can take that accent as a beat and drift onto a beat a few % slower than the main section, putting bar lines about half a beat off. So within the first 48 beats of the song, if a grid extended backward at a steady spacing equal to the period of the 8 beats following some beat diverges from the current beats by more than a quarter beat, the two grids are compared. The criterion is how well the onsets from the first sound up to that beat fit the eighth-note positions (both on-beat and offbeat), and the intro beats are replaced with that grid only when the backward grid is better by more than 0.15 (onset-weighted mean, 30 ms wide Gaussian). In that case the bar lines also continue the phase of the main section backward. If the intro really has a different tempo or free tempo, the original beats fit the onsets better and are left as they are. The intro of “Marigold” (from the first sound at 0.55 s to the band's entry at 7.34 s) was caught at 0.596-second spacing, as a 3-beat pickup bar + bar lines at 2.55 and 4.94 s, but it changed to three full bars at 0.566-second spacing (0.55, 2.82, 5.08 s). These bar lines match, within 5 ms, the starting points at which the intro riff repeats every 2.26 seconds (4 beats). Among the 1000 GTZAN songs, the rule kicked in for only one reggae song, and the score is unchanged.
 
 **Local misalignment in the intro (1.11.7).** Even in a song made at a fixed tempo, if it starts on piano or the like without drums, notes anticipated by a sixteenth note in the intro can be stronger than the onsets between beats, so dynamic programming may take those notes as beats. In this case the total number of beats in the intro is correct, so the "diverges by more than a quarter beat" condition above is not triggered, but the beats are about 1/4 beat early for almost the whole intro, the spacing is uneven, and the chord segments are off too. So if the 8 beats following some beat have an even tempo (spacing within ±3% of the period), and when that grid is extended backward at a steady spacing some current beat deviates from it by more than 0.15 beat, the two grids are compared by how well the intro onsets fit the sixteenth-note positions. The intro beats are replaced with that grid only when the backward grid fits better and there is evidence that the song was made at a fixed tempo (at least 30 onset peaks in the intro, and sixteenth-note fit of the backward grid of at least 0.85).
 
@@ -900,7 +900,7 @@ J(K) = \frac{\sum_j \ell_j\,[\,c_j \subset K\,]}{\sum_j \ell_j} + 0.5\,\frac{\su
 
 If neighboring sections end up with the same key after this re-decision, they are merged into one section (1.10.0). The key-signature classes that split the sections may differ while the keys re-decided from chords are the same, and if left as is, a modulation would be written where the key did not change. Neighboring sections split into relative major and minor (G major and E minor) are also merged into one section, and the key is decided again from the chords of the merged section. This follows the convention of not writing a move between relative keys as a modulation; since songs split this way are ones where the major/minor judgment is ambiguous, the merged section is written as minor only when the minor score is more than 0.2 higher than the relative major (major is more common in popular music, 1.10.0).
 
-**Filtering out near-tie modulations (1.11.1).** When re-deciding the key of each section from the chords, if the key chosen for a section leads the neighboring section's key (or whichever of its relative keys scores higher in this section) by less than 0.1 in $J$, that section is also taken to be in the neighbor's key. This prevents a modulation with almost no evidence from blocking the merging of relative keys and causing the key names of the whole song to go wrong in a chain. In 1.11.0, the intro of 「고민중독」 (Gomin jungdok) split into D major 1.788 vs G major 1.781, and the whole song was written as B minor → E minor → F minor; with this rule it returns to G major → A♭ major (correct). Across all the data tested, only three cases fell within this margin (0.007, 0.02, 0.036), and real modulations led by more than 0.7.
+**Filtering out near-tie modulations (1.11.1).** When re-deciding the key of each section from the chords, if the key chosen for a section leads the neighboring section's key (or whichever of its relative keys scores higher in this section) by less than 0.1 in $J$, that section is also taken to be in the neighbor's key. This prevents a modulation with almost no evidence from blocking the merging of relative keys and causing the key names of the whole song to go wrong in a chain. In 1.11.0, the intro of “Gomin jungdok” split into D major 1.788 vs G major 1.781, and the whole song was written as B minor → E minor → F minor; with this rule it returns to G major → A♭ major (correct). Across all the data tested, only three cases fell within this margin (0.007, 0.02, 0.036), and real modulations led by more than 0.7.
 
 **Key names when m7 and sixth chords overlap (1.11.4).** In a major-key song, vi7 (D♯m7 in F♯ major) has the same notes as I6 (F♯6) and cannot be told apart by chords, but the tonic chord score goes only to the minor side (i7 of D♯ minor), so a major-key song with a lot of vi7 can be written with the name of its relative minor. Only when the key chosen from the chords is minor, the section's note distribution fits the relative major best (first among the 24 keys), that margin is larger than 0.15 in $1.2\,\Delta r$ (1.5 times the near-tie margin of 0.1), and m7 on that minor root takes up at least 1/3 of the section's chord time, is that m7 also counted as the tonic chord of the relative major and the comparison redone. It does not move to any other major key. Used unconditionally, it turned 29 songs on GTZAN whose key had been right into wrong ones (while 26 wrong ones became right), so the conditions were narrowed.
 
@@ -908,7 +908,7 @@ $[\,c \subset K\,]$ is whether all chord tones belong to the key's scale (includ
 
 **Refining modulation names (1.10.3).** If the first key section of the song is 8 bars or shorter and is the subdominant or dominant key of the next section in the same mode (major or minor), it is merged into the next key. When an intro starts on iv or V, the first chord of the phrase makes only the intro come out in a different key, writing a false modulation such as "B♭ minor → F minor". Also, in songs with a modulation, the key names are unified to the mode of the longest section. Relative major and minor have the same notes, so it is only a choice of name, but if chosen separately for each section, a modulation up a whole step would be written like "C minor → F major", hiding what changed; so it is written as "C minor → D minor".
 
-**Refining modulation boundaries (1.10.4).** Modulation boundaries are set by a window over note distributions, so they tend to land a bar or two early, on the new key's side, because of chords with many notes shared by both keys (such as V7 of the old key). After all chords are decided, for each downbeat within 2 bars after the boundary, "the fraction of chord tones in the old key's scale − the fraction in the new key's scale" is summed per beat, and the boundary is postponed to the downbeat that keeps the most old-key chords in the old key (only when it is better by more than 0.5 beat). It is never moved earlier. This avoids conflicting with the position set at the tonic chord after passing through the new key's dominant. Also, if the first beat of the new key is N.C., at least half of that bar is N.C. (a break), and the tonic chord of the new key has not appeared yet, the sound of that bar is taken as the pickup start of the next phrase, and the new key is written from the next downbeat (conditions narrowed in 1.10.5: a bar that rests briefly and then immediately strikes the new tonic chord is in the new key from that bar). The B minor of 「夜に駆ける」 was moved from bar 102 (G7 of C minor), through bar 103 (a break whose first half bar is silent, with only the unaccompanied first note of the vocal), to bar 104, where the accompaniment enters in B minor. The A♭ major modulation of 「고민중독」 was moved from 2 bars early to 1 bar early (the transitional bar leading into the modulation).
+**Refining modulation boundaries (1.10.4).** Modulation boundaries are set by a window over note distributions, so they tend to land a bar or two early, on the new key's side, because of chords with many notes shared by both keys (such as V7 of the old key). After all chords are decided, for each downbeat within 2 bars after the boundary, "the fraction of chord tones in the old key's scale − the fraction in the new key's scale" is summed per beat, and the boundary is postponed to the downbeat that keeps the most old-key chords in the old key (only when it is better by more than 0.5 beat). It is never moved earlier. This avoids conflicting with the position set at the tonic chord after passing through the new key's dominant. Also, if the first beat of the new key is N.C., at least half of that bar is N.C. (a break), and the tonic chord of the new key has not appeared yet, the sound of that bar is taken as the pickup start of the next phrase, and the new key is written from the next downbeat (conditions narrowed in 1.10.5: a bar that rests briefly and then immediately strikes the new tonic chord is in the new key from that bar). The B minor of “Yoru ni kakeru” was moved from bar 102 (G7 of C minor), through bar 103 (a break whose first half bar is silent, with only the unaccompanied first note of the vocal), to bar 104, where the accompaniment enters in B minor. The A♭ major modulation of “Gomin jungdok” was moved from 2 bars early to 1 bar early (the transitional bar leading into the modulation).
 
 #### (19) Camelot notation
 
@@ -1164,7 +1164,7 @@ flowchart LR
 ├── information.html          help page (Korean): evidence for decisions, analysis principles and formulas, verification results (single file)
 ├── LICENSE                   terms of use
 ├── README.md
-├── README.{en,ja,zh,fr,es}.md  README translations: English, 日本語, 中文, Français, Español
+├── README.en.md              English README
 └── docs/
     ├── screenshot-desktop.png
     ├── screenshot-mobile.png
@@ -1178,27 +1178,27 @@ flowchart LR
 The first `<script>` in `chordity.html` defines the global `Engine` (it is also exported via `module.exports` when loaded from Node). The following description is used for developing and verifying this project. Extracting the engine and loading it in your own program counts as modification or partial use and cannot be done without the original author's permission ([LICENSE](LICENSE) section 2-a).
 
 ```js
-// buf: AudioBuffer (예: AudioContext.decodeAudioData 결과)
+// buf: AudioBuffer (e.g. the result of AudioContext.decodeAudioData)
 const channels = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c));
 
-// 무거운 단계: 한 번만
+// Heavy stage: run once
 const A = await Engine.analyze(
   { channels, sampleRate: buf.sampleRate },
   (progress, stage) => console.log(Math.round(progress * 100) + '%', stage ?? '')
 );
 
-// 가벼운 단계: 설정이 바뀔 때마다
+// Lightweight stage: run whenever settings change
 const TL = Engine.buildTimeline(A, { vocab: 'extended', res: 2, slash: true });
 
-console.log(Engine.chartText(TL, { title: '내 노래' }));
-// # 내 노래  |  BPM 97.1  |  박자 4/4  |  조성 C 장조
+console.log(Engine.chartText(TL, { title: 'My Song' }));
+// # My Song  |  BPM 97.1  |  Meter 4/4  |  Key C major
 //   1 | C . / . / . / . | G . / . / . / . | ...
 
-// 카멜롯 표기로 내보내기: 조성은 C 장조(8B), 코드는 8B, 9A7 처럼
-console.log(Engine.chartText(TL, { title: '내 노래', notation: 'camelot' }));
+// Export in Camelot notation: key C major (8B), chords such as 8B, 9A7
+console.log(Engine.chartText(TL, { title: 'My Song', notation: 'camelot' }));
 
-// 로마 숫자로 내보내기: I, V7/vi, ii65 처럼(자리바꿈 숫자는 이어서 적음)
-console.log(Engine.chartText(TL, { title: '내 노래', notation: 'roman' }));
+// Export in Roman numerals: e.g. I, V7/vi, ii65 (inversion figures written consecutively)
+console.log(Engine.chartText(TL, { title: 'My Song', notation: 'roman' }));
 ```
 
 **Settings** (`Engine.defaultSettings()`)
@@ -1237,7 +1237,7 @@ Main fields of the **timeline `TL`**
 | `events[]` | `off`, `dur` (in beats), `tied`, `pcs` (chord tones, 0 = C), `bassPc` (bass to play), `label` (`root`, `base`, `ext`, `bass`, `text`, `ascii`, `nc`, `cam`: Camelot `code`, `ext`, `text`, `ascii`; `rn`: Roman numeral `acc`, `num`, `qual`, `fig`, `sus`, `sec`, `text`, `ascii`) |
 | `bpm` | Tempo computed from the median beat spacing |
 | `meter` | `m`, `triple`, `label` (e.g. `4/4`, `12/8`), `contrast`, `alt` |
-| `key` | First key: `tonic`, `mode`, `score`, `name` (e.g. `E♭ 장조`, "E♭ major") |
+| `key` | First key: `tonic`, `mode`, `score`, `name` (e.g. `E♭ major`) |
 | `keys[]` | Key sections: `name`, `cam` (Camelot code), `tonic`, `mode`, `startBeat`, `barNum` (bar number), `beat` (which beat), `t0` (seconds) |
 
 #### Three clocks
@@ -1281,22 +1281,22 @@ Problems encountered during development and how they were solved. The figures we
 | Slow songs detected at double tempo, clicking on every eighth note | Dense eighth-note arpeggios and a prior distribution favoring 110 BPM | Halving correction via an even/odd asymmetry check on the drum layer | 68 BPM ballad: 133 → 67.1 BPM |
 | Fast songs detected at half tempo | Only the kicks recognized as beats | Doubling correction via a check for kicks on the beat alternating with snares between beats | 176 BPM funk: 88 → 176 BPM |
 | Risk of ruining a piano song at the correct tempo by halving it | Left-hand bass only on beats 1 and 3 makes even/odd asymmetric | Halving correction only at 110 BPM and above | 72 BPM piano kept |
-| A real ballad detected at double tempo, with chords changing every half beat (「세월이 가면」 (Sewori gamyeon): 135 vs. 68 BPM) | Hi-hat and keys fill the offbeats, so the even/odd strength ratio is 1.59, short of the 2.4 threshold | Added a condition checking whether kick and snare cluster on the same side (at the correct beat level they fall on opposite sides because of the backbeat) | Corrected to 68.1 BPM; all synthetic-song decisions unchanged |
+| A real ballad detected at double tempo, with chords changing every half beat (“Sewori gamyeon”: 135 vs. 68 BPM) | Hi-hat and keys fill the offbeats, so the even/odd strength ratio is 1.59, short of the 2.4 threshold | Added a condition checking whether kick and snare cluster on the same side (at the correct beat level they fall on opposite sides because of the backbeat) | Corrected to 68.1 BPM; all synthetic-song decisions unchanged |
 | Spurious 3-beat and 2-beat bars after halving | Eighth-note tracking slipped one slot at a fill, and since every other beat was dropped, everything after it was affected | Instead of dropping beats, track again at the new beat period | Irregular bars 5 → 1 |
 | Beats wobble in slow songs, pulled by syncopation and fills | The interval penalty (fixed 100) is percentage-based, so in slow songs wobbles over 100 ms are allowed cheaply | Compare against the local tempo curve and make the penalty absolute-time-based (α = 2000·T²) | Piecewise linear residual RMS 96–222 → 6–23 ms; ritardando test song 80/80 |
 | Fast rock detected at half tempo, with beats landing on the snare (beats 2 and 4), mixing chords by half a beat (a 178 BPM song read as 89 BPM) | Eighth notes in the bass fill the low end so the kick registers weakly, and the tempo score is similar for both levels | Doubling (offbeat type) based on the pattern of snare on the beat and kick between beats, and the strength of the double-tempo candidate | 177.9 BPM, downbeat F 0 → 0.95, chord root 62% → 86% |
 | Fast songs with a half-time feel detected at half tempo (a 170 BPM song read as 85 BPM) | The slow beat sits on the kick, and the snare also lands between beats | Half-time-type doubling. Drumless piano songs with almost no low hits between beats are excluded | 170.1 BPM; synthetic piano songs unchanged |
-| Songs at 110–130 BPM halved | Judged that eighth notes had been taken as beats by looking only at the even/odd strength difference | Check for low hits between beats (which should be at sixteenth-note positions) and for a backbeat | 8 GTZAN popular-music songs corrected; 「세월이 가면」 stays at 68 BPM |
+| Songs at 110–130 BPM halved | Judged that eighth notes had been taken as beats by looking only at the even/odd strength difference | Check for low hits between beats (which should be at sixteenth-note positions) and for a backbeat | 8 GTZAN popular-music songs corrected; “Sewori gamyeon” stays at 68 BPM |
 | 4/4 songs written as 7/4, 5/4 or 3/4 | In songs of about 30 seconds, only a few rare strong downbeat traces were picked, inflating the contrast | Check the autocorrelation of downbeat evidence; with a clear drum backbeat, only even meters | Songs written in odd meters in GTZAN 221 → 104 |
-| In syncopated riffs, bars are shifted by one beat and spurious 5-beat and 3-beat bars appear | Downbeat evidence follows chords that change an eighth note early | Drum even/odd prior (kick on beats 1 and 3, snare on beats 2 and 4) | Irregular bars 9 → 3 (「고민중독」 (Gomin jungdok)); GTZAN popular-music downbeat F 0.557 → 0.608 |
+| In syncopated riffs, bars are shifted by one beat and spurious 5-beat and 3-beat bars appear | Downbeat evidence follows chords that change an eighth note early | Drum even/odd prior (kick on beats 1 and 3, snare on beats 2 and 4) | Irregular bars 9 → 3 (“Gomin jungdok”); GTZAN popular-music downbeat F 0.557 → 0.608 |
 | The ending of a song written as changing to 3/4 | Chords change one beat early, looking like a 3-beat spacing | Meter change probability $10^{-6}$ → $10^{-7}$ | 4/4 kept; the 4 synthetic songs with meter changes unchanged |
 | Many m7 chords with the third in the bass, like Am7/C and Em7/G | Sixth chords made of the same notes (C6, G6) read as m7 inversions | If the bass is that note and is the strongest, read it as a triad over the bass | In GuitarSet, 12 of the 13 changed spots match the played ground truth |
-| A major-key song written as modulating to the relative minor midway (G major → E minor) | Only sections with many progressions settling on vi (Em) and many B7 → Em progressions were judged minor on their own | Merge neighboring sections split between relative major/minor and judge again; minor only when minor clearly leads | 「고민중독」 G major → A♭ major (matches the ground truth); keys of all other test songs unchanged |
-| Written as sus4 even though the third sounds | A fourth mixed in from the melody or pitched drums (snare partials) | Triad if the third is at least 0.7 times the fourth | 「고민중독」 sus errors 10% → 2% |
+| A major-key song written as modulating to the relative minor midway (G major → E minor) | Only sections with many progressions settling on vi (Em) and many B7 → Em progressions were judged minor on their own | Merge neighboring sections split between relative major/minor and judge again; minor only when minor clearly leads | “Gomin jungdok” G major → A♭ major (matches the ground truth); keys of all other test songs unchanged |
+| Written as sus4 even though the third sounds | A fourth mixed in from the melody or pitched drums (snare partials) | Triad if the third is at least 0.7 times the fourth | “Gomin jungdok” sus errors 10% → 2% |
 | Two-level decisions split in songs with a strong skank, like reggae | The double-tempo interpretation is also musically accepted | Not forced automatically; a "÷2" control is provided instead | Intentionally unresolved |
 | Beats marked 6–8 ms early | The 46 ms window includes the attack ahead of time, so the flux peak comes early | 6.5 ms correction constant | Mean error 0 ± 2 ms |
 | 61% of seventh chords recognized as triads | Excessive prior penalty for seventh chords | Retuned $\beta$, $\gamma$ and the penalty by grid search | Missed sevenths 0; triads mistaken for sevenths 0 |
-| Even songs with a modulation show only one key, and chords after the modulation are written in the old key's spelling (A♭m7 in an E major section, etc.) | Key estimated only once for the whole song | Split into sections with a key-signature-level key HMM, and apply ♯/♭ spelling and the key bonus separately per section | 「세월이 가면」 in E major from bar 45 beat 1, written G♯m7 and C♯7 thereafter |
+| Even songs with a modulation show only one key, and chords after the modulation are written in the old key's spelling (A♭m7 in an E major section, etc.) | Key estimated only once for the whole song | Split into sections with a key-signature-level key HMM, and apply ♯/♭ spelling and the key bonus separately per section | “Sewori gamyeon” in E major from bar 45 beat 1, written G♯m7 and C♯7 thereafter |
 | A clear A minor progression (Am … E7) judged as E minor | Key decided only by the correlation of the note distribution with key profiles, not penalizing out-of-key notes (F) enough | Re-decide section keys from the recognized chords (scale fit, tonic-chord time, V → I, first and last chord) and blend with the note-distribution correlation | Judged A minor; Roman numerals i v6 VI III6 … |
 | Short sections lean toward the relative minor (E major → C♯ minor) | If a section ends on vi and contains V/vi → vi, the chord cues lean minor | Added the share of the tonic chord on downbeats of 4-bar phrases as a cue, and set the weight of the note distribution from an 18-song test | All 18 songs with a clear key correct |
 | When the tempo changes greatly midway, later beats are missed and even the meter goes wrong | Local tempo searched only within ±15% of the global tempo | Find jumps with a tempo-state Viterbi; songs without a jump use the previous curve unchanged | Beats 64→93/96, offbeat errors 16→1 |
@@ -1400,7 +1400,7 @@ Spelling after the modulation was also checked. The D major section is written w
 |---|---|
 | Numbers for the 24 keys checked against the standard Camelot wheel table | 24/24 match |
 | Conversion by chord type | C → 8B, Am → 8A, G7 → 9B7, Dm7 → 7A7, Cmaj7 → 8Bmaj7, Esus4 → 12Bsus4, Bdim → 10Adim, Bm7♭5 → 10A7♭5, Bdim7 → 10Adim7, G/B → 9B |
-| Switching notation on a real recording (「세월이 가면」 (Sewori gamyeon)) | Key E♭ major (5B) → E major (12B), modulation label "12B로" (Korean for "to 12B"). The chart, current and next chord, text chart and screen reader names all switch to Camelot, and they switch back when note names are chosen |
+| Switching notation on a real recording (“Sewori gamyeon”) | Key E♭ major (5B) → E major (12B), modulation label "to 12B". The chart, current and next chord, text chart and screen reader names all switch to Camelot, and they switch back when note names are chosen |
 | Analysis results | Changing the notation leaves beat, downbeat and chord decisions unchanged (identical results for the 18 synthetic songs) |
 
 #### Roman numeral tests
@@ -1413,11 +1413,11 @@ Synthetic audio with clear chords was analyzed to check that the Roman numerals 
 | C major (secondary dominants, borrowed chords) | C, E7, Am, D7, G7, C, A7, Dm, G7, C, Fm, C, B♭, C | I, V7/vi, vi, V7/V, V7, I, V7/ii, ii, V7, I, iv, I, ♭VII, I |
 | E♭ major (secondary ii, inversions) | E♭, B♭/D, Cm, B♭m7, E♭7, A♭maj7, B♭7/A♭, Gm7, Cm7, Fm7, B♭7, E♭ | I, V6, vi, ii7/IV, V7/IV, IVM7, V⁴₂, iii7, vi7, ii7, V7, I |
 
-Of the 105 chords in the real recording (「세월이 가면」), 10 were written as secondary chords (ii7/IV, V7/IV, V7/ii, etc.) and 16 as inversions, and the B7 just before the modulation was written as V7 of the new key, E major. The key decisions for the 18 synthetic songs with a clear key were all correct with the current method that blends chords and note distribution (the previous method using only the note distribution picked E minor for an A minor progression, getting 17).
+Of the 105 chords in the real recording (“Sewori gamyeon”), 10 were written as secondary chords (ii7/IV, V7/IV, V7/ii, etc.) and 16 as inversions, and the B7 just before the modulation was written as V7 of the new key, E major. The key decisions for the 18 synthetic songs with a clear key were all correct with the current method that blends chords and note distribution (the previous method using only the note distribution picked E minor for an A minor progression, getting 17).
 
 #### Real-recording test
 
-Tested with one commercial recording (기현 (Kihyun) 「세월이 가면」, OST of 응답하라 1988 (Reply 1988), 3 min 50 s). Since there are no ground-truth beat annotations, the residual of fitting the beats in each section to a straight line was used as a proxy for tracking error, exploiting the fact that it is a studio recording with a steady tempo.
+Tested with one commercial recording (Kihyun “Sewori gamyeon”, OST of Reply 1988, 3 min 50 s). Since there are no ground-truth beat annotations, the residual of fitting the beats in each section to a straight line was used as a proxy for tracking error, exploiting the fact that it is a studio recording with a steady tempo.
 
 | Item | Before | Now |
 |---|---|---|
@@ -1525,72 +1525,72 @@ In 1.10.0, while fixing the beat-level, downbeat and chord-naming rules, the res
 
 GTZAN downbeat F by genre rose across the board: blues 0.328 → 0.361, country 0.778 → 0.794, disco 0.676 → 0.708, metal 0.363 → 0.476, pop 0.676 → 0.717, rock 0.519 → 0.593, hip-hop 0.482 → 0.541, reggae 0.634 → 0.679, jazz 0.349 → 0.360, classical 0.293 → 0.315. Per song, among the 600 popular-music songs, downbeat F rose by more than 0.05 in 61 songs and fell in 34. Of those that fell, 22 are cases where a 4/4 song previously mis-written as 7/4, 5/4 or 3/4 was corrected to 4/4 and lost a few downbeats that had matched by chance; only 8 songs got worse downbeat positions with the same meter. In GuitarSet, two funk songs (114 BPM) were corrected from half tempo to the correct tempo, so the beats became denser and the chord root dropped by 6–9 percentage points.
 
-Three popular-song recordings were also checked. 「고민중독」 (Gomin jungdok) was scored against a ground truth made by aligning a published chord chart bar by bar to the recording's drums and bass (only the 62% of sections that could be confirmed with confidence), and for 「크리스마스의 기억」 (Keuriseumaseu-ui gieok) only the known tempo (170 BPM) and meter were checked.
+Three popular-song recordings were also checked. “Gomin jungdok” was scored against a ground truth made by aligning a published chord chart bar by bar to the recording's drums and bass (only the 62% of sections that could be confirmed with confidence), and for “Keuriseumaseu-ui gieok” only the known tempo (170 BPM) and meter were checked.
 
 | Song | Item | 1.9.4 | 1.10.0 |
 |---|---|---|---|
-| QWER 「고민중독」 (truth 178 BPM, 4/4, 129 bars) | Tempo | 89.0 (half tempo on the snare) | 177.9 |
+| QWER “Gomin jungdok” (truth 178 BPM, 4/4, 129 bars) | Tempo | 89.0 (half tempo on the snare) | 177.9 |
 | | Beat F / downbeat F / irregular bars | 0.64 / 0 / 9 | 0.96 / 0.95 / 3 |
 | | Chord root / major-minor (per beat) | 61.6% / 50.5% | 85.5% / 83.5% |
 | | Bar-level chords | 66.7% | 91.3% |
 | | Share of names with embellishments like 7 or sus | 91% | 67% |
 | | Key | E minor → F minor | G major → A♭ major (from bar 104, matches the ground truth) |
-| Warak 「크리스마스의 기억」 (170 BPM) | Tempo / irregular bars | 85.0 / 3 | 170.1 / 2 (the song's first and last bars) |
-| 기현 (Kihyun) 「세월이 가면」 (Sewori gamyeon) | Agreement with 1.4.2 (chords, downbeats, beats) | 97.7%, 66/66, 257/257 | Same |
+| Warak “Keuriseumaseu-ui gieok” (170 BPM) | Tempo / irregular bars | 85.0 / 3 | 170.1 / 2 (the song's first and last bars) |
+| Kihyun “Sewori gamyeon” | Agreement with 1.4.2 (chords, downbeats, beats) | 97.7%, 66/66, 257/257 | Same |
 
 The beats, downbeats, chords and keys of the 37 synthetic songs (18 regression, 10 popular-style, 9 special-genre) and of 37 previously unseen synthetic songs are the same as 1.9.4 on a per-song basis.
 
 #### Verification on 5 real recordings (1.10.3)
 
-Tempo, meter, bar positions, key and chords were checked on five popular songs of different genres and languages. Bar positions were compared with an independent analyzer (madmom: trained beat and downbeat tracking and major/minor chord recognition). Chords were scored every 0.1 s (root, major/minor family) against a ground truth made by aligning published chord charts to the recording beat by beat, with spots where the chart and the recording differ (cover arrangements, etc.) decided by measuring the bass and harmony bands. The ground truth and madmom results are not distributed because of copyright; only the scores are given. 「여래아」 (Yeoraea) has no published chord chart, so only tempo, meter, bars and key were checked.
+Tempo, meter, bar positions, key and chords were checked on five popular songs of different genres and languages. Bar positions were compared with an independent analyzer (madmom: trained beat and downbeat tracking and major/minor chord recognition). Chords were scored every 0.1 s (root, major/minor family) against a ground truth made by aligning published chord charts to the recording beat by beat, with spots where the chart and the recording differ (cover arrangements, etc.) decided by measuring the bass and harmony bands. The ground truth and madmom results are not distributed because of copyright; only the scores are given. “Yeoraea” has no published chord chart, so only tempo, meter, bars and key were checked.
 
 | Song | Tempo (published value) | Meter | Downbeat agreement (madmom) | Key | Chord root / major-minor 1.10.2 → 1.10.3 | madmom, same scoring |
 |---|---|---|---|---|---|---|
-| 여자친구 (GFRIEND) 「시간을 달려서」 (Sigan-eul dallyeoseo) | 112.0 (112) | 4/4 | 0.96 → 0.99 | F minor | 89.0% / 86.2% → 89.5% / 86.8% | 83.7% / 84.0% |
-| 「もう恋なんてしない」 cover with female vocals (7 semitones higher and about 5% faster than the original) | 109.9 | 4/4 | 0.99 | B major | 90.1% / 92.9% → 90.4% / 92.9% | 84.1% / 88.1% |
-| あいみょん 「マリーゴールド」 | 106.0 (106) | 4/4 | 0.96 | D major | 89.4% / 88.9% → 90.4% / 89.9% | 92.9% / 92.9% |
-| YOASOBI 「夜に駆ける」 | 130.0 (130) | 4/4 | 1.00 | C minor → B minor → D minor | 88.6% / 80.6% → 88.6% / 80.5% | 83.4% / 82.7% |
-| 시드 사운드 (Seed Sound) 「여래아」 | 90.0 | 4/4 | 1.00 | C minor → D minor (1.10.2: C minor → F major) | No chart | - |
+| GFRIEND “Sigan-eul dallyeoseo” | 112.0 (112) | 4/4 | 0.96 → 0.99 | F minor | 89.0% / 86.2% → 89.5% / 86.8% | 83.7% / 84.0% |
+| “Mou koi nante shinai” cover with female vocals (7 semitones higher and about 5% faster than the original) | 109.9 | 4/4 | 0.99 | B major | 90.1% / 92.9% → 90.4% / 92.9% | 84.1% / 88.1% |
+| Aimyon “Marigold” | 106.0 (106) | 4/4 | 0.96 | D major | 89.4% / 88.9% → 90.4% / 89.9% | 92.9% / 92.9% |
+| YOASOBI “Yoru ni kakeru” | 130.0 (130) | 4/4 | 1.00 | C minor → B minor → D minor | 88.6% / 80.6% → 88.6% / 80.5% | 83.4% / 82.7% |
+| Seed Sound “Yeoraea” | 90.0 | 4/4 | 1.00 | C minor → D minor (1.10.2: C minor → F major) | No chart | - |
 
-All five songs have the correct tempo level and meter, and their bar positions agree with madmom and the chord charts. The first two bars of 「시간을 달려서」 were corrected in 1.10.3, and the intro barlines of 「マリーゴールド」 in 1.10.4. madmom also places the intro of 「マリーゴールド」 differently (1.78 and 4.78 s), so the downbeat agreement remains 0.96; the barlines were verified from the period and starting point at which the intro riff repeats. The modulations down and up a semitone in 「夜に駆ける」 really exist; the key a semitone lower was shown two bars early (bar 102) up to 1.10.3, and from 1.10.4 it is shown at bar 104, where the B minor chorus starts. Most remaining chord errors are cases where the vocal melody or sustained notes mix into the harmony band so that a neighboring chord with many common tones is read (A → Bm7/A, G7 → Gm7, C → Cm7, etc.), short chords lasting half a bar or one beat being missed, and a sus4 resolving to a triad being merged into a single chord. Reducing the weight of the high register raised the root by 0.6–1.1 percentage points on these five songs, but it was not adopted because it made the synthetic R&B ballad, GuitarSet and 「고민중독」 (Gomin jungdok) worse.
+All five songs have the correct tempo level and meter, and their bar positions agree with madmom and the chord charts. The first two bars of “Sigan-eul dallyeoseo” were corrected in 1.10.3, and the intro barlines of “Marigold” in 1.10.4. madmom also places the intro of “Marigold” differently (1.78 and 4.78 s), so the downbeat agreement remains 0.96; the barlines were verified from the period and starting point at which the intro riff repeats. The modulations down and up a semitone in “Yoru ni kakeru” really exist; the key a semitone lower was shown two bars early (bar 102) up to 1.10.3, and from 1.10.4 it is shown at bar 104, where the B minor chorus starts. Most remaining chord errors are cases where the vocal melody or sustained notes mix into the harmony band so that a neighboring chord with many common tones is read (A → Bm7/A, G7 → Gm7, C → Cm7, etc.), short chords lasting half a bar or one beat being missed, and a sus4 resolving to a triad being merged into a single chord. Reducing the weight of the high register raised the root by 0.6–1.1 percentage points on these five songs, but it was not adopted because it made the synthetic R&B ballad, GuitarSet and “Gomin jungdok” worse.
 
-1.10.4 (intro grid, refined modulation boundaries) did not change the chords, bars or key boundaries of the five songs, and the synthetic 37 songs, the 18 regression songs, the key and Roman numeral tests, GuitarSet, the chords, downbeats and beats of 「고민중독」 and 「세월이 가면」 (Sewori gamyeon), Warak, and the GTZAN scores all stayed the same. The key boundary in 「고민중독」 moved one bar toward the ground truth, and in 9 places among the 1000 GTZAN 30-second excerpts without key ground truth (3 classical, 4 metal, 1 each jazz and rock) and in 1 GuitarSet song, the modulation marker moved 1–2 bars later (in short excerpts these mostly look like modulations that are not really there).
+1.10.4 (intro grid, refined modulation boundaries) did not change the chords, bars or key boundaries of the five songs, and the synthetic 37 songs, the 18 regression songs, the key and Roman numeral tests, GuitarSet, the chords, downbeats and beats of “Gomin jungdok” and “Sewori gamyeon”, Warak, and the GTZAN scores all stayed the same. The key boundary in “Gomin jungdok” moved one bar toward the ground truth, and in 9 places among the 1000 GTZAN 30-second excerpts without key ground truth (3 classical, 4 metal, 1 each jazz and rock) and in 1 GuitarSet song, the modulation marker moved 1–2 bars later (in short excerpts these mostly look like modulations that are not really there).
 
-Other test results for 1.10.3: the 37 synthetic songs are the same per song; 「고민중독」 root 85.5% → 85.9%, major-minor 83.5% → 83.8%; GuitarSet popular music root unchanged (81.9%), downbeat F 0.568 → 0.574; the 6 GTZAN popular genres with beat and downbeat F unchanged and irregular bars 711 → 695; 「세월이 가면」 unchanged at 97.7%, 66/66, 257/257 against 1.4.2.
+Other test results for 1.10.3: the 37 synthetic songs are the same per song; “Gomin jungdok” root 85.5% → 85.9%, major-minor 83.5% → 83.8%; GuitarSet popular music root unchanged (81.9%), downbeat F 0.568 → 0.574; the 6 GTZAN popular genres with beat and downbeat F unchanged and irregular bars 711 → 695; “Sewori gamyeon” unchanged at 97.7%, 66/66, 257/257 against 1.4.2.
 
 #### Verification kit of 10 real recordings (1.11.0)
 
-To the five songs of 1.10.3 were added five songs of different genres and tempos (김종국 (Kim Jong-kook) 「이 사람이다」 (I saramida), 015B 「이젠 안녕」 (Ijen annyeong), a live cover of 박명수 (Park Myung-soo) 「바다의 왕자」 (Bada-ui wangja), and female-vocal covers of 디셈버 (December) 「별이 될게」 (Byeori doelge) and 피노키오 (Pinocchio) 「사랑과 우정 사이」 (Sarang-gwa ujeong sai)) and 「세월이 가면」 (기현 (Kihyun), OST of 응답하라 1988 (Reply 1988)), making a verification kit of 10 real recordings with chord ground truth. For each song, two or more published chord charts were aligned to the beats of the recording, spots where the charts and the recording differ were decided by measuring the bass and harmony bands, and everything was separately and skeptically rechecked (1–9 fixes per song), producing it together with beat, downbeat and key ground truth. The ground truth is not distributed because of copyright. 「여래아」 was left out because it has no published chart, and 「고민중독」 is scored separately.
+To the five songs of 1.10.3 were added five songs of different genres and tempos (Kim Jong-kook “I saramida”, 015B “Ijen annyeong”, a live cover of Park Myung-soo “Bada-ui wangja”, and female-vocal covers of December “Byeori doelge” and Pinocchio “Sarang-gwa ujeong sai”) and “Sewori gamyeon” (Kihyun, OST of Reply 1988), making a verification kit of 10 real recordings with chord ground truth. For each song, two or more published chord charts were aligned to the beats of the recording, spots where the charts and the recording differ were decided by measuring the bass and harmony bands, and everything was separately and skeptically rechecked (1–9 fixes per song), producing it together with beat, downbeat and key ground truth. The ground truth is not distributed because of copyright. “Yeoraea” was left out because it has no published chart, and “Gomin jungdok” is scored separately.
 
-Rules and values were chosen using only the first four songs, 「고민중독」, GuitarSet and synthetic songs; the five new songs and 「세월이 가면」 were not looked at while choosing values and were measured only at the end.
+Rules and values were chosen using only the first four songs, “Gomin jungdok”, GuitarSet and synthetic songs; the five new songs and “Sewori gamyeon” were not looked at while choosing values and were measured only at the end.
 
 | Song | Chord root / major-minor 1.10.5 → 1.11.0 | madmom, same scoring |
 |---|---|---|
-| 여자친구 「시간을 달려서」 | 89.3% / 86.5% → 91.8% / 90.0% | 83.7% / 84.0% |
-| 「もう恋なんてしない」 cover | 90.4% / 92.6% → 92.8% / 94.1% | 84.1% / 88.1% |
-| あいみょん 「マリーゴールド」 | 90.4% / 89.8% → 97.0% / 94.9% | 92.9% / 92.9% |
-| YOASOBI 「夜に駆ける」 | 88.6% / 80.5% → 90.7% / 85.0% | 83.4% / 82.7% |
-| 김종국 「이 사람이다」 | 87.6% / 83.5% → 90.0% / 85.6% | 83.3% / 80.9% |
-| 015B 「이젠 안녕」 | 85.8% / 83.2% → 91.0% / 88.8% | 83.2% / 82.7% |
-| 박명수 「바다의 왕자」 live cover | 94.0% / 93.6% → 99.3% / 99.3% | 90.3% / 90.3% |
-| 디셈버 「별이 될게」 cover | 90.4% / 89.8% → 90.9% / 88.5% | 88.6% / 88.5% |
-| 피노키오 「사랑과 우정 사이」 cover | 97.7% / 96.2% → 98.0% / 95.8% | 91.1% / 91.9% |
-| 기현 「세월이 가면」 | 88.4% / 84.8% → 94.7% / 91.2% | 90.8% / 89.8% |
+| GFRIEND “Sigan-eul dallyeoseo” | 89.3% / 86.5% → 91.8% / 90.0% | 83.7% / 84.0% |
+| “Mou koi nante shinai” cover | 90.4% / 92.6% → 92.8% / 94.1% | 84.1% / 88.1% |
+| Aimyon “Marigold” | 90.4% / 89.8% → 97.0% / 94.9% | 92.9% / 92.9% |
+| YOASOBI “Yoru ni kakeru” | 88.6% / 80.5% → 90.7% / 85.0% | 83.4% / 82.7% |
+| Kim Jong-kook “I saramida” | 87.6% / 83.5% → 90.0% / 85.6% | 83.3% / 80.9% |
+| 015B “Ijen annyeong” | 85.8% / 83.2% → 91.0% / 88.8% | 83.2% / 82.7% |
+| Park Myung-soo “Bada-ui wangja” live cover | 94.0% / 93.6% → 99.3% / 99.3% | 90.3% / 90.3% |
+| December “Byeori doelge” cover | 90.4% / 89.8% → 90.9% / 88.5% | 88.6% / 88.5% |
+| Pinocchio “Sarang-gwa ujeong sai” cover | 97.7% / 96.2% → 98.0% / 95.8% | 91.1% / 91.9% |
+| Kihyun “Sewori gamyeon” | 88.4% / 84.8% → 94.7% / 91.2% | 90.8% / 89.8% |
 | First 4 songs (used to choose values) | 89.7% / 87.2% → 93.3% / 91.0% | 86.5% / 87.3% |
 | Last 6 songs (not looked at while choosing values) | 90.8% / 88.6% → 94.0% / 91.5% | 88.0% / 87.5% |
 | All 10 songs | 90.4% / 88.0% → 93.7% / 91.3% | 87.4% / 87.4% |
 
 Scoring checks, at every 0.1 s sample, whether the root and major/minor family of the engine's chord equal one of the ground-truth labels; places with no chord (before the first downbeat, at the end) also count as wrong. The table in the 1.10.3 section uses the old scoring, which differs in how it finds the chord at a given time and in excluding such samples from the major/minor denominator, so its values differ by 0.1–0.7 percentage points.
 
-The root improved in all 10 songs, and samples with a wrong root fell from 9.6% to 6.3% (those read as a neighboring chord with many common tones 5.0% → 3.6%). Major-minor dropped slightly in 「별이 될게」 and 「사랑과 우정 사이」. The share matching both the root and the quality (major, minor, 7, maj7, m7, sus, etc.) rose from 64.3% to 66.0% (this share is inherently low for the first 4 songs, whose ground-truth charts write only triads). Beats, downbeats and keys stayed the same in all 10 songs. 「이젠 안녕」 (truth 71 BPM) and 「사랑과 우정 사이」 (64 BPM) are detected at double tempo, counting eighth notes as beats; broadening the conditions of the beat-level check would push more correct-tempo GTZAN songs down to half, so this was not fixed (4-8).
+The root improved in all 10 songs, and samples with a wrong root fell from 9.6% to 6.3% (those read as a neighboring chord with many common tones 5.0% → 3.6%). Major-minor dropped slightly in “Byeori doelge” and “Sarang-gwa ujeong sai”. The share matching both the root and the quality (major, minor, 7, maj7, m7, sus, etc.) rose from 64.3% to 66.0% (this share is inherently low for the first 4 songs, whose ground-truth charts write only triads). Beats, downbeats and keys stayed the same in all 10 songs. “Ijen annyeong” (truth 71 BPM) and “Sarang-gwa ujeong sai” (64 BPM) are detected at double tempo, counting eighth notes as beats; broadening the conditions of the beat-level check would push more correct-tempo GTZAN songs down to half, so this was not fixed (4-8).
 
-**Test criterion for 「세월이 가면」 switched to the ground truth (1.11.0).** Until then, regressions on this song were checked by whether it matched the 1.4.2 results (chord agreement 97.7%, downbeats 66/66, beats 257/257), but the 1.4.2 results themselves had a root accuracy of about 88% against the ground truth. From 1.11.0, it is compared against the ground truth, and falling below the recorded values (root 94.7%, major-minor 91.2%, quality 78.1%, beat F 0.948, downbeat F 0.937) counts as a regression; agreement with 1.4.2 is kept only for reference (in 1.11.0, chords 85.9%, downbeats and beats unchanged at 66/66 and 257/257).
+**Test criterion for “Sewori gamyeon” switched to the ground truth (1.11.0).** Until then, regressions on this song were checked by whether it matched the 1.4.2 results (chord agreement 97.7%, downbeats 66/66, beats 257/257), but the 1.4.2 results themselves had a root accuracy of about 88% against the ground truth. From 1.11.0, it is compared against the ground truth, and falling below the recorded values (root 94.7%, major-minor 91.2%, quality 78.1%, beat F 0.948, downbeat F 0.937) counts as a regression; agreement with 1.4.2 is kept only for reference (in 1.11.0, chords 85.9%, downbeats and beats unchanged at 66/66 and 257/257).
 
-Other test results for 1.11.0: the 37 synthetic songs root 96.52% → 96.81%, major/minor family 95.60% → 95.78% (three songs, bebop, swing jazz and the R&B ballad, improved and the rest are the same; beats and downbeats unchanged); 「고민중독」 root 85.9% → 93.3%, major-minor 83.8% → 88.2%; GuitarSet popular music root 81.87% → 82.47%, major-minor 68.97% → 69.72%; all of GuitarSet root 77.87% → 78.35%; the 18 regression songs, key and Roman numeral tests, and the beats, downbeats and meters of GTZAN and Warak unchanged. In GTZAN, the key changed in 23 of the 1000 songs; compared with the published GTZAN key ground truth (Lerch), 7 changed to correct and 5 to wrong (the rest have no ground truth or are wrong either way), raising key accuracy for the 6 popular genres from 55.3% to 56.0% (MIREX score, which gives partial credit for relative keys and fifth relations, 64.4% → 65.0%). Stereo files take about 40% longer to analyze per song (kit of 10 songs, average 2.9 s → 4.0 s, same computer).
+Other test results for 1.11.0: the 37 synthetic songs root 96.52% → 96.81%, major/minor family 95.60% → 95.78% (three songs, bebop, swing jazz and the R&B ballad, improved and the rest are the same; beats and downbeats unchanged); “Gomin jungdok” root 85.9% → 93.3%, major-minor 83.8% → 88.2%; GuitarSet popular music root 81.87% → 82.47%, major-minor 68.97% → 69.72%; all of GuitarSet root 77.87% → 78.35%; the 18 regression songs, key and Roman numeral tests, and the beats, downbeats and meters of GTZAN and Warak unchanged. In GTZAN, the key changed in 23 of the 1000 songs; compared with the published GTZAN key ground truth (Lerch), 7 changed to correct and 5 to wrong (the rest have no ground truth or are wrong either way), raising key accuracy for the 6 popular genres from 55.3% to 56.0% (MIREX score, which gives partial credit for relative keys and fifth relations, 64.4% → 65.0%). Stereo files take about 40% longer to analyze per song (kit of 10 songs, average 2.9 s → 4.0 s, same computer).
 
 #### 1.11.8 verification (a one-beat chord on the bar's downbeat)
 
-The second bar of 「해질녘 예스터데이」 (Haejilnyeok yeseuteodei) plays A♯m7 on the first beat and D♯m7 from the second beat. Looking at the first beat alone, A♯m7 leads D♯m7 by 3.79, but this is smaller than the penalty for changing chords at the second beat (4.0), so in 1.11.7 the whole bar came out as `D♯m7`.
+The second bar of “Haejilnyeok yeseuteodei” plays A♯m7 on the first beat and D♯m7 from the second beat. Looking at the first beat alone, A♯m7 leads D♯m7 by 3.79, but this is smaller than the penalty for changing chords at the second beat (4.0), so in 1.11.7 the whole bar came out as `D♯m7`.
 
 At first there was only a score condition: "if another chord leads by more than 3.5 on the first beat and the current chord is better on the second beat, make the first beat that chord." With that, 102 of the 1,268 test songs changed, and in GuitarSet, which has chord ground truth, all 6 songs whose scores moved got worse. According to the ground truth, all those spots were places where the new chord starts from the first beat, and the other chord seen on the first beat was the reverb of the previous chord mixed with the new chord. Score differences could not separate this song from those songs (GuitarSet 00_Jazz3-150-C had a difference of 3.94, larger than this song). A condition that split the first beat in half and checked whether the chord also leads in the later half-beat was not used, because in this song A♯m7 is actually weak in the later half (0.88).
 
@@ -1603,13 +1603,13 @@ Whether the two chords were really struck separately was decided by the start of
 | + attack and bass conditions, score difference 3.25 or more | 34 | No songs changed |
 | + attack and bass conditions, score difference 3.5 or more (adopted) | 23 | No songs changed |
 
-With 3.25 there were also no worsened spots on songs with ground truth, but since it is close to 3.0, where songs start getting worse, 3.5 was chosen for a margin. With the final condition, 23 songs change (one or two bars each). In 「해질녘 예스터데이」 the second bar is back to `A♯m7 D♯m7`, and a D♭ was added on the first beat of bar 93 near the end (`A♭sus4 Fm7/C B♭m7` → `D♭ A♭sus4 Fm7/C B♭m7`). In 「고민중독」 from the real-recording kit, B7/F♯ was added on the first beat of one bar around 2:21, but this is a cell where the ground-truth chart has no chord written, so the score is unchanged (the m4a file of the same song is the same). The remaining 20 songs are GTZAN songs without chord ground truth. The 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the 「세월이 가면」 ground-truth test, and chord and beat scoring of the 180 GuitarSet songs are the same as 1.11.7, and even the changed songs keep their beats, downbeats, meters and keys.
+With 3.25 there were also no worsened spots on songs with ground truth, but since it is close to 3.0, where songs start getting worse, 3.5 was chosen for a margin. With the final condition, 23 songs change (one or two bars each). In “Haejilnyeok yeseuteodei” the second bar is back to `A♯m7 D♯m7`, and a D♭ was added on the first beat of bar 93 near the end (`A♭sus4 Fm7/C B♭m7` → `D♭ A♭sus4 Fm7/C B♭m7`). In “Gomin jungdok” from the real-recording kit, B7/F♯ was added on the first beat of one bar around 2:21, but this is a cell where the ground-truth chart has no chord written, so the score is unchanged (the m4a file of the same song is the same). The remaining 20 songs are GTZAN songs without chord ground truth. The 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the “Sewori gamyeon” ground-truth test, and chord and beat scoring of the 180 GuitarSet songs are the same as 1.11.7, and even the changed songs keep their beats, downbeats, meters and keys.
 
 #### 1.11.7 verification (local misalignment in the intro)
 
-「해질녘 예스터데이」 (Haejilnyeok yeseuteodei), reported by a user, has a piano intro until the drums come in at 10.88 s, but its beats were detected at uneven intervals of 0.40–0.53 s, so the chords were off from the very first bar. Extending the main section's beat period (0.455 s, 132 BPM) backward lands exactly on the first sound (3.14 s), and nearly all the piano onsets in the intro sit on sixteenth-note positions of that grid (51 of 58 onset peaks within ±25 ms), confirming that the song was made at a fixed 132 BPM from the start. Until now, the tracker followed sixteenth-note anticipations (5.31 s, 9.40 s, etc.) as beats, so beats came up to 0.12 s early. In 1.11.7 the intro beats are placed at 0.455 s intervals, and the third bar changed from `G♯m G♯m7` to `G♯m7 C♯7` (a progression descending by fifths). However, the second bar changed from `A♯m7 D♯m7` to `D♯m7`: on the correct grid A♯m7 sounds only on the first beat (plus one sixteenth note), so a one-beat chord was merged into its neighbor. This was fixed in 1.11.8 (see the 1.11.8 verification above). The first bar changed from `B G♯7/F♯` to `G♯m7/B`, and outside the intro, when chord scores are pooled across repeated sections, the changed intro beats were used as a pair, so a single beat, the fourth beat of bar 44, changed from `Em7` to `Cmaj7` (judging by the notes on that beat, Em7 is more plausible). The remaining bars are unchanged.
+“Haejilnyeok yeseuteodei”, reported by a user, has a piano intro until the drums come in at 10.88 s, but its beats were detected at uneven intervals of 0.40–0.53 s, so the chords were off from the very first bar. Extending the main section's beat period (0.455 s, 132 BPM) backward lands exactly on the first sound (3.14 s), and nearly all the piano onsets in the intro sit on sixteenth-note positions of that grid (51 of 58 onset peaks within ±25 ms), confirming that the song was made at a fixed 132 BPM from the start. Until now, the tracker followed sixteenth-note anticipations (5.31 s, 9.40 s, etc.) as beats, so beats came up to 0.12 s early. In 1.11.7 the intro beats are placed at 0.455 s intervals, and the third bar changed from `G♯m G♯m7` to `G♯m7 C♯7` (a progression descending by fifths). However, the second bar changed from `A♯m7 D♯m7` to `D♯m7`: on the correct grid A♯m7 sounds only on the first beat (plus one sixteenth note), so a one-beat chord was merged into its neighbor. This was fixed in 1.11.8 (see the 1.11.8 verification above). The first bar changed from `B G♯7/F♯` to `G♯m7/B`, and outside the intro, when chord scores are pooled across repeated sections, the changed intro beats were used as a pair, so a single beat, the fourth beat of bar 44, changed from `Em7` to `Cmaj7` (judging by the notes on that beat, Em7 is more plausible). The remaining bars are unchanged.
 
-On the 1,268 test songs, conditions were added one at a time while counting the songs that changed. With only the conditions of steady tempo, local deviation and sixteenth-note fit, 4 songs changed (2 GTZAN songs with unchanged beat and downbeat scores). GuitarSet 05_Funk2-119-G kept the same beat and downbeat scores but gained a bar of different length, and its chord root dropped 0.254 → 0.222 and major-minor 0.316 → 0.263, so it was excluded by adding a fixed-tempo evidence condition (at least 30 onset peaks, sixteenth-note fit of at least 0.85). This song is guitar alone from start to finish, with only 19 onsets in the intro and a fit of 0.84. With the final conditions, the only song that changes is 「해질녘 예스터데이」; the remaining 1,267 songs, the 18 regression songs, the key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit, the 「세월이 가면」 (Sewori gamyeon) ground-truth test, and GTZAN and GuitarSet scoring are the same as 1.11.6. Since no other test song has an intro of the same shape (sixteenth-note anticipations in a fixed-tempo song that starts without drums), how many other songs this rule fixes has not yet been measured.
+On the 1,268 test songs, conditions were added one at a time while counting the songs that changed. With only the conditions of steady tempo, local deviation and sixteenth-note fit, 4 songs changed (2 GTZAN songs with unchanged beat and downbeat scores). GuitarSet 05_Funk2-119-G kept the same beat and downbeat scores but gained a bar of different length, and its chord root dropped 0.254 → 0.222 and major-minor 0.316 → 0.263, so it was excluded by adding a fixed-tempo evidence condition (at least 30 onset peaks, sixteenth-note fit of at least 0.85). This song is guitar alone from start to finish, with only 19 onsets in the intro and a fit of 0.84. With the final conditions, the only song that changes is “Haejilnyeok yeseuteodei”; the remaining 1,267 songs, the 18 regression songs, the key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit, the “Sewori gamyeon” ground-truth test, and GTZAN and GuitarSet scoring are the same as 1.11.6. Since no other test song has an intro of the same shape (sixteenth-note anticipations in a fixed-tempo song that starts without drums), how many other songs this rule fixes has not yet been measured.
 
 #### 1.11.6 verification (3:2 beat-level check)
 
@@ -1636,7 +1636,7 @@ Running GuitarSet chord scoring at the 8-song stage showed that 02_BN2-166-Ab (1
 | GuitarSet 02_Rock3-148-C | 6/8, 98 BPM → 4/4, 150 BPM | Beat F 0.40 → 0.60, downbeat F 0.28 → 0.63, chord root 0.87 → 0.97, major-minor 0.76 → 0.87 |
 | GTZAN jazz.00086 | 12/8, 137 BPM → 5/4, 206 BPM (double the true 104) | Beat F 0.28 → 0.59, downbeat F 0.12 → 0.17 |
 
-The first 6 songs reached the correct tempo, and jazz.00086 (actually a song with a 4:3 error) is now at double the correct tempo, so it can be fixed with the "÷2" button in the correction controls (“보정”) (before, it was 12/8 and could not be fixed with the button). There are 28 test songs with the same error (written as 12/8 or 6/8 with a tempo 2/3 of the truth), 10 in GTZAN and 18 in GuitarSet, and 6 of them reached the correct tempo. The remaining songs failed at least one of the conditions (mainly the score ratio of 0.93). Lowering this threshold would also change guitar accompaniment songs (00_BN1-129, etc.) whose tempo would be right but whose beats would stick to the offbeats, making them worse, so it was not widened. When all 1,268 songs were analyzed separately and compared with 1.11.5 (lower bound 60 BPM), everything except the 7 songs above and 02_BN2-166 was the same, and after raising the lower bound to 90, the 125 songs whose beats appear split into three were run again, confirming that only 02_BN2-166 returned to its 1.11.5 result. In the chord scoring of the 180 GuitarSet songs, only these 2 songs improved and the rest are the same; the 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit, the 「세월이 가면」 ground-truth test and GTZAN keys are the same as 1.11.5.
+The first 6 songs reached the correct tempo, and jazz.00086 (actually a song with a 4:3 error) is now at double the correct tempo, so it can be fixed with the "÷2" button in the correction controls (before, it was 12/8 and could not be fixed with the button). There are 28 test songs with the same error (written as 12/8 or 6/8 with a tempo 2/3 of the truth), 10 in GTZAN and 18 in GuitarSet, and 6 of them reached the correct tempo. The remaining songs failed at least one of the conditions (mainly the score ratio of 0.93). Lowering this threshold would also change guitar accompaniment songs (00_BN1-129, etc.) whose tempo would be right but whose beats would stick to the offbeats, making them worse, so it was not widened. When all 1,268 songs were analyzed separately and compared with 1.11.5 (lower bound 60 BPM), everything except the 7 songs above and 02_BN2-166 was the same, and after raising the lower bound to 90, the 125 songs whose beats appear split into three were run again, confirming that only 02_BN2-166 returned to its 1.11.5 result. In the chord scoring of the 180 GuitarSet songs, only these 2 songs improved and the rest are the same; the 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit, the “Sewori gamyeon” ground-truth test and GTZAN keys are the same as 1.11.5.
 
 #### 1.11.5 verification (4:3 beat-level check)
 
@@ -1655,14 +1655,14 @@ The 6 changed songs are as follows.
 
 | Song | What changed | Compared with the ground truth |
 |---|---|---|
-| 「아주 먼 옛날」 (Aju meon yennal) (user report) | 12/8, 92 BPM → 4/4, 69 BPM; bars of different length 4 → 0 (excluding the last bar) | No ground-truth file (chords fall on beats 1 and 3 of each bar and progress evenly, like C–Em–Dm7–G7) |
+| “Aju meon yennal” (user report) | 12/8, 92 BPM → 4/4, 69 BPM; bars of different length 4 → 0 (excluding the last bar) | No ground-truth file (chords fall on beats 1 and 3 of each bar and progress evenly, like C–Em–Dm7–G7) |
 | GTZAN pop.00004 | 6/8, 107 BPM → 4/4, 80 BPM | Beat F 0.30 → 1.00, downbeat F 0.17 → 1.00 |
 | GTZAN pop.00062 | 6/8, 107 BPM → 2/4, 81 BPM | Beat F 0.30 → 1.00, downbeat F 0.11 → 0.67 |
 | GTZAN hiphop.00035 | 12/8, 112 BPM → 4/4, 84 BPM | Beat F 0.28 → 1.00, downbeat F 0.15 → 1.00 |
 | GTZAN rock.00049 | 12/8, 111 BPM → 4/4, 84 BPM | Beat F 0.27 → 0.98, downbeat F 0 → 0 (same) |
 | GuitarSet 00_Rock2-85-F | 12/8, 113 BPM → 4/4, 85 BPM | Beat F 0.30 → 0.99, downbeat F 0.21 → 0.97 |
 
-In pop.00004 and pop.00062, the re-tracked beats followed the kick and stuck to the offbeats (beat F 0), so they improved only with the half-beat shift rule. There are 19 songs with the same error (written as 12/8 or 6/8 with a tempo 4/3 of the truth), 11 in GTZAN, 7 in GuitarSet, and 「아주 먼 옛날」, and 6 of them were fixed. The other 13 failed at least one of the conditions above, and widening the conditions further would turn guitar accompaniment songs whose true tempo is 3/2 times faster, and very fast songs, into half tempo or offbeat, so they were not widened. Songs whose beats do not appear split into three skip this check, so their results are the same as 1.11.4. Analyzing all 1,268 songs separately with the 1.11.4 engine and this engine and comparing them also showed everything the same except the 6 songs above, and the 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit and the 「세월이 가면」 ground-truth test are the same as 1.11.4.
+In pop.00004 and pop.00062, the re-tracked beats followed the kick and stuck to the offbeats (beat F 0), so they improved only with the half-beat shift rule. There are 19 songs with the same error (written as 12/8 or 6/8 with a tempo 4/3 of the truth), 11 in GTZAN, 7 in GuitarSet, and “Aju meon yennal”, and 6 of them were fixed. The other 13 failed at least one of the conditions above, and widening the conditions further would turn guitar accompaniment songs whose true tempo is 3/2 times faster, and very fast songs, into half tempo or offbeat, so they were not widened. Songs whose beats do not appear split into three skip this check, so their results are the same as 1.11.4. Analyzing all 1,268 songs separately with the 1.11.4 engine and this engine and comparing them also showed everything the same except the 6 songs above, and the 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the real-recording kit and the “Sewori gamyeon” ground-truth test are the same as 1.11.4.
 
 #### 1.11.4 verification (not making any existing song worse)
 
@@ -1675,25 +1675,25 @@ The conditions of the three rules in 1.11.4 (meter change check, re-examining ba
 | GTZAN country.00039, jazz.00074 | Key name F♯ minor → A major, E minor → G major | Wrong → correct |
 | GTZAN blues.00061 | Key name F minor → A♭ major | Truth G minor; wrong both before and after (same MIREX score) |
 
-No song got worse in beats, downbeats, chords or keys. For keys, it was also ensured that no song's distance from the ground truth (MIREX weighted score) worsened (with a threshold of 0.1, one song changed from a key a fifth away from the truth to a more distant key, so 0.15 was used). The 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the 11-song real-recording kit, the 「세월이 가면」 ground-truth test and GuitarSet are the same as 1.11.3.
+No song got worse in beats, downbeats, chords or keys. For keys, it was also ensured that no song's distance from the ground truth (MIREX weighted score) worsened (with a threshold of 0.1, one song changed from a key a fifth away from the truth to a more distant key, so 0.15 was used). The 18 regression songs, key and Roman numeral tests, scoring of the 37 synthetic songs, the 11-song real-recording kit, the “Sewori gamyeon” ground-truth test and GuitarSet are the same as 1.11.3.
 
-**What was not adopted without conditions.** Used without conditions, the three rules changed many songs: the meter change check 8 songs (3 worse in downbeats), bar re-examination 159 songs (72 better and 34 worse in downbeats), key names 118 songs (26 keys to correct, 29 to wrong). Restricting them to cases with clear evidence in order to protect existing songs meant giving up most of the songs that had improved. Two other approaches were also tested but not adopted: counting toward major only m7 chords whose bass is not the root (76 songs, 17 keys to correct and 13 to wrong), and a naming rule that writes an in-key m7 with its seventh in the bass as a major triad over the bass (D♯m7/C♯ → F♯/C♯; 「바다의 왕자」 (Bada-ui wangja) root 99.3% → 99.1%).
+**What was not adopted without conditions.** Used without conditions, the three rules changed many songs: the meter change check 8 songs (3 worse in downbeats), bar re-examination 159 songs (72 better and 34 worse in downbeats), key names 118 songs (26 keys to correct, 29 to wrong). Restricting them to cases with clear evidence in order to protect existing songs meant giving up most of the songs that had improved. Two other approaches were also tested but not adopted: counting toward major only m7 chords whose bass is not the root (76 songs, 17 keys to correct and 13 to wrong), and a naming rule that writes an in-key m7 with its seventh in the bass as a major triad over the bass (D♯m7/C♯ → F♯/C♯; “Bada-ui wangja” root 99.3% → 99.1%).
 
 #### 1.11.1 verification (checking chord timing, quality and speed)
 
 **Analysis speed.** Analysis was made about 1.8 times faster without changing a single bit of the computed results (the same operations in the same order). Sample-rate conversion computes 8 outputs of the same phase side by side, and the FFT runs two stages in one pass and computes only the frequency bins that are used. In Chrome, the total time to analyze and chart 5 real recordings dropped from 20.2 s to 11.3 s (undoing the increase from 1.11.0 and even faster than 1.10.5), and peak memory during analysis is the same as 1.11.0. Identical results were confirmed by comparing every number the engine produces on real recordings (including mono, 3-channel and 48 kHz versions), 90 GuitarSet songs, 74 synthetic songs, various sample rates, lengths and silent inputs, and combinations of disabled switches.
 
-**Fixing a key regression.** In 1.11.0 the key of 「고민중독」 (Gomin jungdok) came to be written incorrectly as B minor → E minor → F minor (1.10.5 had G major → A♭ major, matching the ground truth). The kit had no key ground-truth file for this song, so it was missed in the 1.11.0 tests. The cause was a single seventh-chord name left by the vocal-melody reduction (C in the intro becoming C7), which made the intro key D major by a score difference of 0.007; it was fixed by filtering out nearly tied modulations. The only places this rule changed are 「고민중독」 and a false modulation in one hip-hop song among the 1000 GTZAN songs (that song differs from the ground truth both before and after); the kit's 10 songs, the 180 GuitarSet songs, the synthetic songs, and the key and Roman numeral tests are unchanged, keys included.
+**Fixing a key regression.** In 1.11.0 the key of “Gomin jungdok” came to be written incorrectly as B minor → E minor → F minor (1.10.5 had G major → A♭ major, matching the ground truth). The kit had no key ground-truth file for this song, so it was missed in the 1.11.0 tests. The cause was a single seventh-chord name left by the vocal-melody reduction (C in the intro becoming C7), which made the intro key D major by a score difference of 0.007; it was fixed by filtering out nearly tied modulations. The only places this rule changed are “Gomin jungdok” and a false modulation in one hip-hop song among the 1000 GTZAN songs (that song differs from the ground truth both before and after); the kit's 10 songs, the 180 GuitarSet songs, the synthetic songs, and the key and Roman numeral tests are unchanged, keys included.
 
-**Quality names.** Adding half-diminished seventh names raised quality against the GuitarSet performances from 59.37% to 60.28%, quality on the kit's 10 songs from 66.0% to 66.2% (m7♭5 in 「이 사람이다」 (I saramida) and 「もう恋なんてしない」), and analysis time per song on node on the same computer averages 4.0 s → 2.1 s. Root, major-minor, beats and keys are unchanged in every test group.
+**Quality names.** Adding half-diminished seventh names raised quality against the GuitarSet performances from 59.37% to 60.28%, quality on the kit's 10 songs from 66.0% to 66.2% (m7♭5 in “I saramida” and “Mou koi nante shinai”), and analysis time per song on node on the same computer averages 4.0 s → 2.1 s. Root, major-minor, beats and keys are unchanged in every test group.
 
 **Investigated but not adopted.**
 - Chord change timing: breaking down the 2.1% of "off within one beat" errors in real recordings, true timing errors where the same chord change was placed on a different beat were 0.36 percentage points, and 0.21 points of those were differences in how the ground-truth charts write anticipations. The rest were missed or misread short chords lasting 1–2 beats, so the rules that move boundaries (adjusting the change penalty, strengthening the end-of-bar anticipation rule, ½-beat resolution) were not adopted because each made at least one popular-music song worse.
-- Major triads written as seventh chords: in songs whose ground-truth charts write only triads, the m7, 7 and maj7 the engine added were mostly (77–88%) correct notes compared with the actual GuitarSet performances. The clearly wrong cases are a fourth over the V chord (melody or sustained note) mistakenly taken as a harmonic of the dominant seventh's seventh; a rule to prevent this (crediting the fourth bin only up to the share the seventh can produce) improved the songs used to choose values, but in 「바다의 왕자」 (Bada-ui wangja), one of the 6 final check songs, it turned a real dominant seventh into a triad and lowered quality by 3.07 percentage points, so it was not adopted. Changing the seventh-chord templates themselves moved the errors to sus4 and greatly reduced major-minor accuracy.
-- Turning sus4 into a triad when the third is clear in the accompaniment: major-minor rose by 1.1 percentage points on the songs used to choose values, but in 「세월이 가면」 (Sewori gamyeon), one of the 6 final check songs, it lost a real sus4, so it was not adopted.
+- Major triads written as seventh chords: in songs whose ground-truth charts write only triads, the m7, 7 and maj7 the engine added were mostly (77–88%) correct notes compared with the actual GuitarSet performances. The clearly wrong cases are a fourth over the V chord (melody or sustained note) mistakenly taken as a harmonic of the dominant seventh's seventh; a rule to prevent this (crediting the fourth bin only up to the share the seventh can produce) improved the songs used to choose values, but in “Bada-ui wangja”, one of the 6 final check songs, it turned a real dominant seventh into a triad and lowered quality by 3.07 percentage points, so it was not adopted. Changing the seventh-chord templates themselves moved the errors to sus4 and greatly reduced major-minor accuracy.
+- Turning sus4 into a triad when the third is clear in the accompaniment: major-minor rose by 1.1 percentage points on the songs used to choose values, but in “Sewori gamyeon”, one of the 6 final check songs, it lost a real sus4, so it was not adopted.
 - The adoption criteria for both rules were fixed before running the final check songs, and values were not changed and remeasured after failing the criteria.
 
-Other test results for 1.11.1: the 37 synthetic songs and 37 previously unseen synthetic songs, the 18 regression songs, key and Roman numeral tests, Warak, and the beats, downbeats, roots and major-minor of GTZAN and GuitarSet are the same as 1.11.0. The 「세월이 가면」 ground-truth test is unchanged at root 94.7%, major-minor 91.2%, quality 78.1%.
+Other test results for 1.11.1: the 37 synthetic songs and 37 previously unseen synthetic songs, the 18 regression songs, key and Roman numeral tests, Warak, and the beats, downbeats, roots and major-minor of GTZAN and GuitarSet are the same as 1.11.0. The “Sewori gamyeon” ground-truth test is unchanged at root 94.7%, major-minor 91.2%, quality 78.1%.
 
 #### Held-over and change position tests (1.8.4)
 
@@ -1729,7 +1729,7 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 **Limitations**
 
 - Verification focused on **synthetic audio** with known ground truth; real recordings were checked with 998 GTZAN songs with beat and downbeat ground truth, 180 GuitarSet songs with chord ground truth, and a few popular songs (4-6). Accuracy is lower on real recordings with loud vocals and dense arrangements than on synthetic songs. The bar downbeat F-measure for GTZAN's popular-music genres is about 0.61.
-- Slow ballads at 60–75 BPM may be detected at double tempo, counting eighth notes as beats (「이젠 안녕」 (Ijen annyeong), 「사랑과 우정 사이」 (Sarang-gwa ujeong sai)). In that case each bar shown is half an actual bar, so fix it with the "half" (“절반”) button in the correction controls (“보정”).
+- Slow ballads at 60–75 BPM may be detected at double tempo, counting eighth notes as beats (“Ijen annyeong”, “Sarang-gwa ujeong sai”). In that case each bar shown is half an actual bar, so fix it with the "half" button in the correction controls.
 - In slow songs subdivided into sixteenth notes, a dotted eighth (3 sixteenths) may be taken as one beat, so the tempo comes out 4/3 times faster, the song is written in 12/8 or 6/8, and chords may land at uneven spots in the middle of bars. From 1.11.5, when the evidence is clear, the song is re-tracked at a 4/3 times slower tempo, but among the 19 test songs with this error only 6 are fixed, 1 (GTZAN jazz.00086) became double the correct tempo through the 3:2 check of 1.11.6 (see the 1.11.6 verification in 4-6), and the remaining 12 are unchanged (widening further makes real 12/8 songs and guitar accompaniment songs worse). This cannot be fixed with the correction buttons (×2, ÷2, ÷3, half beat) (the right tempo is sometimes visible among the tempo candidates in the analysis info). Conversely, songs with even eighth notes (solo guitar accompaniment, etc.) detected as 12/8 or 6/8 at 2/3 of the tempo are, from 1.11.6, re-tracked 3/2 times faster when the evidence is clear, but among the 28 test songs with this error only 6 reach the correct tempo and the rest are unchanged (widening further makes real 12/8 songs and guitar accompaniment songs whose beats stick to the offbeats worse). This also cannot be fixed with the correction buttons.
 - Whether the tempo is taken at the double or half level can go either way depending on the song. Among very fast songs over 160 BPM, those that cannot be distinguished by drum pattern are detected at half tempo, and some songs at 75–100 BPM at double tempo (fix with ÷2 or ×2).
 - The chord vocabulary has no 9, 11 or 13 tensions, sixth chords or add9, so these are simplified to a nearby triad or seventh chord. Jazz with many tensions and walking bass often gets the root wrong (synthetic swing jazz root about 32%).
@@ -1739,7 +1739,7 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 - Camelot notation is a system for keys and cannot express the bass note (inversion), so the bass is omitted; sus chords, which have no third, are placed in B (the major family) by convention.
 - Roman numerals are determined by rules. Secondary chords are written as V/x only when they resolve to the immediately following chord, and unresolved out-of-key chords are written by scale degree (e.g., I7 not going to IV). The Neapolitan chord is written ♭II6 instead of N6, and enharmonic equivalents such as ♯IV and ♭V are written only one way, per the table. Chord name spelling follows the scale degree of the Roman numeral (♭II in C major is D♭, vii°/ii is C♯, inversion basses use the letter of the chord tone, as in E♭7/D♭). When a double accidental would be needed or the result would be F♭, C♭, E♯ or B♯, which are not in the key, the enharmonic name is used (♭VI in D♭ major is A instead of B𝄫).
 - Roman numerals depend on the key decision, so if the wrong one of a relative major/minor pair is chosen, all the numerals change (e.g., i … instead of vi …).
-- Meter changes are shown only when the new meter lasts 4 bars or more; changes lasting one or two bars are left as irregular bars (shown as "3 beats" (“3박”)). Automatic candidates are 2, 3, 4, 5 and 7 beats (4 and 2 for compound meters), and songs that switch between simple and compound meters (6/8, 12/8) cannot be followed. Songs detected one level slower, such as bossa nova felt in two-beat units, are written with bars twice as long (fix with ×2).
+- Meter changes are shown only when the new meter lasts 4 bars or more; changes lasting one or two bars are left as irregular bars (shown as "3 beats"). Automatic candidates are 2, 3, 4, 5 and 7 beats (4 and 2 for compound meters), and songs that switch between simple and compound meters (6/8, 12/8) cannot be followed. Songs detected one level slower, such as bossa nova felt in two-beat units, are written with bars twice as long (fix with ×2).
 - Tempo changes in the middle of a song are followed when the new tempo lasts more than 10 seconds. Sudden changes lasting a few seconds and heavy rubato may cause missed beats, and intros that start without a beat are extrapolated from the first tempo. When the intro has the same tempo as the main section but the beats drifted because of syncopated accents, they are realigned to the main section's grid (1.10.4).
 - In songs whose chords change every two beats, the downbeat may be off by one beat. Songs with a clear drum backbeat are reinforced by the drums' even/odd pattern, but irregular bars may still remain in riffs where the drums rest or in heavily syncopated sections.
 - Chords anticipated by an eighth note (entering before the downbeat) are written in one-beat units, so in heavily syncopated riffs chord names may appear about half a beat early or late.
@@ -1783,7 +1783,7 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 - S. Kostka, D. Payne, and B. Almén, *Tonal Harmony*, 8th ed., McGraw-Hill, 2018. (Conventions for Roman numerals and inversion figures)
 - W3C, *Web Audio API* specification.
 
-<p align="right"><a href="#목차">↑ Back to contents</a></p>
+<p align="right"><a href="#contents">↑ Back to contents</a></p>
 
 ## Changelog
 
@@ -1800,26 +1800,26 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 ### Chordity 1.x
 
 #### 1.11.10 (2026-10-21)
-- The README is now available in six languages (한국어 · English · 日本語 · 中文 · Français · Español). Switch languages with the selector at the very top. The app interface and the help page remain in Korean.
+- At this release, the README became available in six languages (Korean · English · Japanese · Chinese · French · Spanish), with a language selector at the very top. The app interface and the help page remained in Korean. The current README editions are Korean and English.
 
 #### 1.11.9 (2026-10-18)
-- Fixed a case where turning off slash (bass) notation (“베이스음 표기”) in the settings could change the 1.11.8 decision about one-beat chords on the bar's downbeat. With the notation off, inversion smoothing was skipped, so the same chord differing only by inversion was treated as a different chord. The decision is now the same whether the notation is on or off, and results with the default setting (notation on) are unchanged.
+- Fixed a case where turning off slash (bass) notation in the settings could change the 1.11.8 decision about one-beat chords on the bar's downbeat. With the notation off, inversion smoothing was skipped, so the same chord differing only by inversion was treated as a different chord. The decision is now the same whether the notation is on or off, and results with the default setting (notation on) are unchanged.
 
 #### 1.11.8 (2026-10-18)
-- Fixed cases where a one-beat chord sounding only on the bar's downbeat was merged into the chord on the following beat and disappeared (second bar of 「해질녘 예스터데이」 (Haejilnyeok yeseuteodei), `A♯m7 D♯m7`). The downbeat is written separately only when another chord clearly leads on the downbeat, that chord's notes are newly struck on the downbeat, the original chord is struck again on the second beat, and the two chords have different basses. Cases where the previous chord's reverb mixes in and sounds like a different chord are not changed.
+- Fixed cases where a one-beat chord sounding only on the bar's downbeat was merged into the chord on the following beat and disappeared (second bar of “Haejilnyeok yeseuteodei”, `A♯m7 D♯m7`). The downbeat is written separately only when another chord clearly leads on the downbeat, that chord's notes are newly struck on the downbeat, the original chord is struck again on the second beat, and the two chords have different basses. Cases where the previous chord's reverb mixes in and sounds like a different chord are not changed.
 - Among the 1,268 test songs, 23 songs changed (one or two bars each), and nothing got worse in songs with chord ground truth.
 
 #### 1.11.7 (2026-10-15)
-- Fixed cases where, in songs that start with piano or similar without drums, anticipated sixteenth notes in the intro were taken as beats, making the beats uneven and the chords off from the first bar (「해질녘 예스터데이」). Only when the following main section has a steady tempo and the intro's notes fit well on sixteenth-note positions of that tempo are the intro beats laid out by extending the main section's tempo backward.
+- Fixed cases where, in songs that start with piano or similar without drums, anticipated sixteenth notes in the intro were taken as beats, making the beats uneven and the chords off from the first bar (“Haejilnyeok yeseuteodei”). Only when the following main section has a steady tempo and the intro's notes fit well on sixteenth-note positions of that tempo are the intro beats laid out by extending the main section's tempo backward.
 - Among the 1,268 test songs, this is the only song that changed; all others are unchanged.
 
 #### 1.11.6 (2026-10-14)
 - Fixed cases where songs with steady eighth notes (guitar accompaniment, 8-beat rock, etc.) were written in 12/8 or 6/8 at 2/3 of the actual tempo. Only songs whose beats appear split into three and that were not changed by the 4/3 check of 1.11.5 are re-tracked at a 3/2 times faster tempo, and the change is made only when the tempo score, the accents and eighth-note split of the new beat, and the spacing of harmonic changes all point that way.
 - Among the 1,268 test songs, 7 songs changed, all with beats and downbeats better or the same (the 2 songs with chord ground truth also improved in chords). 6 songs reached the correct tempo, and 1 became double the correct tempo (a state that can be fixed with the correction buttons).
-- The "4:3 beat level" (“4:3 박 단계”) row in the analysis info was renamed "4:3/3:2 beat level" (“4:3·3:2 박 단계”) and now also shows which way the song was re-tracked.
+- The "4:3 beat level" row in the analysis info was renamed "4:3/3:2 beat level" and now also shows which way the song was re-tracked.
 
 #### 1.11.5 (2026-10-14)
-- Fixed cases where slow songs dense with sixteenth notes were written in 12/8 at a 4/3 times faster tempo (「아주 먼 옛날」 (Aju meon yennal) 92 BPM 12/8 → 69 BPM 4/4). Only songs whose beats appear split into three are re-tracked at a 4/3 times slower tempo, and the change is made only when the tempo score, the eighth-note split of the new beat, and the spacing of harmonic changes all point that way.
+- Fixed cases where slow songs dense with sixteenth notes were written in 12/8 at a 4/3 times faster tempo (“Aju meon yennal” 92 BPM 12/8 → 69 BPM 4/4). Only songs whose beats appear split into three are re-tracked at a 4/3 times slower tempo, and the change is made only when the tempo score, the eighth-note split of the new beat, and the spacing of harmonic changes all point that way.
 - Among the 1,268 test songs, 6 songs changed; the 5 with ground truth improved in beats and improved or stayed the same in downbeats. Of the 19 test songs with the same error, the other 13 were left as they were to avoid harming other songs.
 - A "4:3 beat level" row was added to the analysis info (only for songs whose beats appear split into three; "4:3/3:2 beat level" from 1.11.6).
 
@@ -1834,12 +1834,12 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - The icon color follows the light or dark mode of the browser and operating system, not the page's theme choice: dark lines in light mode and light lines in dark mode. After switching modes, you may need to reload the page for the icon color to change. Safari (as of 26) draws dark lines regardless of mode, so a background-colored outline was added around the lines to keep the icon visible even when the tab color and line color are similar.
 
 #### 1.11.2 (2026-10-13)
-- Corrected "Chordity는 AI이며" ("Chordity is an AI and …") in the notice at the bottom of the app and the help page to "Chordity는 소리를 자동으로 분석하므로 틀릴 수 있습니다" ("Chordity analyzes sound automatically, so it can be wrong"). Chordity does not use trained AI models; it analyzes with signal processing and probabilistic models.
+- Corrected "Chordity is an AI and …" in the notice at the bottom of the app and the help page to "Chordity analyzes sound automatically, so it can be wrong". Chordity does not use trained AI models; it analyzes with signal processing and probabilistic models.
 - The terms of use changed. Personal and non-commercial use remains free, but modifying this software, or taking part of it (the analysis engine, etc.) to use in your own program, requires the author's permission, even if only you use it. Details are in [LICENSE](LICENSE).
 
 #### 1.11.1 (2026-10-13)
 - Analysis is about 1.8 times faster. It was sped up without changing the order of calculations, so results from this part are the same; it undoes the time added in 1.11.0 and is even faster than 1.10.5.
-- Corrected the key of some songs being written incorrectly toward the relative minor in 1.11.0 (「고민중독」 (Gomin jungdok) B minor → E minor → F minor corrected to G major → A♭ major).
+- Corrected the key of some songs being written incorrectly toward the relative minor in 1.11.0 (“Gomin jungdok” B minor → E minor → F minor corrected to G major → A♭ major).
 - Half-diminished seventh chords are written as m7♭5 (Roman numeral ø) instead of dim.
 - Results of the chord timing and quality checks were added to the verification section.
 
@@ -1852,17 +1852,17 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 #### 1.10.5 (2026-10-11)
 - Fixed the rule that refines modulation positions writing the new key one bar late even when the music briefly rests in the new key's first bar and then immediately plays the new key's tonic chord. The new key is written from the next bar only when more than half of the bar is rest and the new tonic chord has not yet appeared.
 - Fixed a possible mismatch between the meter display and the bars, or a nonexistent meter change being written, in songs whose intro beats were re-joined to the main section when a different meter had also been detected in the intro.
-- When the downbeat is moved earlier or later in the correction controls (“보정”), the barlines of a re-joined intro now move along with the main section.
+- When the downbeat is moved earlier or later in the correction controls, the barlines of a re-joined intro now move along with the main section.
 - Prevented beats before 0 s that could appear when re-joining the intro in files where the song starts with sound right away.
 
 #### 1.10.4 (2026-10-11)
-- Fixed cases where, in intros with few instruments, the beats drifted slightly slow and the barlines were off by about half a beat, pulled by accents anticipated at the ends of bars. If the intro continues at the same tempo as the main section, the main section's beats and barlines are extended backward to the end of the intro (e.g., the intro of 「マリーゴールド」 as three whole bars).
-- Refined modulation markers that appeared one or two bars before the new key's phrase. Chords that belong to the previous key, such as the previous key's dominant (V7), are kept in the previous key, and if the new key's first bar starts with a rest (break), the new key is written from the next bar (e.g., B minor in 「夜に駆ける」 from the bar where the chorus starts).
+- Fixed cases where, in intros with few instruments, the beats drifted slightly slow and the barlines were off by about half a beat, pulled by accents anticipated at the ends of bars. If the intro continues at the same tempo as the main section, the main section's beats and barlines are extended backward to the end of the intro (e.g., the intro of “Marigold” as three whole bars).
+- Refined modulation markers that appeared one or two bars before the new key's phrase. Chords that belong to the previous key, such as the previous key's dominant (V7), are kept in the previous key, and if the new key's first bar starts with a rest (break), the new key is written from the next bar (e.g., B minor in “Yoru ni kakeru” from the bar where the chorus starts).
 
 #### 1.10.3 (2026-10-11)
 - Tempo, meter, bars, keys and chords were verified with five real popular songs of various genres ("Verification on 5 real recordings" in 4-6). All five have the correct tempo and meter, and the chords, compared with published charts, have about 90% correct roots.
 - Chords anticipated on the last beat of a bar (syncopation, bass approach notes) are written as changing on the next bar's downbeat, as in sheet music.
-- Fixed cases where the downbeat was detected one beat late at the start of a song, creating a spurious pickup bar and a "3 beats" (“3박”) bar.
+- Fixed cases where the downbeat was detected one beat late at the start of a song, creating a spurious pickup bar and a "3 beats" bar.
 - Prevented false modulations at the beginning of songs caused by only the intro being assigned a different key. Also, in songs with modulations, key names that mixed major and minor, like "C minor → F major", are now matched to the song's predominant major/minor and written like "C minor → D minor".
 
 #### 1.10.2 (2026-10-11)
@@ -1877,27 +1877,27 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - Fixed the chord and bar just before the destination briefly being shown as the current position right after clicking another bar or moving with the arrow keys during playback.
 
 #### 1.10.0 (2026-10-11)
-- Slashes on beats where a chord is newly struck are drawn thicker, so you can see the rhythm in which chords are struck. The slashes of beats holding a black chord (half beats in the "half-beat" (“½박 단위”) mode) become thicker, while the positions of grey chords holding the previous chord and of `N.C.` keep normal slashes.
+- Slashes on beats where a chord is newly struck are drawn thicker, so you can see the rhythm in which chords are struck. The slashes of beats holding a black chord (half beats in the "half-beat" mode) become thicker, while the positions of grey chords holding the previous chord and of `N.C.` keep normal slashes.
 - Fixed hexagonal frames being drawn overlapping each other, and arrival tempo pills sitting on top of another frame or being drawn twice in the same spot, when a gradually changing tempo section was detected split into two or three pieces. Sections overlapping or touching in the same direction are merged into one, and when they overlap while changing direction, such as speeding up and then slowing down, they are split at the fastest (or slowest) beat.
-- After drawing the chart, the actual widths of the labels above and below the bars are measured for the screen width, and the white pills, hexagonal frames, black pills (key and meter) and `N박` (“N beats”) markers are placed so they do not overlap each other or stick out of the line. When pills are close together, the arrival pill steps slightly aside, frames shorten the end touching a pill, and if a frame is too short to fit all of `여기까지 63` ("up to here 63"), only the number is written.
-- Fixed the white pill on the last beat of a song's final bar sticking out past the final double barline on narrow screens, and the background of the `N박` marker overlapping the top of the chord name area. Also prevented layouts where a pill on a line's last beat stuck out of the line and made narrow screens overflow horizontally, a modulation pill at the start of a line touched the line below the slashes of the line above, or a modulation pill overlapped an `N박` marker.
+- After drawing the chart, the actual widths of the labels above and below the bars are measured for the screen width, and the white pills, hexagonal frames, black pills (key and meter) and `N beats` markers are placed so they do not overlap each other or stick out of the line. When pills are close together, the arrival pill steps slightly aside, frames shorten the end touching a pill, and if a frame is too short to fit all of `up to here 63`, only the number is written.
+- Fixed the white pill on the last beat of a song's final bar sticking out past the final double barline on narrow screens, and the background of the `N beats` marker overlapping the top of the chord name area. Also prevented layouts where a pill on a line's last beat stuck out of the line and made narrow screens overflow horizontally, a modulation pill at the start of a line touched the line below the slashes of the line above, or a modulation pill overlapped an `N beats` marker.
 - Fixed chord names overlapping each other when a bar has many chords. The font size is now determined by measuring the actual width after drawing rather than estimating from the number of characters, so the chord name size in some bars may differ slightly from before, depending on the song. In bars where names do not fit even at the smallest size, names alternate between two lines, upper and lower, and in the rare case where a long name on a bar's last beat does not fit even in two lines on a narrow screen, the bass note (`/F♯`) is dropped first and `…` is added.
-- Fixed cases where a modulation to the same key, like `C 장조 → C 장조` ("C major → C major"), was written even though the key had not changed. After the key sections are split and the keys are re-decided from the chords, two neighboring sections that end up in the same key are merged into one.
+- Fixed cases where a modulation to the same key, like `C major → C major`, was written even though the key had not changed. After the key sections are split and the keys are re-decided from the chords, two neighboring sections that end up in the same key are merged into one.
 - Fixed fast songs (160–180 BPM) being detected at half tempo. In particular, songs where the slow beat landed on the snare (beats 2 and 4), throwing off the bar downbeat and mixing two chords within one beat so that many seventh chords and slash chords appeared (e.g., 178 BPM rock read as 89 BPM), are now detected at the correct tempo and with the correct bars. Fast songs with a half-time feel (e.g., 170 BPM read as 85 BPM) are also doubled.
 - Made the decision to halve the tempo stricter, reducing cases where songs at 110–130 BPM were mistaken for eighth notes taken as beats and halved.
 - In songs where the drums play a backbeat, the even/odd pattern of kick (beats 1 and 3) and snare (beats 2 and 4) is also used to determine bar downbeats. This reduced bars shifting by one beat and spurious 3-beat or 5-beat bars in syncopated riffs where chords change before the downbeat, and greatly reduced cases of 4/4 songs being wrongly written as 7/4, 5/4 or 3/4. Also fixed song endings where chords change one beat early being written as switching to 3/4.
-- When the chord change unit is set to ½ beat, the metronome adds a small, high "tick" between beats as well, clicking like "accent–tick–beat–tick–beat–tick–beat–tick" (“띡-틱-딱-틱-딱-틱-딱-틱”).
+- When the chord change unit is set to ½ beat, the metronome adds a small, high "tick" between beats as well, clicking like "accent–tick–beat–tick–beat–tick–beat–tick".
 - Fixed major-key songs being written as if modulating to the relative minor midway (e.g., G major → E minor). Neighboring sections split between relative major and minor are merged into one section and judged again, and minor is written only when minor clearly leads.
 - m7 chords with the third in the bass, like Am7/C and Em7/G, are sixth chords made of the same notes, so they are written as C and G. Spots where the bass is unclear and may have been misheard, and m7 chords briefly passing between instances of the same chord, keep their original names. Cases written as sus4 even though the third sounds clearly were also fixed to triads.
 - Results checked on real recordings (998 GTZAN songs, 180 GuitarSet songs, three popular songs) were added to 4-6. Some of the changed songs may have bar downbeat positions or chord names that differ from before.
 
 #### 1.9.4 (2026-10-10)
-- Fixed the app overflowing horizontally when a song was opened on very narrow screens (320px or less). The three volume sliders now share the width and fit on one line, and the select boxes in the correction panel (“보정”) fit inside their cells. On even narrower screens (below about 310px), the theme bar moves down to the next line.
+- Fixed the app overflowing horizontally when a song was opened on very narrow screens (320px or less). The three volume sliders now share the width and fit on one line, and the select boxes in the correction panel fit inside their cells. On even narrower screens (below about 310px), the theme bar moves down to the next line.
 - Fixed the text chord chart box extending past the panel's right border.
 - Panel titles no longer break in the middle of a word on narrow screens.
 
 #### 1.9.3 (2026-10-10)
-- Fixed the help page header overflowing horizontally a little on very narrow screens (320px), and the "Help" (“도움말”) tag being squeezed vertically at phone widths (375–410px), making the header grow to two or three lines. At phone widths the "Help" tag is hidden, and on narrower screens the theme bar moves down to the next line.
+- Fixed the help page header overflowing horizontally a little on very narrow screens (320px), and the "Help" tag being squeezed vertically at phone widths (375–410px), making the header grow to two or three lines. At phone widths the "Help" tag is hidden, and on narrower screens the theme bar moves down to the next line.
 
 #### 1.9.2 (2026-10-10)
 - Added a copyright and terms-of-use notice at the bottom of the app and the help page. The full terms are in the repository's LICENSE file.
@@ -1908,8 +1908,8 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - The app and the help page share the same theme. It can also be chosen with the keyboard arrow keys, and it follows the reduced-motion setting.
 
 #### 1.9.0 (2026-09-30)
-- Added a "follow the song" (“곡 따라”) mode for chord playback and made it the default. Places newly struck in the original (black text in the chart) are struck again, and held places (grey) keep ringing, following the original's strumming pattern.
-- In the settings you can still choose, as before, "when the chord changes" (“코드가 바뀔 때”), "restrike every bar" (“마디마다 다시”) or "every beat" (“박마다”).
+- Added a "follow the song" mode for chord playback and made it the default. Places newly struck in the original (black text in the chart) are struck again, and held places (grey) keep ringing, following the original's strumming pattern.
+- In the settings you can still choose, as before, "when the chord changes", "restrike every bar" or "every beat".
 
 #### 1.8.4 (2026-09-30)
 - Grey (held over) is written only when the previous bar's chord is held without being struck again. Even the same chord is written in black text if it is newly struck on the bar's downbeat.
@@ -1924,8 +1924,8 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - When a double accidental would be needed or the result would be F♭, C♭, E♯ or B♯, which are not in the key, the enharmonic name is used.
 
 #### 1.8.1 (2026-09-30)
-- The song's first bar shows the starting key and meter, like the key signature and time signature in sheet music (`C 장조` `4/4`, i.e., "C major", "4/4").
-- Labels at change points attach the Korean particle 로/으로 ("to"), chosen by spelling rules to fit the new value (`D 장조로`, `3/4으로`, `132로`, `63으로`). Labels at the start of the song have no particle.
+- The song's first bar shows the starting key and meter, like the key signature and time signature in sheet music (`C major` `4/4`, i.e., "C major", "4/4").
+- Labels at change points attach the Korean directional suffix, romanized as ro/euro ("to"), chosen by spelling rules to fit the new value (rendered in English as `to D major`, `to 3/4`, `to 132`, `to 63`). Labels at the start of the song have no directional suffix.
 
 #### 1.8.0 (2026-09-30)
 - Moved the tempo markers (white pills, hexagonal frames) to the line below the slashes, so the slashes and the current beat stay visible even in sections where the tempo changes gradually.
@@ -1934,12 +1934,12 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 
 #### 1.7.0 (2026-09-30)
 - A white hexagonal frame (triangles at both ends, a rectangle in the middle) is drawn spanning sections where the tempo changes gradually. The length the frame spans is the section where the tempo changes.
-- Inside the frame, the arrival tempo is normally written, as in `여기까지 63` ("up to here 63"), and when the playback position is inside the frame, the current tempo is shown, as in `현재 67` ("now 67").
+- Inside the frame, the arrival tempo is normally written, as in `up to here 63`, and when the playback position is inside the frame, the current tempo is shown, as in `now 67`.
 - On the beat where the change is complete, the arrival tempo is written in a white pill.
 - Gradually changing sections are written in the analysis info and the text chart.
 
 #### 1.6.0 (2026-09-30)
-- When the meter changes in the middle of a song, the meter field at the top shows it like `4/4 → 3/4 → 4/4`, and a `3/4로` ("to 3/4") label is attached to the bar where it changes.
+- When the meter changes in the middle of a song, the meter field at the top shows it like `4/4 → 3/4 → 4/4`, and a `to 3/4` label is attached to the bar where it changes.
 - The tempo is written in a white pill (`120`) at the slash position of the beat where the song starts and where the tempo suddenly changes.
 - During playback, the tempo field at the top follows the tempo at that position. When the tempo changes gradually, the number also changes step by step.
 - Meter changes and tempo changes are also written in the text chart and the analysis info.
@@ -1957,7 +1957,7 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - Added the versioning rules and the changelog to the README.
 
 #### 1.4.1 (2026-09-27)
-- Refined the notice at the bottom to "Chordity는 AI이며 실수할 수 있습니다. 중요한 부분은 귀로 들어 다시 한번 확인해 주세요." ("Chordity is an AI and can make mistakes. Please check important parts again by ear.")
+- Refined the notice at the bottom to "Chordity is an AI and can make mistakes. Please check important parts again by ear."
 - Added a table of contents linking to every section at the top of the README.
 
 #### 1.4.0 (2026-09-26)
@@ -1967,7 +1967,7 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 
 #### 1.3.1 (2026-09-26)
 - Moved the chord notation choice (note names, Camelot, Roman numerals) from the settings panel to a bar directly above the chart. You can also switch it with ← and → when the bar has focus.
-- Renamed the chord recognition setting remaining in the settings panel to "chord types" (“코드 종류”).
+- Renamed the chord recognition setting remaining in the settings panel to "chord types".
 - Added images and explanations for each notation to the README.
 
 #### 1.3.0 (2026-09-26)
@@ -1978,8 +1978,8 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 - Chords and keys can be viewed as Camelot wheel numbers (8B, 8A). The text chart can also be exported in Camelot.
 
 #### 1.1.1 (2026-09-26)
-- "Applied" (“적용 중”) now shows, separately, settings that differ from the defaults as well as beat corrections.
-- Split reset into two: "reset beat corrections" (“박 보정 되돌리기”) and "restore default settings" (“설정 기본값으로”).
+- "Applied" now shows, separately, settings that differ from the defaults as well as beat corrections.
+- Split reset into two: "reset beat corrections" and "restore default settings".
 
 #### 1.1.0 (2026-09-26)
 - When the key changes within a song, the app finds which key starts from which bar and beat and shows it in the chart, the key field, the text chart and the analysis info.
@@ -1989,9 +1989,9 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 #### 1.0.0 (2026-09-26)
 - Named the app Chordity. The logo, title and documents were changed to the new name, and saved settings carry over as they are.
 
-### Development versions 0.x (마디 코드)
+### Development versions 0.x (Madi Code)
 
-Before the official name was chosen, the app was built under the name "마디 코드" ("Bar Chords").
+Before the official name was chosen, the app was built under the name "Madi Code" ("Bar Chords").
 
 #### 0.4.1 (2026-09-26)
 - Fixed README formulas so they display correctly on GitHub.
@@ -2019,4 +2019,5 @@ Before the official name was chosen, the app was built under the name "마디 �
 #### 0.1.0 (2026-09-25)
 - Built the analysis engine: zero-latency resampling, real FFT, per-band onsets, tempo estimation, dynamic-programming beat tracking, on-beat and beat-level checks, reference pitch and chroma, bar downbeat inference, chord inference including inversions, and regression tests on synthetic audio.
 
-<p align="right"><a href="#목차">↑ Back to contents</a></p>
+<p align="right"><a href="#contents">↑ Back to contents</a></p>
+
