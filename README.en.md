@@ -1,12 +1,18 @@
-[한국어](README.md)&emsp;&emsp;English
+[한국어](README.md) · **English** · [日本語](README.ja.md) · [中文](README.zh.md) · [Français](README.fr.md) · [Español](README.es.md)
+
+Version 1.11.11:
+
+Contributors -
+
+* 고쿠라주민 (118.220): suggested the idea of keeping the focus in place as the chords move on while the beat-correction panel or a bottom panel is open.
 
 > If you have collaborated on or contributed to this project, or would like to, please contact me personally. This project is source-available software that anyone can use free of charge. For personal and non-commercial purposes, you may use it as is at no cost. However, copyright and ownership belong to the original author, collaborators and contributors: without the original author's permission you may not modify it or take any part of it and put it into your own program (even for your own use only), and you may not claim this program as your own or distribute or sell it elsewhere. Uploading modified versions to a GitHub fork is also not permitted. Use by organizations such as schools, private academies, clubs, churches, religious organizations and companies is not automatically free, so please contact me first. The full terms are in [LICENSE](LICENSE).
 
-# Chordity <sup>v1.11.10</sup>
+# Chordity <sup>v1.12.0</sup>
 
 **Chordity is a web page that writes down the chords bar by bar when you give it a song file, and plays a metronome locked exactly to the beat of the song.**
 
-At the moment a chord changes, a piano plays that chord, so you can check it by ear and play along. No installation, no sign-up and no internet connection are needed. Your music files never leave your computer.
+At the moment a chord changes, a piano or an acoustic guitar, or both together, plays that chord, so you can check it by ear and play along. No installation, no sign-up and no internet connection are needed. Your music files never leave your computer.
 
 The results can be wrong. The analysis principles, the reasoning behind its decisions, and how to check and correct the results are collected on the [help page](information.html) (in Korean). You can also open it by clicking the notice at the very bottom of the app.
 
@@ -23,7 +29,7 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
   - [If the metronome sounds off](#if-the-metronome-sounds-off)
   - [Viewing chord names differently](#viewing-chord-names-differently)
     - [Note names](#viewing-in-note-names), [Camelot](#viewing-in-camelot), [Roman numerals](#viewing-in-roman-numerals)
-  - [Hearing chords on the piano](#hearing-chords-on-the-piano)
+  - [Hearing chords on the piano or acoustic guitar](#hearing-chords-on-the-piano-or-acoustic-guitar)
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Songs that work well, songs that are hard](#songs-that-work-well-songs-that-are-hard)
   - [Good to know](#good-to-know)
@@ -35,7 +41,7 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
   - [2-5. Working out the chords](#2-5-working-out-the-chords)
   - [2-6. The rules of music as probabilities](#2-6-the-rules-of-music-as-probabilities)
   - [2-7. A metronome that does not drift](#2-7-a-metronome-that-does-not-drift)
-  - [2-8. Playing the chords on the piano](#2-8-playing-the-chords-on-the-piano)
+  - [2-8. Playing the chords on the piano or acoustic guitar](#2-8-playing-the-chords-on-the-piano-or-acoustic-guitar)
   - [2-9. Finding where the key changes](#2-9-finding-where-the-key-changes)
 - **[Part 3. How it works](#part-3-how-it-works)**
   - [3-1. Overall flow](#3-1-overall-flow)
@@ -49,22 +55,22 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
   - [3-9. Chord playback](#3-9-chord-playback)
 - **[Part 4. A closer look](#part-4-a-closer-look)**
   - [4-1. Algorithms and formulas](#4-1-algorithms-and-formulas)
-    - [(1) Zero-delay resampling](#1-zero-delay-resampling), [(2) Real FFT](#2-real-fft), [(3) Per-band spectral flux and the onset envelope](#3-per-band-spectral-flux-and-the-onset-envelope), [(4) Tempo estimation](#4-tempo-estimation), [(5) DP beat tracking (Ellis, 2007)](#5-dp-beat-tracking-ellis-2007), [(6) Beat refinement](#6-beat-refinement), [(7) On-beat phase check](#7-on-beat-phase-check), [(8) Beat-level check](#8-beat-level-check), [(9) Beat subdivision decision](#9-beat-subdivision-decision), [(10) Spectral peaks, tuning, chroma](#10-spectral-peaks-tuning-chroma), [(11) Beat-synchronous pooling, bass floor, key](#11-beat-synchronous-pooling-bass-floor-key), [(12) Chord templates and emission scores](#12-chord-templates-and-emission-scores), [(13) Chord Viterbi: O(T·K)](#13-chord-viterbi-otk), [(14) Downbeat evidence and the meter HMM](#14-downbeat-evidence-and-the-meter-hmm), [(15) Metronome scheduling](#15-metronome-scheduling), [(16) Piano synthesis](#16-piano-synthesis), [(17) Voicing and striking](#17-voicing-and-striking), [(18) Modulation tracking](#18-modulation-tracking), [(19) Camelot notation](#19-camelot-notation), [(20) Roman numeral harmonic analysis](#20-roman-numeral-harmonic-analysis), [(21) Reinforcements by song type](#21-reinforcements-by-song-type), [(22) Held-over chords and change positions](#22-held-over-chords-and-change-positions)
+    - [(1) Zero-delay resampling](#1-zero-delay-resampling), [(2) Real FFT](#2-real-fft), [(3) Per-band spectral flux and the onset envelope](#3-per-band-spectral-flux-and-the-onset-envelope), [(4) Tempo estimation](#4-tempo-estimation), [(5) DP beat tracking (Ellis, 2007)](#5-dp-beat-tracking-ellis-2007), [(6) Beat refinement](#6-beat-refinement), [(7) On-beat phase check](#7-on-beat-phase-check), [(8) Beat-level check](#8-beat-level-check), [(9) Beat subdivision decision](#9-beat-subdivision-decision), [(10) Spectral peaks, tuning, chroma](#10-spectral-peaks-tuning-chroma), [(11) Beat-synchronous pooling, bass floor, key](#11-beat-synchronous-pooling-bass-floor-key), [(12) Chord templates and emission scores](#12-chord-templates-and-emission-scores), [(13) Chord Viterbi: O(T·K)](#13-chord-viterbi-otk), [(14) Downbeat evidence and the meter HMM](#14-downbeat-evidence-and-the-meter-hmm), [(15) Metronome scheduling](#15-metronome-scheduling), [(16) Piano synthesis](#16-piano-synthesis), [(17) Voicing and striking](#17-voicing-and-striking), [(18) Modulation tracking](#18-modulation-tracking), [(19) Camelot notation](#19-camelot-notation), [(20) Roman numeral harmonic analysis](#20-roman-numeral-harmonic-analysis), [(21) Reinforcements by song type](#21-reinforcements-by-song-type), [(22) Held-over chords and change positions](#22-held-over-chords-and-change-positions), [(23) Acoustic guitar synthesis](#23-acoustic-guitar-synthesis), [(24) Follow the strumming](#24-follow-the-strumming)
   - [4-2. The physical world](#4-2-the-physical-world)
-    - [Sound, pitch, equal temperament](#sound-pitch-equal-temperament), [Harmonics](#harmonics), [Frequency ranges by instrument](#frequency-ranges-by-instrument), [The time–frequency trade-off](#the-timefrequency-trade-off), [Sampling and aliasing](#sampling-and-aliasing), [Loudness, reverberation, logarithms](#loudness-reverberation-logarithms), [Human perception](#human-perception), [Piano strings](#piano-strings), [Latency and distance](#latency-and-distance)
+    - [Sound, pitch, equal temperament](#sound-pitch-equal-temperament), [Harmonics](#harmonics), [Frequency ranges by instrument](#frequency-ranges-by-instrument), [The time–frequency trade-off](#the-timefrequency-trade-off), [Sampling and aliasing](#sampling-and-aliasing), [Loudness, reverberation, logarithms](#loudness-reverberation-logarithms), [Human perception](#human-perception), [Piano strings](#piano-strings), [Acoustic guitar strings](#acoustic-guitar-strings), [Latency and distance](#latency-and-distance)
   - [4-3. System](#4-3-system)
     - [Components](#components), [Repository layout](#repository-layout), [Engine API](#engine-api), [Three clocks](#three-clocks), [Audio graph](#audio-graph), [Saved settings](#saved-settings)
   - [4-4. Issues and fixes](#4-4-issues-and-solutions)
   - [4-5. Optimization](#4-5-optimization)
   - [4-6. Verification](#4-6-verification)
-    - [Unit tests](#unit-tests), [Synthetic song regression tests](#synthetic-song-regression-tests), [Modulation tests](#modulation-tests), [Camelot notation tests](#camelot-notation-tests), [Roman numeral tests](#roman-numeral-tests), [Real recording tests](#real-recording-test), [Real-browser end-to-end tests](#real-browser-end-to-end-tests), [Chord playback tests](#chord-playback-tests), [Song type expansion tests (1.5.0)](#extended-song-type-tests-150), [Meter change and tempo display tests (1.6.0)](#meter-change-and-tempo-display-tests-160), [Held-over chord and change position tests (1.8.4)](#held-over-and-change-position-tests-184)
+    - [Unit tests](#unit-tests), [Synthetic song regression tests](#synthetic-song-regression-tests), [Modulation tests](#modulation-tests), [Camelot notation tests](#camelot-notation-tests), [Roman numeral tests](#roman-numeral-tests), [Real recording tests](#real-recording-test), [Real-browser end-to-end tests](#real-browser-end-to-end-tests), [Chord playback tests](#chord-playback-tests), [Acoustic guitar and new piano tests (1.12.0)](#acoustic-guitar-and-new-piano-tests-1120), [Song type expansion tests (1.5.0)](#extended-song-type-tests-150), [Meter change and tempo display tests (1.6.0)](#meter-change-and-tempo-display-tests-160), [Held-over chord and change position tests (1.8.4)](#held-over-and-change-position-tests-184)
   - [4-7. Strengths](#4-7-strengths)
   - [4-8. Limitations and future work](#4-8-limitations-and-future-work)
   - [4-9. References](#4-9-references)
 - **[Changelog](#changelog)**
   - [Versioning rules](#versioning)
   - [Chordity 1.x](#chordity-1x)
-    - [1.11.10](#11110-2026-10-21), [1.11.9](#1119-2026-10-18), [1.11.8](#1118-2026-10-18), [1.11.7](#1117-2026-10-15), [1.11.6](#1116-2026-10-14), [1.11.5](#1115-2026-10-14), [1.11.4](#1114-2026-10-14), [1.11.3](#1113-2026-10-14), [1.11.2](#1112-2026-10-13), [1.11.1](#1111-2026-10-13), [1.11.0](#1110-2026-10-13), [1.10.5](#1105-2026-10-11), [1.10.4](#1104-2026-10-11), [1.10.3](#1103-2026-10-11), [1.10.2](#1102-2026-10-11), [1.10.1](#1101-2026-10-11), [1.10.0](#1100-2026-10-11), [1.9.4](#194-2026-10-10), [1.9.3](#193-2026-10-10), [1.9.2](#192-2026-10-10), [1.9.1](#191-2026-09-30), [1.9.0](#190-2026-09-30), [1.8.4](#184-2026-09-30), [1.8.3](#183-2026-09-30), [1.8.2](#182-2026-09-30), [1.8.1](#181-2026-09-30), [1.8.0](#180-2026-09-30), [1.7.0](#170-2026-09-30), [1.6.0](#160-2026-09-30), [1.5.0](#150-2026-09-30), [1.4.2](#142-2026-09-27), [1.4.1](#141-2026-09-27), [1.4.0](#140-2026-09-26), [1.3.1](#131-2026-09-26), [1.3.0](#130-2026-09-26), [1.2.0](#120-2026-09-26), [1.1.1](#111-2026-09-26), [1.1.0](#110-2026-09-26), [1.0.0](#100-2026-09-26)
+    - [1.12.0](#1120-2026-10-25), [1.11.11](#11111-2026-10-25), [1.11.10](#11110-2026-10-21), [1.11.9](#1119-2026-10-18), [1.11.8](#1118-2026-10-18), [1.11.7](#1117-2026-10-15), [1.11.6](#1116-2026-10-14), [1.11.5](#1115-2026-10-14), [1.11.4](#1114-2026-10-14), [1.11.3](#1113-2026-10-14), [1.11.2](#1112-2026-10-13), [1.11.1](#1111-2026-10-13), [1.11.0](#1110-2026-10-13), [1.10.5](#1105-2026-10-11), [1.10.4](#1104-2026-10-11), [1.10.3](#1103-2026-10-11), [1.10.2](#1102-2026-10-11), [1.10.1](#1101-2026-10-11), [1.10.0](#1100-2026-10-11), [1.9.4](#194-2026-10-10), [1.9.3](#193-2026-10-10), [1.9.2](#192-2026-10-10), [1.9.1](#191-2026-09-30), [1.9.0](#190-2026-09-30), [1.8.4](#184-2026-09-30), [1.8.3](#183-2026-09-30), [1.8.2](#182-2026-09-30), [1.8.1](#181-2026-09-30), [1.8.0](#180-2026-09-30), [1.7.0](#170-2026-09-30), [1.6.0](#160-2026-09-30), [1.5.0](#150-2026-09-30), [1.4.2](#142-2026-09-27), [1.4.1](#141-2026-09-27), [1.4.0](#140-2026-09-26), [1.3.1](#131-2026-09-26), [1.3.0](#130-2026-09-26), [1.2.0](#120-2026-09-26), [1.1.1](#111-2026-09-26), [1.1.0](#110-2026-09-26), [1.0.0](#100-2026-09-26)
   - [Development versions 0.x (Madi Code)](#development-versions-0x-madi-code)
     - [0.4.1](#041-2026-09-26), [0.4.0](#040-2026-09-25), [0.3.1](#031-2026-09-25), [0.3.0](#030-2026-09-25), [0.2.1](#021-2026-09-25), [0.2.0](#020-2026-09-25), [0.1.0](#010-2026-09-25)
 
@@ -83,7 +89,7 @@ The results can be wrong. The analysis principles, the reasoning behind its deci
 
 1. Open the file `chordity.html` in a browser such as Chrome, Edge, Safari or Firefox.
 2. Click **Open file** or drag a music file onto the window. After a few seconds the chord chart appears.
-3. Press the **Play** button. Along with the music, the metronome sounds a "tock" on every beat (a high "tick" on the first beat of each bar, and when the chord change unit is ½ beat, a small "tik" between beats as well), a yellow highlighter box surrounds the chord now sounding, and that chord's name gets bigger. Inside the box, orange fills up like a progress bar as far as it has played, and when the chord changes the box springs over to the next chord. The piano plays the chord wherever the original song strikes it (it strikes again when the chord changes or the same chord is struck anew, and keeps ringing where the chord is held over).
+3. Press the **Play** button. Along with the music, the metronome sounds a "tock" on every beat (a high "tick" on the first beat of each bar, and when the chord change unit is ½ beat, a small "tik" between beats as well, or two "tik"s when it is ⅓ beat in a triplet song), a yellow highlighter box surrounds the chord now sounding, and that chord's name gets bigger. Inside the box, orange fills up like a progress bar as far as it has played, and when the chord changes the box springs over to the next chord. The piano plays the chord wherever the original song strikes it (it strikes again when the chord changes or the same chord is struck anew, and keeps ringing where the chord is held over).
 
 Any file the browser can play will do, such as MP3, WAV, M4A, FLAC or OGG.
 
@@ -112,8 +118,8 @@ Any file the browser can play will do, such as MP3, WAV, M4A, FLAC or OGG.
 | Roman numerals such as `I`, `vi`, `V7/ii` | Chord names when Roman numeral notation is selected (see "Viewing in Roman numerals" below) |
 | Circle indicators | Which beat it is now. The largest circle is the first beat of the bar |
 | "Next G" at the top | The chord coming up soon |
-| Metronome and chord playback buttons | Toggle on and off each time you press them |
-| Music, click and chord sliders | Adjust the volume of the original song, the metronome and the piano chords separately |
+| Metronome, piano and acoustic guitar buttons | Toggle on and off each time you press them. The piano and the acoustic guitar are turned on and off separately; with both on, they play together |
+| Music, click and chord sliders | Adjust the volume of the original song, the metronome and the chord playback (piano and acoustic guitar) separately |
 
 ### If the metronome sounds off
 
@@ -132,7 +138,7 @@ Most of the time it lines up on its own, but for some songs different people cou
 
 What you have changed so far is shown under **Active** in the same panel, split into "beat corrections" and "settings". Even when the panel is collapsed, a summary is visible next to its title.
 
-If you want simpler chords, choose "basic" under **Chord type**; if you also want to see chords that change within a beat, choose "half-beat". In half-beat mode the metronome also adds a small, high "tik" between beats (on the eighth notes), playing like "tick-tik-tock-tik-tock-tik-tock-tik".
+If you want simpler chords, choose "basic" under **Chord type**; if you also want to see chords that change within a beat, choose "half-beat". In half-beat mode the metronome also adds a small, high "tik" between beats (on the eighth notes), playing like "tick-tik-tock-tik-tock-tik-tock-tik". In triplet songs where the beat divides into three (12/8, 6/8, etc.), this option changes to "⅓-beat" and divides each beat into three (three eighth notes), and the metronome also puts two "tik"s between beats, playing like "tick-tik-tik-tock-tik-tik".
 
 ### Viewing chord names differently
 
@@ -191,13 +197,14 @@ This is the Roman numeral harmonic analysis used in harmony textbooks. Instead o
 - If the dominant of the new key appears right before a modulation, it is written as V of the new key (e.g. B7 right before moving to E major is V7).
 - If slash (bass) notation is turned off, chords are written in root position without inversion figures.
 
-### Hearing chords on the piano
+### Hearing chords on the piano or acoustic guitar
 
-With **Chord playback** turned on, the piano plays each chord at the moment it changes. Listening to it layered over the original lets you check by ear right away whether the written chord is right, and it also guides you when playing along. The piano automatically matches the song's tuning, so it never sounds out of tune against the original.
+Turn on chord playback with the **Piano** and **Acoustic guitar** buttons at the top, and the recognized chords are played. The two buttons are turned on and off separately; with both on, the piano and the acoustic guitar play together (at first, only the piano is on). Listening to it layered over the original lets you check by ear right away whether the written chord is right, and it also guides you when playing along. The sound automatically matches the song's tuning, so it never sounds out of tune against the original.
 
-- The volume of the music, the clicks and the chords is set separately with the three sliders at the top.
-- Under **Chord playback** in **Correct it**, you can choose when chords are struck: follow the song (default, restrikes only where the original strikes anew), when the chord changes, again every bar, or every beat.
-- To turn it off, press the **Chord playback** button or the P key.
+- The volume of the music, the clicks and the chords is set separately with the three sliders at the top (the chord slider applies to both the piano and the acoustic guitar).
+- Under **Piano playback** in **Correct it**, you can choose when the piano strikes: follow the song (default, restrikes only where the original strikes anew), when the chord changes, again every bar, or every beat.
+- Under **Acoustic guitar playback** in **Correct it**, you can choose how the acoustic guitar plays. The default, **follow the strumming**, finds the rhythm in which guitar, piano, drums and so on were played in the original, in sixteenth-note slots on each beat, and strums down and up at those spots. In bars where no strikes are found it strums once on the downbeat, and because it finds the original's rhythm from the sound, it may differ from the actual performance (4-8). **4-beat, 8-beat and 16-beat strum** picks, bar by bar, the strum variation taught in guitar method books (for 8-beat, ↓↑↓↑↓↑↓↑, ↓ ↓ ↓↑↓↑, ↓ ↓↑ ↑↓↑, etc.) that best fits the original's rhythm, and strums it in time with the song's beats. Following the basic technique of always swinging the hand up and down, strokes on the beat side are down and those in between are up, and the chosen patterns appear in the "acoustic guitar strum" row of **Analysis info**. **Swing strum** strums the two eighth notes of each beat long and short (↓·↑ ↓·↑), on the first and third notes of a triplet. If the original swings, it measures where the offbeat falls (the swing ratio) from the original and matches it; for straight songs or songs where it cannot be measured, it strums at the triplet position (⅔ of the beat). Swing plays only this rhythm, without variations, and the ratio used appears in the "acoustic guitar strum" row of the analysis info. In every mode it always strums where the chord newly changes (if it changes between slots to be strummed, on the first slot after it: for 4-beat the next beat, for swing that beat's offbeat); even where there is no chord (N.C.), if the original has drums or another rhythm, it plays a **mute** ("chik") with the strings damped, or, if the bass note is clear, a **palm mute** on that note (it does not play in quiet places), and the chords are held with real guitar fingerings (C is x32010, G is 320003, etc.).
+- The piano can also be turned on and off with the P key, and the acoustic guitar with the G key.
 
 ### Keyboard shortcuts
 
@@ -205,7 +212,8 @@ With **Chord playback** turned on, the piano plays each chord at the moment it c
 |---|---|
 | Space | Play, pause |
 | M | Metronome on, off |
-| P | Chord playback on, off |
+| P | Piano chord playback on, off |
+| G | Acoustic guitar chord playback on, off |
 | ← → | Previous bar, next bar |
 | Home | Go to the beginning |
 
@@ -220,8 +228,9 @@ Songs with a clear beat, such as pop, rock, ballads, dance, hip-hop, K-pop and a
 - Your file is not sent over the internet. All analysis happens inside the browser.
 - Clicking the notice at the very bottom of the screen opens the [help page](information.html) (in Korean) in a new tab; it covers when results can be wrong and how to check them, plus the analysis principles and verification results.
 - Settings such as the metronome, chord playback, volume, chord type and chord notation style are saved in the browser and stay the same next time.
-- Even with Bluetooth earphones, the music, clicks and piano are all delayed together, so they do not drift apart from each other.
+- Even with Bluetooth earphones, the music, clicks and chord playback are all delayed together, so they do not drift apart from each other.
 - If there is no sound on an iPhone, check whether silent mode is on.
+- During playback the page scrolls to follow the current bar. While the correction/settings panel at the top or the text chord chart or analysis info panel at the bottom is open, it does not scroll, so you can keep reading the panel; close the panels and it follows again.
 
 <p align="center"><img src="docs/screenshot-mobile.png" width="280" alt="Phone screen (dark theme)"></p>
 
@@ -287,9 +296,13 @@ This metronome does not tick at a fixed interval like "97 ticks per minute"; it 
 
 The timing is precise too. If a timer fires a click by saying "play now!", it gets delayed by tens of ms whenever the computer is busy. So clicks are scheduled 0.2 seconds ahead on the **clock of the audio device** that plays the music. Because the music and the clicks use the same clock and the same output path, they mesh to the individual sample, and even on a device with delayed output, both come out late together and stay aligned with each other.
 
-### 2-8. Playing the chords on the piano
+### 2-8. Playing the chords on the piano or acoustic guitar
 
 Including recorded piano sounds would make the file large and require external files. So the piano sound is **built directly from the laws of physics**. A piano string is not an ideal string but a stiff steel wire, so its harmonics ring slightly higher than exact integer multiples (inharmonicity). The hammer strikes at about 1/7 of the string's length, so harmonics that do not move at that point ring weakly. Two or three strings sound one note together, and because they differ very slightly in pitch, the sound undulates slowly (beating), and a two-stage decay arises that falls quickly at first and then lingers. Higher harmonics die away faster, so the sound gradually becomes softer. These properties are layered as formulas to synthesize each note.
+
+Since 1.12.0, more of the properties measured on real pianos have been added: a timbre that keeps more high harmonics the harder the hammer strikes, beating between the strings in all harmonics, and a low "thump" as the hammer strikes the string and knocks the soundboard; the sound is then sent out through a response that imitates the wooden resonance of the piano soundboard. When a key is released, the dampers come down differently in each register, and the very top register (strings without dampers) rings on for a long time.
+
+The acoustic guitar is made with the Karplus-Strong method, which imitates a plucked string. If noise one string period long is fed into a delay line and fed back again and again while being darkened slightly, it becomes a sound that, like a really plucked string, loses its high components first. The position and force with which the pick strikes the string and the air and top-plate resonances of the guitar body are added, and the chords are played with fingerings held by hand on a standard-tuned six-string. A downstroke strikes all strings starting from the lowest, and an upstroke strikes the upper 3–4 strings starting from the highest, a few ms apart. When to strum is decided by finding, in each slot obtained by dividing the beat into four (three for compound meters), the moments when the sound in the original's mid range (200–2,500 Hz) newly gets louder.
 
 A chord is played split into one left-hand bass note and a right-hand chord. For the right hand, it chooses the inversion that moves the hand the least from the previous chord, so the sound does not jump around when the chord changes. The piano is tuned to the song's reference pitch found in the analysis and is scheduled on the same audio clock as the metronome, so it sounds exactly at the moment the chord changes.
 
@@ -328,7 +341,7 @@ flowchart TD
   BT --> TL[("Timeline TL")]
   TL --> CH["Chord chart view"]
   TL --> SC["Metronome scheduler"]
-  TL --> PS["Chord playback<br/>voicing, piano synthesis"]
+  TL --> PS["Chord playback<br/>voicing, piano and acoustic guitar synthesis"]
   PB --> OUT["Limiter, AudioContext output"]
   SC --> OUT
   PS --> OUT
@@ -385,16 +398,17 @@ The analysis is split into a **heavy stage** and a **lightweight stage**.
 4. **Preliminary chords**: a quick pass using only major and minor triads is solved once and used as downbeat evidence.
 5. **Subdivision decision**: the onset strengths at the 1/2 point and at the 1/3 and 2/3 points within a beat are compared to see whether it is a compound meter.
 6. **Downbeat HMM**: the meter is chosen automatically (4 beats vs 3 beats, or 4 vs 2 for compound meters), and the user's downbeat shifts are applied.
-7. **Final chord HMM**: solved by Viterbi with up to 289 states including inversions, in units of 1 beat or ½ beat.
+7. **Final chord HMM**: solved by Viterbi with up to 289 states including inversions, in units of 1 beat, ½ beat or ⅓ beat (triplet songs).
 8. **Building bars**: bars are split at each downbeat, and each gets the positions and lengths of chord changes within the bar, whether a chord continues from the previous bar, the note names (♯ or ♭) that fit the key at that point, the Camelot code and the Roman numeral. The screen shows the one chosen in the chord notation bar above the chart, and changing the notation does not re-run the analysis. Modulation boundaries are refined to the beat with a slight preference for the downbeat (to the tonic chord's position when passing through the dominant), and the bar and beat number are recorded.
 
 ### 3-7. Playback and metronome
 
 - **Music**: an `AudioBufferSourceNode` is started 60 ms after the current audio time.
 - **Scheduler**: wakes every 25 ms and schedules on the audio clock the clicks for the beats coming within the next 0.2 seconds. When the tab is in the background, the browser slows timers down, so it schedules up to 1.5 seconds ahead.
-- **Click sound**: a short sound prepared in advance (downbeat 1,850 Hz, other beats 1,250 Hz, and 2,600 Hz between beats in half-beat mode). It sounds from the very first sample, so there is no attack delay.
+- **Click sound**: a short sound prepared in advance (downbeat 1,850 Hz, other beats 1,250 Hz, and 2,600 Hz between beats in sub-beat (½-beat or ⅓-beat) mode). It sounds from the very first sample, so there is no attack delay.
 - **Resynchronization**: when the position is moved or corrections or settings change, all scheduled clicks are cancelled and rescheduled starting from the beat after the current position.
 - **Screen**: the playback position is computed every frame, minus the output latency reported by the browser, to match the moment it is actually heard. The screen is updated only when the bar, beat or chord changes.
+- **Auto-scroll**: when the bar changes and the current bar is outside the view below the fixed transport bar, the page scrolls smoothly. If any collapsible panel (`details.panel`) is open, it does not scroll (1.11.11).
 
 ### 3-8. What the correction buttons do
 
@@ -413,15 +427,16 @@ Corrections are stored as an **operation log** on the beat list and are reapplie
 | Step | What it does |
 |---|---|
 | Chord segments | For each chord event in a bar, the engine passes on the chord tones (0 = C) together with the bass note to play. When slash notation is turned off, the bass is the root. |
-| Strike list | Built according to when chords are struck. "Follow the song" strikes where the chord changes and, even for the same chord, on downbeats where the original strikes anew (black text in the chart), and keeps ringing where the chord is held over (grey). "When the chord changes" strikes a same chord continuing across bars only once, "again every bar" strikes again on each downbeat, and "every beat" strikes on all beats. On N.C. nothing is struck and the previous chord also stops. |
-| Voicing | The bass is in D2–C♯3; for the right hand all chord tones are placed in close position, choosing the inversion closest to the center of the previous voicing. |
-| Synthesis and cache | The notes used in the song are synthesized one at a time in advance, in the order they first appear (once per note). If the song's reference pitch changes, they are rebuilt. |
-| Scheduling | The same scheduler as the metronome schedules strikes 0.2 seconds ahead on the audio clock. The click timing correction is not applied; chords are played at the music's time as is. |
-| Release | At the time a chord segment ends (the next strike or N.C.), the sound decays with a 70 ms time constant, as if the dampers came down. |
-| Restart | If playback starts or jumps into the middle of a chord, the chord in progress is sounded once immediately. |
-| Mixing | Music, click and chord each have their own volume; the piano gets a little 1.6-second room reverb mixed in, then a fixed make-up gain (+6.4 dB). The three sounds pass through a limiter (−1 dBFS) just before the output and are combined without clipping. |
+| Strike list | For the piano, built according to when chords are struck. "Follow the song" strikes where the chord changes and, even for the same chord, on downbeats where the original strikes anew (black text in the chart), and keeps ringing where the chord is held over (grey). "When the chord changes" strikes a same chord continuing across bars only once, "again every bar" strikes again on each downbeat, and "every beat" strikes on all beats. On N.C. nothing is struck and the previous chord also stops. |
+| Stroke list (acoustic guitar) | The engine's `strokes(A, TL)` measures the strength of the mid-range flux in each slot obtained by dividing the beat into four (three for compound meters), and strums in slots whose strength, normalized within the song, is 0.5 or more (timed at the peak within the slot) and in slots where the chord newly changes. Sixteenth-note offbeats (odd slots) are upstrokes and the rest are downstrokes, and the strumming force varies with the strength. A bar with no strikes gets one downstroke on the downbeat. If a stroke moved to the peak within its slot comes less than 60 ms before a chord boundary (a strum played early), it is strummed with the new chord. Each string rings until the same string is struck again, the chord changes or N.C. begins (low strings are not cut off by upstrokes). When 4-, 8- or 16-beat strum is chosen, the engine's `strumGrid(A, TL, mode)` picks one method-book pattern per bar and strums in its slots (see (24)). For swing strum, the same function strums ↓·↑ on every beat, at the beat and at the offbeat position (the ratio measured from the original, or ⅔ of the beat when it cannot be measured, for straight songs and for compound meters). In N.C. sections where the original has rhythm, both functions add mute strokes (`mute`: `dead` for a mute, `palm` for a palm mute, with the note `pc` for a palm mute) (see (24)). |
+| Voicing | Piano: the bass is in D2–C♯3; for the right hand all chord tones are placed in close position, choosing the inversion closest to the center of the previous voicing. Acoustic guitar: it searches for fingerings within a 4-fret window (including open strings) on a standard-tuned six-string in which the lowest sounding string is the bass note and all strings above it are strummed, and among the shapes that contain all chord tones (with four or more tones, the fifth may be left out) it chooses by number of fingers, position and open strings (once per chord). |
+| Synthesis and cache | The notes used in the song are synthesized one at a time in advance, in the order they first appear (for the piano once per note; for the acoustic guitar, whose synthesis takes only about 2 ms per note, only the normal force layer is made in advance and the other layers when they are played, with 2 excitation noises and only the 48 most recently used buffers kept). The piano is synthesized from the current playback position onward, in order of appearance, split up harmonic by harmonic and only about 10 ms at a time, so the screen does not freeze. A chord that is not fully built yet is waited for on the playback side and struck as soon as it is ready, and skipped if it is more than 0.3 seconds late. If the song's reference pitch changes, they are rebuilt. |
+| Scheduling | The same scheduler as the metronome schedules strikes 0.2 seconds ahead on the audio clock. The click timing correction is not applied; chords are played at the music's time as is. The piano's strike list and the acoustic guitar's stroke list each keep their own place, and only the instruments that are on are scheduled, so with both on they play together. An instrument that is off still moves its place forward, so when it is turned on it continues from the current position. |
+| Release | For the piano, at the time a chord segment ends (the next strike or N.C.), the sound decays with a per-register time constant (70–160 ms, 0.6 seconds for the top register), as if the dampers came down. For the acoustic guitar, restriking the same string stops the previous sound within 8 ms (the pick blocks the string), and strings not in a downstroke are muted by hand in 30 ms. |
+| Restart | If playback starts or jumps into the middle of a chord, the chord in progress is sounded once immediately (with a downstroke on the acoustic guitar). Turning one instrument on during playback sounds the current chord on that instrument only, and turning it off stops only that instrument's sound. |
+| Mixing | Music, click and chord each have their own volume (the chord volume applies to both the piano and the acoustic guitar); the piano passes through the soundboard response and the acoustic guitar through the body response, then a little 1.6-second room reverb is mixed in and a fixed make-up gain is applied (matched by rendering so that both instruments are as loud as the 1.11 piano). All sounds pass through a limiter (−1 dBFS) just before the output and are combined without clipping. |
 
-The metronome and chord playback are also resynchronized separately. Turning the metronome off and on or changing the click timing does not cut off a piano chord that is ringing.
+The metronome and chord playback are also resynchronized separately. Turning the metronome off and on or changing the click timing does not cut off a piano chord that is ringing. The piano and the acoustic guitar are also independent of each other, so turning one off and on does not cut off the other's sound.
 
 ---
 
@@ -744,9 +759,11 @@ Since the transition score is "0 to stay, $-\lambda_s$ to change (regardless of 
 V_s(c) = e_s(c) + \max\!\Big(V_{s-1}(c),\ \max_{c'} V_{s-1}(c') - \lambda_s\Big)
 ```
 
-| Slot position | Downbeat | Middle beat of an even meter | Other beats | Between beats (½-beat resolution) | Preliminary chords (all beats) |
+| Slot position | Downbeat | Middle beat of an even meter | Other beats | Between beats (sub-beat resolution) | Preliminary chords (all beats) |
 |---|---|---|---|---|---|
 | $\lambda_s$ | 1.5 | 3.0 | 4.0 | 6.0 | 3.0 |
+
+**⅓-beat resolution (1.12.0).** In triplet songs where the beat divides into three (songs written as 12/8 or 6/8 because the beat subdivision profile is triplet), choosing "half-beat" (which becomes "⅓-beat" in such songs) solves each beat as three slots of ⅓ beat instead of ½. This is because cutting the dotted-quarter beat of a compound meter in half does not line up with the eighth-note boundaries. The emission scores are computed on chroma normalized regardless of slot length, so with more slots, changes become relatively cheaper per beat. Therefore, for ⅓ beat, the four final-chord slot values of $\lambda_s$ in the table above are multiplied by 1.75 (downbeat 2.625, middle beat 5.25, other beats 7.0, between beats 10.5; the preliminary chords' 3.0 stays the same). The results of comparing 1.5, 1.75, 2.0 and 2.5 are in 4-6. Voting across repeated sections runs only up to 3,000 slots, so for ⅓ beat it is skipped in songs longer than about 1,000 beats (1,500 beats for ½ beat).
 
 #### (14) Downbeat evidence and the meter HMM
 
@@ -817,35 +834,44 @@ x(t) = A\Big[\,0.75\,\big(\sin\, 2\pi f t + 0.3\sin\, 2\pi (2.02 f) t\big)\,e^{-
 
 #### (16) Piano synthesis
 
-The fundamental frequency and inharmonic partials are set from the MIDI note $m$ and the song's reference pitch deviation $\theta$ (in semitones).
+This is the piano of 1.12.0 (v2). The fundamental frequency and inharmonic partials are set from the MIDI note $m$ and the song's reference pitch deviation $\theta$ (in semitones). As in real pianos, the inharmonicity $B$ is small in the bass and large in the treble (Fletcher).
 
 ```math
-f_0 = 440 \cdot 2^{(m - 69 + \theta)/12},\qquad f_k = k f_0\sqrt{1 + B k^2},\qquad B = 3.5\times 10^{-4}\cdot 2^{(m-60)/24}
+f_0 = 440 \cdot 2^{(m - 69 + \theta)/12},\qquad f_k = k f_0\sqrt{1 + B k^2},\qquad B = \mathrm{clip}\big(2.5\times 10^{-4}\cdot 2^{(m-48)/16},\ 10^{-4},\ 4\times 10^{-3}\big)
 ```
 
-The partial amplitudes are set by the hammer strike position $x_h = 1/7.5$ and the high-frequency damping of the hammer felt.
+The partial amplitudes are set by the comb of the hammer strike position $x_h = 0.122$ and a felt low-pass whose cutoff frequency changes with the hammer force $v$ (default 0.55). The harder the strike, the more briefly the felt touches the string, so high partials remain.
 
 ```math
-a_k = \frac{|\sin(\pi k x_h)|}{k^{0.8}}\cdot\frac{1}{1 + (f_k/f_b)^2},\qquad f_b = \mathrm{clip}\big(2600 + 40(m-60),\ 1800,\ 5000\big)\ \text{Hz}
+a_k = \frac{0.08 + |\sin(\pi k x_h)|}{k^{0.55}\,\big(1 + (f_k/f_c)^{2.6}\big)},\qquad f_c = \mathrm{clip}\big((900 + 9 f_0)(0.55 + 1.1\,v),\ 700,\ 9000\big)\ \text{Hz}
 ```
 
-Each partial is the sum of a fast decay (prompt sound) and a slow decay (aftersound), and the low partials are sounded together by several strings $s$ at slightly different pitches $d_s$.
+Each partial is the sum of a fast decay (prompt sound, ratio $p$) and a slow decay (aftersound). Up to the 24th partial, the $S$ strings that make up one note (1: m < 32, 2: m < 44, 3: otherwise) are tuned slightly differently (±1.6 cent) by a random number fixed per note and sound together. The decay also differs slightly for each string ($\tau^S/(1 + 0.12 q)$), so beating and double decay arise in all low partials.
 
 ```math
-y(t) = \sum_{k}\ \sum_{s=1}^{S_k} \frac{a_k}{S_k}\left(0.60\,e^{-t/\tau^{F}_k} + 0.40\,e^{-t/\tau^{S}_k}\right)\sin\!\left(2\pi f_k\, 2^{d_s/1200}\, t + \varphi_k\right)
+y(t) = \sum_{k}\ \sum_{q=0}^{S_k-1} \frac{a_k}{S_k}\left(p\,e^{-t/\tau^{F}_k} + (1-p)\,e^{-(1 + 0.12q)\,t/\tau^{S}_k}\right)\sin\!\left(2\pi f_k\, 2^{d_q/1200}\, t + \varphi_k\right)
 ```
 
 ```math
-\tau^{S}_k = \max\!\left(0.12,\ \tau_1\Big(\frac{f_0}{f_k}\Big)^{0.7}\right),\qquad \tau^{F}_k = 0.15\,\tau^{S}_k,\qquad \tau_1 = \mathrm{clip}\!\left(8.5\cdot 2^{-(m-38)/16},\ 1.0,\ 8.5\right)\ \text{s}
+\tau^{S}_k = \max\!\left(0.1,\ \tau_1\Big(\frac{f_0}{f_k}\Big)^{0.75}\right),\quad \tau^{F}_k = \max(0.04,\ 0.12\,\tau^{S}_k),\quad \tau_1 = \mathrm{clip}\!\left(11\cdot 2^{-(m-36)/15},\ 1.2,\ 11\right)\ \text{s},\quad p = \mathrm{clip}\big(0.5 + 0.006(m-60),\ 0.35,\ 0.7\big)
 ```
 
-The number of strings $S_k$ for $k \le 6$ is 1 (m < 35), 2 (m < 47) or 3 (otherwise), and 1 for $k > 6$. The tuning offsets between strings are $d = (0, +1.0, -0.8)$ cent. Partials are used only up to the 32nd and 8 kHz, and are not computed after falling below −100 dB. The starting phase $\varphi_k$ differs for each partial, using a random number fixed per note, but the several strings of the same partial start in the same phase (see beating in 4-2). On top of this come 30 ms of hammer noise, a 2 ms attack ramp and a 60 ms fade at the end, and the level is set so that the RMS of the first 0.3 seconds is 0.12. The length is $\mathrm{clip}(5.6 - 0.07(m-38),\ 2.6,\ 5.6)$ seconds. The whole piano path is multiplied by a fixed make-up gain of +6.4 dB (×2.09). Sines are generated by a rotation recurrence instead of `Math.sin`, with the magnitude reset to 1 every 2,048 samples.
+Partials are used up to the 64th and 12 kHz, and are not computed after falling below −100 dB. In the bass (m < 40) the fundamental is reduced to 0.55 times, like real bass strings with strong harmonics. At the moment of striking, a low knock on the soundboard ($f = \mathrm{clip}(f_0/2, 60, 140)$ Hz, 12 ms decay) and felt noise (4 ms) are added. Sines are generated by a rotation recurrence.
 
 ```math
 \begin{pmatrix} c_{i+1} \\ s_{i+1} \end{pmatrix} =
 \begin{pmatrix} \cos\,\omega & -\sin\,\omega \\ \sin\,\omega & \cos\,\omega \end{pmatrix}
 \begin{pmatrix} c_i \\ s_i \end{pmatrix},\qquad \omega = \frac{2\pi f}{f_s}
 ```
+
+When a note is released (the next strike, N.C.), the damper decay differs by register. The piano soundboard is imitated by a 0.35-second response $h$ made of the direct sound plus 160 decaying modes placed at logarithmic intervals between 70 and 4,500 Hz; the energy of the mode part is set to 1.2 times the direct sound and the total energy to 1.
+
+```math
+\tau_\text{rel}(m) = \begin{cases} 0.6\ \text{s} & m \ge 89\ (\text{댐퍼 없음}) \\ \mathrm{clip}\big(0.16 - 0.0015(m-40),\ 0.07,\ 0.16\big)\ \text{s} & \text{그 밖} \end{cases},\qquad
+h(t) = \delta(t) + \sum_{j=1}^{160} A_j\,e^{-t/\tau_j}\sin(2\pi f_j t + \phi_j),\quad \tau_j = 0.09\Big(\frac{70}{f_j}\Big)^{0.5}\cdot U(0.6, 1.4)\ \text{s}
+```
+
+Each note's first 0.3 seconds is set to an RMS of 0.12, and the fixed gain of the path is lowered (×0.52) to offset how much the soundboard response boosts the piano range (about +12 dB), matching the loudness of the 1.11 piano. The piano up to 1.11 (v1: 32 partials and 8 kHz, beating only up to the 6th partial, no soundboard) is kept as a switch for comparison.
 
 #### (17) Voicing and striking
 
@@ -1033,6 +1059,64 @@ The first and second conditions say that $Z$ is better on the downbeat and $Y$ o
 
 **Refining anticipations at the end of a bar (1.10.3).** If a chord judged to change on the last beat of a bar continues with the same root into the next downbeat, it is often an anticipation (a strum played an eighth note ahead) or a bass approach note. Sheet music writes such changes on the next downbeat, so unless the new chord's score on that beat leads the old chord by more than 6.5, the change is moved to the next downbeat. The threshold was matched against aligned chord charts for 11 candidate spots in 4 real recordings (6 of the 7 moved spots matched the charts, and the 2 that really changed on that beat were left as is).
 
+#### (23) Acoustic guitar synthesis
+
+This is the extended Karplus-Strong algorithm (Jaffe & Smith, 1983). One period $P = f_s/f_0$ is split into a delay line of $N$ samples, a loop low-pass $H(z) = (1-s) + s z^{-1}$ (phase delay of $s$ samples) and a first-order Thiran allpass (fractional delay $d$), which removes the tuning error.
+
+```math
+N = \lfloor P - s - 0.1 \rfloor,\quad d = P - s - N,\quad A(z) = \frac{a + z^{-1}}{1 + a z^{-1}},\ a = \frac{1-d}{1+d},\qquad s = \mathrm{clip}\big(0.5 - 0.004(m-40),\ 0.3,\ 0.5\big)
+```
+
+The loop gain $g$ is set by compensating for the low-pass magnitude at the fundamental $|H(f_0)|$ so that the fundamental's decay time is $T_{60}$ (7 seconds in the bass → 1.6 seconds in the treble).
+
+```math
+g = \frac{10^{-3/(T_{60} f_0)}}{|H(e^{i 2\pi f_0/f_s})|},\qquad T_{60} = 7\cdot\Big(\frac{1.6}{7}\Big)^{\mathrm{clip}((m-40)/36,\,0,\,1)}\ \text{s}
+```
+
+For the excitation, noise one period long is low-passed with a cutoff of $\mathrm{clip}(1500 + 6000v,\ 1200,\ 9000)$ Hz that depends on the pick force $v$, the pick-position comb $x[n] - x[n - \beta N]$ ($\beta = 0.14$, picked near the bridge) is applied, and then the DC is removed. There are 3 force layers (0.45, 0.7, 0.95), and 2 noises per note are used in rotation so that the same stroke does not sound mechanically identical. The body is a 0.25-second response made of the direct sound and 90 modes between 80 and 3,500 Hz, with the air resonance (about 102 Hz), the top plate (about 205 Hz) and about 420 Hz boosted (mode energy = 1.5 times the direct sound).
+
+A stroke strikes the strings of the fingering one after another. A downstroke strikes all strings starting from the lowest, an upstroke strikes at most the upper 4 strings starting from the highest at 0.72 times the force, and the interval between strings depends on the force $v$.
+
+```math
+\Delta_\text{down} = 12\ \text{ms}\cdot(1.25 - 0.5v),\qquad \Delta_\text{up} = 8\ \text{ms}\cdot(1.25 - 0.5v)
+```
+
+Restriking the same string stops the previous sound with an 8 ms time constant (in reality the pick blocks the string), and strings not in a downstroke are muted with 30 ms.
+
+#### (24) Follow the strumming
+
+The moments when a harmony instrument was struck in the original show up as peaks in the mid-range (200–2,500 Hz) spectral flux $e_t$ (the mid band of (3)). After normalizing with the median and the 90th percentile of the positive values within the song, each beat $b_i$ is divided into $D$ slots (4, or 3 for compound meters), the maximum near each slot is taken as the slot strength, and the slot strengths are normalized within the song again.
+
+```math
+\hat e_t = \frac{e_t - \mathrm{med}^{+}(e)}{q_{0.9}^{+}(e) - \mathrm{med}^{+}(e)},\qquad
+v_{ij} = \max_{|t - \tau_{ij}| \le w} \hat e_t,\quad \tau_{ij} = b_i + \frac{j}{D}(b_{i+1} - b_i),\quad w = \min\Big(45\ \text{ms},\ \frac{b_{i+1} - b_i}{2D}\Big),\qquad
+u_{ij} = \frac{v_{ij} - \mathrm{med}(v)}{q_{0.9}(v) - \mathrm{med}(v)}
+```
+
+It strums in slots with $u_{ij} \ge 0.5$ (timed at the peak within the slot) and in slots where the chord newly changes (where a black-text chord starts in the chart), and never in N.C. slots. For direction, sixteenth-note offbeats ($j$ odd) are up and the rest are down, and the force is $\mathrm{clip}(0.6 + 0.12u,\ 0.45,\ 1)$. A bar with no strummed slots gets one downstroke on the downbeat, and two strokes that overlap within 30 ms are merged into one. The threshold and the direction rule were set using the per-string note ground truth of the 180 GuitarSet songs (4-6).
+
+**4-, 8- and 16-beat strum variations (1.12.0).** The slot size is the beat for 4-beat, the eighth note for 8-beat (3 slots per beat in compound meters) and the sixteenth note for 16-beat (6 slots per beat in compound meters). The pattern table holds the ones commonly taught in guitar method books. For 8-beat in 4/4 there are ten: ↓↑↓↑↓↑↓↑ (basic), ↓·↓↑↓↑↓↑, ↓·↓·↓↑↓↑, ↓·↓↑·↑↓↑ (go-go/calypso), ↓·↓↑↓·↓↑, ↓·↓·↓·↓↑, ↓·↓↑·↑↓·, ↓↑↓↑↓·↓↑, ↓···↓·↓↑ and ↓·↓↑↓···; 16-beat also has ten (all sixteenths, ↓·↓↑ on every beat, slow go-go, 3-3-2 syncopation, etc.); 4-beat has six, ↓↓↓↓ and ones mixed with rests; and there are separate tables for 3/4 and 2/4 and for 6/8 and 12/8 (three eighth notes as ↓↓↑, etc.). In simple meters the direction follows the pendulum rule of always swinging the hand up and down (down on beats and half beats, up in between), so the patterns differ only in which slots they strike. So that the chosen beat can be heard, every 8-beat pattern strikes at least one eighth-note upstroke and every 16-beat pattern at least one sixteenth-note offbeat.
+
+For each bar (in groups of 4, 3 or 2 beats for bars of 5 or more beats), the original's slot strengths $u_k$ measured at the same slot size (the same mid-range flux as follow the strumming, normalized across slots within the song) are used to score pattern $p$, and, together with a bonus added when the same pattern as in the previous group is kept, Viterbi picks the highest-scoring sequence of patterns over the whole song.
+
+```math
+s_n(p) = \sum_{k \in p} \big(u_k - \theta\big) + \beta\,[p = p_0],\qquad
+\max_{p_1, \dots, p_N}\ \sum_n s_n(p_n) + \sigma \sum_{n} |p_n|\,[p_n = p_{n-1}]
+```
+
+$k \in p$ are the slots the pattern strikes, $p_0$ is the basic pattern and $|p|$ is the number of slots. The threshold $\theta$ is −0.3 for 4-beat, 0.1 for 8-beat and 0.2 for 16-beat (higher for smaller slots, since there are more weak slots), and $\beta = 0.1$, $\sigma = 0.1$. If the chord newly changes in a slot the pattern does not strike, a downstroke is added in that slot (if the change falls between slots, in the first slot after it: 4-beat strikes only on beats, so in the half-beat and ⅓-beat modes a chord that changes between beats is struck as the new chord on the next beat), and N.C. slots are not struck. The force is 0.84 on the downbeat, 0.74 on other beats, 0.68 for downstrokes between beats and 0.66 for upstrokes, plus $0.06\,\mathrm{clip}(u_k, -1, 2)$ (then ×0.88 for 16-beat, so its many strokes do not sound louder), and the gap between strings is shortened to within 45% of the slot length so that one stroke never runs past the next slot, even on fast sixteenth notes.
+
+**Swing strum (1.12.0).** It plays the triplet rhythm -.--.--.--.- as is (struck on the first and third triplet notes of each beat; `-` struck, `.` rest). In simple meters each beat has two slots: a downstroke at the beat $b_i$ and an upstroke at the offbeat $b_i + \varphi\,(b_{i+1} - b_i)$, with slot lengths of $\varphi$ beat and $1 - \varphi$ beat (long:short = $\varphi : (1 - \varphi)$, 2:1 for a triplet). In compound meters (6/8, 12/8) the beat is already a triplet, so it strikes the first and third of the three eighth-note slots ($\varphi = \tfrac23$). The swing ratio $\varphi$ is measured from the original. In the beat-synchronous phase profile $S(\theta)$ (32 bins per beat, $\theta \in [-0.25, 1)$), made by overlaying and averaging the mid-range flux of every beat by position within the beat $\theta = (t - b_i)/(b_{i+1} - b_i)$, it finds the on-beat peak $\theta_\text{on}$ ( $|\theta| \le 0.12$ ) and the interior local maximum $\theta_\text{off}$ between $\theta_\text{on} + 0.42$ and $\theta_\text{on} + 0.76$ ( $\mathrm{med}\,S$ is the median over $\theta \in [0, 1)$).
+
+```math
+\hat\varphi = \theta_\text{off} - \theta_\text{on},\qquad
+\mathrm{sal} = \frac{S(\theta_\text{off}) - \mathrm{med}\,S}{S(\theta_\text{on}) - \mathrm{med}\,S}
+```
+
+If the offbeat position $\hat\varphi$ exceeds 0.70 but the mirror position $\theta_\text{on} + 1 - \hat\varphi$ and the ½ position (each the maximum within ±0.04) are also filled (height above the median more than 0.3 times that of the offbeat peak), the song is treated as straight sixteenth notes and the search is repeated between $\theta_\text{on} + 0.42$ and $\theta_\text{on} + 0.70$. If $\mathrm{sal} \ge 0.2$, beats whose normalized strength at the offbeat position is 0.5 or more make up at least 20%, and $\hat\varphi \ge 0.56$, the original is taken to swing, and $\hat\varphi$ is clipped to [0.56, 0.75] and used. Otherwise (a straight song, a swing lighter than 0.56, or an unclear offbeat), it strums at the triplet position $\varphi = \tfrac23$. So songs with a light swing of about 0.55 are also played at 2:1. Unlike 4-, 8- and 16-beat, it does not choose variations bar by bar and always strums ↓·↑ on every beat (the reason variations were not added is in 4-6). In half-beat mode, when the chord changes between beats, the new chord is struck at that beat's offbeat position $\varphi$, and the previous chord keeps ringing until then. The analysis info shows the offbeat position (as a ratio of the beat length, e.g. 0.63 beat), the long:short ratio and whether it was measured from the original ("measured from the original", or the reason the default triplet was used: "the original is straight" or "could not be measured from the original"), and for 12/8 and 6/8 songs only "swing (compound-meter triplet ↓·↑)" is shown.
+
+**Mutes and palm mutes in N.C. sections (1.12.0).** Even where there is no chord (N.C.), the acoustic guitar strums with the strings damped if the original has rhythm. Consecutive N.C. events are grouped into one section, and the same slot strength $u$ as in follow the strumming (the formula above) is used to check whether anything was struck in the original. It strums only on beats where the share of slots with $u \ge 0.5$ among the slots in the section is 0.15 or more, the piece of the section cut at the barlines has at least one such slot, and the beat's level (the beat's rms² in dB − the song's median beat level) is −18 dB or more. Follow the strumming strums in slots with $u \ge 0.5$, and 4-, 8- and 16-beat and swing strum in the slots their chosen pattern strikes (the way the pattern is chosen is unchanged). So it does not play in quiet beginnings, endings and stops. How to strum is decided per section. If a majority of the section's beats have a pitched bass (in the beat's bass chroma with the song's floor removed, the largest note is 50% or more of the sum and the sum is at least 0.3 times the song's median), there are 3 or more such beats, and the most common bass note accounts for 60% or more of those beats and is a scale note of the key at that spot, it plays a **palm mute** with that note's power chord (root, fifth and octave, on the three lowest strings). Otherwise it plays a **mute** (a "chik" struck with the left hand damping all six strings). The sound uses the string model of (23) as is, but for the palm mute a first-order low-pass is added inside the string loop so the high harmonics die away quickly, with a fundamental T60 of 0.15–0.29 seconds (longer for lower notes), and for the mute the T60 is about 30 ms with pick and string noise added. When a mute is struck, all ringing strings stop (since the hand is on the strings), and the level was set a little below that of an ordinary stroke (mute ×1.5, palm mute ×0.8 → the RMS of the first 0.1 seconds is about 7 dB lower for the mute and about 6 dB lower for the palm mute).
+
 ### 4-2. The physical world
 
 #### Sound, pitch, equal temperament
@@ -1109,17 +1193,33 @@ A sample rate $f_s$ cannot hold components above $f_s/2$ (the Nyquist frequency)
 
 #### Piano strings
 
-These are the physical phenomena imitated by the piano synthesis used for chord playback.
+These are the physical phenomena imitated by the piano synthesis (1.12.0 v2) used for chord playback.
 
 | Phenomenon | Physics | In the synthesis |
 |---|---|---|
 | Inharmonicity | Because of the bending stiffness of a steel string, higher harmonics are sharper than integer multiples. $B = \pi^3 E d^4 / (64 T L^2)$ ( $E$ Young's modulus, $d$ diameter, $T$ tension, $L$ length) | $f_k = k f_0\sqrt{1 + Bk^2}$, with $B$ increasing in higher registers |
-| Strike position | When the hammer strikes at about 1/7 to 1/9 of the string's length, harmonics that have a node (a point that does not move) at that spot barely sound | $\lvert\sin(\pi k x_h)\rvert$ , $x_h = 1/7.5$ |
-| Hammer felt | The soft felt touches briefly and filters out very high components | $1/(1 + (f_k/f_b)^2)$ |
+| Strike position | When the hammer strikes at about 1/7 to 1/9 of the string's length, harmonics that have a node (a point that does not move) at that spot barely sound | $\lvert\sin(\pi k x_h)\rvert$ , $x_h = 0.122$ |
+| Hammer felt | The soft felt touches briefly and filters out very high components | $1/(1 + (f_k/f_c)^{2.6})$ |
 | Double decay | The several strings of one note exchange energy through the bridge, so the sound decays quickly at first and then lingers | Prompt sound 60%, aftersound 40% |
-| Beating | The strings of one note are tuned slightly differently, around 1 cent, so the sound undulates slowly | Low partials are synthesized with 2–3 strings, and the strings of the same partial start in the same phase so they gradually drift apart |
-| Per-partial decay | Higher harmonics lose energy faster, so the sound darkens over time | $\tau_k \propto (f_0/f_k)^{0.7}$ |
-| Sustain by register | Low strings are long and heavy and ring for a long time | Fundamental aftersound 1.0–8.5 seconds |
+| Beating | The strings of one note are tuned slightly differently, around 1 cent, so the sound undulates slowly | Synthesized with 2–3 strings up to the 24th partial (±1.6 cent by a random number fixed per note), and the strings of the same partial start in the same phase so they gradually drift apart |
+| Per-partial decay | Higher harmonics lose energy faster, so the sound darkens over time | $\tau_k \propto (f_0/f_k)^{0.75}$ |
+| Sustain by register | Low strings are long and heavy and ring for a long time | Fundamental aftersound 1.2–11 seconds |
+| Hammer force | The harder the strike, the more briefly the felt touches the string, so high harmonics remain (brighter) | Felt low-pass cutoff $f_c \propto 0.55 + 1.1v$ |
+| Soundboard | The string's vibration passes through the bridge to the wooden soundboard, which radiates it into the air. The soundboard's many resonances add a woody ring to the timbre | Passed through a response of 160 decaying modes at 70–4,500 Hz |
+| Dampers | When a key is released, a felt damper presses on the string and the sound dies away quickly. The top register has no dampers | 70–160 ms by register, 0.6 seconds at the top |
+
+#### Acoustic guitar strings
+
+These are the physical phenomena imitated by the acoustic guitar (steel-string) synthesis.
+
+| Phenomenon | Physics | In the synthesis |
+|---|---|---|
+| Decay of a plucked string | As the string vibrates it loses energy to the bridge and the air, and higher components are lost faster | Low-pass in the delay-line loop (Karplus-Strong) |
+| Tuning | If one period is not a whole number of samples, the pitch goes off | Fractional delay with a first-order allpass (error within 0.21 cent) |
+| Pick position | Picking near the bridge weakens the harmonics that have a node at that point | Comb $x[n] - x[n - 0.14N]$ |
+| Pick force | The harder the pick, the brighter and louder | Excitation low-pass 1.2–9 kHz, 3 force layers |
+| Body resonance | The air inside the body (about 100 Hz) and the top plate (about 200 Hz) boost the low end | Response of 90 modes, emphasizing 102, 205 and 420 Hz |
+| Strumming | A downstroke reaches the strings from the lowest, an upstroke from the highest, a few ms apart. Restriking briefly blocks the string with the pick | 4–15 ms between strings; the previous sound on the same string is stopped |
 
 #### Latency and distance
 
@@ -1138,7 +1238,7 @@ flowchart LR
     CT["Correction and settings controls"]
     RD["Renderer<br/>chord chart, indicators, waveform"]
     PL["Player and scheduler"]
-    PN["Chord playback<br/>voicing, piano synthesis cache"]
+    PN["Chord playback<br/>voicing, piano and acoustic guitar synthesis cache"]
   end
   subgraph EN["Engine script Engine"]
     AN["analyze"]
@@ -1164,7 +1264,7 @@ flowchart LR
 ├── information.html          help page (Korean): evidence for decisions, analysis principles and formulas, verification results (single file)
 ├── LICENSE                   terms of use
 ├── README.md
-├── README.en.md              English README
+├── README.{en,ja,zh,fr,es}.md  README translations: English, Japanese, Chinese, French, Spanish
 └── docs/
     ├── screenshot-desktop.png
     ├── screenshot-mobile.png
@@ -1209,7 +1309,7 @@ console.log(Engine.chartText(TL, { title: 'My Song', notation: 'roman' }));
 | `meter` | `'auto'` or an integer | `'auto'` | Beats per bar |
 | `downShift` | Integer | `0` | Downbeat shift (positive means later) |
 | `vocab` | `'basic'`, `'standard'`, `'extended'` | `'standard'` | Chord vocabulary |
-| `res` | `1` or `2` | `1` | Chord change unit (1 beat, ½ beat) |
+| `res` | `1` or `2` | `1` | Chord change unit (1 beat, sub-beat: ½ beat, or ⅓ beat for triplet songs) |
 | `slash` | true, false | `true` | Bass note (inversion) notation |
 
 Main fields of the **analysis result `A`**
@@ -1235,6 +1335,7 @@ Main fields of the **timeline `TL`**
 | `beats`, `pos`, `barOfBeat` | Beat times, position within the bar (0 is the downbeat), the bar each beat belongs to |
 | `bars[]` | `num`, `pickup`, `t0`, `t1`, `startBeat`, `nBeats`, `events[]` |
 | `events[]` | `off`, `dur` (in beats), `tied`, `pcs` (chord tones, 0 = C), `bassPc` (bass to play), `label` (`root`, `base`, `ext`, `bass`, `text`, `ascii`, `nc`, `cam`: Camelot `code`, `ext`, `text`, `ascii`; `rn`: Roman numeral `acc`, `num`, `qual`, `fig`, `sus`, `sec`, `text`, `ascii`) |
+| `res`, `subRes` | Actual chord slot resolution (1, 2, 3: 3 when `settings.res` is 2 and the song is triplet), resolution when sub-beat is chosen (2 or 3) |
 | `bpm` | Tempo computed from the median beat spacing |
 | `meter` | `m`, `triple`, `label` (e.g. `4/4`, `12/8`), `contrast`, `alt` |
 | `key` | First key: `tonic`, `mode`, `score`, `name` (e.g. `E♭ major`) |
@@ -1259,7 +1360,7 @@ flowchart LR
   M["Music buffer"] --> GM["Music volume"]
   C["Click buffer"] --> GC["Click volume"]
   P["Piano notes<br/>per-note velocity, stereo position"] --> PB["Piano bus"]
-  PB --> MK["Makeup gain +6.4 dB"]
+  PB --> MK["Makeup gain ×0.52 (piano), ×0.98 (guitar)"]
   PB --> RV["Room reverb 1.6 s"] --> W["Reverb amount 0.22"] --> MK
   MK --> GP["Chord volume"]
   GM --> L["Limiter −1 dBFS"]
@@ -1270,7 +1371,7 @@ flowchart LR
 
 #### Saved settings
 
-Metronome on/off, downbeat accent, chord name notation (note names, Camelot, Roman numerals), chord playback on/off and when to strike, music, click and chord volumes, click timing, auto-scroll, theme, chord vocabulary, resolution, and slash notation are saved to `chordity-prefs-v1` in `localStorage` (values saved under an earlier name are migrated). The app works as usual even in environments where saving is not possible.
+Metronome on/off, downbeat accent, chord name notation (note names, Camelot, Roman numerals), piano and acoustic guitar chord playback on/off (acoustic guitar from 1.12.0) and when the piano strikes, how the acoustic guitar plays (1.12.0), music, click and chord volumes, click timing, auto-scroll, theme, chord vocabulary, resolution, and slash notation are saved to `chordity-prefs-v1` in `localStorage` (values saved under an earlier name are migrated). The app works as usual even in environments where saving is not possible.
 
 ### 4-4. Issues and solutions
 
@@ -1336,8 +1437,8 @@ Problems encountered during development and how they were solved. The figures we
 | Minimal screen updates | DOM modified only when the bar, beat or chord changes. The waveform shows progress by clipping two canvases drawn once to a CSS width | No canvas redraw every frame |
 | Click sound | Prebuilt as a buffer and reused; canceled all at once via a schedule list | No oscillator graph built per click |
 | Typed arrays | `Float32Array`, `Float64Array`, `Int16Array`, `Int32Array`, `Uint8Array` | Contiguous memory, JIT optimization |
-| Piano synthesis | Sine generation by rotation recurrence (no `Math.sin` calls), computation skipped below −100 dB, each note synthesized once and cached, presynthesized in the order of first appearance in the song | 0 main-thread tasks over 50 ms during playback |
-| Piano note memory | Only the notes used in the song (15 in the test song), 2.6–5.6 s mono | About 13 MB |
+| Piano and acoustic guitar synthesis | Sine generation by rotation recurrence (no `Math.sin` calls), computation skipped below −100 dB, each note synthesized once and cached, presynthesized in the order of first appearance in the song. The acoustic guitar is a single delay line, so about 2 ms per note (piano v2 about 60 ms, v1 about 30 ms; 48 kHz, node) | 0 main-thread tasks over 50 ms during playback |
+| Chord playback note memory | Piano: only the notes used in the song (15 in the test song), 2.8–6.5 s mono; acoustic guitar: 3 s mono notes, up to the 48 most recently used | Piano about 14 MB, guitar at most about 28 MB |
 
 There is also a reason for not using web workers. Workers need a separate script file or a `blob:` URL, which constrains single-file distribution and environments with a strict content security policy. Yielding every 32 ms alone keeps the progress display smooth even while analyzing a 5-minute song.
 
@@ -1464,6 +1565,76 @@ Scheduled piano notes were intercepted the same way. The pitch of each note buff
 | Effect on the metronome | Even with the limiter, clicks 37/37, 29/29, 22/22 on beat, and downbeat accents all correct |
 | Main thread | 0 tasks over 50 ms during playback |
 | Loudness and ringing | The app's actual synthesis function and sound path were rendered with OfflineAudioContext and compared with the previous version at the same slider setting. First-second RMS +5.1 to +6.5 dB (about 1.8–2.1 times), 1–2 s tail +2.7 to +3.0 dB, 10 dB decay time 1.3–1.8 times (C, G7, Am). Peaks at −7 dBFS at the default volume, −2.3 to −3.0 dBFS at maximum volume |
+
+#### Acoustic guitar and new piano tests (1.12.0)
+
+**Scoring follow the strumming.** From the per-string note ground truth of the 180 GuitarSet songs, groups in which 3 or more strings sounded within 60 ms were taken as actual strokes (8,551 of them), labeled down if the lower strings sounded first and up if the higher strings sounded first. A stroke time chosen by the engine within ±50 ms counted as a hit.
+
+| Method | Precision | Recall | F |
+|---|---|---|---|
+| Treble chroma rise, threshold 0.5 | 0.48 | 0.61 | 0.54 |
+| Onset envelope (full band), threshold 0.5 | 0.53 | 0.64 | 0.58 |
+| Mid-range flux, threshold 0.3 | 0.50 | 0.73 | 0.59 |
+| Mid-range flux, threshold 0.5 (adopted) | 0.54 | 0.64 | 0.59 |
+| Mid-range flux, threshold 0.7 | 0.55 | 0.55 | 0.55 |
+| Mid-range flux, averaged over the same position in the 2 bars before and after | 0.54 | 0.61 | 0.57 |
+
+F by song type is rock 0.60, funk 0.62, bossa nova 0.64, jazz 0.65 and singer-songwriter 0.43 (much of the accompaniment is fingerpicked). Threshold 0.3 has the same F but lower precision (it often strums where nothing was played), so 0.5 was chosen; a repeating pattern averaged across bars did not improve things and was not used. For direction, all-down (70.4%) and up only on sixteenth-note offbeats (70.3%) are almost the same, while making eighth-note offbeats up drops to 66.8%, so the sixteenth-note rule, which mixes in upstrokes, was chosen.
+
+**Scoring the 4-, 8- and 16-beat strum variations.** With the same ground truth, playing only the basic pattern was compared with choosing a variation bar by bar, for each slot size ("Changes" is the rate at which the pattern changed from group to group).
+
+| Slot size | F, basic pattern only | F, variations chosen | Direction (basic → variations) | Changes |
+|---|---|---|---|---|
+| 4-beat | 0.462 | 0.471 | 75.8% → 75.6% | 0.31 |
+| 8-beat | 0.462 | 0.501 | 63.4% → 67.6% | 0.24 |
+| 16-beat | 0.314 | 0.415 | 70.0% → 69.8% | 0.18 |
+
+For every song type (rock, funk, bossa nova, jazz, singer-songwriter), the result was equal to or higher than playing only the basic pattern. With a keep-pattern bonus $\sigma$ of 0, F is a little over 0.01 higher, but the pattern changes almost every bar (0.5–0.7 times per group), so it was set to 0.1. Adding patterns that strike only quarter or eighth notes to the 8- and 16-beat tables gives a higher F of 0.509 and 0.485, but even with 16-beat chosen, bars striking only quarter notes became the most common, so they were not added; adding high-range flux (F ±0.003) and changing the density with bar dynamics (F −0.007 to −0.011) were only compared. On five real popular-music recordings, 8-beat switched among 6–13 patterns per song depending on the section (intro ↓···↓·↓↑, verse ↓·↓↑·↑↓·, etc.), while 16-beat stayed on a single ↓·↓·↓·↓↑-type pattern (eighth-note downstrokes plus one sixteenth-note upstroke) for a long time in songs with a steady drum rhythm (4-8).
+
+**Sound.** The fundamental of the acoustic guitar matches the target pitch within 0.21 cent on every note from E2 to E5 (MIDI 40–76), and it also follows the song's reference pitch deviation (−30, +25 cents). The loudness (RMS) compared at the same volume, by rendering the app's sound path with OfflineAudioContext, is −24.6 dBFS for the 1.11 piano, −24.6 for the new piano and −25.4 for the acoustic guitar on 12 seconds of GuitarSet rock accompaniment, and −27.1, −26.8 and −26.4 dBFS on a synthetic pad song. With the new piano and the acoustic guitar both on, it is −22.1 and −24.0 dBFS, with peaks of at most −5.5 and −5.3 dBFS, below the limiter. The chord fingerings come out as shapes held by hand, such as C x32010, G 320003, Am x02210, D xx0232, E 022100, Bm7 x20202 and C/E 032010.
+
+**Main thread.** Right after opening a song, playback was moved to a later bar that had not been synthesized in advance yet, and tasks over 50 ms (longtask) were counted during 6 seconds of playback. The first implementation, which synthesized the new piano in one go, had 5 (51–93 ms); after only splitting the synthesis into pieces there was 1 (195–267 ms), because the first chord was finished on the spot; since unready chords are waited for, there are 0 for both the piano and the acoustic guitar (1.11.11 also has 0). In exchange, the first chord right after opening a song, or right after moving to a place not visited yet, may come in slightly late (once, by about 70 ms, in the "follow the song" test).
+
+**Browser test (`e2e-guitar.js`).** At first only the piano button is on, and once the acoustic guitar button is turned on, it stays on after reopening. With both on and 7 seconds of the pad song played, the piano strikes the chord notes at the same moment (3 times) and the acoustic guitar plays 17 strokes with 4–6 strings per stroke, struck one after another 7.7–11.0 ms apart, so the two sound together. Turning the piano off with the P key leaves only the acoustic guitar playing, and turning the acoustic guitar off with the G key and the piano on leaves only the piano; turning the acoustic guitar off during playback leaves no guitar notes after that, while the piano keeps playing. At every chord boundary there was a stroke played with the new chord (8/8, 15/15 and 9/9 on two GuitarSet songs and the pad song). With 4-, 8- and 16-beat, on 9 seconds of a synthetic pop song with drums, every stroke fell on a beat, eighth-note or sixteenth-note slot measured from the metronome clicks (within 2% of the click interval), and the direction judged from the pitches of the first and last strings matched the pendulum rule every time (all 14 strokes down for 4-beat, 17 strokes for 8-beat, 35 for 16-beat). The results of the 18 regression songs, key, Roman numeral, 37 synthetic song and real recording tests are the same as 1.11.11 (the analysis did not change).
+
+**Scoring swing strum.** With the same GuitarSet ground truth, the actual swing ratio of each song (the offbeat position of the strokes relative to the ground-truth beats) was measured, and the 97 simple-meter songs in which the engine caught the beats at the ground-truth tempo were divided into 22 swing songs (jazz 15, singer-songwriter 4, bossa nova 2, rock 1) and 75 straight songs. The offbeat error is the median time difference between matched offbeat strokes and the ground truth.
+
+| Mode | F, swing songs (±30 / ±50 ms) | F, straight songs | Offbeat error, swing songs |
+|---|---|---|---|
+| 8-beat basic pattern (offbeat at the ½ position) | 0.344 / 0.399 | 0.491 / 0.513 | 30.5 ms |
+| 8-beat variations (app default) | 0.408 / 0.461 | 0.519 / 0.538 | 34.0 ms |
+| Swing, always at the triplet ⅔ position | 0.385 / 0.432 | 0.310 / 0.335 | 22.1 ms |
+| Swing, ratio measured from the original (adopted) | 0.422 / 0.454 | 0.310 / 0.336 | 14.8 ms |
+
+On swing songs, the ratio measured from the original differed from the actual ratio by a median of 0.012 beat, but the songs that passed the confidence conditions and were played at that ratio were 15 of the 22 swing songs (the other 7 got ⅔ because their offbeats were not clear), and 74 of the 75 straight songs were judged straight (the one song mistaken for swing is a bossa nova). On the 11-song real popular-music recording kit and the 17 test WAVs other than the shuffle, no song was wrongly measured as swing either, so all were played at the triplet position (the 12/8 ballad is in a compound meter, so ⅔ by definition). Swing scores lower than 8-beat on straight songs, and on swing songs it is also slightly lower than the 8-beat variations at ±50 ms, because it strums on every beat: at a position not in the original (⅔) in straight songs, and also on offbeats where the original rests in swing songs. Swing is a mode that turns the playing into a triplet rhythm rather than following the original, so this is left as is. The synthetic shuffle song (`shuffle.wav`, 96 BPM, swing ratio 0.62, ↓·↑ on every beat) was played as 4/4 with a ratio of 0.626 and 0.95 upstrokes per beat, and the synthetic swing jazz at 140 BPM and bebop at 260 BPM (ride offbeat at ⅔) were measured at 0.673 and 0.661.
+
+Letting it choose a variation bar by bar (patterns mixed with rests as in 8-beat, such as ↓··↓··↓·↑↓·↑) raised F on the GuitarSet swing songs (15 of the 22 are jazz) by +0.030 / +0.029 and on compound-meter songs by +0.026 / +0.022, but on the synthetic shuffle song it chose ↓··↓··↓·↑↓·↑, without the upstrokes of the first two beats, in every bar, so upstrokes per beat fell 0.95 → 0.48 and F (±30 ms) 0.972 → 0.829, and in the 12/8 synthetic ballad every bar likewise became D--D-UD--D-U, with half the upstrokes, instead of four ↓·↑ (D-UD-UD-UD-U). This is because when upstrokes are weaker than downstrokes, the strengths of the offbeat slots cluster below the median within the song. Even when the slot strengths were normalized in other ways (against the floor between slots, as a ratio to neighboring beats, or separately for on-beat and offbeat slots), the ability to tell offbeat slots that were struck from those that were not (balanced accuracy) on straight popular-style GuitarSet songs stayed the same at 0.69–0.70, so swing plays only ↓·↑ on every beat, without variations. A rule that treats a song as straight sixteenth notes when the offbeat exceeds 0.70 even if only the ½ position is filled prevents false shuffles (0.75) in hand-made tresillo (3-3-2) and dembow patterns, but it judged one GuitarSet swing rock song straight and lowered the swing-song F 0.422 → 0.411, so it was not added.
+
+In the browser test, the synthetic shuffle song got one downstroke on the beat and one upstroke at the 0.63 position in all 14 beat-click intervals, the straight pop song was struck at the ⅔ position 14/14, and the 12/8 ballad at the 0 and ⅔ positions of the dotted-quarter beat. For chords that change between beats in half-beat mode (G → G7, Esus4 → E), the new chord's note (F, G♯) was in the upstroke at that beat's ⅔ position and not in that beat's downstroke, and there were no separate strokes at the half-beat position. The strokes of 4-, 8- and 16-beat and of follow the strumming do not differ at all from before swing was added, on the 180 GuitarSet songs, the 18 test WAVs and the 11 kit songs (over 220,000 strokes).
+
+**Scoring the ⅓-beat mode.** Among the test songs, the ones analyzed as triplet are 38 GuitarSet songs (all with a ground-truth meter of 4/4: songs with a swing or shuffle feel, or, for 16 of them, songs where the dotted quarter was caught as the beat), 72 GTZAN songs and 1 of the 37 synthetic songs (the 12/8 ballad); there are none among the 11 songs of the real-recording kit. For songs that are not triplet (142 GuitarSet songs, 927 GTZAN songs, the 11 kit songs), the half-beat results are also the same as 1.11.11, and with the 1-beat unit (the default) every song is the same. Among the 450 ground-truth changes in the 38 triplet GuitarSet songs there is not a single change between beats, so whether changes at ⅓ positions are right cannot be checked there; 8 synthetic 12/8 songs whose chords change at eighth-note positions (⅓, ⅔) (64 changes between beats, 128 changes on beats) were therefore made separately for the comparison.
+
+| Chord change unit | Between-beat changes in place, synthetic songs (±¼ eighth note) | Root / major-minor / change-boundary F, 29 triplet popular-style GuitarSet songs | Between-beat changes, 72 triplet GTZAN songs (per bar) |
+|---|---|---|---|
+| ½ beat | 0 / 64 | 77.3% / 68.1% / 0.418 | 0.385 |
+| ⅓ beat, penalty ×1.5 | 56 / 64 | 76.7% / 67.9% / 0.446 | 0.516 |
+| ⅓ beat, penalty ×1.75 (adopted) | 56 / 64 | 77.2% / 68.5% / 0.466 | 0.375 |
+| ⅓ beat, penalty ×2.0 | 52 / 64 | 77.3% / 68.6% / 0.468 | 0.288 |
+| ⅓ beat, penalty ×2.5 | 40 / 64 | 78.0% / 69.7% / 0.490 | 0.159 |
+
+The 128 changes on beats were in place with every setting. ×1.5 has the same change cost per beat as ½ beat, but in GTZAN it increases changes between beats by 34% and lowers the GuitarSet root by about 0.7 percentage points, so ×1.75 was chosen: it catches the ⅓-position changes as well as ×1.5 does, while keeping the number of changes between beats similar to ½ beat. ×2.0 and above score higher on GuitarSet (since the ground truth has no changes between beats, fewer changes score higher), but they miss the ⅓-position changes in the synthetic songs. Multiplying separately, ×1.5 for on-beat slots and ×2.0 only for between-beat slots, was not added because on 2 of the synthetic songs above (66 and 76 BPM, 16 changes between beats) 10 changes were in place (14 with ×1.75). In the browser test (`e2e-subtick.js`), with the 12/8 ballad in ⅓-beat mode, two "tik"s sound between every pair of adjacent beats at the ⅓ and ⅔ positions (within 5 ms), the chart's small slashes are also two per beat, and the select box and the "Active" summary show "⅓-beat", while the chord change unit in the analysis info shows "⅓ beat".
+
+**Scoring N.C. mutes.** First, what N.C. is in real songs was measured. In 11 real popular-song recordings, N.C. was 26 of 5,149 beats (0.5%), almost all of it quiet beginnings and endings, while in 600 popular-style GTZAN songs it was 426 of 34,391 beats (1.2%, 73 songs), many of them drum-only breaks and hip-hop sections with only bass and drums. Drum intros, drum breaks, complete stops, a last chord ringing out to the end, soft fade-outs, rising noise, bass+808 and rap-vocal sections and so on were put into 22 synthetic songs with ground truth (66–150 BPM; pop, acoustic, EDM, hip-hop, rock, waltz, 12/8), and the ground truth for every beat (chord, mute, palm mute with its note, or rest) was written down for the comparison.
+
+| Mode | Mutes | Beat precision | Beat recall | False mutes in rests | Palm-mute note correct |
+|---|---|---|---|---|---|
+| Follow the strumming | 324 | 1.000 | 0.573 | 0 | 100% |
+| 4-beat | 181 | 1.000 | 0.564 | 0 | 100% |
+| 8-beat | 273 | 1.000 | 0.579 | 0 | 100% |
+| 16-beat | 456 | 1.000 | 0.601 | 0 | 100% |
+| Swing | 386 | 1.000 | 0.601 | 0 | 100% |
+
+The type (mute or palm mute) was right 78–80% of the time, and every miss was a walking bass (the note changes every beat) played as a mute (a "chik" was judged better than a wrong note, so a palm mute is played only when one note continues for more than 60%). The 9 synthetic sections with only bass and kick are read by the engine as chords (A, D, etc.), so they are not N.C. and are played with those chords. The 11 real recordings have 0 mutes in every mode, and among the test WAVs mutes occur only in the two songs with drum-only intros and in the palm-mute test song. In the real recordings, the places that have rhythm but must be blocked were the ending of “Sigan-eul dallyeoseo” (strong slots 50%, −23 dB: blocked by the level threshold) and the beginning of “Gomin jungdok” (strong slots 2/16, blocked by the section condition). Comparing thresholds, a section strong-slot share of 0.10 produced mutes in the real recordings (“Gomin jungdok”, “Ijen annyeong”), 0.20 lowered the beat recall 0.58 → 0.50, and a level threshold of −24 dB put mutes at the ending of “Sigan-eul dallyeoseo”, so 0.15 and −18 dB were chosen. Without the bar-piece condition, when a quiet bar was joined into one section with the following break, 4-, 8- and 16-beat and swing put 13 mutes on beats with no sound. Letting the palm-mute note follow each beat made 20 of 225 notes in GTZAN clash a semitone against the root of a neighboring chord, so the notes were merged into one note, played only when it is a scale note of the key (0 of 162). Strokes outside N.C. did not change at all on the 180 GuitarSet songs, the 999 GTZAN songs, the test WAVs or the real recordings. In the browser test, on a drum intro, follow the strumming's 9 mutes and 8-beat's 12 mutes all fell on the metronome slots following the pendulum rule, with ordinary strokes from the first chord on, and on a bass+808 rap intro (`ncpalm.wav`) it played only A5 palm mutes (lowest note 110.3 Hz).
 
 #### Extended song-type tests (1.5.0)
 
@@ -1716,7 +1887,7 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 - **An easy-to-read, bar-based chord chart.** Supports multiple chords per bar, placement aligned to beat positions, slash chords, pickup bars, N.C., held-over chord display, ♯/♭ spelling fitted to the key of each section, a choice of Camelot (8B, 8A) and Roman numeral (I, V7/vi, ii⁶₅) notation, modulation positions (which key from which bar and beat), and copying a text chart.
 - **Chords that go wrong less often even with vocals.** In stereo recordings it reduces the vocals panned to the center and pools chord evidence across repeated verses and choruses, reducing errors where a neighboring chord is pulled in by the vocal melody (10 real popular songs, root 90.4% → 93.7%).
 - **Automatic reference pitch correction.** Even for recordings where A4 is not 440 Hz, it estimates and corrects the tuning before finding chords.
-- **Check the recognized chords by ear.** A piano plays the chords tuned to the original's reference pitch, so you can listen over the original and judge right away whether the chords are correct. Music, click and chord sounds are adjusted separately.
+- **Check the recognized chords by ear.** A piano or an acoustic guitar (together, when both are on) plays the chords tuned to the original's reference pitch, so you can listen over the original and judge right away whether the chords are correct. The acoustic guitar finds the rhythm played in the original and strums in that rhythm, or picks, bar by bar, the 4-, 8- or 16-beat strum variation from guitar method books that fits the original. Music, click and chord sounds are adjusted separately.
 - **Instant correction.** The beat level and downbeat, which people perceive differently, can be fixed with a single button and are applied within tens of ms without reanalysis.
 - **Fully offline, with privacy.** No uploads; it runs as a single HTML file without external libraries, CDNs or web fonts.
 - **Explainable decisions.** It works with signal processing and probabilistic models, without a trained black-box model, and tempo candidates, the evidence for phase and level checks, meter contrast and key correlations can be viewed on screen.
@@ -1747,7 +1918,9 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 - When a vocal melody or sustained notes mix into the harmony band, a neighboring chord with many common tones may be read (A → Bm7/A, G7 → Gm7, C → Cm7, etc.). The vocal-melody reduction and repetition matching in 1.11.0 reduced such errors on 10 real popular songs from 5.0% to 3.6% (0.1 s samples), but vocal-melody reduction works only on stereo recordings with the vocals panned to the center, and repetition matching has no effect, or may pull the wrong way, in sections that appear only once or where the chords are varied on each repetition.
 - For chords with the same notes (Cm7 and E♭6, Cm9 with ninths mixed in and E♭maj7, etc.) the bass is the only cue, and because of the balance with bass lines full of passing tones, the root is sometimes wrong.
 - The whole file is decoded into memory, so very long files (tens of minutes) may hit the browser's memory limit.
-- The piano for chord playback is not recorded samples but a synthesized sound imitating the physics, so its timbre differs from a real grand piano, and there is only one voicing style: a single bass note plus a close-position right hand.
+- The piano and acoustic guitar for chord playback are not recorded samples but synthesized sounds imitating the physics, so their timbre differs from the real instruments. The piano has only one voicing style (a single bass note plus a close-position right hand), and the acoustic guitar only one kind of fingering (standard tuning, no capo, within 4 frets).
+- The new piano takes tens of ms to synthesize each note, so the notes used in the song are built in advance. Right after opening a song, or right after moving to a place not visited yet, the first chord may come in slightly late, or be skipped if it is more than 0.3 seconds late.
+- The acoustic guitar's follow the strumming looks for moments when the sound in the original newly gets louder, so in songs with strong drums it strums along with the drum rhythm, and fingerpicked playing (arpeggios) is also played as strums. On the 180 GuitarSet songs, agreement with actual strokes (3 or more strings struck within 60 ms) is F 0.59, the direction (down/up) is right 70% of the time, and it plays upstrokes less often than the real performances (12%). The 4-, 8- and 16-beat strums are played on the analyzed beats, so if the beats or downbeats are off, they are off too, and in songs with a steady drum rhythm 16-beat may stay on one pattern for a long time. Brushing (muted) strokes mixed in between chords outside N.C. are not available yet. Palm mutes in N.C. are played only where the engine reads N.C., so if a bass-only riff is read as a chord (e.g. A), that chord is played, and a bass whose note changes every beat is played as mutes instead of palm mutes. Nothing is played before the first beat or after the last beat, and the palm-mute level differs slightly by root (E♭5 at the 6th fret of the 5th string is about 2–4 dB quieter than other notes). The 8- and 16-beat variations may pick sparse patterns without upstrokes in songs where upstrokes are much weaker than downstrokes (on a synthetic pop song strummed ↓↑ on every beat, 8-beat comes out as a ↓·↓·↓·↓↑-type pattern). Swing strum does not vary bar by bar even when the original swings, playing only ↓·↑ on every beat, and for songs with an unclear offbeat or a swing lighter than 0.56 (including songs with a light swing of about 0.55), it strums at the triplet position (2:1) instead of the original's swing ratio. Straight sixteenth-note syncopation with accents near 0.75 (tresillo, dembow, etc.) may be measured as a dotted shuffle (3:1), and shuffles at 120 BPM or slower may be caught as 12/8 and played as compound-meter triplets (fixed at ⅔) (18 of 24 synthetic shuffles at 80 BPM, 8 of 24 at 120 BPM, none at 160 BPM). The ⅓-beat mode is used only for compound-meter songs whose beat divides into three, so songs played with swing but caught as 4/4 are divided into ½ beats. Also, with ⅓ beat, voting across repeated sections is skipped for songs longer than about 1,000 beats.
 
 **Worth trying in the future**
 
@@ -1759,7 +1932,7 @@ Drawing positions on screen were also checked. When 6 songs were opened at deskt
 - Recognizing short chords lasting 1–2 beats (most of the remaining root errors), and cases where the beat slips by half a beat mid-song
 - Loop playback of a section, slowed-down playback that keeps the pitch
 - A print layout for the chord chart, transposition and capo notation
-- A choice of chord playback timbres (electric piano, guitar strumming) and voicing styles
+- More chord playback timbres (electric piano, etc.), following fingerpicked guitar (arpeggios), and a choice of voicing styles
 
 ### 4-9. References
 
@@ -1799,8 +1972,20 @@ Versions are written as three numbers, `major.minor.build`. The current version 
 
 ### Chordity 1.x
 
+#### 1.12.0 (2026-10-25)
+- Added the acoustic guitar to chord playback. The piano and acoustic guitar buttons at the top turn each one on and off separately (the P key for the piano, the G key for the acoustic guitar), and with both on they play together. The acoustic guitar finds the rhythm played in the original and strums down and up in that rhythm (follow the strumming), with the chords held in real guitar fingerings.
+- The acoustic guitar can also play 4-beat, 8-beat and 16-beat strums. From the many strum variations taught in guitar method books, it picks bar by bar the one that best fits the original's rhythm and strums it down and up in time with the song's beats, and the chosen patterns appear in the analysis info.
+- Even where there is no chord (N.C.), if the original has drums or another rhythm, the acoustic guitar plays a mute ("chik") with the strings damped, or, if the bass note is clear, a palm mute on that note. It does not play in quiet beginnings, endings and stops.
+- Added swing strum to the acoustic guitar. It strums the two eighth notes of each beat long and short (↓·↑), on the first and third notes of a triplet, and when the original swings, it matches the ratio measured from the original.
+- In songs analyzed as triplet (12/8, 6/8, etc.), the chord change unit's "half-beat" option becomes "⅓-beat", dividing each beat into thirds (⅓ beat each). Chords that change on an eighth-note position are written at that position, and the metronome also puts two "tik"s between beats.
+- Rebuilt the sound of the chord playback piano, adding a timbre that changes with the hammer force, beating in all harmonics, the sound of the hammer knocking the soundboard, the wooden resonance of the soundboard, and dampers that differ by register.
+- Matched the piano and the acoustic guitar so they sound equally loud at the same "chord" volume.
+
+#### 1.11.11 (2026-10-25)
+- Fixed the page scrolling away from an open panel during playback. While the correction/settings panel at the top or the text chord chart or analysis info panel at the bottom is open, auto-scroll pauses; it resumes once the panels are closed.
+
 #### 1.11.10 (2026-10-21)
-- At this release, the README became available in six languages (Korean · English · Japanese · Chinese · French · Spanish), with a language selector at the very top. The app interface and the help page remained in Korean. The current README editions are Korean and English.
+- At this release, the README became available in six languages (Korean · English · Japanese · Chinese · French · Spanish), with a language selector at the very top. The app interface and the help page remained in Korean.
 
 #### 1.11.9 (2026-10-18)
 - Fixed a case where turning off slash (bass) notation in the settings could change the 1.11.8 decision about one-beat chords on the bar's downbeat. With the notation off, inversion smoothing was skipped, so the same chord differing only by inversion was treated as a different chord. The decision is now the same whether the notation is on or off, and results with the default setting (notation on) are unchanged.
@@ -2020,4 +2205,3 @@ Before the official name was chosen, the app was built under the name "Madi Code
 - Built the analysis engine: zero-latency resampling, real FFT, per-band onsets, tempo estimation, dynamic-programming beat tracking, on-beat and beat-level checks, reference pitch and chroma, bar downbeat inference, chord inference including inversions, and regression tests on synthetic audio.
 
 <p align="right"><a href="#contents">↑ Back to contents</a></p>
-
