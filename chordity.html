@@ -346,7 +346,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.12.1">v1.12.1</span>
+    <span class="ver" title="Chordity 버전 1.12.2">v1.12.2</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -1283,11 +1283,39 @@ const Engine = (function () {
     return { T: { nF: T.nF, K: T.K, midi: T.midi, amp, cnt: T.cnt }, info: { contours: nC, vocal: nV, vocalFrac: +(fV / Math.max(1, nF)).toFixed(3) } };
   }
 
+  // 단선율 정도(ACAP): 프레임마다 가장 낮은 센 피크(프레임 최대의 rel 이상)를 기본음으로 보고, 그 배음(1~10, ±0.35반음)에 걸리는 피크 크기의 몫.
+  //  노래 한 줄이면 1에 가깝고 여러 음(화음)이면 낮음. 배음 번호는 음정 차 d를 0.05반음 칸 표(MONO_BIN)로 바로 찾고 그 배음과 ±0.35반음인지 확인
+  //  (배음 허용 범위끼리는 1.1반음 넘게 떨어져 한 칸에 배음이 둘 걸리지 않으므로 배음 열 개를 다 견주는 것과 결과가 같음). 피크마다 한 번 → 곡 전체 수십 ms
+  //  돌려줌 { fit(프레임별 몫), en(프레임 피크 크기 합: 박 집계 가중) }
+  const MONO_HL = Array.from({ length: 11 }, (_, h) => h ? 12 * Math.log2(h) : 0);
+  const MONO_BIN = (() => { const b = new Uint8Array(Math.ceil((MONO_HL[10] + 0.7) * 20) + 1); for (let h = 1; h <= 10; h++) for (let i = Math.floor(MONO_HL[h] * 20); i <= Math.floor((MONO_HL[h] + 0.7) * 20); i++) b[i] = h; return b; })();
+  function monoFit(T, rel) {
+    const fit = new Float32Array(T.nF), en = new Float32Array(T.nF), K = T.K;
+    for (let t = 0; t < T.nF; t++) {
+      const c = T.cnt[t], b = t * K; let tot = 0, mx = 0;
+      for (let q = 0; q < c; q++) { const a = T.amp[b + q]; tot += a; if (a > mx) mx = a; }
+      en[t] = tot;
+      if (!(tot > 0)) continue;
+      let lo = Infinity;
+      for (let q = 0; q < c; q++) if (T.amp[b + q] >= rel * mx && T.midi[b + q] < lo) lo = T.midi[b + q];
+      let s = 0;
+      for (let q = 0; q < c; q++) {
+        const d = T.midi[b + q] - lo, ib = Math.floor((d + 0.35) * 20); if (ib < 0 || ib >= MONO_BIN.length) continue;
+        const h = MONO_BIN[ib];
+        if (h && Math.abs(d - MONO_HL[h]) < 0.35) s += T.amp[b + q];
+      }
+      fit[t] = s / tot;
+    }
+    return { fit, en };
+  }
+
   async function harmonyFeatures(x, tick, p0, p1, side) {
     const pm = p0 + (p1 - p0) * 0.45, ps = side ? p0 + (p1 - p0) * 0.78 : p1;
     const B = await peakSTFT(x, 4096, 512, 32, 1400, 24, tick, p0, pm);   // 주파수 해상도 우선(베이스·튜닝)
     const T = await peakSTFT(x, 2048, 256, 110, 4200, 36, tick, pm, ps);  // 시간 해상도 우선(트레블)
     const tuning = estimateTuning(B);
+    // 무반주 판정(ACAP)용 단선율 정도: 스위치와 관계없이 늘 잼(가벼움). 끈 채 분석한 결과로도 buildTimeline에서 스위치를 켜 비교할 수 있게
+    const MF = monoFit(T, P.ACAP_REL);
     // 곁 신호 트레블 크로마(SIDE_CHROMA): 가운데 정위 선율이 빠진 반주 화성
     const Ts = side ? await peakSTFT(side, 2048, 256, 110, 4200, 36, tick, ps, p1) : null;
     // 노래 선율 줄이기(MEL_SUP): 짧은 창으로 가장 두드러진 음높이 줄기를 따라가 음높이가 흔들리는(노래) 줄기의 배음만 트레블에서 깎음
@@ -1300,6 +1328,7 @@ const Engine = (function () {
       trebleSide: Ts ? chromaFromPeaks(Ts, tuning, TREBLE_W) : null,
       trebleMel: mel ? chromaFromPeaks(mel.T, tuning, TREBLE_W) : null, melInfo: mel ? mel.info : null,
       trebleMidi: P.NNLS ? midiSpecFromPeaks(T, tuning) : null,
+      mono: MF.fit, monoE: MF.en,                       // 트레블 프레임마다 단선율 정도와 피크 크기 합(무반주 판정 ACAP, hopT 간격)
     };
   }
 
@@ -2288,6 +2317,50 @@ const Engine = (function () {
     return { t0, t1, treb, bass, lo, en, floor };
   }
 
+  // 무반주 구간(ACAP): 박마다 단선율 정도(fitL)·베이스·곁/가운데 비를 모아 반주 없는 노래 구간을 찾음(P의 ACAP 설명 참고).
+  //  F: beatFeatures(바닥 뺀 베이스, 박 크기 en). 돌려줌 { beat(박마다 1), runs: [[시작 박, 끝 박), …], stat: 구간마다 중앙값(진단용) }
+  function acapRegions(A, F) {
+    const n = F.t0.length, H = A.harm, out = { beat: new Uint8Array(n), runs: [], stat: [] };
+    if (!P.ACAP || !H.mono || n < P.ACAP_MINB) return out;
+    const hop = H.hopT, nT = H.mono.length, sideOn = !!H.trebleSide;
+    const fl = new Float64Array(n), bs = new Float64Array(n), sd = new Float64Array(n), t3 = new Float64Array(n), c12 = new Float64Array(12);
+    for (let i = 0; i < n; i++) {
+      let s = 0, w = 0, sm = 0, ss = 0;
+      for (let t = Math.max(0, Math.floor(F.t0[i] / hop)); t < Math.min(nT, Math.ceil(F.t1[i] / hop)); t++) {
+        s += H.mono[t] * H.monoE[t]; w += H.monoE[t];
+        if (sideOn) for (let k = 0; k < 12; k++) { sm += H.treble[t * 12 + k]; ss += H.trebleSide[t * 12 + k]; }
+      }
+      fl[i] = w > 0 ? s / w : 0;
+      sd[i] = sm > 0 ? ss / sm : 0;
+      for (let k = 0; k < 12; k++) bs[i] += F.bass[i * 12 + k];
+      let ct = 0; for (let k = 0; k < 12; k++) { c12[k] = F.treb[i * 12 + k]; ct += c12[k]; }
+      c12.sort(); t3[i] = ct > 0 ? (c12[11] + c12[10] + c12[9]) / ct : 0;
+    }
+    const bm = median(Array.from(bs).filter(v => v > 0)) || 1e-12, em = median(F.en);
+    // 킥(ACAP_KICK): 박 자리 킥 층 최댓값을 곡 99% 값으로 나눔. 킥이 뚜렷한 구간(드럼과 리프·랩)은 무반주로 보지 않음(N.C. 뮤트가 맡음)
+    const kk = new Float64Array(n);
+    if (A.drum && A.drum.K) { const K = A.drum.K, k99 = quantile(K, 0.99) || 1; for (let i = 0; i < n; i++) kk[i] = sampleMax(K, timeToFrame(F.t0[i]), 2) / k99; }
+    const loud = i => F.en[i] - em >= P.ACAP_QUIET;
+    const cand = i => bs[i] / bm < P.ACAP_BASS || !loud(i);       // 베이스가 거의 없거나 조용한 박
+    for (let i = 0; i < n;) {
+      if (!cand(i)) { i++; continue; }
+      // 후보 박이 이어진 구간. 후보 아닌 박이 ACAP_GAP개까지 끼어도 이음(베이스가 한 박 튀는 것). 끼인 박은 판정에서 뺌
+      let j = i; for (;;) { while (j < n && cand(j)) j++; let g = 0; while (j + g < n && !cand(j + g)) g++; if (j >= n || g > P.ACAP_GAP || j + g >= n) break; j += g; }
+      const L = []; for (let k = i; k < j; k++) if (cand(k) && loud(k)) L.push(k);   // 조용한 박은 판정에서 빼고(숨·멈춤) 구간 안에서는 함께 덮음
+      if (L.length >= P.ACAP_MINB && (!P.ACAP_INTRO || i <= P.ACAP_LEAD)) {   // ACAP_INTRO: 곡 첫머리(첫 ACAP_LEAD박 안)에서 시작한 구간만
+        const fit = median(L.map(k => fl[k])), side = sideOn ? median(L.map(k => sd[k])) : -1, top3 = median(L.map(k => t3[k])), kick = median(L.map(k => kk[k]));
+        if (fit >= P.ACAP_FIT && top3 >= P.ACAP_TOP3 && kick < P.ACAP_KICK && (!sideOn || side < P.ACAP_SIDE)) {
+          const a = L[0], b = L[L.length - 1] + 1;                       // 첫·끝 조용하지 않은 박까지(구간 앞뒤의 조용한 박은 그대로 둠)
+          out.runs.push([a, b]);
+          out.stat.push({ a, b, fit: +fit.toFixed(3), side: +side.toFixed(3), top3: +top3.toFixed(3), kick: +kick.toFixed(3), bass: +median(L.map(k => bs[k] / bm)).toFixed(3) });
+          for (let k = a; k < b; k++) out.beat[k] = 1;
+        }
+      }
+      i = j;
+    }
+    return out;
+  }
+
   // ---------------------------------------------------------------
   // 코드 모델: 배음 포함 템플릿(트레블) + 베이스 음(전위) 우도 + 복잡도·조성 사전분포
   // ---------------------------------------------------------------
@@ -2467,6 +2540,35 @@ const Engine = (function () {
     //   (합성 정답 세트 22곡의 쉼 구간 거짓 뮤트 13개: 숨 섞인 잡음 6, 여린 한 번 7) → 0. 정답 세트의 다른 결과·키트(0)·스트로크 따라는 그대로,
     //   GTZAN 대중음악형 8비트 뮤트 −15(센 칸 없는 마디 조각). NCM_LACT 0 / 0.1 / 0.15는 정답 세트에서 같고, 0.2는 박 재현율 0.58 → 0.50
     NCM_LOCAL: true, NCM_LACT: 0,
+    //  무반주 구간(ACAP): 반주 없이 노래(한 줄 선율)와 효과음만 나오는 곳은 코드가 없음(N.C.). 박마다
+    //   fitL = 단선율 정도: 트레블 피크 STFT 프레임마다 가장 낮은 센 피크(프레임 최대의 ACAP_REL 이상)의 배음 1~10(±0.35반음)이 설명하는
+    //          피크 크기의 몫(노래 한 줄이면 1에 가깝고 화음이면 낮음), 박 안 프레임 크기 가중 평균. ACAP_REL은 분석(analyze) 때 쓰임
+    //   베이스 = 바닥 뺀 베이스 크로마 합 / 곡 중앙값(양수 박), 곁/가운데 = 곁 신호(L−R) 트레블 크로마 합 / 가운데 트레블 크로마 합(스테레오만),
+    //   top3 = 박 트레블 크로마에서 센 세 음의 몫(음높이 있는 소리면 큼. 드럼만 나오는 도입부는 피크가 적어 fitL이 높아도 크로마가 고르게 퍼짐)
+    //   킥 = 박 자리 킥 층(drumLayer K) 최댓값 / 곡 99% 값
+    //  베이스 < ACAP_BASS이거나 조용한(박 크기 − 곡 중앙값 < ACAP_QUIET dB) 박이 이어진 구간(아닌 박이 ACAP_GAP개까지 끼어도 이음, 끼인 박은 판정에서 뺌)에서,
+    //   조용하지 않은 박이 ACAP_MINB 이상이고 그 박들의 fitL 중앙값 ≥ ACAP_FIT, top3 중앙값 ≥ ACAP_TOP3, 킥 중앙값 < ACAP_KICK,
+    //   곁/가운데 중앙값 < ACAP_SIDE(모노·곁 신호 없음이면 보지 않음)면 첫·끝 조용하지 않은 박 사이를 무반주로.
+    //   ACAP_TOP3: 합성 드럼 도입부(pickup.wav, fitL 0.65·top3 약 0.5)를 무반주로 보면 N.C. 뮤트가 사라짐.
+    //   ACAP_KICK: GTZAN blues.00010 첫머리(리프 한 줄 + 드럼, fitL 0.62·킥 1.23 / 結露 0.24)를 막음.
+    //   ACAP_LEAD·ACAP_GAP: 結露 앞 2초를 잘라 낸 음원에서 첫 박의 베이스가 튀어 구간이 첫 박에서 시작하지 못하던 것(LEAD 0·GAP 0이면 놓침)
+    //  재 본 것(1.12.2, 켬 기본값): 結露 첫머리 0.95~28.83초(마디 0~8, 33박: fitL 0.619, 곁 0.00, top3 0.87, 킥 0.24, 베이스 0.04)만 N.C.로,
+    //   모노로 섞기·48 kHz·앞 2초 자름에서도 같은 구간. 실제 녹음 키트 11곡·시험 WAV 19곡·GuitarSet 180곡·GTZAN 999곡에서 무반주 구간 0(1.12.1과 결과 같음).
+    //   結露도 마디 9(28.8초)부터는 1박·½박 단위 모두 1.12.1과 같고, 무반주 구간의 통기타 스트로크·뮤트는 0(끄면 스트로크 따라 39번, 8비트 45번).
+    //   한계: 곡 첫머리에서 노래 밑에 베이스 없이 아주 여린 지속음만 깔린 경우도 무반주로 봄 — 키트 「恋」 197~206초(노래 + 여린 지속음, 정답은 코드)를
+    //   곡 맨 앞에 붙이면 N.C.(fitL 0.71, 곁 0.05). 합성 시험(가운데 모노 피아노 3화음, 베이스 없음)도 첫머리면 2곡 중 1곡이 무반주로 잡힘.
+    //   남성 독창은 기본음이 베이스 대역(MIDI 33~57)에 걸려 대개 잡지 못함, 곁 신호가 큰 스테레오 잔향 독창도 곁 문턱에 걸려 놓침(합성 시험)
+    //  무반주 칸은 최종 코드 방출에서 코드 상태를 막아 N만 남김(반복 투표 뒤에 막아 다른 반복이 되살리지 못함. 그 뒤 다듬기는 N을 코드로 바꾸지 않음).
+    //   박·첫 박·박자·조성 음 분포(박 단위 특징·예비 코드)는 그대로. 결과는 TL.acap = [[시작 박, 끝 박), …]
+    //  ACAP_REP(비교용, 끔): 무반주 칸은 반복 짝(REP)으로 주지도 받지도 않음(노래만 있는 칸이 반주 있는 반복의 코드를 흔들지 않게).
+    //   켜면 무반주 밖 코드도 바뀜(結露 1박 단위 8칸·½박 단위 1칸, 정답 없음)이라 효과를 보이기 전까지 끔. 끄면 무반주 밖 결과는 예전과 같음
+    //  통기타 N.C. 뮤트(NC_MUTE)는 무반주 구간에서 치지 않음(물방울 같은 효과음·노래 첫소리를 반주 리듬으로 보지 않게. 앞뒤 N.C.는 따로 판정)
+    //  ACAP_INTRO: 곡 첫머리(첫 ACAP_LEAD박 안)에서 시작한 구간만. 끄면 곡 가운데 구간도 — 실제 녹음 키트 「恋」 197~206초(fitL 0.72,
+    //   곁/가운데 0.05, 베이스 0.01로 結露 첫머리 0.62·0.00·0.04보다 더 단선율처럼 보임)를 N.C.로 바꿔 그 곡 근음 92.8 → 90.2%(정답 코드 차트는 코드가 있음).
+    //   키트에서 베이스가 거의 없는 곡 가운데 구간 8곳(사랑 3, 이사람·별·고민중독 각 1, 恋 2)은 모두 정답에 코드가 있음(N.C.로 바꾸면 그 곡 근음 −1.6~−2.9%p)
+    //   비교했지만 넣지 않음: 박 번호를 1·2·4로 나눈 자리마다 킥 중앙값(마디에 한 번 치는 킥도 잡음) — 結露 첫머리 뒤쪽의 낮은 물방울 소리가
+    //   두 박마다 킥 층에 크게 잡혀(곡 99% 값의 4~5배) 結露를 놓침
+    ACAP: true, ACAP_BASS: 0.2, ACAP_FIT: 0.6, ACAP_SIDE: 0.3, ACAP_MINB: 8, ACAP_QUIET: -15, ACAP_REL: 0.2, ACAP_REP: false, ACAP_INTRO: true, ACAP_TOP3: 0.7, ACAP_KICK: 0.4, ACAP_LEAD: 2, ACAP_GAP: 1,
     IG_LOCAL: true, IG_STEADY: 0.03, IG_LDEV: 0.15, IG_LMARGIN: 0, IG_LMINPK: 30, IG_LFIT: 0.85,
     INTRO_GRID: true, IG_DRIFT: 0.25, IG_SIG: 0.03, IG_MARGIN: 0.15, IG_PK: 0.08,   // 곡 첫머리 박을 본 구간 주기로 거꾸로 이은 격자로(밀림 박 수, 온셋 맞춤 폭(초), 맞춤 차, 온셋 봉우리 문턱)
     KEY_EDGE: true, KE_BARS: 2, KE_MARGIN: 0.5,         // 전조 경계를 최종 코드로 뒤로 다듬음(살필 마디 수, 옮길 최소 이득: 박마다 (앞 조 적합 − 새 조 적합)×2의 합)
@@ -3522,6 +3624,7 @@ const Engine = (function () {
 
     // 비트 단위 특징 + 예비 코드(장·단3화음) + 조성
     const F = beatFeatures(A, beats);
+    const acap = acapRegions(A, F);                      // 무반주 구간(ACAP): 최종 코드에서만 N으로(박·첫 박·조성 특징은 그대로)
     const keyG = estimateKey(F.treb, F.bass);           // 곡 전체 조성(전조가 없으면 그대로 씀)
     const KS = keySegments(F);
     const segs = KS.segs.map(g => ({ start: g.start, end: g.end, cls: g.cls }));
@@ -3755,6 +3858,8 @@ const Engine = (function () {
     const bass = subFloor(aggregate(A.harm.bass, A.harm.hopB, t0, t1), F.floor);
     let states = getStates(set.vocab, true);
     const keyOfSlot = s => keyAtBeat(Math.floor(s / res));
+    // 무반주 칸(ACAP): 슬롯 s는 박 ⌊s/res⌋에 속함. 무반주 구간이 없으면 null(모든 결과가 예전과 같음)
+    const acapS = acap.runs.length ? Uint8Array.from({ length: nS }, (_, s) => acap.beat[Math.floor(s / res)]) : null;
     // 반복 구간 투표(REP): 반복 짝을 한 번 찾아 두고, 최종 방출 점수마다 짝들과 섞음
     let rp = null;
     if (P.REP && nS >= 3 * P.REP_MINLAG * res && nS <= P.REP_MAXS) {   // 아주 긴 입력은 건너뜀(유사도 표가 슬롯² 크기)
@@ -3763,6 +3868,8 @@ const Engine = (function () {
         P.REP_POS ? (s => pos[Math.floor(s / res)] * res + s % res) : null,
         P.REP_TR && segs.length > 1 ? ((s, j) => (sig(keyOfSlot(s)) - sig(keyOfSlot(j)) + 12) % 12) : null);
       if (P.DBG_REP) A._rep = { rp, t0: Array.from(t0), t1: Array.from(t1), pos: Array.from(pos), res, treb: Array.from(treb), bass: Array.from(bass) };
+      // ACAP_REP: 무반주 칸이 낀 짝은 가중 0(주지도 받지도 않음). 정족수(REP_MINP·REP_AGREE)도 가중 0인 짝은 세지 않음
+      if (rp && acapS && P.ACAP_REP) for (let s = 0; s < nS; s++) for (let p = rp.start[s]; p < rp.start[s + 1]; p++) if (acapS[s] || acapS[rp.pj[p]]) rp.pw[p] = 0;
     }
     let emCache = new Map(), repOn = !!rp, consDone = false;
     // 방출 점수(트레블 크로마 tr별): 반복 구간 투표를 켰으면 짝들과 섞음. SIDE_CHROMA(SC_ROOT)가 두 크로마로 따로 판정해도 둘 다 투표
@@ -3784,6 +3891,9 @@ const Engine = (function () {
         if (C < P.REP_CONS) repOn = false;
       }
       if (repOn) e = repApply(e, st, rp, nS);
+      // 무반주 칸(ACAP)은 코드 상태를 막아 N만 남김. 반복 투표 뒤라 다른 반복이 되살리지 못하고, 두 크로마 판정(SC_ROOT)·파워 코드 다시 풀기·
+      //  경계 다듬기(EDGE_ATTACK·LATE_EDGE·DB_SHORT, REP_EDGE면 이 점수)가 모두 이 점수를 씀. 그 뒤 다듬기는 N을 코드로 바꾸지 않음
+      if (acapS) { const K = st.length; for (let s = 0; s < nS; s++) if (acapS[s]) for (let k = 0; k < K; k++) if (st[k].root >= 0) e[s * K + k] = -1e9; }
       emCache.set(key, { st, E: e }); return e;
     };
     const decode = tr => {
@@ -4340,7 +4450,8 @@ const Engine = (function () {
           startBeat: b, bar: bi, barNum: bar.num, beat: bar.pickup ? (m - bar.nBeats) + off + 1 : off + 1, t0: beats[b] };
       }),
       sub, subRes, settings: set,                          // subRes: 작은박을 켜면 박을 몇으로 나누는지(2 또는 셋잇단 곡 3)
-      dbg: { z, lab0: Array.from(lab0, k => st0[k].id), treb: F.treb, bass: F.bass },   // 진단용
+      acap: acap.runs,                                     // 무반주 구간(ACAP): [[시작 박, 끝 박), …] — 코드 N.C., 통기타 뮤트 없음
+      dbg: { z, lab0: Array.from(lab0, k => st0[k].id), treb: F.treb, bass: F.bass, acap: acap.stat },   // 진단용
     };
   }
 
@@ -4487,6 +4598,15 @@ const Engine = (function () {
       if (!ev.label.nc) continue;
       const x0 = b.startBeat + ev.off, x1 = x0 + ev.dur, last = regs[regs.length - 1];
       if (last && Math.abs(last.x1 - x0) < 1e-6) last.x1 = x1; else regs.push({ x0, x1 });
+    }
+    // 무반주 구간(ACAP, TL.acap)은 뮤트 구간에서 잘라 냄: 노래·효과음(물방울 등)의 첫소리를 반주 리듬으로 보지 않음.
+    //  잘린 앞뒤 N.C.(조용한 첫머리 등)는 저마다 따로 리듬·크기를 판정(무반주 칸이 그 구간의 센 칸 비율을 올리지 않게)
+    for (const [a, b] of (TL.acap || [])) {
+      for (let k = regs.length - 1; k >= 0; k--) {
+        const g = regs[k]; if (g.x1 <= a + 1e-6 || g.x0 >= b - 1e-6) continue;
+        const keep = [{ x0: g.x0, x1: Math.min(g.x1, a) }, { x0: Math.max(g.x0, b), x1: g.x1 }].filter(r => r.x1 - r.x0 > 1e-6);
+        regs.splice(k, 1, ...keep);
+      }
     }
     if (!regs.length || nb < 2) return null;
     // 박 크기: 박 [b_i, b_i+1)의 rms² 평균(dB, beatFeatures와 같은 식) − 곡 박 크기 중앙값
@@ -4800,7 +4920,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings, strokes, strumGrid,
     // 테스트용 내부 함수
-    _: { ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
+    _: { acapRegions, monoFit, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
   };
 })();
 
@@ -6588,6 +6708,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
       rows.push(['코드 변화 단위', TL.res === 3 ? '⅓박' : TL.res === 2 ? '½박' : '1박']);
+      // 무반주(엔진 ACAP): 반주 없이 노래(한 줄 선율)만 나와 코드를 적지 않은(N.C.) 구간. 마디 번호와 시각(끝은 마지막 박이 끝나는 시각)
+      const ac = TL.acap || [], nB = TL.beats.length;
+      rows.push(['무반주', ac.length ? ac.map(([a, b]) => {
+        const n0 = TL.bars[TL.barOfBeat[a]].num, n1 = TL.bars[TL.barOfBeat[b - 1]].num, t1 = b < nB ? TL.beats[b] : TL.bars[TL.bars.length - 1].t1;
+        return (n0 === n1 ? n0 : n0 + '~' + n1) + '마디(' + fmtTime(TL.beats[a]) + '~' + fmtTime(t1) + ')';
+      }).join(', ') + ', 코드 N.C.' : '없음']);
       if (TL.meter.alt) rows.push(['박자 판정', TL.meter.alt.map(a => a.m + '박 대비도 ' + a.contrast.toFixed(2)).join(', ')]);
       rows.push(['조성 상관', TL.key.score.toFixed(2)]);
       const kk = keysShown(TL);
