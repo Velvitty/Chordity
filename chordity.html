@@ -346,7 +346,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.12.0">v1.12.0</span>
+    <span class="ver" title="Chordity 버전 1.12.1">v1.12.1</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2393,6 +2393,19 @@ const Engine = (function () {
     //  맞춘 세기가 ST_TH 이상이면 그 칸에서 침(시각은 칸 안 플럭스 봉우리, ST_SNAP). 코드가 새로 바뀐 칸은 늘 침. 칸 홀짝으로 다운·업(ST_DIR 'odd16').
     //  GuitarSet 180곡 현별 음 정답(현 3개 이상이 60 ms 안에 울린 묶음)으로 정함: 문턱 0.5에서 F 0.58(록 0.59, 펑크 0.62), 방향 70%
     ST_TH: 0.5, ST_SNAP: true, ST_DIR: 'odd16', ST_WIN: 0.045,
+    //  ST_SPLIT(1.12.1): 칸 자리마다 문턱 — 박 위 칸(0)은 ST_TH_ON, 박 사이 칸(16분·8분 엇박)은 ST_TH_OFF. 끄면 모든 칸이 ST_TH.
+    //  밴드 곡에서 엇박의 약한 스트로크(특히 16분 업)를 놓쳐 박마다 다운만 드문드문 치던 것을 고침. 봉우리로 옮기기(ST_SNAP)도 칸 문턱을 넘은 칸에.
+    //  Engine.strokes 그대로 채점(끔 → 켬). tests/strum/engscore.js(GuitarSet 180곡, 위 0.58과 같은 채점): F 0.587 → 0.598(정밀도 0.541 → 0.514, 재현율 0.642 → 0.716),
+    //   록 0.601 → 0.633, 펑크 0.616 → 0.634, 싱어송라이터 0.429 → 0.425, 보사노바 0.640 → 0.637, 재즈 0.652 → 0.661, 방향 70.4 → 69.2%, 업 12 → 16%(정답 36%).
+    //   tests/strum/mixscore.js(분석한 박 구간 안 정답만, 단박자 135곡): F 0.614 → 0.622, 록 0.617 → 0.650, 싱어송라이터 0.460 → 0.447, 겹박자 36곡 0.584 → 0.617, 박당 1.02 → 1.20(정답 0.84).
+    //   GuitarSet에 합성 드럼(정답 박에 킥·스네어, 하이햇 8분/16분, 드럼 RMS = 기타 RMS, tests/strum/mixdump.js)을 섞은 밴드형(mixscore.js 단박자): F 0.583 → 0.596 / 0.582 → 0.595
+    //   (록 0.620 → 0.650, 펑크 0.594 → 0.621, 싱어송라이터 0.445 → 0.449). 정답 없는 실제 녹음 11곡 박당 1.04 → 1.28(곡마다 +16~27%), 업 10 → 15%, 뮤트 0 그대로.
+    //   박 위 문턱 0.5 / 0.4 / 0.3(박 사이 0.3, mixscore.js): 기타만 F 0.620 / 0.622 / 0.623, 밴드형(하이햇 8분) 0.595 / 0.596 / 0.594 — 록은 낮을수록, 싱어송라이터는 높을수록 좋아 가운데.
+    //   박 사이 0.2는 기타만 F 0.615로 낮고 밴드형은 0.595로 같음. 비교했지만 넣지 않음: 8분음표 느낌(곡 안 16분 칸 센 수 < 칸 2 센 수 × 0.7)이면 칸 2를 업으로
+    //   (문턱 0.3 칸 세기 채점에서 업 18 → 40%로 정답 36%에 가깝지만 방향 록 84 → 68%, 펑크 88 → 79%; 칸 2를 늘 업이면 록 75%, 펑크 68%.
+    //   정답에서 칸 2 업은 록 12%, 펑크 5%, 싱어송라이터 55%, 보사노바·재즈 70%이고, 곡 단위 특징으로 가를 수 없음: 칸 2 업이 많은 곡 AUC 템포 0.72(보사노바), 나머지 0.41~0.53),
+    //   스트로크마다 원곡 소리로 방향 가르기(세기·고역/중역 비·봉우리 앞뒤: AUC 0.49~0.55), 앞뒤 마디 같은 자리 세기 섞기(F 낮아짐)
+    ST_SPLIT: true, ST_TH_ON: 0.4, ST_TH_OFF: 0.3,
     //  4·8·16비트 스트럼 변주(1.12.0, strumGrid): 묶음마다 원곡 칸 세기에 맞는 교본 패턴을 고름(SG_ADAPT, 끄면 기본 패턴만).
     //  점수 = Σ 칠 칸 (u − 문턱) + 기본 패턴 SG_BASIC, 앞 묶음과 같은 패턴이면 칸마다 SG_STAY(비터비). 문턱은 칸 크기마다(SG_TH4·8·16):
     //  u는 그 칸 크기의 칸끼리 맞춘 값이라 박은 대부분 세고 16분음표 칸은 대부분 약함. GuitarSet 180곡 스트로크 정답으로 정함(기본 패턴만 → 변주,
@@ -4377,7 +4390,7 @@ const Engine = (function () {
     const out = [], barOf = TL.barOfBeat, struck = new Set();
     for (const s of slot) {
       if (nc.has(s.x)) continue;
-      const v = (s.v - med) / sc, strong = v >= P.ST_TH;
+      const v = (s.v - med) / sc, strong = v >= stTh(s.j);
       if (!strong && !change.has(s.x)) continue;
       out.push({ t: strong && P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR === 'odd16' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x) });
       if (barOf) struck.add(barOf[s.i]);
@@ -4411,6 +4424,9 @@ const Engine = (function () {
     }
     return mergeMutes(fin, mut);
   }
+
+  // 스트로크 따라의 칸 문턱(칸 자리 j): ST_SPLIT이면 박 위 ST_TH_ON, 박 사이 ST_TH_OFF, 끄면 ST_TH
+  const stTh = j => !P.ST_SPLIT ? P.ST_TH : j === 0 ? P.ST_TH_ON : P.ST_TH_OFF;
 
   // 스트로크 따라의 칸 세기: 박마다 D칸, 칸 시각 근처(±ST_WIN, 칸 간격의 절반까지)의 중역 플럭스(곡 안 양수 중앙값·90% 값으로 맞춤) 최댓값 v와 그 프레임 시각 tp.
   //  칸 번호 x = 박 × D + 칸(끝 박 뒤는 칸 없음). 칸 세기 u = (v − med)/sc(칸끼리 다시 맞춤)
