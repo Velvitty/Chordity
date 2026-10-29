@@ -242,6 +242,20 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 .slashes i.off.ch { width: 4.5px; margin-left: 4px; height: 11px; opacity: .9; }
 .bar.cur .slashes i.ch { opacity: 1; }
 .slashes i.hit { background: var(--ink); opacity: 1 !important; height: 19px; }
+/* 통기타 스트로크 기호(1.14.0, 통기타를 켰을 때만): 코드 이름(지금 코드 상자 아래 끝 49px)과 빗금 사이 칸. 다운 Π·업 V는 그 박 자리 빗금 가운데
+   (칸 왼쪽 + 6.5px)에, 뮤트 구간은 처음~끝 기호를 잇는 꺾쇠(양 끝이 아래로 꺾임) 위 가운데에 M. 켜면 마디를 칸만큼 높임(빗금·템포 줄은 아래에 그대로) */
+.bar .gm { display: none; position: absolute; left: 12px; right: 10px; top: 50px; height: 22px; pointer-events: none; }
+#chart.gm .bar { height: 106px; }
+#chart.gm .bar .gm { display: block; }
+/* 기호는 글꼴과 상관없이 같은 꼴로 그림(clip-path로 자른 색 면): 다운 ⊓(위 막대 굵게), 업 V. 글자(Π·V)는 접근성 트리에서 빠진 칸 안에만 */
+.gm .sd { position: absolute; bottom: 1px; width: 9px; height: 8px; margin-left: 2px; font-size: 0; background: var(--pencil); clip-path: polygon(0 0, 100% 0, 100% 100%, 82% 100%, 82% 30%, 18% 30%, 18% 100%, 0 100%); }
+.gm .sd.up { height: 9px; clip-path: polygon(0 0, 19% 0, 50% 76%, 81% 0, 100% 0, 59% 100%, 41% 100%); }
+.bar.cur .gm .sd { background: var(--ink); }
+.gm .mb { position: absolute; top: 10px; height: 2px; border-top: 1.2px solid var(--pencil); }
+.gm .mb.l { border-left: 1.2px solid var(--pencil); }
+.gm .mb.r { border-right: 1.2px solid var(--pencil); }
+.gm .mb i { position: absolute; left: 50%; bottom: 100%; margin-bottom: 0; transform: translateX(-50%); font: 800 11px/10px var(--ui-font); font-style: normal; color: var(--ink); }   /* 글자라 마우스를 올린 마디(--hover)에서도 4.5:1 넘게 잉크색 */
+.bar.cur .gm .mb, .bar.cur .gm .mb i { border-color: var(--ink); color: var(--ink); }
 .bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; line-height: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; padding: 0 3px; border-radius: 3px; }   /* 상자 아래 끝이 코드 칸 위(12px)를 넘지 않게. 바탕은 비워 지금 코드 상자 윗변을 가리지 않음 */
 .bar.pickup .tag { right: auto; left: 10px; }
 .bar .pillrow { position: absolute; top: -4px; z-index: 3; display: flex; gap: 4px; }
@@ -301,6 +315,8 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
   .line { grid-template-columns: 26px minmax(0, 1fr); }
   .line .num { padding-right: 5px; }
   .bar { height: 78px; }
+  .bar .gm { top: 47px; height: 21px; }
+  #chart.gm .bar { height: 101px; }
   .chord { font-size: 21px; }
   .chord.sm { font-size: 16px; }
   .chord.xs { font-size: 13px; }
@@ -346,7 +362,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.12.2">v1.12.2</span>
+    <span class="ver" title="Chordity 버전 1.14.0">v1.14.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2083,6 +2099,16 @@ const Engine = (function () {
   // 큰 배열 훑기는 작은 함수로(한 번만 도는 async 함수 본문보다 빨리 최적화됨, 계산은 같음)
   function absMax(x) { let pk = 0; for (let i = 0; i < x.length; i++) { const v = Math.abs(x[i]); if (v > pk) pk = v; } return pk; }
   function scaleBy(x, g) { for (let i = 0; i < x.length; i++) x[i] *= g; }
+  // 곁 신호(11,025 Hz) 프레임 rms: A.rms와 같은 틀(홉 128 = 22,050 Hz 홉 256과 같은 86.13 fps, 프레임 가운데 ±홉/2)
+  function sideRms(s11, nF) {
+    const hop = 128, out = new Float32Array(nF);
+    for (let t = 0; t < nF; t++) {
+      const c = t * hop, a = Math.max(0, c - (hop >> 1)), b = Math.min(s11.length, c + (hop >> 1));
+      let e = 0; for (let i = a; i < b; i++) e += s11[i] * s11[i];
+      out[t] = b > a ? Math.sqrt(e / (b - a)) : 0;
+    }
+    return out;
+  }
 
   async function analyze(input, onProgress) {
     const tStart = nowMs();
@@ -2099,12 +2125,13 @@ const Engine = (function () {
     let x11 = await resample(x22, ANA_SR, HAR_SR, tick, 0.12, 0.17);
     // 곁 신호(SIDE_CHROMA): 스테레오 (L−R)/2. 가운데 정위(대개 리드 보컬·선율)는 지워지고 좌우로 벌린 반주만 남음.
     //  모노·거의 모노(곁/가운데 에너지가 SC_MIN_DB 미만)면 만들지 않음(그대로 기존 동작)
-    let s11 = null;
+    let s11 = null, sideMid = -Infinity;
     if (!wantSide) MX = null;
     if (wantSide) {
       const es = MX.es, em = MX.em; let side = null;
       MX = null;
-      if (em > 0 && 10 * Math.log10(es / em + 1e-12) >= P.SC_MIN_DB) { side = sideOf(chans, len); s11 = await resample(side, srIn, HAR_SR, tick, 0.17, 0.17); }   // 화성 분석 샘플레이트로 한 번에(두 단계보다 빠름)
+      if (em > 0) sideMid = 10 * Math.log10(es / em + 1e-12);
+      if (em > 0 && sideMid >= P.SC_MIN_DB) { side = sideOf(chans, len); s11 = await resample(side, srIn, HAR_SR, tick, 0.17, 0.17); }   // 화성 분석 샘플레이트로 한 번에(두 단계보다 빠름)
       side = null;
     }
     const pk = absMax(x22);
@@ -2117,6 +2144,7 @@ const Engine = (function () {
     await tick.force(0.17, '리듬 특징 추출');
     const R = await rhythmFeatures(x22, tick, 0.17, 0.42);
     x22 = null;
+    const srms = s11 ? sideRms(s11, R.nF) : null;                  // 곁 신호 프레임 크기(통기타 셈여림 DYN). 분석 결과는 바꾸지 않음
     await tick.force(0.42, '화성 특징 추출');
     const Hm = await harmonyFeatures(x11, tick, 0.42, 0.86, s11);
     x11 = null; s11 = null;
@@ -2141,7 +2169,7 @@ const Engine = (function () {
     const A = {
       duration, sampleRate: srIn, fps: FPS, nF: R.nF,
       fl: R.fl, fm: R.fm, fh: R.fh, rms: R.rms, O, nov, audible, startT, endT,
-      harm: Hm, tempo,
+      harm: Hm, tempo, srms, sideMid,
     };
     A.S = beatSalience(A);
     A.drum = drumLayer(A);
@@ -2487,6 +2515,27 @@ const Engine = (function () {
     //  비교했지만 끔: SG_HI(고역 플럭스를 0.5배 더함: F ±0.003), SG_DYN(마디 셈여림으로 바라는 밀도, 0.6에서 F −0.007~−0.011.
     //  실제 대중음악 곡에서 16비트가 한 패턴에 머무는 곳을 큰 구간에서 촘촘하게 바꾸지만 정답으로 맞는지 보일 수 없음)
     SG_ADAPT: true, SG_TH4: -0.3, SG_TH8: 0.1, SG_TH16: 0.2, SG_STAY: 0.1, SG_BASIC: 0.1, SG_HI: 0, SG_DYN: 0,
+    //  통기타 셈여림(1.13.0, DYN): 스트로크마다 세기 db(0 = 가장 셈, vel 1.0 다운) = Y0(방식마다) + 마디 이득 g + 강세 μ, −30~0으로 자름. vel = 10^(db/20)도 같이.
+    //   마디 이득 g(DYN_MACRO): 마디 크기 R(A.rms 제곱 평균 dB)과 곁 신호 크기 S(A.srms, 스테레오 (L−R)/2. 모노·거의 모노면 없음 → 곁 비중 0)를
+    //    코드 마디(N.C.만·무반주 아님)의 DYN_REF 분위로 맞춰 L = (1 − DYN_W)(R − R기준) + DYN_W·max(S − S기준, DYN_SFLOOR), L을 다시 같은 분위로 맞추고
+    //    g = clamp(L, DYN_FLOOR, 0). 곁 신호가 음악 크기(R)만 따를 때보다 DYN_XCUT dB 넘게 더 깎지 않음(조용한 곳에서도 들리게). 다듬지 않음(마디선에서 바로 바뀜).
+    //    마스터링한 대중음악은 절과 후렴의 rms가 거의 같고(結露 절 1 − 후렴 0.0 dB) 반주가 좌우로 넓어지는 차이가 곁 신호에 나타남(곁 중역 −8.7 dB)
+    //   강세 μ: 스트로크 따라는 DYN_K × (칸 세기 u(−1.25~2로 자름) − ±DYN_WIN마디 안 스트로크 u의 중앙값), 빈 마디 첫 박은 DYN_FB.
+    //    일정 스트로크는 DYN_KG × (u(−1~2) − 같은 중앙값). 곡 전체가 아니라 앞뒤 마디로 가운데를 잡아 조용한 구간을 더 세게 치지 않음
+    //   음색(소리 층): tone = DYN_TONE·10^(min(0, g + 2)/40)를 마디마다 같게(층이 스트로크마다 깜빡이지 않게). 화면은 db·tone이 있으면 업 세기 비(upVel)·바닥 0.3 없이
+    //    db를 그대로 진폭으로, 업은 실제로 친 현 수로 맞춤
+    //   업 DYN_UP dB: 업은 위쪽 현 3~4개를 몰아 쳐서 같은 db면 다운보다 어택(−5~+60 ms 중역)이 1.6~2.1 dB 크게 렌더링됨.
+    //    GuitarSet 180곡(기타만·하이햇 8분·16분 섞음 × 스트로크 따라·8비트·16비트 9칸)에서 렌더링으로 잰 업 크기로 들리는 세기와 실제 연주 세기의 r을 보면
+    //    0 / −1 / −2 / −3 / −4 dB에서 평균 0.517 / 0.542 / 0.549 / 0.537 / 0.511(9칸 중 8칸이 −2에서 가장 높거나 같음) → −2
+    //   비교용(끔): DYN_POS(일정 스트로크 자리 표: 첫 박 −1.5, 3박 −1, 8분 엇박 −1.5, 16분 엇박 −2.5, 업 −0.5 dB), DYN_HF(고역 플럭스 계수), DYN_ACC(μ ≥ 4 dB면 한 층 위)
+    //   DYN_XCUT 3(4는 結露 스트로크 따라 프리코러스에서 원곡 대비 스트로크 크기 중앙값 −15.3 dB로 들림 기준 −15 dB를 넘음, 3은 −14.4 dB)
+    //   Y0: 실제 녹음 12곡(結露 + 키트 11곡) 큰 마디(코드 마디, g ≥ −1 dB) 다운 스트로크 세기 중앙값이 1.12.2와 같게(곡 중앙값 차 0).
+    //    큰 마디 에너지를 그대로 두면(설계안) 업을 키운 만큼 다운이 작아져 結露 후렴 다운이 들리는 비율 96 → 88%로 떨어졌기 때문.
+    //    그 결과 큰 마디 에너지(업 포함)는 +0.1~+0.7 dB, 0 dB에 닿는 스트로크 곡 중앙값 1~5%(4비트·8비트 곡 최대 약 10%, 1.12.2 최대 세기 vel 1과 같음)
+    DYN: true, DYN_MACRO: true, DYN_REF: 0.75, DYN_W: 0.5, DYN_SFLOOR: -20, DYN_FLOOR: -12, DYN_XCUT: 3,
+    DYN_K: 4, DYN_KG: 3, DYN_WIN: 2, DYN_FB: -2, DYN_TONE: 0.7, DYN_UP: -2,
+    DYN_Y0S: -3.3, DYN_Y04: -2.2, DYN_Y08: -2.15, DYN_Y016: -3.9, DYN_Y0SW: -3.0,
+    DYN_POS: false, DYN_HF: 0, DYN_ACC: false,
     //  스윙 스트럼(1.12.0, strumGrid 'swing'): 사용자가 적은 셋잇단 리듬 -.--.--.--.-(박마다 셋잇단 첫째·셋째 = ↓·↑, 길게-짧게).
     //  단박자는 박당 2칸(8분음표)의 엇박을 박의 φ 자리에, 겹박자는 셋잇단 칸 j = 0·2(φ = ⅔ 고정, 12/8은 정의상 셋잇단).
     //  SW_AUTO: φ를 중역 플럭스의 박 동기 위상 프로필(θ ∈ [−0.25, 1.0), 박당 SW_NB칸)에서 잼: 박 위 봉우리(±SW_ONW)에서 엇박 봉우리
@@ -4503,14 +4552,14 @@ const Engine = (function () {
       if (nc.has(s.x)) continue;
       const v = (s.v - med) / sc, strong = v >= stTh(s.j);
       if (!strong && !change.has(s.x)) continue;
-      out.push({ t: strong && P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR === 'odd16' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x) });
+      out.push({ t: strong && P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR === 'odd16' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v });
       if (barOf) struck.add(barOf[s.i]);
     }
     // 코드가 이어지는데 친 곳이 하나도 없는 마디는 첫 박에 한 번(소리가 끊기지 않게)
     TL.bars.forEach((b, bi) => {
       if (struck.has(bi) || b.startBeat + 1 >= nb) return;
       if (nc.has(b.startBeat * D)) return;
-      out.push({ t: beats[b.startBeat], dir: 1, vel: 0.55, bar: bi });
+      out.push({ t: beats[b.startBeat], dir: 1, vel: 0.55, bar: bi, fb: true });
     });
     out.sort((a, b) => a.t - b.t);
     // 봉우리로 옮긴 시각이 거의 겹치면(30 ms 안) 하나만: 코드가 새로 바뀐 칸의 스트로크를 남김(그 자리에서 새 코드를 쳐야 하므로)
@@ -4521,19 +4570,83 @@ const Engine = (function () {
       res.push(x);
     }
     const fin = res.map(x => ({ t: x.t, dir: x.dir, vel: x.vel, change: x.change }));
+    // 셈여림(DYN): 가운데는 남은 스트로크 중 빈 마디 첫 박이 아닌 것으로
+    const dsrc = P.DYN ? res.map(x => ({ bar: x.bar, u: x.fb ? 0 : clamp(x.u, -1.25, 2), fb: !!x.fb, ref: !x.fb })) : null;
     // N.C. 구간 뮤트(NC_MUTE): 세기가 NCM_TH 이상인 N.C. 칸에서 그 박이 크기 문턱을 넘으면 뮤트 스트로크(시각·방향·세기는 위와 같은 규칙).
     //  위 스트로크를 다 정한 뒤에 끼우므로(친 마디 표시·30 ms 겹침 정리에 들어가지 않음) 뮤트가 아닌 스트로크는 하나도 바뀌지 않음
     const M = P.NC_MUTE && nc.size ? ncMute(A, TL, ss) : null;
-    if (!M) return fin;
-    const rg = M.regOf(D), mut = [];
+    if (!M) { if (dsrc) dynApply(A, TL, fin, dsrc, P.DYN_K, P.DYN_Y0S); return fin; }
+    const rg = M.regOf(D), mut = [], msrc = [];
     for (const s of slot) {
       const k = nc.has(s.x) ? rg[s.x] : -1;
       if (k < 0 || !M.ok[s.i]) continue;
       const v = (s.v - med) / sc;
       if (v < P.NCM_TH || (P.NCM_ACT_ST && !M.regs[k].active)) continue;
       mut.push(muteOf({ t: P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR === 'odd16' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), change: false }, M.regs[k], s.i));
+      msrc.push({ bar: barOf ? barOf[s.i] : -1, u: clamp(v, -1.25, 2), fb: false, ref: false });
     }
+    if (dsrc) dynApply(A, TL, fin.concat(mut), dsrc.concat(msrc), P.DYN_K, P.DYN_Y0S);
     return mergeMutes(fin, mut);
+  }
+
+  // 통기타 셈여림(P.DYN) 마디 이득: { g(마디마다 dB, 0 이하), tone(마디마다 소리 층 값) }. 식은 P의 DYN 설명.
+  //  같은 A·TL·설정이면 한 번만 잼(통기타 방식을 바꿀 때마다 다시 불림)
+  const DYN_SIG = ['DYN_MACRO', 'DYN_REF', 'DYN_W', 'DYN_SFLOOR', 'DYN_FLOOR', 'DYN_XCUT', 'DYN_TONE'];
+  const dynCache = new WeakMap();
+  function dynBars(A, TL) {
+    const sig = DYN_SIG.map(k => P[k]).join('|'), c = dynCache.get(TL);
+    if (c && c.sig === sig && c.A === A) return c.v;
+    const nbar = TL.bars.length, g = new Float64Array(nbar);
+    if (P.DYN_MACRO && A && A.rms && A.fps && nbar) {
+      const beats = TL.beats, nb = beats.length, fps = A.fps, T = nb > 1 ? (beats[nb - 1] - beats[0]) / (nb - 1) : 0.5;
+      // 마디 크기(제곱 평균 dB): 프레임 [⌊t0·fps⌋, ⌈t1·fps⌉), 끝 박 뒤 마디는 평균 박 길이로 늘림
+      const bdb = (x, t0, t1) => { const f0 = Math.max(0, Math.floor(t0 * fps)), f1 = Math.min(x.length, Math.max(f0 + 1, Math.ceil(t1 * fps))); let e = 0; for (let f = f0; f < f1; f++) e += x[f] * x[f]; return 10 * Math.log10(e / Math.max(1, f1 - f0) + 1e-12); };
+      const side = A.srms && A.srms.length ? A.srms : null, acap = TL.acap || [];
+      const R = new Float64Array(nbar), S = new Float64Array(nbar), on = [];
+      TL.bars.forEach((b, i) => {
+        const s1 = b.startBeat + b.nBeats, t0 = beats[b.startBeat], t1 = s1 < nb ? beats[s1] : beats[nb - 1] + (s1 - nb + 1) * T;
+        R[i] = bdb(A.rms, t0, t1); if (side) S[i] = bdb(side, t0, t1);
+        if (b.events.some(e => !e.label.nc) && !acap.some(([a, z]) => b.startBeat >= a - 1e-6 && s1 <= z + 1e-6)) on.push(i);
+      });
+      const qv = a => { const s = Float64Array.from(a).sort(); return s.length ? s[Math.floor(P.DYN_REF * (s.length - 1))] : 0; };
+      if (on.length) {
+        const w = side ? P.DYN_W : 0, Rr = qv(on.map(i => R[i])), Sr = side ? qv(on.map(i => S[i])) : 0;
+        const L = Array.from(R, (r, i) => (1 - w) * (r - Rr) + w * Math.max(S[i] - Sr, P.DYN_SFLOOR)), Lr = qv(on.map(i => L[i]));
+        for (let i = 0; i < nbar; i++) {
+          const x = clamp(L[i] - Lr, P.DYN_FLOOR, 0);
+          g[i] = clamp(Math.max(x, Math.min(0, R[i] - Rr) - P.DYN_XCUT), P.DYN_FLOOR, 0);   // 음악 크기만 따를 때보다 DYN_XCUT 넘게 깎지 않음
+        }
+      }
+    }
+    const v = { g, tone: Float64Array.from(g, x => P.DYN_TONE * Math.pow(10, Math.min(0, x + 2) / 40)) };
+    dynCache.set(TL, { sig, A, v });
+    return v;
+  }
+  // 셈여림 붙이기: list[k]에 db·tone·vel(·acc)을 씀. src[k] = { bar, u(자른 칸 세기), fb(빈 마디 첫 박), ref(가운데 계산에 넣음), pos(자리 표 dB) }
+  //  μ = K·(u − 가운데), 가운데 = ±DYN_WIN마디 안 ref 스트로크 u의 중앙값(4개 못 되면 ±2·DYN_WIN마디, 그래도 못 되면 곡 전체), 빈 마디 첫 박은 DYN_FB.
+  //  업은 DYN_UP을 더함. db = clamp(Y0 + μ + g, −30, 0)
+  function dynApply(A, TL, list, src, K, Y0) {
+    const { g, tone } = dynBars(A, TL), nbar = g.length;
+    if (!nbar) return;
+    const byBar = Array.from({ length: nbar }, () => []);
+    for (const x of src) if (x.ref && x.bar >= 0 && x.bar < nbar) byBar[x.bar].push(x.u);
+    const W = P.DYN_WIN, mid = new Float64Array(nbar), all = [].concat(...byBar), songMid = median(all);
+    const near = (b, w) => { let a = []; for (let q = Math.max(0, b - w); q <= Math.min(nbar - 1, b + w); q++) a = a.concat(byBar[q]); return a; };
+    for (let b = 0; b < nbar; b++) { let a = near(b, W); if (a.length < 4) a = near(b, 2 * W); mid[b] = a.length >= 4 ? median(a) : songMid; }
+    // 고역 플럭스(DYN_HF, 끔): 스트로크 ±45 ms 안 고역 플럭스 봉우리(곡 안 양수 중앙값·90% 값으로 맞춰 −1.5~4로 자름) − 그 중앙값
+    let hf = null;
+    if (P.DYN_HF && A && A.fh && A.fps) {
+      const e = A.fh, fps = A.fps, pos = Float64Array.from(e.filter(x => x > 0)).sort(), qq = p => pos.length ? pos[Math.floor(p * (pos.length - 1))] : 1, m0 = qq(0.5), s0 = (qq(0.9) - m0) || 1;
+      hf = list.map(s => { let mx = -Infinity; for (let f = Math.max(0, Math.floor((s.t - 0.045) * fps)); f <= Math.min(e.length - 1, Math.ceil((s.t + 0.045) * fps)); f++) mx = Math.max(mx, (e[f] - m0) / s0); return clamp(mx === -Infinity ? 0 : mx, -1.5, 4); });
+      const hm = median(hf); hf = hf.map(x => x - hm);
+    }
+    list.forEach((s, k) => {
+      const x = src[k], b = clamp(x.bar, 0, nbar - 1);
+      const mu = x.fb ? P.DYN_FB : K * (x.u - mid[b]) + (x.pos || 0) + (hf ? P.DYN_HF * hf[k] : 0) + (s.dir < 0 ? P.DYN_UP : 0);
+      const db = clamp(Y0 + mu + g[b], -30, 0);
+      s.db = db; s.vel = Math.min(1, Math.pow(10, db / 20)); s.tone = tone[b];
+      if (P.DYN_ACC && mu >= 4) s.acc = true;
+    });
   }
 
   // 스트로크 따라의 칸 문턱(칸 자리 j): ST_SPLIT이면 박 위 ST_TH_ON, 박 사이 ST_TH_OFF, 끄면 ST_TH
@@ -4855,7 +4968,7 @@ const Engine = (function () {
     const units = [], TH = mode === 'beat4' ? P.SG_TH4 : mode === 'beat16' ? P.SG_TH16 : swing ? P.SG_THSW : P.SG_TH8;   // 겹박자 스윙은 8비트 겹박자와 같은 칸이라 SG_TH8
     for (const b of TL.bars) {
       let s = b.startBeat;
-      const r = barR[TL.bars.indexOf(b)];
+      const bi = TL.bars.indexOf(b), r = barR[bi];
       for (const g of strumGroups(b.nBeats)) {
         if (s + g >= nb) break;                                      // 끝 박 뒤는 칸 시각이 없음
         const lib = strumLib(mode, triple, g), x0 = s * R;
@@ -4866,7 +4979,7 @@ const Engine = (function () {
           if (P.SG_DYN > 0 && dhi > dlo) z -= P.SG_DYN * p.length * Math.pow((dens[pi] - dWant) / (dhi - dlo), 2);
           return z;
         });
-        units.push({ s, g, x0, lib, key: (triple ? 'c' : 's') + g, sc: sc2, bar: b });
+        units.push({ s, g, x0, lib, key: (triple ? 'c' : 's') + g, sc: sc2, bar: b, bi });
         s += g;
       }
     }
@@ -4892,7 +5005,14 @@ const Engine = (function () {
     }
     // N.C. 구간 뮤트(NC_MUTE): 원곡에 리듬이 있는 구간(NCM_ACT)이면 고른 패턴이 치는 N.C. 칸을 뮤트로(크기 문턱을 넘는 박만, 코드 바뀜 다운은 없음)
     const M = P.NC_MUTE && nc.size ? ncMute(A, TL) : null, rg = M ? M.regOf(R) : null;
-    const out = [], plan = [];
+    const out = [], plan = [], dsrc = P.DYN ? [] : null;
+    // 셈여림 자리 표(DYN_POS, 끔): 칸 k의 마디 안 자리로 dB
+    const posDb = (U, k, up) => {
+      if (!P.DYN_POS) return 0;
+      const j = k % R, pos = U.s + Math.floor(k / R) - U.bar.startBeat, n4 = U.bar.nBeats === 4;
+      const p = j ? (2 * j === R ? -1.5 : -2.5) : pos === 0 ? -1.5 : n4 && (pos === 1 || pos === 3) ? 0 : n4 && pos === 2 ? -1 : 0;
+      return p + (up ? -0.5 : 0);
+    };
     for (let n = 0; n < units.length; n++) {
       const U = units[n], p = U.lib[pick[n]];
       plan.push({ bar: TL.bars.indexOf(U.bar), beat: U.s, pat: p });
@@ -4903,6 +5023,7 @@ const Engine = (function () {
           if (q >= 0 && p[k] !== '-' && M.regs[q].active && M.ok[Math.floor(x / R)]) {
             const atBeat = k % R === 0, base = p[k] === 'U' ? 0.66 : atBeat && k === 0 && U.s === U.bar.startBeat ? 0.84 : atBeat ? 0.74 : 0.68;
             out.push(muteOf({ t: slotT[x], dir: p[k] === 'U' ? -1 : 1, vel: clamp((base + 0.06 * clamp(u(x), -1, 2)) * (mode === 'beat16' ? SG_SOFT16 : 1), 0.4, 1), change: false, span: span[x] }, M.regs[q], Math.floor(x / R)));
+            if (dsrc) dsrc.push({ bar: U.bi, u: clamp(u(x), -1, 2), fb: false, ref: false, pos: posDb(U, k, p[k] === 'U') });
           }
           continue;
         }
@@ -4910,8 +5031,11 @@ const Engine = (function () {
         if (!c) continue;
         const atBeat = k % R === 0, base = c === 'U' ? 0.66 : atBeat && k === 0 && U.s === U.bar.startBeat ? 0.84 : atBeat ? 0.74 : 0.68;
         out.push({ t: slotT[x], dir: c === 'U' ? -1 : 1, vel: clamp((base + 0.06 * clamp(u(x), -1, 2)) * (mode === 'beat16' ? SG_SOFT16 : 1), 0.4, 1), change: change.has(x), span: span[x] });
+        if (dsrc) dsrc.push({ bar: U.bi, u: clamp(u(x), -1, 2), fb: false, ref: true, pos: posDb(U, k, c === 'U') });
       }
     }
+    // 셈여림(DYN): 16비트 가볍게(SG_SOFT16)는 Y0에 들어 있음
+    if (dsrc) dynApply(A, TL, out, dsrc, P.DYN_KG, mode === 'beat4' ? P.DYN_Y04 : mode === 'beat16' ? P.DYN_Y016 : mode === 'swing' ? P.DYN_Y0SW : P.DYN_Y08);
     out.plan = plan;
     if (sw) out.swing = sw;
     return out;
@@ -4920,7 +5044,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings, strokes, strumGrid,
     // 테스트용 내부 함수
-    _: { acapRegions, monoFit, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
+    _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
   };
 })();
 
@@ -5012,6 +5136,22 @@ const Synth = (function () {
     strikePos: 0.122,             // 해머 타격 위치(현 길이 비, 실제 1/7~1/9)
     cents: 1.6,                   // 현 사이 조율 차의 크기(cent)
     multiK: 24,                   // 이 번째 배음까지 현 여러 가닥으로(맥놀이·이중 감쇠)
+    // ---- 1.13 스위치: 모두 끄면 1.12 소리와 샘플 단위로 같음 ----
+    // decay2: 감쇠 상수를 실제 피아노 녹음에서 잰 부분음 감쇠(262~1047 Hz 초기 기울기가 1.12 공식의 1.6~1.8배)에 맞춤
+    decay2: false,
+    //  tau1 = clamp(tauMax·2^(−(m−36)/oct), tauMin, tauMax): 기본음 여음 시간, tS = tau1·(f0/fk)^pexp, tF = clamp(tS·tF, tFmin, tFmax)
+    //  즉음 비율은 부분음 주파수로: fk ≤ pF1 Hz에서 pLo → fk ≥ pF2 Hz에서 pHi(로그 보간)
+    D2: { tauMax: 5.5, tauMin: 1.2, oct: 22, pexp: 0.6, tF: 0.12, tFmin: 0.2, tFmax: 0.4, pLo: 0.75, pHi: 0.2, pF1: 250, pF2: 1500 },
+    // attack2: 해머 타격음. 1.12의 노크(60~140 Hz 사인)·펠트 잡음 대신
+    //  ① 접촉 잡음 터짐(nzHp~nzLp Hz, 시정수 nzRise초로 올라가 nzTau초로 감쇠, 첫 5 ms RMS가 음 크기의 nzDb)
+    //  ② 힘 펄스(한 주기 사인 × hann, 직류 없음, 폭 pulseMs): 재생 경로의 소리판 응답과 곱해져 나무 '똑'(commuted synthesis)
+    //  크기는 음(현 소리)만으로 정규화한 뒤 더하므로 타격음을 키워도 음 크기는 그대로
+    attack2: false,
+    A2: { nzDb: 1, nzRise: 0.0015, nzTau: 0.015, nzHp: 1500, nzLp: 7000, pulseDb: -12, pulseMs: 2.5, pulseMin: 1.0, pulseMax: 4.0 },
+    // tail2: 정해 둔 버퍼 길이(2.8~6.5초, 끝에서 80 ms 페이드: 그때 아직 음 크기의 −12~−34 dB) 대신
+    //  소리가 floorDb(정규화 크기 기준)까지 줄어든 곳에서 fade초 동안 끝냄(길어야 lenCap초)
+    tail2: false,
+    T2: { floorDb: -45, lenCap: 8, fade: 0.15 },
   };
   const inharm = m => clamp(2.5e-4 * Math.pow(2, (m - 48) / 16), 1e-4, 4e-3);
   // 배음 하나를 만들 때마다 멈출 수 있는 생성기: 화면을 멈추지 않게 나눠서 합성(pianoV2Steps), 한 번에(pianoV2)
@@ -5019,10 +5159,11 @@ const Synth = (function () {
   function* pianoV2Steps(m, sr, tune, vel) {
     vel = vel == null ? 0.6 : vel;
     const f0 = f0Of(m, tune), P = PIANO2;
-    const n = Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
+    const D = P.decay2 ? P.D2 : null, A = P.attack2 ? P.A2 : null, T = P.tail2 ? P.T2 : null;
+    const n = T ? Math.round(sr * T.lenCap) : Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
     const y = new Float32Array(n);
     const B = inharm(m), fMax = Math.min(0.45 * sr, P.fMax);
-    const tau1 = clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax);
+    const tau1 = D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax);
     // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음
     const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel), 700, 9000);
     const nStr = m < 32 ? 1 : (m < 44 ? 2 : 3);
@@ -5030,6 +5171,7 @@ const Synth = (function () {
     const det = [];
     for (let q = 0; q < nStr; q++) det.push(q === 0 ? 0 : (rnd() * 2 - 1) * P.cents + (q === 1 ? 0.6 : -0.5));
     const prompt = clamp(0.5 + (m - 60) * 0.006, 0.35, 0.7);     // 즉음 비율: 높은 음일수록 큼
+    const promptOf = fk => D.pLo + (D.pHi - D.pLo) * clamp(Math.log(fk / D.pF1) / Math.log(D.pF2 / D.pF1), 0, 1);
     for (let k = 1; k <= P.kMax; k++) {
       const fk = k * f0 * Math.sqrt(1 + B * k * k);
       if (fk > fMax) break;
@@ -5038,7 +5180,8 @@ const Synth = (function () {
       let a = (0.08 + comb) * hammer / Math.pow(k, 0.55);
       if (k === 1 && m < 40) a *= 0.55;                            // 저음은 기본음이 약하고 배음이 큼
       if (a < 1e-3) continue;
-      const tS = Math.max(0.1, tau1 * Math.pow(f0 / fk, 0.75)), tF = Math.max(0.04, tS * 0.12);
+      const tS = Math.max(0.1, tau1 * Math.pow(f0 / fk, D ? D.pexp : 0.75)), tF = D ? clamp(tS * D.tF, D.tFmin, D.tFmax) : Math.max(0.04, tS * 0.12);
+      const pr = D ? promptOf(fk) : prompt;
       const len = Math.min(n, Math.ceil(sr * tS * Math.log(a / 1e-5)));
       const strings = k <= P.multiK ? nStr : 1;
       const df = Math.exp(-1 / (tF * sr)), ds = Math.exp(-1 / (tS * sr));
@@ -5047,7 +5190,7 @@ const Synth = (function () {
         // 현마다 조율 차와 약간 다른 감쇠(현끼리 결합이 달라 이중 감쇠가 생김)
         const w = 2 * Math.PI * fk * Math.pow(2, det[q] / 1200) / sr, cw = Math.cos(w), sw = Math.sin(w);
         const dsq = Math.pow(ds, 1 + 0.12 * q);
-        let re = Math.cos(ph), im = Math.sin(ph), ef = prompt * a / strings, es = (1 - prompt) * a / strings;
+        let re = Math.cos(ph), im = Math.sin(ph), ef = pr * a / strings, es = (1 - pr) * a / strings;
         for (let i = 0; i < len; i++) {
           const r = re * cw - im * sw; im = re * sw + im * cw; re = r;
           y[i] += im * (ef + es); ef *= df; es *= dsq;
@@ -5056,18 +5199,54 @@ const Synth = (function () {
       }
       yield k;
     }
-    // 해머 노크(소리판을 두드리는 낮은 '쿵')와 펠트 잡음
-    const rz = lcg((m * 7919 + 17) >>> 0);
-    const kf = clamp(f0 * 0.5, 60, 140), kw = 2 * Math.PI * kf / sr, kA = 0.05 * (0.4 + vel);
-    const nzN = Math.min(n, Math.round(sr * 0.04));
-    let lp = 0;
-    const cLp = Math.exp(-2 * Math.PI * clamp(fc * 0.8, 1200, 7000) / sr), nzA = 0.012 + 0.025 * vel;
-    for (let i = 0; i < nzN; i++) {
-      lp = lp * cLp + (rz() * 2 - 1) * (1 - cLp);
-      y[i] += kA * Math.sin(kw * i) * Math.exp(-i / (sr * 0.012)) + nzA * lp * Math.exp(-i / (sr * 0.004));
+    if (!A) {
+      // 해머 노크(소리판을 두드리는 낮은 '쿵')와 펠트 잡음(1.12)
+      const rz = lcg((m * 7919 + 17) >>> 0);
+      const kf = clamp(f0 * 0.5, 60, 140), kw = 2 * Math.PI * kf / sr, kA = 0.05 * (0.4 + vel);
+      const nzN = Math.min(n, Math.round(sr * 0.04));
+      let lp = 0;
+      const cLp = Math.exp(-2 * Math.PI * clamp(fc * 0.8, 1200, 7000) / sr), nzA = 0.012 + 0.025 * vel;
+      for (let i = 0; i < nzN; i++) {
+        lp = lp * cLp + (rz() * 2 - 1) * (1 - cLp);
+        y[i] += kA * Math.sin(kw * i) * Math.exp(-i / (sr * 0.012)) + nzA * lp * Math.exp(-i / (sr * 0.004));
+      }
     }
-    edges(y, sr, 1, 80);
-    return normalize(y, sr, 0.12);
+    edges(y, sr, 1, T ? 0 : 80);
+    normalize(y, sr, 0.12);
+    if (A) hammer2(y, sr, m, fc, vel, A);
+    return T ? trimTail(y, sr, T) : y;
+  }
+  // 해머 타격음(attack2). 크기는 정규화한 음 크기(0.12) 기준 dB, 세기(vel) 0.55에서. 세기가 두 배면 +6 dB
+  function hammer2(y, sr, m, fc, vel, A) {
+    const vg = vel / 0.55, base = 0.12 * vg;
+    // ① 접촉 잡음: 백색 잡음 → 1극 고역 통과 → 1극 저역 통과(펠트 차단 주파수의 1.6배를 넘지 않음)
+    const rz = lcg((m * 7919 + 29) >>> 0);
+    const nN = Math.min(y.length, Math.round(sr * A.nzTau * 8)), x = new Float32Array(nN);
+    const ch = Math.exp(-2 * Math.PI * A.nzHp / sr), cl = Math.exp(-2 * Math.PI * Math.min(A.nzLp, fc * 1.6) / sr);
+    let hp = 0, prev = 0, lp = 0;
+    for (let i = 0; i < nN; i++) {
+      const w = rz() * 2 - 1;
+      hp = ch * (hp + w - prev); prev = w;
+      lp = lp * cl + hp * (1 - cl);
+      x[i] = lp * (1 - Math.exp(-i / (sr * A.nzRise))) * Math.exp(-i / (sr * A.nzTau));
+    }
+    const n5 = Math.min(nN, Math.round(sr * 0.005));
+    let e = 0; for (let i = 0; i < n5; i++) e += x[i] * x[i];
+    const gN = base * Math.pow(10, A.nzDb / 20) / (Math.sqrt(e / n5) + 1e-12);
+    for (let i = 0; i < nN; i++) y[i] += x[i] * gN;
+    // ② 힘 펄스: 폭은 낮은 음일수록 길게(해머가 크고 무거움)
+    const W = clamp(A.pulseMs * Math.pow(2, -(m - 60) / 36), A.pulseMin, A.pulseMax) / 1000, nP = Math.max(4, Math.round(sr * W));
+    const aP = base * Math.SQRT2 * Math.pow(10, A.pulseDb / 20);
+    for (let i = 0; i < nP && i < y.length; i++) { const ph = 2 * Math.PI * i / nP; y[i] += aP * Math.sin(ph) * (0.5 - 0.5 * Math.cos(ph)); }
+  }
+  // tail2: 20 ms 묶음 RMS가 floorDb(정규화 크기 0.12 기준) 위였던 마지막 곳 + fade초에서 끝냄(올림 코사인 페이드)
+  function trimTail(y, sr, T) {
+    const B = Math.round(sr * 0.02), thr = 0.12 * Math.pow(10, T.floorDb / 20);
+    let last = 0;
+    for (let s = 0; s + B <= y.length; s += B) { let e = 0; for (let i = s; i < s + B; i++) e += y[i] * y[i]; if (Math.sqrt(e / B) > thr) last = s + B; }
+    const nf = Math.round(sr * T.fade), end = Math.min(y.length, last + nf), out = y.slice(0, end);
+    for (let i = 0; i < Math.min(nf, end); i++) out[end - 1 - i] *= 0.5 - 0.5 * Math.cos(Math.PI * i / nf);
+    return out;
   }
   // 음역별 놓을 때의 감쇠(댐퍼): 낮은 음은 천천히, 맨 위 음역(댐퍼 없음)은 길게
   const pianoRelease = m => m >= 89 ? 0.6 : clamp(0.16 - (m - 40) * 0.0015, 0.07, 0.16);
@@ -5083,12 +5262,13 @@ const Synth = (function () {
       for (let j = 0; j < opt.modes; j++) {
         const f = opt.fLo * Math.pow(opt.fHi / opt.fLo, (j + r()) / opt.modes);
         const tau = opt.tau0 * Math.pow(opt.fLo / f, opt.tauExp) * (0.6 + 0.8 * r());
-        const a = opt.gain * (0.5 + r()) / Math.sqrt(opt.modes) * (opt.peaks ? opt.peaks(f) : 1);
+        const a = opt.gain * (0.5 + r()) / Math.sqrt(opt.modes) * (opt.peaks ? opt.peaks(f) : 1) * (opt.tilt ? Math.pow(f / opt.fLo, opt.tauExp / 2 * opt.tilt) : 1);
         const w = 2 * Math.PI * f / sr, ph = r() * 2 * Math.PI, dec = Math.exp(-1 / (tau * sr));
         const nn = Math.min(len, Math.ceil(tau * sr * 7));
         let e = a;
         for (let i = 0; i < nn; i++) { d[i] += e * Math.sin(w * i + ph); e *= dec; }
       }
+      if (opt.fix) d[0] = opt.direct;                // 모드의 첫 샘플이 직접음에 더해지지 않게(1.12는 직접음이 −6.5 dB, 전체 에너지 0.77)
       let em = 0; for (let i = 1; i < len; i++) em += d[i] * d[i];
       const k = Math.sqrt(opt.ratio * opt.direct * opt.direct / (em + 1e-12));
       for (let i = 1; i < len; i++) d[i] *= k;
@@ -5097,7 +5277,11 @@ const Synth = (function () {
     }
     return ir;
   }
-  const soundboardIR = sr => modalIR(sr, { len: 0.35, seed: 4242, direct: 1, ratio: 1.2, modes: 160, fLo: 70, fHi: 4500, tau0: 0.09, tauExp: 0.5, gain: 0.55 });
+  // 소리판 1.13 스위치(SOUNDBOARD.v2): 직접음 고침 + 모드 비율·감쇠·기울기. 끄면 1.12와 같음
+  const SOUNDBOARD = { v2: false, ratio: 1.2, tau0: 0.05, tauExp: 0.75, tilt: 0.6 };
+  const soundboardIR = sr => SOUNDBOARD.v2
+    ? modalIR(sr, { len: 0.35, seed: 4242, direct: 1, ratio: SOUNDBOARD.ratio, modes: 160, fLo: 70, fHi: 4500, tau0: SOUNDBOARD.tau0, tauExp: SOUNDBOARD.tauExp, gain: 0.55, fix: true, tilt: SOUNDBOARD.tilt })
+    : modalIR(sr, { len: 0.35, seed: 4242, direct: 1, ratio: 1.2, modes: 160, fLo: 70, fHi: 4500, tau0: 0.09, tauExp: 0.5, gain: 0.55 });
   // 기타 몸통: 공기 공명(약 100 Hz)과 앞판(약 200 Hz) 모드를 키운 짧은 응답
   const bodyIR = sr => modalIR(sr, { len: 0.25, seed: 777, direct: 1, ratio: 1.5, modes: 90, fLo: 80, fHi: 3500, tau0: 0.05, tauExp: 0.6, gain: 0.7,
     peaks: f => 1 + 2.2 * Math.exp(-Math.pow(Math.log(f / 102) / 0.12, 2)) + 1.6 * Math.exp(-Math.pow(Math.log(f / 205) / 0.15, 2)) + 0.8 * Math.exp(-Math.pow(Math.log(f / 420) / 0.2, 2)) });
@@ -5301,7 +5485,7 @@ const Synth = (function () {
     return best.strings;
   }
 
-  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, PIANO1, PIANO2, GUITAR, GMUTE, f0Of };
+  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, f0Of };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
 </script>
@@ -5431,7 +5615,18 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     release: 0.07,                // v1: 코드가 끝날 때 소리가 줄어드는 시간 상수(초). v2는 음역별(Synth.pianoRelease)
     makeup: 2.09,                 // v1 경로의 고정 보정 이득(+6.4 dB)
     makeup2: 0.52,                // v2 경로의 고정 보정 이득: 소리판 응답이 피아노 음역을 키우므로(+12 dB) 렌더링으로 재서 v1과 같은 크기로
+    // 1.13 피아노(v2 위에서): 해머 타격음·실제 녹음에 맞춘 감쇠·버퍼 끝·소리판 고침(Synth.PIANO2·SOUNDBOARD 스위치) + 작은 방 잔향.
+    //  끄면 1.12 소리와 같음(소리판·합성 스위치도 함께 꺼짐)
+    v3: true,
+    makeup3: 0.80,                // v3 경로 보정 이득: C Am F G7을 2.4초씩 친 진행 전체 RMS가 1.12와 같게(1.2·4.8초 진행은 +0.8·−0.7 dB)
+    wet3: 0.18,                   // 방 잔향 이득(잔향 응답 에너지 1이라 잔향/건조음 에너지 약 −13.5 dB)
+    // 방 잔향(작은 방, RT60 1.2초): 확산음 20 ms부터(4 ms 페이드), 초기 반사 6개(ms, 크기), 시간에 따라 어두워짐(dark × RT60초)
+    room2: { rt60: 1.2, len: 1.3, pre: 0.02, dark: 0.6, er: [[7, 0.5], [11, 0.42], [15, 0.36], [19, 0.3], [24, 0.25], [31, 0.2]] },
+    tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
   };
+  // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함)
+  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; };
+  syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
     variants: 2,                  // 같은 음도 들뜸 잡음을 몇 가지로 바꿔 가며(같은 스트로크가 기계처럼 똑같이 들리지 않게)
@@ -5494,10 +5689,35 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
     return ir;
   }
+  // 1.13 방 잔향(PIANO.room2): RT60을 정해 감쇠, 초기 반사, 에너지 1로 맞춤(convolver.normalize = false로 씀 → wet 이득이 곧 잔향 크기)
+  function makeRoomIR2(R) {
+    const sr = ctx.sampleRate, len = Math.round(sr * R.len), ir = [new Float32Array(len), new Float32Array(len)], k = 6.9078 / R.rt60;
+    for (let c = 0; c < 2; c++) {
+      const d = ir[c], p0 = Math.round(sr * R.pre), fin = Math.round(sr * 0.004);
+      let seed = 777 + c * 4242, lp = 0;
+      for (let i = 0; i < len; i++) {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        const t = i / sr;
+        lp += ((seed / 4294967296 * 2 - 1) - lp) * (0.25 + 0.6 * Math.exp(-t / (R.dark * R.rt60)));
+        if (i < p0) continue;
+        d[i] = lp * Math.exp(-k * t) * (i - p0 < fin ? 0.5 - 0.5 * Math.cos(Math.PI * (i - p0) / fin) : 1);
+      }
+      // 초기 반사: 채널마다 조금 다른 시각(좌우 넓이), 부호를 바꿔 가며, 3샘플로 퍼뜨림
+      R.er.forEach(([ms, g], j) => {
+        const i = Math.round(sr * (ms * (c ? 1.07 : 1) + (c ? 0.3 : 0)) / 1000), s = (j % 2 ? -1 : 1) * g;
+        if (i + 2 < len) { d[i] += 0.5 * s; d[i + 1] += s; d[i + 2] += 0.5 * s; }
+      });
+    }
+    let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
+    const g = 1 / Math.sqrt(e / 2);
+    for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
+    return ir;
+  }
   const stereoIR = ir => { const b = ctx.createBuffer(2, ir[0].length, ctx.sampleRate); for (let c = 0; c < 2; c++) b.getChannelData(c).set(ir[c]); return b; };
   // 공통 소리 경로: 음들 → 버스 → [몸통(소리판·기타 몸통) 응답] → (건조음 + 방 잔향) → 고정 보정 이득 → out
   // 압축기는 쓰지 않는다: 꼬리까지 끌어올려 울림이 과하게 길어지기 때문(측정으로 확인)
-  function buildChain(out, bodyIR, wetGain, makeup) {
+  //  room(1.13): 주면 makeRoomIR2(room)을 정규화 없이(에너지 1) 씀, 없으면 1.12 방 잔향(makeRoomIR, Web Audio 정규화)
+  function buildChain(out, bodyIR, wetGain, makeup, room) {
     const bus = ctx.createGain(), mix = ctx.createGain();
     let src = bus;
     if (bodyIR) {
@@ -5506,14 +5726,17 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     src.connect(mix);
     try {
       const conv = ctx.createConvolver(), wet = ctx.createGain();
-      conv.buffer = makeRoomIR(); wet.gain.value = wetGain;
+      if (room) { conv.normalize = false; conv.buffer = stereoIR(makeRoomIR2(room)); } else conv.buffer = makeRoomIR();   // normalize는 buffer보다 먼저
+      wet.gain.value = wetGain;
       src.connect(conv); conv.connect(wet); wet.connect(mix);
     } catch (e) { /* 잔향 없이도 동작 */ }
     mix.gain.value = makeup;
     mix.connect(out);
     return bus;
   }
-  const buildPianoChain = out => PIANO.v2 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), 0.22, PIANO.makeup2) : buildChain(out, null, 0.22, PIANO.makeup);
+  const buildPianoChain = out => !PIANO.v2 ? buildChain(out, null, 0.22, PIANO.makeup)
+    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.makeup3, PIANO.room2)
+    : buildChain(out, Synth.soundboardIR(ctx.sampleRate), 0.22, PIANO.makeup2);
   const buildGuitarChain = out => buildChain(out, Synth.bodyIR(ctx.sampleRate), 0.16, GUITAR.makeup);
   // 코드 → 건반: 왼손 베이스 한 음(D2~C♯3) + 오른손 밀집 배치(이전 배치의 중심과 가장 가깝게)
   function voicing(pcs, bassPc, target) {
@@ -5599,7 +5822,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       // 뮤트는 코드 경계 앞 60 ms 규칙(앞당겨 치기)도 보지 않음: 코드 스트로크의 자리 k는 그 시각만으로 정해져 뮤트가 있든 없든 같음
       if (st[i].mute) {
         const nx = i + 1 < st.length ? st[i + 1].t : Infinity;
-        out.push({ t0: t, t1: Math.max(t + 0.05, Math.min(nx, t + GUITAR.muteRing)), mute: st[i].mute, pc: st[i].pc, dir: st[i].dir, vel: st[i].vel, span: st[i].span, strings: Synth.muteVoicing(st[i].mute, st[i].pc) });
+        out.push({ t0: t, t1: Math.max(t + 0.05, Math.min(nx, t + GUITAR.muteRing)), mute: st[i].mute, pc: st[i].pc, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, strings: Synth.muteVoicing(st[i].mute, st[i].pc) });
         continue;
       }
       while (k + 1 < segs.length && segs[k + 1].t0 <= t + 0.06) k++;
@@ -5614,7 +5837,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         const nbT = TL.beats[lastLE(TL.beats, segs[j].t0) + 1];
         for (let q = i + 1; q < st.length; q++) if (!st[q].mute && st[q].t + 0.06 >= t1) { if (nbT == null || st[q].t < nbT) t1 = Math.max(t1, st[q].t); break; }
       }
-      out.push({ t0: t, t1: Math.max(t + 0.05, t1), g, dir: st[i].dir, vel: st[i].vel, span: st[i].span, strings: Synth.guitarVoicing(g.pcs, g.bassPc) });
+      out.push({ t0: t, t1: Math.max(t + 0.05, t1), g, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, strings: Synth.guitarVoicing(g.pcs, g.bassPc) });
     }
     for (const s of out) s.notes = s.strings.map(x => x.m);
     S.strums = out;
@@ -5624,13 +5847,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  뮤트 스트로크(s.mute)는 같은 간격·방향 규칙으로 뮤트 음(1초 버퍼, 짧게 사라짐)을 치고, 치기 전에 울리던 현을 모두 막음(왼손이 줄 위에)
   const ringing = [null, null, null, null, null, null];
   let strumN = 0, muteN = 0;   // 뮤트는 따로 세어 코드 스트로크의 변형 차례를 바꾸지 않음(N.C. 밖 소리가 그대로)
+  //  셈여림(엔진 DYN, s.db가 수): 진폭 = 10^(db/20) 그대로(업 세기 비·바닥 없음), 현마다 세기는 실제로 친 현 수로 맞춤(업이 위쪽 현 3~4개만 쳐서 작아지지 않게),
+  //   소리 층과 현 사이 간격은 마디마다 같은 tone으로(acc면 한 층 위)
+  const strumLayer = s => typeof s.db === 'number' ? Math.min(2, (s.tone < 0.55 ? 0 : s.tone < 0.82 ? 1 : 2) + (s.acc ? 1 : 0)) : 1;
   function playStrum(s, when, endAt) {
-    const up = s.dir < 0, top = s.strings[s.strings.length - 1].s, kind = s.mute || '';
+    const up = s.dir < 0, top = s.strings[s.strings.length - 1].s, kind = s.mute || '', dyn = typeof s.db === 'number';
     let list = up ? s.strings.filter(x => x.s >= Math.max(top - 3, s.strings[0].s)).reverse() : s.strings;
     if (up && list.length > 4) list = list.slice(0, 4);
-    const vel = clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1) * (up ? GUITAR.upVel : 1);
-    const layer = vel < 0.55 ? 0 : vel < 0.82 ? 1 : 2;
-    let gap = (up ? GUITAR.spreadUp : GUITAR.spreadDown) * (1.25 - 0.5 * vel);
+    const vel = dyn ? Math.pow(10, s.db / 20) : clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1) * (up ? GUITAR.upVel : 1);
+    const layer = dyn ? strumLayer(s) : vel < 0.55 ? 0 : vel < 0.82 ? 1 : 2;
+    let gap = (up ? GUITAR.spreadUp : GUITAR.spreadDown) * (1.25 - 0.5 * (dyn ? s.tone : vel));
     if (s.span && list.length > 1) gap = Math.min(gap, 0.45 * s.span / (list.length - 1));   // 빠른 16분음표에서도 한 칸의 절반 안에 다 침
     if (kind) muteN++; else strumN++;
     const kg = kind ? GUITAR.muteGain[kind] || 1 : 1;
@@ -5645,7 +5871,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (old && old.end > at) { try { const p = old.g.gain; p.cancelScheduledValues(at); p.setTargetAtTime(0, at, 0.008); old.src.stop(at + 0.06); } catch (e) { } }
       const buf = guitarNote(x.m, layer, ((kind ? muteN : strumN) + i) % GUITAR.variants, kind);
       const src = ctx.createBufferSource(); src.buffer = buf;
-      const g = ctx.createGain(), v0 = vel * (0.62 + 0.08 * (5 - x.s) / 5) * Math.sqrt(4 / s.strings.length) * kg;
+      const g = ctx.createGain(), v0 = vel * (0.62 + 0.08 * (5 - x.s) / 5) * Math.sqrt(4 / (dyn ? list.length : s.strings.length)) * kg;
       g.gain.value = v0;
       src.connect(g);
       let o = g;
@@ -5672,6 +5898,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else playChord(s.notes, when, endAt); }
   function playChord(notes, when, endAt) {
     const nRH = notes.length - 1;
+    if (PIANO.tieMax > 0) endAt = Math.min(endAt, when + PIANO.tieMax);   // (끔) 오래 끌어 둔 코드는 손을 뗌
     notes.forEach((m, i) => {
       const buf = pianoNote(m);
       const rel = PIANO.v2 ? Synth.pianoRelease(m) : PIANO.release;
@@ -5728,17 +5955,17 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (!list || !list.length) return;
       const from = Math.max(0, lastLE(times, t));
       for (let q = 0; q < list.length; q++) {
-        const s = list[(from + q) % list.length], kind = s.mute || '';      // 통기타 뮤트 스트로크는 뮤트 음(kind)으로
-        for (const m of s.notes) if (!need.some(x => x.m === m && x.gtr === gtr && x.kind === kind) && (gtr || !pianoCache.has(m))) need.push({ m, gtr, kind });
+        const s = list[(from + q) % list.length], kind = s.mute || '', layer = gtr ? strumLayer(s) : 1;      // 통기타 뮤트 스트로크는 뮤트 음(kind)으로, 셈여림이면 그 소리 층으로
+        for (const m of s.notes) if (!need.some(x => x.m === m && x.gtr === gtr && x.kind === kind && x.layer === layer) && (gtr || !pianoCache.has(m))) need.push({ m, gtr, kind, layer });
       }
     };
     if (prefs.piano) add(S.strikes, S.strikeT, false);
     if (prefs.guitar) add(S.strums, S.strumT, true);
     const yieldNow = () => new Promise(r => setTimeout(r, 0));
-    for (const { m, gtr, kind } of need) {
+    for (const { m, gtr, kind, layer } of need) {
       if (tok !== warmToken) return;
       if (gtr) {
-        if ((kind ? muteCache : guitarCache).size + GUITAR.variants <= (kind ? GUITAR.muteCacheMax : GUITAR.cacheMax)) for (let v = 0; v < GUITAR.variants; v++) guitarNote(m, 1, v, kind);
+        if ((kind ? muteCache : guitarCache).size + GUITAR.variants <= (kind ? GUITAR.muteCacheMax : GUITAR.cacheMax)) for (let v = 0; v < GUITAR.variants; v++) guitarNote(m, layer, v, kind);
         await yieldNow(); continue;
       }
       if (pianoCache.has(m)) continue;
@@ -5770,17 +5997,17 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   // 시험용: 코드 연주(와 원곡)를 지금 앱과 같은 소리 경로로 오프라인 렌더링해 스테레오 Float32Array 두 개로 돌려줌.
-  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, guitarMode: 통기타 치는 방식})
+  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, guitarMode: 통기타 치는 방식})
   //  piano·guitar·guitarMode를 빼면 지금 상태를 따름
   async function offlineRender(from, dur, opt) {
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, pianoBus, guitarBus, v2: PIANO.v2, gm: prefs.guitarMode };
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, gm: prefs.guitarMode };
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
     const oc = new OfflineAudioContext(2, Math.ceil(dur * sr), sr);
     try {
-      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.guitarMode) prefs.guitarMode = opt.guitarMode;
+      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode;
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       pianoBus = buildPianoChain(pianoGain); guitarBus = buildGuitarChain(pianoGain);
@@ -5800,11 +6027,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       return [r.getChannelData(0), r.getChannelData(1)];
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
-      ctx = saved.ctx; pianoGain = saved.pianoGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; prefs.guitarMode = saved.gm;
+      ctx = saved.ctx; pianoGain = saved.pianoGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; syncPianoV3(); prefs.guitarMode = saved.gm;
       clearSynthCache(); buildStrikes();
     }
   }
   window.__chordityRender = offlineRender;
+  // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
+  window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '' }));
 
   // ---------------- 재생기 + 메트로놈 스케줄러 ----------------
   // 클릭은 setInterval 타이밍이 아니라 AudioContext 시계에 미리(200 ms 앞) 예약한다.
@@ -6182,6 +6411,69 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const bl0 = S.barLabels.find(b => b && !b.final), cw1 = chart.clientWidth;
     if (bl0) { const adj = bl0.lane.getBoundingClientRect().width - laneWidth(cw1, false); if (adj < -0.05 || cw1 !== cw0) { S.laneAdj = Math.min(0, adj); layoutChords(cw1); } }
     if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { chordWCache.clear(); S.rampNeed = null; measureChords(S.TL); layoutChords(); layoutTempoRow(); });
+    renderStrokeMarks();
+  }
+
+  // 통기타 스트로크 기호(1.14.0): 통기타를 켜면 마디 안 코드 이름과 빗금 사이에, 실제로 치는 스트로크마다 다운 Π·업 V를 그 박 자리에.
+  //  뮤트(뮤트·팜뮤트)는 이어진 뮤트 스트로크의 처음과 끝을 잇는 꺾쇠(양 끝이 아래로 꺾인 선) 위에 M(줄·마디를 넘으면 조각마다, 끝 조각에만 꺾임).
+  //  자리: 스트로크 따라는 박을 D칸(4, 겹박자 3)으로 나눈 가장 가까운 칸(봉우리로 옮긴 시각을 칸으로 되돌림), 4·8·16비트·스윙은 칠 시각 그대로.
+  //  통기타를 끄면 칸을 비우고 마디 높이도 원래대로(#chart.gm)
+  function renderStrokeMarks() {
+    const chart = $('chart'), TL = S.TL, on = !!(prefs.guitar && TL && !TL.empty && S.barEls.length && S.strums);
+    chart.classList.toggle('gm', on);
+    for (const be of S.barEls) if (be && be.gm) be.gm.textContent = '';
+    if (!on) return;
+    const b = TL.beats, nb = b.length, D = TL.meter.triple ? 3 : 4, snap = guitarMode() === 'strum';
+    // 시각 → 박 좌표(박 번호 + 박 안 자리)
+    const beatPos = t => {
+      let i = Math.min(nb - 2, Math.max(0, lastLE(b, t + 0.03)));
+      let x = Math.max(0, (t - b[i]) / (b[i + 1] - b[i]));
+      if (snap) x = Math.round(x * D) / D;
+      if (x >= 1 - 1e-9) { if (i + 1 < nb - 1) { i++; x = 0; } else x = 0.999; }
+      return i + x;
+    };
+    const barAt = gx => TL.barOfBeat[Math.min(nb - 1, Math.floor(gx + 1e-9))];
+    const fOf = (bi, gx) => { const bar = TL.bars[bi], g = S.barGeo[bi]; return (g.shift + gx - bar.startBeat) / g.slots; };
+    const pct = f => (f * 100).toFixed(3) + '%';
+    const frags = new Map();                              // 마디 → 문서 조각(마디마다 한 번에 붙임)
+    const fragOf = bi => { let f = frags.get(bi); if (!f) { f = document.createDocumentFragment(); frags.set(bi, f); } return f; };
+    const groups = []; let grp = null;
+    for (const s of S.strums) {
+      const gx = beatPos(s.t0), bi = barAt(gx);
+      if (bi == null || !S.barEls[bi]) continue;
+      const d = document.createElement('span');
+      d.className = 'sd' + (s.dir < 0 ? ' up' : '') + (s.mute ? ' mu' : '');
+      d.textContent = s.dir < 0 ? 'V' : 'Π';
+      d.style.left = pct(fOf(bi, gx));
+      fragOf(bi).appendChild(d);
+      // 뮤트 구간: 뮤트 스트로크가 다른 스트로크 없이 이어지는 동안(2박 넘게 비면 새 구간)
+      if (s.mute) {
+        if (grp && gx - grp.x1 <= 2 + 1e-9) grp.x1 = gx;
+        else { grp = { x0: gx, x1: gx, palm: s.mute === 'palm' }; groups.push(grp); }
+      } else grp = null;
+    }
+    for (const g of groups) {
+      const b0 = barAt(g.x0), b1 = barAt(g.x1), pieces = [];
+      for (let bi = b0; bi <= b1; bi++) {
+        const bar = TL.bars[bi], s0 = bar.startBeat, s1 = s0 + bar.nBeats;
+        const a = Math.max(g.x0, s0), z = Math.min(g.x1, s1);
+        pieces.push({ bi, a, z, L: g.x0 >= s0, R: g.x1 <= s1 + 1e-9 && (bi === b1) });
+      }
+      // M 글자는 박 길이가 가장 긴 조각에(같으면 앞 조각)
+      let lab = pieces[0]; for (const pc of pieces) if (pc.z - pc.a > lab.z - lab.a + 1e-9) lab = pc;
+      for (const pc of pieces) {
+        const m = document.createElement('span');
+        m.className = 'mb' + (pc.L ? ' l' : '') + (pc.R ? ' r' : '');
+        // 끝 조각은 스트로크 기호 바깥쪽 끝까지(기호 가운데 ± 5.5px), 이어지는 쪽은 마디 칸 끝까지
+        const fa = pc.L ? fOf(pc.bi, pc.a) : null, fz = pc.R ? fOf(pc.bi, pc.z) : null;
+        const left = pc.L ? 'calc(' + pct(fa) + ' + 1px)' : '-12px';
+        const right = pc.R ? 'calc(' + pct(fz) + ' + 12px)' : 'calc(100% + 10px)';
+        m.style.left = left; m.style.width = 'calc(' + right + ' - ' + left + ')';
+        if (pc === lab) { const t = document.createElement('i'); t.textContent = 'M'; m.appendChild(t); }
+        fragOf(pc.bi).appendChild(m);
+      }
+    }
+    for (const [bi, f] of frags) S.barEls[bi].gm.appendChild(f);
   }
 
   // 템포 줄에 그릴 것을 박 단위로 정리: 엔진이 겹치는 구간을 주더라도 화면에는 겹쳐 그리지 않음
@@ -6559,6 +6851,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (mk) mk.classList.add('ch');
     }
     el.appendChild(sl);
+    const gm = document.createElement('div'); gm.className = 'gm'; gm.setAttribute('aria-hidden', 'true');   // 통기타 스트로크 기호 칸(renderStrokeMarks가 채움)
+    el.appendChild(gm);
     if (!bar.pickup && bar.nBeats !== m) {
       const tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = bar.nBeats + '박';
       el.appendChild(tg);
@@ -6642,7 +6936,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       names.push('템포 ' + Math.round(t.bpm));
     }
     el.setAttribute('aria-label', (bar.pickup ? '못갖춘마디' : bar.num + '마디') + ': ' + names.join(', '));
-    S.barEls[idx] = { el, marks };
+    S.barEls[idx] = { el, marks, gm };
     return el;
   }
 
@@ -7033,6 +7327,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     $('guitarBtn').setAttribute('aria-pressed', String(prefs.guitar));
     if (prefs.guitar) { player.resyncPiano('g'); if (player.playing) player.schedule(); }
     else cancelVoices('g');
+    if (S.TL) renderStrokeMarks();
   }
 
   function syncControls() {
@@ -7079,7 +7374,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   $('selGuitarMode').addEventListener('change', e => {
     prefs.guitarMode = e.target.value; savePrefs(); renderApplied();
     if (!S.TL) return;
-    buildStrikes(); renderInfo(); player.resyncPiano('g'); if (player.playing) player.schedule();
+    buildStrikes(); renderStrokeMarks(); renderInfo(); player.resyncPiano('g'); if (player.playing) player.schedule();
   });
   // 볼륨: 넓은 화면(트랜스포트 안)과 좁은 화면(아래 줄) 두 벌을 같은 값으로 묶음
   document.querySelectorAll('[data-vol]').forEach(inp => {
