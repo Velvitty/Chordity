@@ -365,7 +365,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.15.0">v1.15.0</span>
+    <span class="ver" title="Chordity 버전 1.15.1">v1.15.1</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2523,6 +2523,11 @@ const Engine = (function () {
     //  GuitarSet 180곡 현별 음 정답(현 3개 이상이 60 ms 안에 울린 묶음)으로 정함: 문턱 0.5에서 F 0.58(록 0.59, 펑크 0.62), 방향 70%
     //  ST_DIR: 'odd16'(16분 홀수 칸 업), 'down'(모두 다운), 'feel'(끔, 아래 1.15.0 설명)
     ST_TH: 0.5, ST_SNAP: true, ST_DIR: 'odd16', ST_FEEL_WIN: 0, ST_WIN: 0.045,
+    //  스트로크 시각(1.15.1, 사용자: 기타가 약간 어긋난 타이밍에 쳐짐 → 한 치의 오차도 없이 정확한 타이밍에):
+    //   ST_TPCAL(고침): 칸 안 봉우리 시각을 박과 같은 규칙으로(검출 지연 보정 CALIB_SEC 6.5 ms + 프레임 사이 포물선 보간). 1.15.0까지는 정수 프레임 ÷ fps라
+    //    늘 6.5 ms 이르고 11.6 ms 간격으로 끊겨, 실제 녹음에서 박 위 스트로크가 박보다 4~7 ms 일렀음
+    //   ST_GRID: 봉우리로 옮기지 않고 칸 시각(박을 4칸·3칸으로 나눈 자리) 그대로 침
+    ST_TPCAL: 0, ST_GRID: false,
     //  ST_SPLIT(1.12.1): 칸 자리마다 문턱 — 박 위 칸(0)은 ST_TH_ON, 박 사이 칸(16분·8분 엇박)은 ST_TH_OFF. 끄면 모든 칸이 ST_TH.
     //  밴드 곡에서 엇박의 약한 스트로크(특히 16분 업)를 놓쳐 박마다 다운만 드문드문 치던 것을 고침. 봉우리로 옮기기(ST_SNAP)도 칸 문턱을 넘은 칸에.
     //  Engine.strokes 그대로 채점(끔 → 켬). tests/strum/engscore.js(GuitarSet 180곡, 위 0.58과 같은 채점): F 0.587 → 0.598(정밀도 0.541 → 0.514, 재현율 0.642 → 0.716),
@@ -2568,7 +2573,13 @@ const Engine = (function () {
     //  느린 긁기(1.15.0, RAKE): 곡의 끝 코드, 하이라이트 앞 마디 첫 박, 한 마디(RAKE_HOLD박) 넘게 끄는 코드를 여섯 줄 RAKE_BEAT박에 걸쳐 천천히(rakeMark).
     //   [RAKE_MIN, RAKE_MAX]초로 자르고 끝 코드는 RAKE_END배. 하이라이트: 뒤 4마디 − 앞 4마디 크기가 RAKE_RISE dB 이상이고 앞뒤 4마디 안에서 가장 크게 오르는 곳.
     //   실제 녹음 8곡(스트로크 따라)에서 곡마다 1~11곳, 135 BPM 약 0.21초 · 68 BPM 약 0.44초. 크기가 고른 곡(빙고)은 하이라이트를 못 찾음
+    //   1.15.1: 긁는 자리를 곡의 끝 구간으로 좁힘(사용자: 끝나는 곳·후주로 넘어가는 곳이 아닌데 드르르릉). 1.15.0의 나머지 자리는 꺼진 스위치로:
+    //    RAKE_MID_RISE(하이라이트 앞, 끔): 곡 첫머리(4마디째)에서 악기가 들어오는 곳까지 잡힘(실제 녹음 14곡 중 10곡), 크기만으로는 간주와 후렴을 못 가름
+    //    RAKE_MID_HOLD(곡 가운데서 끄는 코드, 끔): 스트로크 따라에서 원곡 친 곳을 못 찾은 마디(첫 박 한 번)가 대부분(IU 8마디, ijen 8·22·72·148마디 등)
+    //   RAKE_OUTRO(켬): 후주로 넘어가는 마디. 곡 끝에서 거꾸로 마디 크기가 곡 중앙값보다 RAKE_OUT_DB 넘게 작은 마디가 이어지는 꼬리(RAKE_OUT_MIN마디 이상,
+    //    곡의 RAKE_OUT_MAX 이하)를 찾아 그 앞 마디의 첫 박을 긁음. 끄는 코드(RAKE_HOLD박)는 이 꼬리와 그 앞 마디, 꼬리가 없으면 마지막 두 마디에서만 긁음
     RAKE: true, RAKE_BEAT: 0.5, RAKE_END: 1.6, RAKE_MIN: 0.12, RAKE_MAX: 0.5, RAKE_HOLD: 4, RAKE_RISE: 2.5,
+    RAKE_MID_RISE: false, RAKE_MID_HOLD: false, RAKE_OUTRO: true, RAKE_OUT_DB: 6, RAKE_OUT_MIN: 2, RAKE_OUT_MAX: 0.25,
     //  4·8·16비트 스트럼 변주(1.12.0, strumGrid): 묶음마다 원곡 칸 세기에 맞는 교본 패턴을 고름(SG_ADAPT, 끄면 기본 패턴만).
     //  점수 = Σ 칠 칸 (u − 문턱) + 기본 패턴 SG_BASIC, 앞 묶음과 같은 패턴이면 칸마다 SG_STAY(비터비). 문턱은 칸 크기마다(SG_TH4·8·16):
     //  u는 그 칸 크기의 칸끼리 맞춘 값이라 박은 대부분 세고 16분음표 칸은 대부분 약함. GuitarSet 180곡 스트로크 정답으로 정함(기본 패턴만 → 변주,
@@ -2594,7 +2605,11 @@ const Engine = (function () {
     //   Y0: 실제 녹음 12곡(結露 + 키트 11곡) 큰 마디(코드 마디, g ≥ −1 dB) 다운 스트로크 세기 중앙값이 1.12.2와 같게(곡 중앙값 차 0).
     //    큰 마디 에너지를 그대로 두면(설계안) 업을 키운 만큼 다운이 작아져 結露 후렴 다운이 들리는 비율 96 → 88%로 떨어졌기 때문.
     //    그 결과 큰 마디 에너지(업 포함)는 +0.1~+0.7 dB, 0 dB에 닿는 스트로크 곡 중앙값 1~5%(4비트·8비트 곡 최대 약 10%, 1.12.2 최대 세기 vel 1과 같음)
-    DYN: true, DYN_MACRO: true, DYN_REF: 0.75, DYN_W: 0.5, DYN_SFLOOR: -20, DYN_FLOOR: -12, DYN_XCUT: 3,
+    //   셈여림 넓히기(1.15.1, 사용자: 세게 치는 부분일수록 조금씩 더 세게, 여리게 치는 부분일수록 조금씩 더 여리게): 마디 이득을 기준 분위에서 떨어진 만큼
+    //    DYN_EXP배로 넓힘 g = clamp(DYN_EXP·(L − L기준), DYN_FLOOR, DYN_CEIL)(DYN_XCUT 하한도 DYN_EXP·min(0, R − R기준) − DYN_XCUT), 스트로크 db 상한도 DYN_CEIL.
+    //    1.15.0까지는 DYN_EXP 1, DYN_CEIL 0, DYN_FLOOR −12: 기준(75% 분위)보다 큰 마디(곡의 약 4분의 1)는 모두 0 dB로 같아 후렴과 큰 절을 같은 세기로 침.
+    //    음색도 g > 0이면 그만큼 밝게(tone = DYN_TONE·10^((min(0, g + 2) + max(0, g))/40), g ≤ 0은 그대로)
+    DYN: true, DYN_MACRO: true, DYN_REF: 0.75, DYN_W: 0.5, DYN_SFLOOR: -20, DYN_FLOOR: -15, DYN_XCUT: 3, DYN_EXP: 1.5, DYN_CEIL: 3,
     DYN_K: 4, DYN_KG: 3, DYN_WIN: 2, DYN_FB: -2, DYN_TONE: 0.7, DYN_UP: -2,
     DYN_Y0S: -3.3, DYN_Y04: -2.2, DYN_Y08: -2.15, DYN_Y016: -3.9, DYN_Y0SW: -3.0,
     DYN_POS: false, DYN_HF: 0, DYN_ACC: false,
@@ -4617,7 +4632,7 @@ const Engine = (function () {
       if (nc.has(s.x)) continue;
       const v = (s.v - med) / sc, strong = v >= stTh(s.j) || (s.j % 2 === 1 && s.v >= adTh);
       if (!strong && !change.has(s.x)) continue;
-      out.push({ t: strong && P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
+      out.push({ t: strong && P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
       if (barOf) struck.add(barOf[s.i]);
     }
     // 업 고르기(ST_REG): 16분 엇박(홀수 칸, 업) 스트로크는 앞뒤 ST_REG_W마디(박 수가 같은 마디) 가운데 같은 자리를 친 마디가
@@ -4638,7 +4653,7 @@ const Engine = (function () {
         if (s.j === 0 || nc.has(s.x)) continue;
         const bar = barOf[s.i], k = (s.i - TL.bars[bar].startBeat) * D + s.j, v = (s.v - med) / sc;
         if ((hit.has(bar) && hit.get(bar).has(k)) || v < P.ST_REG_ADD || !share(bar, k)) continue;
-        add.push({ t: P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar, change: false, u: v, j: s.j, k, sv: v });
+        add.push({ t: P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar, change: false, u: v, j: s.j, k, sv: v });
       }
       if (P.ST_REG) for (let q = out.length - 1; q >= 0; q--) { const x = out[q]; if (!x.change && x.j % 2 === 1 && x.bar >= 0 && !share(x.bar, x.k)) out.splice(q, 1); }
       out.push(...add);
@@ -4712,16 +4727,16 @@ const Engine = (function () {
       if (k < 0 || !M.ok[s.i]) continue;
       const v = (s.v - med) / sc;
       if (v < P.NCM_TH || (P.NCM_ACT_ST && !M.regs[k].active)) continue;
-      mut.push(muteOf({ t: P.ST_SNAP ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), change: false }, M.regs[k], s.i));
+      mut.push(muteOf({ t: P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), change: false }, M.regs[k], s.i));
       msrc.push({ bar: barOf ? barOf[s.i] : -1, u: clamp(v, -1.25, 2), fb: false, ref: false });
     }
     if (dsrc) dynApply(A, TL, fin.concat(mut), dsrc.concat(msrc), P.DYN_K, P.DYN_Y0S);
     return mergeMutes(fin, mut);
   }
 
-  // 통기타 셈여림(P.DYN) 마디 이득: { g(마디마다 dB, 0 이하), tone(마디마다 소리 층 값) }. 식은 P의 DYN 설명.
+  // 통기타 셈여림(P.DYN) 마디 이득: { g(마디마다 dB, DYN_CEIL 이하), tone(마디마다 소리 층 값) }. 식은 P의 DYN 설명.
   //  같은 A·TL·설정이면 한 번만 잼(통기타 방식을 바꿀 때마다 다시 불림)
-  const DYN_SIG = ['DYN_MACRO', 'DYN_REF', 'DYN_W', 'DYN_SFLOOR', 'DYN_FLOOR', 'DYN_XCUT', 'DYN_TONE'];
+  const DYN_SIG = ['DYN_MACRO', 'DYN_REF', 'DYN_W', 'DYN_SFLOOR', 'DYN_FLOOR', 'DYN_XCUT', 'DYN_TONE', 'DYN_EXP', 'DYN_CEIL'];
   const dynCache = new WeakMap();
   function dynBars(A, TL) {
     const sig = DYN_SIG.map(k => P[k]).join('|'), c = dynCache.get(TL);
@@ -4743,18 +4758,18 @@ const Engine = (function () {
         const w = side ? P.DYN_W : 0, Rr = qv(on.map(i => R[i])), Sr = side ? qv(on.map(i => S[i])) : 0;
         const L = Array.from(R, (r, i) => (1 - w) * (r - Rr) + w * Math.max(S[i] - Sr, P.DYN_SFLOOR)), Lr = qv(on.map(i => L[i]));
         for (let i = 0; i < nbar; i++) {
-          const x = clamp(L[i] - Lr, P.DYN_FLOOR, 0);
-          g[i] = clamp(Math.max(x, Math.min(0, R[i] - Rr) - P.DYN_XCUT), P.DYN_FLOOR, 0);   // 음악 크기만 따를 때보다 DYN_XCUT 넘게 깎지 않음
+          const x = clamp(P.DYN_EXP * (L[i] - Lr), P.DYN_FLOOR, P.DYN_CEIL);
+          g[i] = clamp(Math.max(x, P.DYN_EXP * Math.min(0, R[i] - Rr) - P.DYN_XCUT), P.DYN_FLOOR, P.DYN_CEIL);   // 음악 크기만 따를 때보다 DYN_XCUT 넘게 깎지 않음
         }
       }
     }
-    const v = { g, tone: Float64Array.from(g, x => P.DYN_TONE * Math.pow(10, Math.min(0, x + 2) / 40)) };
+    const v = { g, tone: Float64Array.from(g, x => P.DYN_TONE * Math.pow(10, (Math.min(0, x + 2) + Math.max(0, x)) / 40)) };
     dynCache.set(TL, { sig, A, v });
     return v;
   }
   // 셈여림 붙이기: list[k]에 db·tone·vel(·acc)을 씀. src[k] = { bar, u(자른 칸 세기), fb(빈 마디 첫 박), ref(가운데 계산에 넣음), pos(자리 표 dB) }
   //  μ = K·(u − 가운데), 가운데 = ±DYN_WIN마디 안 ref 스트로크 u의 중앙값(4개 못 되면 ±2·DYN_WIN마디, 그래도 못 되면 곡 전체), 빈 마디 첫 박은 DYN_FB.
-  //  업은 DYN_UP을 더함. db = clamp(Y0 + μ + g, −30, 0)
+  //  업은 DYN_UP을 더함. db = clamp(Y0 + μ + g, −30, DYN_CEIL)
   function dynApply(A, TL, list, src, K, Y0) {
     const { g, tone } = dynBars(A, TL), nbar = g.length;
     if (!nbar) return;
@@ -4773,7 +4788,7 @@ const Engine = (function () {
     list.forEach((s, k) => {
       const x = src[k], b = clamp(x.bar, 0, nbar - 1);
       const mu = x.fb ? P.DYN_FB : K * (x.u - mid[b]) + (x.pos || 0) + (hf ? P.DYN_HF * hf[k] : 0) + (s.dir < 0 ? P.DYN_UP : 0);
-      const db = clamp(Y0 + mu + g[b], -30, 0);
+      const db = clamp(Y0 + mu + g[b], -30, P.DYN_CEIL);
       s.db = db; s.vel = Math.min(1, Math.pow(10, db / 20)); s.tone = tone[b];
       if (P.DYN_ACC && mu >= 4) s.acc = true;
     });
@@ -4826,9 +4841,12 @@ const Engine = (function () {
       const dt = beats[i + 1] - beats[i];
       for (let j = 0; j < D; j++) {
         const t = beats[i] + dt * j / D, w = Math.min(P.ST_WIN, dt / D / 2);
-        let mx = -Infinity, mf = Math.round(t * fps);
-        for (let f = Math.max(0, Math.floor((t - w) * fps)); f <= Math.min(ne - 1, Math.ceil((t + w) * fps)); f++) { const v = (e[f] - m0) / s0; if (v > mx) { mx = v; mf = f; } }
-        slot.push({ t, i, j, x: i * D + j, v: mx, tp: mf / fps });
+        const tc = P.ST_TPCAL, cal = tc == null ? 0 : tc;                 // ST_TPCAL(초): 검출 지연 보정 + 프레임 사이 보간(null이면 1.15.0: 정수 프레임)
+        let mx = -Infinity, mf = Math.round((t - cal) * fps);
+        for (let f = Math.max(0, Math.floor((t - cal - w) * fps)); f <= Math.min(ne - 1, Math.ceil((t - cal + w) * fps)); f++) { const v = (e[f] - m0) / s0; if (v > mx) { mx = v; mf = f; } }
+        let d = 0;
+        if (tc != null && mf > 0 && mf < ne - 1) { const a = e[mf - 1], b = e[mf], c = e[mf + 1], den = a - 2 * b + c; if (den < 0) d = clamp(0.5 * (a - c) / den, -0.5, 0.5); }
+        slot.push({ t, i, j, x: i * D + j, v: mx, tp: (mf + d) / fps + cal });
       }
     }
     if (!slot.length) return { slot, med: 0, sc: 1 };
@@ -5202,10 +5220,11 @@ const Engine = (function () {
     return out;
   }
 
-  // 느린 긁기(RAKE): 곡의 끝 코드, 크게 올라가는 부분(하이라이트) 앞 마디의 첫 박, 길게 끄는 코드(다음 스트로크까지 RAKE_HOLD박 이상)를
+  // 느린 긁기(RAKE): 곡의 끝 코드, 후주로 넘어가는 마디의 첫 박, 끝 구간에서 길게 끄는 코드(다음 스트로크까지 RAKE_HOLD박 이상)를
   //  "챙" 대신 "드르르릉"으로. s.rake = 여섯 줄을 긁는 데 걸리는 시간(초) = 박 길이 × RAKE_BEAT(끝 코드는 RAKE_END배)를 [RAKE_MIN, RAKE_MAX]로 자름
-  //  → 느린 곡일수록 천천히. 긁기는 늘 다운(낮은 줄부터). 하이라이트: 마디 크기(제곱 평균 dB) 뒤 4마디 평균 − 앞 4마디 평균이 RAKE_RISE dB 이상이고
-  //  앞뒤 4마디 안에서 가장 크게 오르는 곳. 뮤트 스트로크는 긁지 않음. 다음 스트로크 30 ms 앞까지만 긁고(줄여도 RAKE_MIN 아래면 긁지 않음)
+  //  → 느린 곡일수록 천천히. 긁기는 늘 다운(낮은 줄부터). 후주: 곡 끝의 조용한 꼬리(P의 RAKE_OUTRO 설명). (끔) 하이라이트: 마디 크기(제곱 평균 dB)
+  //  뒤 4마디 평균 − 앞 4마디 평균이 RAKE_RISE dB 이상이고 앞뒤 4마디 안에서 가장 크게 오르는 곳.
+  //  뮤트 스트로크는 긁지 않음. 다음 스트로크 30 ms 앞까지만 긁고(줄여도 RAKE_MIN 아래면 긁지 않음)
   // 정렬된 배열 a에서 a[i] ≤ t인 마지막 i(없으면 −1)
   function lastLE(a, t) { let lo = 0, hi = a.length - 1, r = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (a[m] <= t) { r = m; lo = m + 1; } else hi = m - 1; } return r; }
   function rakeMark(A, TL, list) {
@@ -5216,22 +5235,43 @@ const Engine = (function () {
     const chord = []; list.forEach((s, k) => { if (!s.mute) chord.push(k); });
     if (!chord.length) return list;
     const mark = (k, m, why) => { const s = list[k]; if (s.rake == null) s.dir0 = s.dir; s.rake = Math.max(s.rake || 0, dur(s.t, m)); s.dir = 1; s.rakeWhy = s.rakeWhy || why; };
-    // 길게 끄는 코드: 박 위(±60 ms) 스트로크이고 다음 스트로크까지 RAKE_HOLD박 이상
-    for (let q = 0; q < chord.length; q++) {
-      const k = chord[q], s = list[k], i = lastLE(beats, s.t + 0.06);
-      if (i < 0 || Math.abs(s.t - beats[i]) > 0.06) continue;
-      const nx = k + 1 < list.length ? list[k + 1].t : (beats[nb - 1] + T);
-      if (nx - s.t >= P.RAKE_HOLD * beatLen(s.t) - 1e-6) mark(k, 1, 'hold');
-    }
-    // 하이라이트 앞 마디의 첫 박
-    if (A && A.rms && A.fps && TL.bars.length >= 8) {
-      const fps = A.fps, nbar = TL.bars.length, R = new Float64Array(nbar);
+    const nbar = TL.bars.length, barOf = t => TL.barOfBeat[clamp(lastLE(beats, t + 0.06), 0, nb - 1)];
+    // 마디 크기(A.rms 제곱 평균 dB)
+    let R = null;
+    if (A && A.rms && A.fps && nbar >= 8) {
+      const fps = A.fps; R = new Float64Array(nbar);
       TL.bars.forEach((b, i) => {
         const s1 = b.startBeat + b.nBeats, t0 = beats[b.startBeat], t1 = s1 < nb ? beats[s1] : beats[nb - 1] + (s1 - nb + 1) * T;
         const f0 = Math.max(0, Math.floor(t0 * fps)), f1 = Math.min(A.rms.length, Math.max(f0 + 1, Math.ceil(t1 * fps)));
         let e = 0; for (let f = f0; f < f1; f++) e += A.rms[f] * A.rms[f];
         R[i] = 10 * Math.log10(e / Math.max(1, f1 - f0) + 1e-12);
       });
+    }
+    // 끝 구간: 마지막 코드 스트로크의 마디에서 거꾸로, 곡 중앙값보다 RAKE_OUT_DB 넘게 작은 마디가 이어지는 꼬리(후주)
+    const lastBar = barOf(list[chord[chord.length - 1]].t);
+    let tail = -1;
+    if (P.RAKE_OUTRO && R) {
+      const med = median(Array.from(R.subarray(0, lastBar + 1)));
+      let k = lastBar; while (k > 0 && R[k] <= med - P.RAKE_OUT_DB) k--;
+      const len = lastBar - k;                                     // 꼬리 = k+1 … lastBar
+      if (len >= P.RAKE_OUT_MIN && len <= P.RAKE_OUT_MAX * (lastBar + 1)) tail = k + 1;
+    }
+    const endFrom = tail >= 0 ? tail - 1 : lastBar - 1;            // 끄는 코드를 긁는 끝 구간의 첫 마디
+    // 길게 끄는 코드: 박 위(±60 ms) 스트로크이고 다음 스트로크까지 RAKE_HOLD박 이상. 끝 구간에서만(RAKE_MID_HOLD면 곡 어디서나)
+    for (let q = 0; q < chord.length; q++) {
+      const k = chord[q], s = list[k], i = lastLE(beats, s.t + 0.06);
+      if (i < 0 || Math.abs(s.t - beats[i]) > 0.06) continue;
+      if (!P.RAKE_MID_HOLD && TL.barOfBeat[i] < endFrom) continue;
+      const nx = k + 1 < list.length ? list[k + 1].t : (beats[nb - 1] + T);
+      if (nx - s.t >= P.RAKE_HOLD * beatLen(s.t) - 1e-6) mark(k, 1, 'hold');
+    }
+    // 후주로 넘어가는 마디의 첫 박
+    if (tail >= 1) {
+      const t0 = beats[TL.bars[tail - 1].startBeat];
+      for (const k of chord) if (Math.abs(list[k].t - t0) <= 0.08) { mark(k, 1, 'outro'); break; }
+    }
+    // (끔) 하이라이트 앞 마디의 첫 박
+    if (P.RAKE_MID_RISE && R) {
       const avg = (a, z) => { let e = 0; for (let i = a; i < z; i++) e += R[i]; return e / (z - a); };
       const rise = new Float64Array(nbar).fill(-Infinity);
       for (let b = 4; b + 4 <= nbar; b++) rise[b] = avg(b, b + 4) - avg(b - 4, b);
@@ -5899,7 +5939,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 1.13 피아노(v2 위에서): 해머 타격음·실제 녹음에 맞춘 감쇠·버퍼 끝·소리판 고침(Synth.PIANO2·SOUNDBOARD 스위치) + 작은 방 잔향.
     //  끄면 1.12 소리와 같음(소리판·합성 스위치도 함께 꺼짐)
     v3: true,
-    makeup3: 0.80,                // v3 경로 보정 이득: C Am F G7을 2.4초씩 친 진행 전체 RMS가 1.12와 같게(1.2·4.8초 진행은 +0.8·−0.7 dB)
+    // v3 경로 보정 이득: 0.80이면 C Am F G7을 2.4초씩 친 진행 전체 RMS가 1.12와 같음(1.2·4.8초 진행은 +0.8·−0.7 dB).
+    //  1.15.1: +3 dB(사용자: 피아노가 조금 작음). 기본 볼륨(음악 0.9, 피아노 0.6)에서 실제 녹음 3곡 K 가중 크기가 음악보다 −8.8~−13.3 LU → −5.8~−10.3 LU
+    makeup3: 1.13,
     wet3: 0.18,                   // 방 잔향 이득(잔향 응답 에너지 1이라 잔향/건조음 에너지 약 −13.5 dB)
     // 방 잔향(작은 방, RT60 1.2초): 확산음 20 ms부터(4 ms 페이드), 초기 반사 6개(ms, 크기), 시간에 따라 어두워짐(dark × RT60초)
     room2: { rt60: 1.2, len: 1.3, pre: 0.02, dark: 0.6, er: [[7, 0.5], [11, 0.42], [15, 0.36], [19, 0.3], [24, 0.25], [31, 0.2]] },
@@ -5910,12 +5952,27 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
-    makeup3: 0.79,                // 자체 울림(Synth.GUITAR.selfRes, 방 잔향 없음, 공명현 0.03)일 때: 0.88이면 방 잔향 경로보다 +0.75~+1.1 dB 커서 −0.9 dB
+    // 자체 울림(Synth.GUITAR.selfRes, 방 잔향 없음, 공명현 0.03)일 때: 0.88이면 방 잔향 경로보다 +0.75~+1.1 dB 커서 0.79(−0.9 dB).
+    //  1.15.1: +6 dB(사용자: 기타가 너무 작음). 기본 볼륨(음악 0.9, 기타 0.6)에서 실제 녹음 3곡 K 가중 크기가 음악보다 −9.0~−13.6 LU → −3~−7.6 LU,
+    //  피아노(+3 dB)보다 약 3 dB 큼. 음악과 섞으면 −1 dBFS 리미터에 걸리는 표본이 0.001~0.76% → 0.1~1.4%(음악이 큰 곡은 원래 걸림)
+    makeup3: 1.58,
     makeup2: 0.88,                // 현별 음색(Synth.GUITAR.tone2)일 때: 같은 0.98이면 통기타만 렌더링이 K 가중 +1.0~+1.2 dB, A 가중 0~−0.1 dB(합성곡 3곡,
                                   //  굵은 현에 기본음이 실림) → −0.9 dB 덜어 K +0.1~+0.3·A −0.9~−1.0 dB에서 둘의 가운데로(피아노·음악과의 크기를 그대로)
     variants: 2,                  // 같은 음도 들뜸 잡음을 몇 가지로 바꿔 가며(같은 스트로크가 기계처럼 똑같이 들리지 않게)
     cacheMax: 48,                 // 기억해 둘 기타 음 버퍼 수(3초 모노, 48개 ≈ 28 MB). 합성이 음마다 약 2 ms라 넘치면 오래 안 쓴 것부터 버림
-    spreadDown: 0.012,            // 다운 스트로크에서 현 사이 간격(초, 세게 칠수록 짧게)
+    // 현 사이 간격(1.15.1, spreadDb): 기준은 GuitarSet 반주 녹음(현별 픽업 음 시작)에서 다섯 현 넘게 친 스트로크의 현 사이 간격 중앙값
+    //  다운 6.2 ms(768개, 여섯 줄 펼침 중앙값 27 ms·10% 15 ms·90% 49 ms, 곡 템포와 거의 무관)·업 7.0 ms(403개).
+    //  빠르기 = 세기 db(엔진 셈여림, 없으면 20·log10(vel))가 lo dB 이하면 slow배, hi dB 이상이면 fast배, 그 사이는 dB에 따라 비를 고르게(가운데 dB에서 1배),
+    //  현 사이 간격 = 기준 ÷ 빠르기(사용자: 세게 칠수록 점점 빠르게 1.25배까지, 여리게 칠수록 점점 느리게 0.8배까지)
+    spreadDb: { on: true, down: 0.0062, up: 0.0070, fast: 1.25, slow: 0.8, lo: -15, hi: 3 },
+    //  spreadDb를 끄면 1.15.0까지: 현 사이 간격 × (1.25 − 0.5 × 세기), 다운 0.012(실제 곡 보통 세기 0.7에서 10.8 ms, 여섯 줄 54 ms → 드르륵 느리게 들림)·업 0.008
+    // 스트로크 앞당기기(1.15.1, 현 사이 간격 단위): 첫 현을 (lead × 간격)만큼 일찍 쳐서 스트로크 소리가 가장 크게 일어나는 때(중역 온셋 봉우리,
+    //  1 ms 간격)가 엔진 스트로크 시각에 오게(음수면 늦춤). 「빙고」 통기타 렌더링(스트로크 따라)에서 앞당기지 않으면 봉우리가 예약 시각보다
+    //  다운 −2.1 ms·업 +9.1 ms(중앙값)였고, 원곡 온셋 봉우리보다 다운 −2.6 ms·업 +8.4 ms: 업은 가늘고 작은 위쪽 현부터 쳐서 둘째 현 무렵에 소리가 일어남.
+    //  다운 −0.34·업 1.3으로 실제 녹음 5곡(빙고·IU·키트 3곡)을 렌더링하니 봉우리 − 예약이 다운 −0.8~+0.4 ms, 업 −5.4~+2.7 ms(중앙값 −2.2)라 업을 1.0으로.
+    //  원곡 온셋 봉우리와의 차(곡마다 중앙값)는 다운 −5.8~−0.4 ms(5곡 중앙값 −0.6)·업 −7.2~+3.8 ms. 느린 긁기는 앞당기지 않음(박에서 시작)
+    lead: { down: -0.34, up: 1.0 },
+    spreadDown: 0.012,            // 다운 스트로크(낮은 현부터 모든 현)
     spreadUp: 0.008,              // 업 스트로크(위쪽 현 3~4개)
     upVel: 0.72,                  // 업 스트로크 세기 비
     // N.C. 뮤트(엔진 NC_MUTE, 1.12.0): 뮤트('칙', 왼손으로 줄을 막고 침)·팜뮤트(낮은 현 파워 코드)
@@ -6159,9 +6216,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (up && list.length > 4) list = list.slice(0, 4);
     const vel = dyn ? Math.pow(10, s.db / 20) : clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1) * (up ? GUITAR.upVel : 1);
     const layer = dyn ? strumLayer(s) : vel < 0.55 ? 0 : vel < 0.82 ? 1 : 2;
-    let gap = (up ? GUITAR.spreadUp : GUITAR.spreadDown) * (1.25 - 0.5 * (dyn ? s.tone : vel));
+    const sd = GUITAR.spreadDb;
+    let gap;
+    if (sd && sd.on) {                                                    // 세기 dB에 따라 기준 간격의 sd.slow ~ sd.fast배 빠르기로
+      const k = clamp(((dyn ? s.db : 20 * Math.log10(Math.max(vel, 1e-4))) - sd.lo) / (sd.hi - sd.lo), 0, 1);
+      gap = (up ? sd.up : sd.down) / (sd.slow * Math.pow(sd.fast / sd.slow, k));
+    } else gap = (up ? GUITAR.spreadUp : GUITAR.spreadDown) * (1.25 - 0.5 * (dyn ? s.tone : vel));
     if (s.span && list.length > 1) gap = Math.min(gap, 0.45 * s.span / (list.length - 1));   // 빠른 16분음표에서도 한 칸의 절반 안에 다 침
     if (s.rake && list.length > 1) gap = s.rake / (list.length - 1);                         // 느린 긁기(엔진 RAKE): 여섯 줄을 s.rake초에 걸쳐 드르르릉
+    if (!s.rake && GUITAR.lead) when = Math.max(when - (up ? GUITAR.lead.up : GUITAR.lead.down) * gap, ctx.currentTime);   // 스트로크 앞당기기
     if (kind) muteN++; else strumN++;
     const kg = kind ? GUITAR.muteGain[kind] || 1 : 1;
     if (kind) for (let q = 0; q < 6; q++) {
