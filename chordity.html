@@ -250,6 +250,7 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 /* 기호는 글꼴과 상관없이 같은 꼴로 그림(clip-path로 자른 색 면): 다운 ⊓(위 막대 굵게), 업 V. 글자(Π·V)는 접근성 트리에서 빠진 칸 안에만 */
 .gm .sd { position: absolute; bottom: 1px; width: 9px; height: 8px; margin-left: 2px; font-size: 0; transform-origin: 50% 100%; background: var(--pencil); clip-path: polygon(0 0, 100% 0, 100% 100%, 82% 100%, 82% 30%, 18% 30%, 18% 100%, 0 100%); }
 .gm .sd.up { height: 9px; clip-path: polygon(0 0, 19% 0, 50% 76%, 81% 0, 100% 0, 59% 100%, 41% 100%); }
+.gm .sd.ck { height: 8px; clip-path: polygon(0 14%, 14% 0, 50% 36%, 86% 0, 100% 14%, 64% 50%, 100% 86%, 86% 100%, 50% 64%, 14% 100%, 0 86%, 36% 50%); }
 .gm .rk { position: absolute; bottom: 0; width: 5px; height: 15px; margin-left: -4px; transform-origin: 50% 100%; background: var(--pencil); clip-path: polygon(0 0, 30% 0, 100% 17%, 100% 25%, 30% 42%, 100% 58%, 100% 67%, 30% 83%, 100% 100%, 70% 100%, 0 83%, 0 75%, 70% 58%, 0 42%, 0 33%, 70% 17%); }   /* 느린 긁기(아르페지오 물결선) */
 .bar.cur .gm .sd, .bar.cur .gm .rk { background: var(--ink); }
 .gm .mb { position: absolute; top: 10px; height: 2px; border-top: 1.2px solid var(--pencil); }
@@ -365,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.15.1">v1.15.1</span>
+    <span class="ver" title="Chordity 버전 1.16.0">v1.16.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -538,13 +539,14 @@ body > main { flex: 1 0 auto; }
           <div class="lab">통기타 연주</div>
           <div class="ctl">
             <select id="selGuitarMode" aria-label="통기타가 치는 방식">
+              <option value="ssw">싱어송라이터(곡에 맞춘 반주)</option>
               <option value="strum">스트로크 따라(원곡 리듬대로)</option>
               <option value="beat4">4비트 스트럼</option>
               <option value="beat8">8비트 스트럼</option>
               <option value="beat16">16비트 스트럼</option>
               <option value="swing">스윙 스트럼</option>
             </select>
-            <span class="note">스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다.</span>
+            <span class="note">싱어송라이터(기본)는 통기타 반주자처럼 곡의 템포·느낌으로 8분·16분·셋잇단 손을 정하고, 곡에 맞는 스트럼 그루브(예: <span class="nw">↓ ↓↑ ↑↓↑</span>)를 골라 조용한 구간은 성기게, 큰 구간은 촘촘하게 치며, 되풀이되는 구간은 같게 칩니다. 스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다.</span>
           </div>
         </div>
         <div class="grp">
@@ -2570,6 +2572,35 @@ const Engine = (function () {
     //   실제 녹음 14곡 업 1~31% → 19~54%(빙고 1 → 34%, IU 5 → 32%), 박당 0.89~1.45 → 1.02~2.09
     //   N.C. 뮤트 스트로크는 채우지 않고 방향도 ST_DIR 그대로(8분 손인 곡도 칸 홀짝, e2e-guitar.js의 뮤트 진자 규칙)
     ST_FILL: true, FILL_BPM: 116, FILL_A16: 0.33, FILL_TH: -0.35, FILL_Q: 0.65,
+    //  반복 구간 스트로크 맞추기(ST_REP, repMix): 사용자 — 같은 곡에서 되풀이되는 구간(1·2절, 후렴)의 스트로크가 상당히 다름.
+    //   칠지 말지 판정 전에 칸 세기를 반복 짝(TL.rep, 코드 투표 REP와 같은 짝)의 같은 칸 세기와 섞음:
+    //   u' = (1 − w)·u + w·(짝 가중 평균). ST_REP_SHR = λ > 0이면 자기 가중 1, 짝마다 λ·pw/REP_W(온전한 짝 = λ)로 w = λS/(1 + λS), S = Σ pw/REP_W
+    //   (λ = 1: 온전한 짝 n개면 n + 1번 되풀이의 평균 — 두 번이면 w = 0.5, 세 번이면 셋 평균). ST_REP_SHR 0이면 고정 w = ST_REP_W × min(1, 짝 가중 합 / ST_REP_MINW).
+    //   스트로크 따라의 칸 문턱·16분 엇박 문턱(ST_AD)·손 흐름 채우기 문턱과 4·8·16비트 패턴 점수(strumGrid)에 씀. 세기(vel·셈여림)는 그 칸 자신의 u 그대로.
+    //   자기 칸은 문턱을 못 넘고 섞은 값만 넘으면 봉우리로 옮기지 않고 칸 시각에 침. N.C. 칸은 섞지 않고 짝으로도 쓰지 않음. 코드 바뀜 다운은 그대로.
+    //   ST_REG(끔)의 업 고르기는 섞지 않은 s.v 그대로. 곡이 짧거나 아주 길어 TL.rep이 없으면(GuitarSet 대부분) 예전과 같음.
+    //   실제 녹음 14곡(rep/harness.js, 반복 짝 박끼리 칸 상태 일치·박 전체 일치, 끔 → 켬): 스트로크 따라 칸 0.747 → 0.921, 박 0.354 → 0.763,
+    //   8비트 칸 0.907 → 0.960, 16비트 0.896 → 0.948, 업 0.363 → 0.359, 박당 1.550 → 1.582. GuitarSet 180곡 F 0.581 → 0.579, 방향 70.0 → 70.1%, 업 32.4 → 32.4%.
+    //   비교(고정 w, SHR 0): w 0.5 칸 0.862·박 0.595·8비트 0.953·16비트 0.954, GuitarSet F 0.576 / w 0.7 칸 0.901·박 0.696·8비트 0.957·16비트 0.961, F 0.567
+    //   (두 번 되풀이에서 w > 0.5는 짝 쪽으로 넘어가 원래 친 박이 아닌 쪽에 치게 됨)
+    ST_REP: true, ST_REP_W: 0.5, ST_REP_MINW: 0, ST_REP_SHR: 1,
+    //  싱어송라이터 반주(1.16.0, SSW, 통기타 방식 'ssw', sswStrum): 손 흐름(16분 손: 템포 < SSW_BPM16 또는 16분 엇박 활발함 ≥ SSW_A16),
+    //   기본 수준(엇박 칸 세기 중앙값 < SSW_B3 → 2, < SSW_B4 → 3, 나머지 4, 16분 손이고 SSW_SLOW BPM 아래면 3까지), 마디 바람 = 기본 − SSW_SPAN·max(0, 1 − 2r) (+1: r ≥ SSW_TOP),
+    //   r = SSW_WG·크기 + (1 − SSW_WG)·리듬 활발함(곡 안 크기 폭이 SSW_GMIN dB 못 되면 리듬만), 비터비 바꿈 벌점 SSW_CHG(구절 경계 SSW_CHG4),
+    //   채움 SSW_FILL, 당김 SSW_PUSH, 강세 dB(첫 박 SSW_ACC1, 백비트 SSW_ACCBACK, 8분 엇박 SSW_ACCOFF, 16분 엇박 SSW_ACC16), 박 느낌 맞춤 SSW_ALIGN초, 셈여림 Y0 DYN_Y0SSW
+    SSW: true, SSW_BPM16: 100, SSW_A16: 0.33, SSW_B3: -0.6, SSW_B4: -0.1, SSW_SLOW: 76, SSW_SPAN: 1.5, SSW_TOP: 0.85, SSW_WG: 0.6, SSW_GMIN: 2,
+    SSW_CHG: 2.5, SSW_CHG4: 0.6, SSW_FILL: true, SSW_PUSH: true, SSW_ACC1: 0.5, SSW_ACCBACK: 1, SSW_ACCOFF: -1, SSW_ACC16: -1.5, SSW_ALIGN: 0.015, DYN_Y0SSW: -2.5,
+    SSW_TH: 0.1, SSW_FIT: 4, SSW_BASEFIT: 0, SSW_BASEPRI: 0, SSW_DOWN43: 0.05,
+    //   블라인드 판정(AI 심사 6명 × 실제 녹음 8곡, 1.15.1 대 1.16.0: 39 : 9)에서 나온 약점 고침: SSW_REPG(반복 짝 r 섞기는 크기 차 3 dB 안만: 인트로와 후렴이 같은 진행이면
+    //   섞여 후렴이 4분음표로 내려갔음), SSW_ABSG(g ≤ SSW_G0 → 0.5 이하, ≤ SSW_G1 → 2 이하, ≥ SSW_GLOUD → 기본 이상), SSW_HALF(1·3박 − 2·4박 칸 세기 ≥ SSW_HALF_D면 수준 3을
+    //   ↓↑ · ↓ ↓↑ 하프타임 꼴로), SSW_END(마지막 코드 뒤로 치지 않음), SSW_PHRASE(8마디 구절 끝 박 변화)
+    SSW_REPG: 3, SSW_ABSG: true, SSW_G0: -12, SSW_G1: -7, SSW_GLOUD: -3, SSW_HALF: true, SSW_HALF_D: 0.5, SSW_END: true, SSW_PHRASE: true,
+    // 2차 판정 뒤: SSW_PHRASE_U(구절 끝 ·↑는 원곡 그 박 정박 칸 세기 u가 이 값 미만일 때만, Infinity면 늘), SSW_QGROOVE(조용한 구간 밀도를 원곡 공격 꼴로:
+    //  1·3박 정박 밖 센 칸(u ≥ SSW_QG_U)이 4박당 SSW_QG(16분 손은 SSW_QG16) 이상인 SSW_QG_MIN마디 이상 구간은 기본 패턴을 여리게, 아니면 구간 하나의 밀도,
+    //  그 밀도가 2분·온음표인데 원곡 2·4박이 3박보다 SSW_QB24 이상 세면 4분음표), SSW_BREAK(N.C.로 끝나는 마디는 한 번 치고 멈춤)
+    SSW_PHRASE_U: 0.5, SSW_QGROOVE: true, SSW_QG: 1.2, SSW_QG16: 2, SSW_QG_U: 0.83, SSW_QG_MIN: 3, SSW_QB24: 0.5, SSW_BREAK: true,
+    // SSW_CHUCK(꺼 둠): 백비트가 뚜렷한 8분 손 곡(큰 마디 원곡 2·4박 − 1·3박 ≥ SSW_CHUCK_BB, 그런 마디 8개 이상)의 큰 마디(SSW_CHUCK_RUN마디 이상 이어진 구간) 2·4박 다운을 처크(뮤트)로
+    SSW_CHUCK: false, SSW_CHUCK_BB: 0.2, SSW_CHUCK_RUN: 4,
     //  느린 긁기(1.15.0, RAKE): 곡의 끝 코드, 하이라이트 앞 마디 첫 박, 한 마디(RAKE_HOLD박) 넘게 끄는 코드를 여섯 줄 RAKE_BEAT박에 걸쳐 천천히(rakeMark).
     //   [RAKE_MIN, RAKE_MAX]초로 자르고 끝 코드는 RAKE_END배. 하이라이트: 뒤 4마디 − 앞 4마디 크기가 RAKE_RISE dB 이상이고 앞뒤 4마디 안에서 가장 크게 오르는 곳.
     //   실제 녹음 8곡(스트로크 따라)에서 곡마다 1~11곳, 135 BPM 약 0.21초 · 68 BPM 약 0.44초. 크기가 고른 곡(빙고)은 하이라이트를 못 찾음
@@ -4577,6 +4608,7 @@ const Engine = (function () {
       }),
       sub, subRes, settings: set,                          // subRes: 작은박을 켜면 박을 몇으로 나누는지(2 또는 셋잇단 곡 3)
       acap: acap.runs,                                     // 무반주 구간(ACAP): [[시작 박, 끝 박), …] — 코드 N.C., 통기타 뮤트 없음
+      rep: rp ? { res, start: rp.start, pj: rp.pj, pw: rp.pw } : null,   // 반복 짝(REP): 슬롯 s(박 ⌊s/res⌋)의 짝 슬롯 pj[start[s]..start[s+1]), 가중 pw(통기타 스트로크 반복 맞추기용)
       dbg: { z, lab0: Array.from(lab0, k => st0[k].id), treb: F.treb, bass: F.bass, acap: acap.stat },   // 진단용
     };
   }
@@ -4628,11 +4660,14 @@ const Engine = (function () {
     // 16분 엇박 문턱 맞추기(ST_ADAPT): N.C. 아닌 16분 엇박 칸 가운데 맞춘 플럭스 s.v가 1(곡 안 90% 값) 넘는 칸의 비율 a(곡의 16분 엇박 활발함)로
     //  16분 엇박 칸은 s.v ≥ max(ST_AD_LO, ST_AD_A − ST_AD_K·a)여도 침(16분을 촘촘히 긁는 곡일수록 드럼에 묻힌 여린 업 스트로크까지)
     const adTh = stAdapt(ss, nc, D);
+    // 반복 구간 맞추기(ST_REP): 판정에 쓸 칸 값 V[x](s.v와 같은 단위, 짝과 섞음). 끄면 s.v 그대로
+    const mix = repMix(TL, Float64Array.from(slot, s => s.v), D, x => nc.has(x)), V = x => mix ? mix[x] : slot[x].v;
+    const hitV = (s, sv) => (sv - med) / sc >= stTh(s.j) || (s.j % 2 === 1 && sv >= adTh);
     for (const s of slot) {
       if (nc.has(s.x)) continue;
-      const v = (s.v - med) / sc, strong = v >= stTh(s.j) || (s.j % 2 === 1 && s.v >= adTh);
+      const v = (s.v - med) / sc, own = hitV(s, s.v), strong = mix ? hitV(s, V(s.x)) : own;
       if (!strong && !change.has(s.x)) continue;
-      out.push({ t: strong && P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
+      out.push({ t: strong && own && P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
       if (barOf) struck.add(barOf[s.i]);
     }
     // 업 고르기(ST_REG): 16분 엇박(홀수 칸, 업) 스트로크는 앞뒤 ST_REG_W마디(박 수가 같은 마디) 가운데 같은 자리를 친 마디가
@@ -4676,11 +4711,11 @@ const Engine = (function () {
       };
       for (const x of out) if (x.j === 2 && !m16(x.i)) x.dir = -1;
       // 칸 자리 j마다 문턱: 그 자리(N.C. 아닌) 칸 세기의 FILL_Q 분위수와 FILL_TH 가운데 큰 값(자리마다 세기 크기가 달라서)
-      const thJ = [0, 1, 2, 3].map(j => { const a = slot.filter(s => s.j === j && !nc.has(s.x)).map(s => (s.v - med) / sc).sort((x, y) => x - y); return Math.max(P.FILL_TH, a.length ? a[Math.floor(P.FILL_Q * (a.length - 1))] : 0); });
+      const thJ = [0, 1, 2, 3].map(j => { const a = slot.filter(s => s.j === j && !nc.has(s.x)).map(s => (V(s.x) - med) / sc).sort((x, y) => x - y); return Math.max(P.FILL_TH, a.length ? a[Math.floor(P.FILL_Q * (a.length - 1))] : 0); });
       for (let i = 0; i + 2 < nb; i++) {
         if (!beatOn.has(i) || !beatOn.has(i + 1)) continue;
         const h = m16(i), xa = i * D + (h ? 3 : 2), s = slot[xa];
-        if (!s || has.has(xa) || nc.has(xa) || (s.v - med) / sc < thJ[h ? 3 : 2]) continue;
+        if (!s || has.has(xa) || nc.has(xa) || (V(xa) - med) / sc < thJ[h ? 3 : 2]) continue;
         add(xa, -1);
         add(i * D + (h ? 2 : 0), 1);
       }
@@ -4827,6 +4862,32 @@ const Engine = (function () {
   }
   // 스트로크 따라의 칸 문턱(칸 자리 j): ST_SPLIT이면 박 위 ST_TH_ON, 박 사이 ST_TH_OFF, 끄면 ST_TH
   const stTh = j => !P.ST_SPLIT ? P.ST_TH : j === 0 ? P.ST_TH_ON : P.ST_TH_OFF;
+  // 반복 구간 칸 세기 섞기(ST_REP): val[x](칸 x = 박 × R + 칸)를 반복 짝 박의 같은 칸 값과 섞은 새 배열(끄거나 짝이 없으면 null).
+  //  짝은 TL.rep(슬롯 s = 박 × res, 박 위 슬롯끼리만). skip(x)이 참인 칸(N.C.)은 섞지도 짝으로 쓰지도 않음. 섞기는 원래 값으로 한 번만(순서와 관계없이 같은 결과)
+  function repMix(TL, val, R, skip) {
+    const rp = TL && TL.rep;
+    if (!P.ST_REP || !rp || !(P.ST_REP_W > 0) || !val || !val.length) return null;
+    const res = rp.res || 1, nB = Math.floor(val.length / R), out = Float64Array.from(val);
+    const sw = new Float64Array(R), sv = new Float64Array(R);
+    let any = false;
+    for (let i = 0; i < nB; i++) {
+      const s = i * res; if (s + 1 >= rp.start.length) break;
+      sw.fill(0); sv.fill(0);
+      for (let p = rp.start[s]; p < rp.start[s + 1]; p++) {
+        const q = rp.pj[p], w = rp.pw[p]; if (q % res || !(w > 0)) continue;
+        const k = q / res; if (k === i || k >= nB) continue;
+        for (let j = 0; j < R; j++) { const y = k * R + j; if (skip && skip(y)) continue; sw[j] += w; sv[j] += w * val[y]; }
+      }
+      for (let j = 0; j < R; j++) {
+        const x = i * R + j; if (!(sw[j] > 0) || (skip && skip(x))) continue;
+        // ST_REP_SHR > 0: 자기 가중 1, 짝마다 λ·pw/REP_W(온전한 짝 = λ) — 짝 n개가 모두 온전하면 λ = 1에서 n + 1개 평균(두 번 되풀이면 w = 0.5와 같음)
+        const w = P.ST_REP_SHR > 0 ? P.ST_REP_SHR * sw[j] / (P.REP_W || 1) / (1 + P.ST_REP_SHR * sw[j] / (P.REP_W || 1))
+          : P.ST_REP_W * (P.ST_REP_MINW > 0 ? Math.min(1, sw[j] / P.ST_REP_MINW) : 1);
+        out[x] = (1 - w) * val[x] + w * sv[j] / sw[j]; any = true;
+      }
+    }
+    return any ? out : null;
+  }
 
   // 스트로크 따라의 칸 세기: 박마다 D칸, 칸 시각 근처(±ST_WIN, 칸 간격의 절반까지)의 중역 플럭스(곡 안 양수 중앙값·90% 값으로 맞춤) 최댓값 v와 그 프레임 시각 tp.
   //  칸 번호 x = 박 × D + 칸(끝 박 뒤는 칸 없음). 칸 세기 u = (v − med)/sc(칸끼리 다시 맞춤)
@@ -5134,6 +5195,8 @@ const Engine = (function () {
     }
     const vs = Array.from(v).sort((a, b) => a - b), med = vs.length ? vs[vs.length >> 1] : 0, sc = vs.length ? (vs[Math.floor(0.9 * (vs.length - 1))] - med) || 1 : 1;
     const u = k => e ? (v[k] - med) / sc : 0;
+    // 반복 구간 맞추기(ST_REP): 패턴 점수에만 짝과 섞은 칸 세기 uS(세기·셈여림은 u 그대로)
+    const vm = e ? repMix(TL, v, R, x => nc.has(x)) : null, uS = k => vm ? (vm[k] - med) / sc : u(k);
     // 셈여림(SG_DYN > 0): 마디 크기(rms 평균, dB)를 곡 안 10%·90% 값 사이에서 0~1로(앞뒤 마디와 평균, 차가 3 dB 못 되면 모두 0.5) 맞춘 r로
     //  바라는 밀도 d* = 최소 + (0.25 + 0.5r)(최대 − 최소)(표 안 패턴의 칠 칸 비율). 패턴 밀도가 d*에서 멀수록 칸마다 SG_DYN × ((d − d*)/(최대 − 최소))²를 뺌
     //  (조용한 곳은 성기게, 큰 곳은 촘촘하게. 원곡 칸 세기가 엇박마다 고르게 약해 맞춤만으로는 가장 성긴·가장 촘촘한 패턴만 나오는 것을 막음)
@@ -5154,7 +5217,7 @@ const Engine = (function () {
         const dens = lib.map(p => p.replace(/-/g, '').length / p.length), dlo = Math.min(...dens), dhi = Math.max(...dens), dWant = dlo + (0.25 + 0.5 * r) * (dhi - dlo);
         const sc2 = lib.map((p, pi) => {
           let z = pi === 0 ? P.SG_BASIC : 0;
-          for (let k = 0; k < p.length; k++) if (p[k] !== '-' && !nc.has(x0 + k)) z += u(x0 + k) - TH;
+          for (let k = 0; k < p.length; k++) if (p[k] !== '-' && !nc.has(x0 + k)) z += uS(x0 + k) - TH;
           if (P.SG_DYN > 0 && dhi > dlo) z -= P.SG_DYN * p.length * Math.pow((dens[pi] - dWant) / (dhi - dlo), 2);
           return z;
         });
@@ -5217,6 +5280,247 @@ const Engine = (function () {
     if (dsrc) dynApply(A, TL, out, dsrc, P.DYN_KG, mode === 'beat4' ? P.DYN_Y04 : mode === 'beat16' ? P.DYN_Y016 : mode === 'swing' ? P.DYN_Y0SW : P.DYN_Y08);
     out.plan = plan;
     if (sw) out.swing = sw;
+    return out;
+  }
+
+  // 싱어송라이터 반주(1.16.0, 통기타 방식 'ssw'): 원곡의 칠 때를 하나하나 따라 치지 않고, 통기타 반주자가 곡을 듣고 하듯
+  //  ① 곡의 템포·느낌으로 손 흐름을 정함(겹박자는 셋잇단 손, 느린 곡이나 16분 엇박이 활발한 곡은 16분 손, 나머지는 8분 손),
+  //  ② 곡 전체의 기본 그루브(수준 SSW 기본)를 원곡의 엇박 활발함으로 고르고, ③ 마디마다 구간의 크기(셈여림 마디 이득 g)와 원곡의 리듬 활발함으로
+  //  수준을 기본에서 낮추거나(절·도입은 성기게) 그대로·한 단계 올리며(후렴), ④ 수준은 비터비로 이어(바꿀 때 벌점, 4마디 구절 경계에서는 작게)
+  //  되풀이되는 구간(TL.rep 짝 마디)은 같은 수준으로, ⑤ 크게 올라가는 구간 바로 앞 마디의 끝 박은 채움(↓↑↓↑), ⑥ 박 사이에서 바뀌는 코드는
+  //  그 칸에서 당겨 치고 바로 다음 박은 붙임(당김음), ⑦ 2·4박(백비트)에 강세, 업은 여리게, ⑧ 모든 칸을 원곡 칸 봉우리들의 곡 중앙값만큼 옮겨
+  //  밴드의 박 느낌에 맞춤(SSW_ALIGN). 수준(마디 4박 기준, ↓ 다운 ↑ 업 · 쉼): 0 ↓ 한 번, 1 ↓·↓·(2분), 2 ↓↓↓↓(4분),
+  //  3 8분 손 ↓ ↓↑ ↑ ↓↑(포크) / 16분 손 ↓ ↓·↓↑ ↓ ↓·↓↑ / 셋잇단 손 ↓·↑, 4 8분 손 ↓↑↓↑↓↑↓↑ / 16분 손 ↓·↓↑ ·↑↓↑ 되풀이 / 셋잇단 손 ↓↓↑
+  const SSW_BEAT = {
+    2: { X: 'D-', W: 'DU', O: '-U', N: '--', F: 'DU' },
+    4: { X: 'D---', Y: 'D-DU', Z: '-UDU', N: '----', F: 'DUDU' },
+    3: { X: 'D--', S: 'D-U', F: 'DDU', N: '---' },
+  };
+  // 마디 안 k번째 박(박 n개)의 꼴: 수준 L, 칸 R(2·4·3)
+  function sswBeat(R, L, k, n) {
+    if (L <= 0) return k === 0 ? 'X' : 'N';
+    if (L === 1) return n === 3 || k % 2 === 0 ? 'X' : 'N';
+    if (L === 2) return 'X';
+    if (L === 3) return R === 2 ? (k === 0 ? 'X' : k % 2 ? 'W' : 'O') : R === 4 ? (k % 2 ? 'Y' : 'X') : 'S';
+    return R === 2 ? 'W' : R === 4 ? (k % 2 ? 'Z' : 'Y') : 'F';
+  }
+  function sswStrum(A, TL) {
+    if (!TL || TL.empty) return [];
+    const beats = TL.beats, nb = beats.length, triple = !!TL.meter.triple, nbar = TL.bars.length;
+    const iv = []; for (let i = 0; i + 1 < nb; i++) iv.push(beats[i + 1] - beats[i]); iv.sort((a, b) => a - b);
+    const bpm = iv.length ? 60 / iv[iv.length >> 1] : 100;
+    // ① 손 흐름: 원곡의 16분 엇박 활발함은 16분 칸으로 잼
+    const nc4 = strumMarks(TL, triple ? 3 : 4).nc, ss4 = A && A.fm ? stSlots(A, TL, triple ? 3 : 4) : null;
+    const a16 = ss4 && !triple ? oddAct(ss4, nc4) : 0;
+    const R = triple ? 3 : bpm < P.SSW_BPM16 || a16 >= P.SSW_A16 ? 4 : 2;
+    const { change, nc } = strumMarks(TL, R);
+    const ss = A && A.fm ? stSlots(A, TL, R) : null, slot = ss ? ss.slot : [], med = ss ? ss.med : 0, sc = ss ? ss.sc : 1;
+    const u = x => slot[x] ? (slot[x].v - med) / sc : 0;
+    const mix = ss ? repMix(TL, Float64Array.from(slot, s => s.v), R, x => nc.has(x)) : null;
+    const uS = x => mix ? (mix[x] - med) / sc : u(x);
+    // ⑧ 박 느낌: 박 위 센 칸(u ≥ 1)의 봉우리 − 칸 시각의 곡 중앙값(±SSW_ALIGN초로 자름)
+    let shift = 0;
+    if (P.SSW_ALIGN > 0 && slot.length) {
+      const d = slot.filter(s => s.j === 0 && !nc.has(s.x) && (s.v - med) / sc >= 1).map(s => s.tp - s.t).sort((a, b) => a - b);
+      if (d.length >= 8) shift = clamp(d[d.length >> 1], -P.SSW_ALIGN, P.SSW_ALIGN);
+    }
+    // 스윙: 8분 손이고 원곡이 스윙(원곡에서 잰 φ, 곧지 않음)이면 엇박 칸을 φ 자리로
+    const sw = R === 2 ? swingRatio(A, TL) : null, phi = sw && sw.measured && !sw.straight ? sw.phi : 0.5;
+    const cellT = x => { const i = Math.floor(x / R), j = x % R, dt = beats[i + 1] - beats[i]; return beats[i] + dt * (R === 2 && j === 1 ? phi : j / R) + shift; };
+    // 마디 특징: 크기 r(셈여림 마디 이득 g를 곡 안 20%~90% 값으로 0~1), 리듬 활발함(칸 세기 평균, 곡 안 20%~90% 값으로 0~1)
+    const { g } = dynBars(A, TL);
+    const chordBar = TL.bars.map(b => b.events.some(e => !e.label.nc));
+    const actB = new Float64Array(nbar), offB = new Float64Array(nbar);
+    TL.bars.forEach((b, bi) => {
+      let s1 = 0, n1 = 0, s2 = 0, n2 = 0;
+      for (let i = b.startBeat; i < Math.min(nb - 1, b.startBeat + b.nBeats); i++) for (let j = 0; j < R; j++) {
+        const x = i * R + j; if (nc.has(x)) continue;
+        const v = clamp(uS(x), -1.5, 2); s1 += v; n1++; if (j) { s2 += v; n2++; }
+      }
+      actB[bi] = n1 ? s1 / n1 : -1.5; offB[bi] = n2 ? s2 / n2 : -1.5;
+    });
+    const on = []; for (let b = 0; b < nbar; b++) if (chordBar[b]) on.push(b);
+    const qn = (a, q) => { const s = a.slice().sort((x, y) => x - y); return s.length ? s[Math.floor(q * (s.length - 1))] : 0; };
+    const nrm = arr => { const v = on.map(b => arr[b]), lo = qn(v, 0.2), hi = qn(v, 0.9); return Float64Array.from(arr, x => hi - lo > 1e-6 ? clamp((x - lo) / (hi - lo), 0, 1) : 0.5); };
+    const rG = nrm(Array.from(g)), rA = nrm(Array.from(actB));
+    const gSpan = on.length ? qn(on.map(b => g[b]), 0.9) - qn(on.map(b => g[b]), 0.2) : 0;
+    const wG = gSpan >= P.SSW_GMIN ? P.SSW_WG : 0;
+    let r = Float64Array.from(rG, (x, b) => wG * x + (1 - wG) * rA[b]);
+    // ④ 되풀이 구간: 마디 첫 박이 반복 짝인 마디끼리 r을 섞음(ST_REP과 같은 줄임 가중)
+    if (P.ST_REP && TL.rep) {
+      const rp = TL.rep, res = rp.res || 1, barAt = new Int32Array(nb).fill(-1);
+      TL.bars.forEach((b, bi) => { if (b.startBeat < nb) barAt[b.startBeat] = bi; });
+      const r2 = Float64Array.from(r);
+      for (let bi = 0; bi < nbar; bi++) {
+        const s = TL.bars[bi].startBeat * res; if (s + 1 >= rp.start.length) continue;
+        let sw2 = 0, sv = 0;
+        for (let p = rp.start[s]; p < rp.start[s + 1]; p++) { const q = rp.pj[p]; if (q % res) continue; const k = barAt[q / res]; if (k < 0 || k === bi || !chordBar[k]) continue; if (P.SSW_REPG > 0 && Math.abs(g[k] - g[bi]) > P.SSW_REPG) continue; sw2 += rp.pw[p]; sv += rp.pw[p] * r[k]; }
+        if (sw2 > 0) { const S = (P.ST_REP_SHR || 1) * sw2 / (P.REP_W || 1), w = S / (1 + S); r2[bi] = (1 - w) * r[bi] + w * sv / sw2; }
+      }
+      r = r2;
+    }
+    // 맞춤 점수 fit[b][L]: 마디 b를 수준 L 패턴으로 칠 때 칠 칸의 (uS − SSW_TH) 합 ÷ 마디 칸 수(원곡 리듬과 맞을수록 큼)
+    const BT0 = SSW_BEAT[R], fit = TL.bars.map(b => {
+      const f = new Float64Array(5);
+      for (let L = 0; L < 5; L++) {
+        let z = 0, n = 0;
+        for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; const bp = BT0[sswBeat(R, L, k, b.nBeats)]; for (let j = 0; j < R; j++) { const x = i * R + j; n++; if (bp[j] !== '-' && !nc.has(x)) z += uS(x) - P.SSW_TH; } }
+        f[L] = n ? z / n : 0;
+      }
+      return f;
+    });
+    // ② 곡의 기본 수준: 코드 마디의 엇박 칸 세기 중앙값(SSW_BASEFIT > 0이면 코드 마디 맞춤 점수 합에 그 가중을 더해 2~4 가운데 고름)
+    const songOff = qn(on.map(b => offB[b]), 0.5);
+    let base = songOff < P.SSW_B3 ? 2 : songOff < P.SSW_B4 ? 3 : 4;
+    if (P.SSW_BASEFIT > 0 && on.length) {
+      let best = -Infinity, arg = base;
+      for (let L = 2; L <= 4; L++) { let z = 0; for (const b of on) z += fit[b][L]; z = z / on.length * P.SSW_BASEFIT - (L === base ? 0 : P.SSW_BASEPRI); if (z > best) { best = z; arg = L; } }
+      base = arg;
+    }
+    if (R === 4 && bpm < P.SSW_SLOW) base = Math.min(base, 3);
+    // 맞춤 내리기(SSW_DOWN43): 기본 4인데 코드 마디 평균 맞춤 점수가 수준 4가 3보다 SSW_DOWN43 넘게 낮으면 3으로(원곡 엇박이 그만큼 비어 있음)
+    if (P.SSW_DOWN43 > 0 && base === 4 && on.length) { let d = 0; for (const b of on) d += fit[b][4] - fit[b][3]; if (d / on.length < -P.SSW_DOWN43) base = 3; }
+    // ③ 바라는 수준: 곡의 조용한 절반만 낮춤 기본 − SSW_SPAN·max(0, 1 − 2r)(r = 0에서 − SSW_SPAN), 아주 큰 마디(r ≥ SSW_TOP)는 + 1까지(4 이하)
+    const want = Float64Array.from(r, x => clamp(base - P.SSW_SPAN * Math.max(0, 1 - 2 * x) + (x >= P.SSW_TOP ? 1 : 0), 0, 4));
+    // 크기 절대값(SSW_ABSG, 마디 이득 g dB): g ≤ SSW_G0 아주 조용함 → 0.5 이하(한 번 치고 울리기·2분음표), g ≤ SSW_G1 → 2 이하, g ≥ SSW_GLOUD 큰 곳 → 기본 이상
+    const floor = new Float64Array(nbar);
+    if (P.SSW_ABSG) for (let b = 0; b < nbar; b++) {
+      if (g[b] <= P.SSW_G0) want[b] = Math.min(want[b], 0.5); else if (g[b] <= P.SSW_G1) want[b] = Math.min(want[b], 2);
+      else if (g[b] >= P.SSW_GLOUD) { want[b] = Math.max(want[b], base); floor[b] = base; }
+    }
+    // 조용한 구간의 밀도(SSW_QGROOVE): g ≤ SSW_G1인 코드 마디가 이어진 구간마다 원곡 4칸(겹박자는 3칸) 격자에서 1·3박 정박 밖의 센 칸(u ≥ SSW_QG_U) 수를
+    //  4박당으로 세어, SSW_QG 이상이고 SSW_QG_MIN마디 이상이면 원곡 그루브가 살아 있는 구간 → 크기 상한을 풀고 기본 패턴(3 이하)을 여리게,
+    //  아니면 구간 안 바람을 중앙값 하나로(같은 크기 구간은 같은 밀도)
+    const qsec = [];
+    if (P.SSW_ABSG && P.SSW_QGROOVE) {
+      const D4 = triple ? 3 : 4, s4 = ss4 || (A && A.fm ? stSlots(A, TL, D4) : null);
+      const u4 = x => s4 && s4.slot[x] ? (s4.slot[x].v - s4.med) / s4.sc : -9;
+      const hits = TL.bars.map(b => { let h = 0, nbt = 0; for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; nbt++; for (let j = 0; j < D4; j++) if (!(j === 0 && k % 2 === 0) && u4(i * D4 + j) >= P.SSW_QG_U) h++; } return nbt ? h * 4 / nbt : 0; });
+      // 16분 손(느린 곡)의 그루브 패턴은 박마다 칸이 많아 조용한 구간에서 바쁘게 들림 → 기준을 SSW_QG16으로 높임
+      const qg = R === 4 && P.SSW_QG16 > 0 ? P.SSW_QG16 : P.SSW_QG;
+      let s0 = -1;
+      for (let b = 0; b <= nbar; b++) {
+        const q = b < nbar && chordBar[b] && g[b] <= P.SSW_G1;
+        if (q && s0 < 0) s0 = b;
+        if (!q && s0 >= 0) {
+          const b1 = b - 1, len = b1 - s0 + 1; let h = 0; for (let k = s0; k <= b1; k++) h += hits[k]; h /= len;
+          const groove = len >= P.SSW_QG_MIN && h >= qg;
+          let wm = qn(Array.from(want.subarray(s0, b1 + 1)), 0.5);
+          // 성긴 구간의 2분·온음표(바람 1.5 이하)는 원곡 2·4박 정박이 3박보다 SSW_QB24 이상 세면 4분음표로(빈 3박만 치고 백비트를 건너뛰지 않게)
+          if (!groove && P.SSW_QB24 > 0 && wm <= 1.5) {
+            let s24 = 0, n24 = 0, s3 = 0, n3 = 0;
+            for (let k = s0; k <= b1; k++) { const bar = TL.bars[k]; for (let q = 1; q < bar.nBeats; q++) { const i = bar.startBeat + q; if (i + 1 >= nb) break; const v = clamp(u4(i * D4), -1.5, 2); if (q === 2) { s3 += v; n3++; } else if (q % 2) { s24 += v; n24++; } } }
+            if (n24 && n3 && s24 / n24 - s3 / n3 >= P.SSW_QB24) wm = 2;
+          }
+          for (let k = s0; k <= b1; k++) want[k] = groove ? Math.min(base, 3) : wm;
+          qsec.push({ from: s0, to: b1, hits: h, groove });
+          s0 = -1;
+        }
+      }
+    }
+    // 하프타임(SSW_HALF): 4박 코드 마디에서 1·3박 칸 세기 평균 − 2·4박 평균이 SSW_HALF_D 이상이면 수준 3을 1·3박 중심 꼴로
+    let half = false;
+    if (P.SSW_HALF && R !== 3) {
+      let s13 = 0, n13 = 0, s24 = 0, n24 = 0;
+      for (const b of on) { const bar = TL.bars[b]; if (bar.nBeats !== 4) continue; for (let k = 0; k < 4; k++) { const i = bar.startBeat + k; if (i + 1 >= nb || nc.has(i * R)) continue; const v = clamp(uS(i * R), -1.5, 2); if (k % 2) { s24 += v; n24++; } else { s13 += v; n13++; } } }
+      half = n13 > 8 && n24 > 8 && s13 / n13 - s24 / n24 >= P.SSW_HALF_D;
+    }
+    // ④ 비터비: 비용 (L − 바람)², 수준을 바꾸면 SSW_CHG(4마디 구절 경계는 SSW_CHG4)
+    const first = on.length ? on[0] : 0, NL = 5, lev = new Int32Array(nbar).fill(base);
+    if (nbar) {
+      const em = (b, L) => (L - want[b]) ** 2 - P.SSW_FIT * fit[b][L] + (L < floor[b] ? 100 : 0);
+      let cost = Array.from({ length: NL }, (_, L) => em(0, L)); const back = [];
+      for (let b = 1; b < nbar; b++) {
+        const pen = (b - first) % 4 === 0 ? P.SSW_CHG4 : P.SSW_CHG, nx = new Array(NL), bk = new Int32Array(NL);
+        for (let L = 0; L < NL; L++) { let best = Infinity, arg = 0; for (let Q = 0; Q < NL; Q++) { const c = cost[Q] + (Q === L ? 0 : pen); if (c < best) { best = c; arg = Q; } } nx[L] = best + em(b, L); bk[L] = arg; }
+        cost = nx; back.push(bk);
+      }
+      let L = 0; for (let q = 1; q < NL; q++) if (cost[q] < cost[L]) L = q;
+      for (let b = nbar - 1; b >= 0; b--) { lev[b] = L; if (b > 0) L = back[b - 1][L]; }
+    }
+    // 칸마다 칠 문자(D·U·-)
+    const nX = Math.max(0, nb - 1) * R, cell = new Array(nX).fill('-'), BT = SSW_BEAT[R];
+    const brk = TL.bars.map(b => !!P.SSW_BREAK && b.events.length > 1 && b.events[b.events.length - 1].label.nc && b.events.some(e => !e.label.nc));
+    // 처크(SSW_CHUCK): 8분 손 곡에서 큰 4박 코드 마디(g ≥ SSW_GLOUD, 수준 3 이상)의 원곡 2·4박 정박 칸 세기 평균 − 1·3박 평균이 SSW_CHUCK_BB 이상이면
+    //  (스네어 백비트가 뚜렷함) 그 마디들의 2·4박 다운을 왼손으로 줄을 막고 치는 뮤트(처크)로. 코드가 바뀌는 칸은 그대로 침
+    const chuckBar = new Uint8Array(nbar); let chuckBB = null;
+    if (P.SSW_CHUCK && R === 2) {
+      const cand = []; let s13 = 0, n13 = 0, s24 = 0, n24 = 0;
+      TL.bars.forEach((b, bi) => {
+        if (b.nBeats !== 4 || !chordBar[bi] || brk[bi] || g[bi] < P.SSW_GLOUD || lev[bi] < 3) return;
+        cand.push(bi);
+        for (let k = 0; k < 4; k++) { const i = b.startBeat + k; if (i + 1 >= nb || nc.has(i * R)) continue; const v = clamp(u(i * R), -1.5, 2); if (k % 2) { s24 += v; n24++; } else { s13 += v; n13++; } }
+      });
+      chuckBB = n13 && n24 ? s24 / n24 - s13 / n13 : null;
+      // 큰 마디가 SSW_CHUCK_RUN마디 이상 이어진 구간에만(외따로 큰 마디 하나에 처크가 끼지 않게)
+      if (cand.length >= 8 && chuckBB != null && chuckBB >= P.SSW_CHUCK_BB)
+        for (let q = 0; q < cand.length;) { let e = q; while (e + 1 < cand.length && cand[e + 1] === cand[e] + 1) e++; if (e - q + 1 >= P.SSW_CHUCK_RUN) for (let z = q; z <= e; z++) chuckBar[cand[z]] = 1; q = e + 1; }
+    }
+    const plan = [];
+    TL.bars.forEach((b, bi) => {
+      let pat = '';
+      for (let k = 0; k < b.nBeats; k++) {
+        const i = b.startBeat + k; if (i + 1 >= nb) break;
+        let key = half && lev[bi] === 3 && b.nBeats === 4 ? (R === 2 ? ['W', 'N', 'X', 'W'][k] : ['Y', 'N', 'X', 'Y'][k]) : sswBeat(R, lev[bi], k, b.nBeats);
+        // 구절 끝 변화(SSW_PHRASE): 8마디 구절의 끝 마디(첫 코드 마디 기준) 끝 박을 8분 손은 ·↑(다음 마디로 밀기), 16분·셋잇단 손은 채움으로(수준 3 이상)
+        //  8분 손의 ·↑는 원곡 그 박 정박 칸이 약할 때만(이 마디 값과 되풀이 짝과 섞은 값 모두 SSW_PHRASE_U 미만, 센 4박을 빼지 않음)
+        if (P.SSW_PHRASE && k === b.nBeats - 1 && lev[bi] >= 3 && (bi - first) % 8 === 7 && bi + 1 < nbar && chordBar[bi + 1] && !brk[bi + 1] && (R !== 2 || Math.max(u(i * R), uS(i * R)) < P.SSW_PHRASE_U)) key = R === 2 ? 'O' : 'F';
+        // ⑤ 채움: 다음 마디 수준이 올라가 3 이상이면 이 마디 끝 박을 채움
+        if (P.SSW_FILL && k === b.nBeats - 1 && bi + 1 < nbar && lev[bi + 1] > lev[bi] && lev[bi + 1] >= 3 && chordBar[bi] && !brk[bi + 1]) key = 'F';
+        const bp = BT[key] || BT.N; pat += chuckBar[bi] && k % 2 === 1 && bp[0] === 'D' && !change.has(i * R) ? 'x' + bp.slice(1) : bp;   // 처크 자리는 패턴 글자 x
+        for (let j = 0; j < R; j++) cell[i * R + j] = bp[j];
+      }
+      // 브레이크(SSW_BREAK): 마디 가운데에서 N.C.로 끝나는 마디는 코드 칸에서 한 번만 치고 멈춤(코드가 시작하는 칸은 아래 ⑥에서 침)
+      if (brk[bi])
+        for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) if (!nc.has(i * R + j)) cell[i * R + j] = '-'; }
+      if (chordBar[bi] && pat) plan.push({ bar: bi, beat: b.startBeat, pat, level: lev[bi] });
+    });
+    // ⑥ 코드 바뀜: 박 위는 다운, 박 사이는 진자 방향으로 당겨 치고, 그 칸이 박 바로 앞 칸이면 다음 박(같은 코드)은 치지 않음(붙임)
+    const pend = x => { const j = x % R; return R === 3 ? (j === 2 ? 'U' : 'D') : j % 2 ? 'U' : 'D'; };
+    const tie = new Set();
+    for (const x of change) {
+      if (x >= nX || nc.has(x)) continue;
+      if (x % R === 0) { if (cell[x] === '-') cell[x] = 'D'; continue; }
+      cell[x] = pend(x);
+      if (P.SSW_PUSH && x % R === R - 1 && x + 1 < nX && !change.has(x + 1) && !nc.has(x + 1)) tie.add(x + 1);
+    }
+    // 곡 끝(SSW_END): 마지막 코드가 시작한 칸 뒤로는 치지 않음(그 한 번을 rakeMark가 긁고 끝까지 울려 둠)
+    if (P.SSW_END && change.size) {
+      let lastC = -1; for (const x of change) if (x < nX && x > lastC && !nc.has(x)) lastC = x;
+      if (lastC >= 0) { if (cell[lastC] === '-') cell[lastC] = 'D'; for (let x = lastC + 1; x < nX; x++) if (!nc.has(x)) cell[x] = '-'; }
+    }
+    // N.C. 뮤트(NC_MUTE): strumGrid와 같은 규칙
+    const M = P.NC_MUTE && nc.size ? ncMute(A, TL) : null, rg = M ? M.regOf(R) : null;
+    const out = [], dsrc = P.DYN ? [] : null;
+    const posDb = (x, c) => {
+      const i = Math.floor(x / R), j = x % R, bi = TL.barOfBeat[i], k = i - TL.bars[bi].startBeat, n = TL.bars[bi].nBeats;
+      if (j) return R === 4 && j % 2 ? P.SSW_ACC16 : P.SSW_ACCOFF;
+      return k === 0 ? P.SSW_ACC1 : n === 4 && k % 2 === 1 ? P.SSW_ACCBACK : 0;
+    };
+    for (let x = 0; x < nX; x++) {
+      if (tie.has(x)) continue;
+      const c = cell[x]; if (c === '-') continue;
+      const i = Math.floor(x / R), dt = beats[i + 1] - beats[i], bi = TL.barOfBeat[i];
+      if (nc.has(x)) {
+        const q = rg ? rg[x] : -1;
+        if (q >= 0 && M.regs[q].active && M.ok[i]) {
+          out.push(muteOf({ t: cellT(x), dir: c === 'U' ? -1 : 1, vel: clamp(0.7 + 0.06 * clamp(u(x), -1, 2), 0.4, 1), change: false, span: dt / R }, M.regs[q], i));
+          if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1, 2), fb: false, ref: false, pos: posDb(x, c) });
+        }
+        continue;
+      }
+      const base0 = c === 'U' ? 0.66 : x % R === 0 ? 0.78 : 0.7;
+      if (chuckBar[bi] && c === 'D' && x % R === 0 && !change.has(x) && (i - TL.bars[bi].startBeat) % 2 === 1) {
+        out.push({ t: cellT(x), dir: 1, vel: clamp(base0 + 0.06 * clamp(u(x), -1, 2), 0.4, 1), change: false, span: dt / R, mute: 'dead', chuck: true });
+        if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1, 2), fb: false, ref: false, pos: posDb(x, c) });
+        continue;
+      }
+      out.push({ t: cellT(x), dir: c === 'U' ? -1 : 1, vel: clamp(base0 + 0.06 * clamp(u(x), -1, 2), 0.4, 1), change: change.has(x), span: dt / R });
+      if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1, 2), fb: false, ref: true, pos: posDb(x, c) });
+    }
+    if (dsrc) dynApply(A, TL, out, dsrc, P.DYN_KG, P.DYN_Y0SSW);
+    out.plan = plan;
+    out.ssw = { hand: R === 3 ? 'c' : R === 4 ? 16 : 8, base, half, qsec, chuck: chuckBar.some(v => v) ? chuckBB : null, bpm, a16, songOff, shift, swing: phi !== 0.5 ? phi : null, fitMean: [2, 3, 4].map(L => on.length ? on.reduce((z, b) => z + fit[b][L], 0) / on.length : 0), dbg: P.SSW_DBG ? { cellU: x => [u(x), uS(x)], g: Array.from(g), offB: Array.from(offB), actB: Array.from(actB), r: Array.from(r), want: Array.from(want), lev: Array.from(lev), fit: fit.map(f => Array.from(f)) } : null };
     return out;
   }
 
@@ -5298,7 +5602,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     strokes: (A, TL) => rakeMark(A, TL, strokes(A, TL)),
-    strumGrid: (A, TL, mode) => rakeMark(A, TL, strumGrid(A, TL, mode)),
+    strumGrid: (A, TL, mode) => rakeMark(A, TL, mode === 'ssw' && P.SSW ? sswStrum(A, TL) : strumGrid(A, TL, mode === 'ssw' ? 'beat8' : mode)),
     // 테스트용 내부 함수
     _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
   };
@@ -5829,8 +6133,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const savedPrefs = (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || localStorage.getItem(OLD_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } })();
   const prefs = Object.assign(
     { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'standard', res: 1, slash: true,
-      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'song', guitarMode: 'strum', notation: 'name' },
+      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'song', guitarMode: 'ssw', notation: 'name' },
     savedPrefs);
+  // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
+  if (savedPrefs.gmv !== 2) { if (prefs.guitarMode === 'strum') prefs.guitarMode = 'ssw'; prefs.gmv = 2; }
   // 1.15.0부터 피아노·통기타 볼륨이 따로: 그 전 저장값(코드 볼륨 하나 = pianoVol)은 통기타 볼륨도 같은 값으로 이어받음
   if (savedPrefs.guitarVol == null && typeof savedPrefs.pianoVol === 'number') prefs.guitarVol = savedPrefs.pianoVol;
   function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) { /* 저장 불가 환경은 무시 */ } }
@@ -6161,11 +6467,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     S.strikes = out;
     S.strikeT = Float64Array.from(out, s => s.t0);
   }
-  // 통기타가 치는 방식: 'strum' 스트로크 따라(원곡 리듬), 'beat4'·'beat8'·'beat16' 4·8·16비트(곡의 박에 맞춘 교본 패턴 변주),
+  // 통기타가 치는 방식: 'ssw' 싱어송라이터(1.16.0 기본: 곡의 템포·느낌·구간 크기로 반주자처럼 그루브를 골라 치고 되풀이 구간은 같게, 엔진 sswStrum),
+  //  'strum' 스트로크 따라(원곡 리듬), 'beat4'·'beat8'·'beat16' 4·8·16비트(곡의 박에 맞춘 교본 패턴 변주),
   //  'swing' 스윙(박마다 셋잇단 길게-짧게 -.--.--.--.-, 원곡이 스윙이면 그 비율로)
-  const GUITAR_MODES = ['strum', 'beat4', 'beat8', 'beat16', 'swing'];
-  const guitarMode = () => GUITAR_MODES.indexOf(prefs.guitarMode) > 0 ? prefs.guitarMode : 'strum';
-  const gmName = m => m === 'swing' ? '스윙' : m.slice(4) + '비트';
+  const GUITAR_MODES = ['ssw', 'strum', 'beat4', 'beat8', 'beat16', 'swing'];
+  const guitarMode = () => GUITAR_MODES.indexOf(prefs.guitarMode) > 0 ? prefs.guitarMode : 'ssw';
+  const gmName = m => m === 'swing' ? '스윙' : m === 'ssw' ? '싱어송라이터' : m === 'strum' ? '스트로크 따라' : m.slice(4) + '비트';
   // 통기타: 스트로크마다 그 자리 코드의 운지(Synth.guitarVoicing). 다음 스트로크나 N.C.까지 울림
   //  N.C. 뮤트 스트로크(엔진 NC_MUTE, s.mute 'dead'·'palm'): 코드 구간에 넣지 않고 뮤트 운지(Synth.muteVoicing)로. 다음 스트로크까지, 길어야 GUITAR.muteRing
   function buildStrums(segs) {
@@ -6173,6 +6480,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const st = gm === 'strum' ? Engine.strokes(S.A, TL) : Engine.strumGrid(S.A, TL, gm);
     S.strumPlan = st.plan || null;                               // 4·8·16비트·스윙: 묶음마다 고른 패턴(분석 정보에 보임)
     S.strumSwing = st.swing || null;                             // 스윙: 엇박 자리 φ와 원곡에서 쟀는지
+    S.strumSsw = st.ssw || null;                                 // 싱어송라이터: 손 흐름(8·16분, 셋잇단)과 곡의 기본 수준
     // 스트로크는 봉우리(실제로 친 순간)로 옮겨져 코드 경계보다 조금 이를 수 있음(앞당겨 치기): 경계 60 ms 앞까지는 새 코드로 침
     const end = TL.beats[TL.beats.length - 1];
     let k = 0;
@@ -6181,7 +6489,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       // 뮤트는 코드 경계 앞 60 ms 규칙(앞당겨 치기)도 보지 않음: 코드 스트로크의 자리 k는 그 시각만으로 정해져 뮤트가 있든 없든 같음
       if (st[i].mute) {
         const nx = i + 1 < st.length ? st[i + 1].t : Infinity;
-        out.push({ t0: t, t1: Math.max(t + 0.05, Math.min(nx, t + GUITAR.muteRing)), mute: st[i].mute, pc: st[i].pc, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, strings: Synth.muteVoicing(st[i].mute, st[i].pc) });
+        out.push({ t0: t, t1: Math.max(t + 0.05, Math.min(nx, t + GUITAR.muteRing)), mute: st[i].mute, chuck: !!st[i].chuck, pc: st[i].pc, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, strings: Synth.muteVoicing(st[i].mute, st[i].pc) });
         continue;
       }
       while (k + 1 < segs.length && segs[k + 1].t0 <= t + 0.06) k++;
@@ -6840,15 +7148,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const gx = beatPos(s.t0), bi = barAt(gx);
       if (bi == null || !S.barEls[bi]) continue;
       const d = document.createElement('span');
-      d.className = 'sd' + (s.dir < 0 ? ' up' : '') + (s.mute ? ' mu' : '');
-      d.textContent = s.dir < 0 ? 'V' : 'Π';
+      d.className = 'sd' + (s.dir < 0 ? ' up' : '') + (s.mute ? ' mu' : '') + (s.chuck ? ' ck' : '');
+      d.textContent = s.chuck ? '×' : s.dir < 0 ? 'V' : 'Π';            // 처크(싱어송라이터 SSW_CHUCK): 코드 구간 2·4박 뮤트는 × 한 글자(뮤트 꺾쇠 묶음에 넣지 않음)
       d.style.left = pct(fOf(bi, gx));
       fragOf(bi).appendChild(d);
       s.el = d; s.rkEl = null;                            // 재생 때 통통 튀기(bounceStrokes)
       // 느린 긁기: 다운 기호 왼쪽에 아르페지오 물결선
       if (s.rake) { const w = document.createElement('span'); w.className = 'rk'; w.style.left = pct(fOf(bi, gx)); fragOf(bi).appendChild(w); s.rkEl = w; }
       // 뮤트 구간: 뮤트 스트로크가 다른 스트로크 없이 이어지는 동안(2박 넘게 비면 새 구간)
-      if (s.mute) {
+      if (s.mute && !s.chuck) {
         if (grp && gx - grp.x1 <= 2 + 1e-9) grp.x1 = gx;
         else { grp = { x0: gx, x1: gx, palm: s.mute === 'palm' }; groups.push(grp); }
       } else grp = null;
@@ -7423,17 +7731,17 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       // 통기타 4·8·16비트: 묶음(보통 한 마디)마다 고른 스트럼 패턴을 많이 쓴 순으로(↓ 다운, ↑ 업, · 쉼)
       if (S.strumPlan && S.strumPlan.length) {
         const cnt = new Map(); for (const x of S.strumPlan) cnt.set(x.pat, (cnt.get(x.pat) || 0) + 1);
-        const sym = p => p.replace(/D/g, '↓').replace(/U/g, '↑').replace(/-/g, '·');
+        const sym = p => p.replace(/D/g, '↓').replace(/U/g, '↑').replace(/-/g, '·').replace(/x/g, '×');
         const gm = guitarMode(), sw = S.strumSwing;
         // 스윙(단박자): 박마다 두 칸 xy를 셋잇단 꼴 x·y로(사용자 표기 -.- = ↓·↑, 길게-짧게)
         const show = gm === 'swing' && sw && !sw.compound ? p => sym(p.replace(/(.)(.)/g, '$1-$2')) : sym;
-        const head = gm !== 'swing' ? gmName(gm) + ' ' : !sw ? '스윙 ' : sw.compound ? '스윙(겹박자 셋잇단 ↓·↑) '
+        const ssw = S.strumSsw, head = gm === 'ssw' && ssw ? '싱어송라이터(' + (ssw.hand === 'c' ? '셋잇단 손' : ssw.hand + '분음표 손') + (ssw.swing ? ', 스윙 ' + ssw.swing.toFixed(2) : '') + (ssw.chuck != null ? ', 2·4박 처크 ' + (S.strums || []).filter(s => s.chuck).length + '번' : '') + ') ' : gm !== 'swing' ? gmName(gm) + ' ' : !sw ? '스윙 ' : sw.compound ? '스윙(겹박자 셋잇단 ↓·↑) '
           : '스윙(엇박 ' + sw.phi.toFixed(2) + '박 자리, 길게:짧게 ' + (sw.phi / (1 - sw.phi)).toFixed(1) + ':1, '
             + (sw.measured ? '원곡에서 잼' : (Math.abs(sw.fallback - 2 / 3) < 1e-9 ? '기본값 셋잇단' : '기본값') + ', ' + (sw.straight ? '원곡은 곧음' : '원곡에서 못 잼')) + ') ';   // 못 잼: 엇박이 뚜렷하지 않아 믿을 수 없음
         rows.push(['통기타 스트럼', head + [...cnt].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([p, n]) => show(p) + ' ' + n + '번').join(', ') + (cnt.size > 4 ? ' 외 ' + (cnt.size - 4) + '가지' : '')]);
       }
       // 통기타 N.C. 뮤트(엔진 NC_MUTE): 원곡에 리듬이 있는 N.C. 구간에서 친 뮤트·팜뮤트 수(지금 치는 방식 기준)와 팜뮤트 음(그 자리 조의 철자로 파워 코드 이름)
-      const mutes = (S.strums || []).filter(s => s.mute);
+      const mutes = (S.strums || []).filter(s => s.mute && !s.chuck);
       if (mutes.length) {
         const palm = mutes.filter(s => s.mute === 'palm'), nDead = mutes.length - palm.length, ks = keysShown(TL), names = [];
         const spell = Engine._ && Engine._.spelling;
@@ -7455,14 +7763,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const subUnit = TL => TL && TL.subRes === 3 ? '⅓박' : '½박';
   const OPN = { half: '½박 옮김', x2: '템포 ×2', d2: '템포 ÷2', d3: '템포 ÷3' };
   // 보정 패널의 설정 기본값(저장되는 설정). 음량·테마·켜기/끄기 버튼은 여기서 다루지 않음
-  const PREF_DEFAULT = { vocab: 'standard', res: 1, slash: true, pianoMode: 'song', guitarMode: 'strum', accent: true, autoscroll: true, offsetMs: 0 };
+  const PREF_DEFAULT = { vocab: 'standard', res: 1, slash: true, pianoMode: 'song', guitarMode: 'ssw', accent: true, autoscroll: true, offsetMs: 0 };
   function settingParts() {
     const p = [];
     if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'extended') p.push('코드 확장');
     if (+prefs.res === 2) p.push(subUnit(S.TL) + ' 단위');
     if (!prefs.slash) p.push('베이스음 표기 끔');
     if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때');
-    if (guitarMode() !== 'strum') p.push('통기타 ' + gmName(guitarMode()));
+    if (guitarMode() !== 'ssw') p.push('통기타 ' + gmName(guitarMode()));
     if (!prefs.accent) p.push('첫 박 강조 끔');
     if (!prefs.autoscroll) p.push('자동 스크롤 끔');
     if (prefs.offsetMs) p.push('클릭 타이밍 ' + (prefs.offsetMs > 0 ? '+' : '') + prefs.offsetMs + ' ms');
