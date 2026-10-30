@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.16.0">v1.16.0</span>
+    <span class="ver" title="Chordity 버전 1.17.0">v1.17.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2601,6 +2601,9 @@ const Engine = (function () {
     SSW_PHRASE_U: 0.5, SSW_QGROOVE: true, SSW_QG: 1.2, SSW_QG16: 2, SSW_QG_U: 0.83, SSW_QG_MIN: 3, SSW_QB24: 0.5, SSW_BREAK: true,
     // SSW_CHUCK(꺼 둠): 백비트가 뚜렷한 8분 손 곡(큰 마디 원곡 2·4박 − 1·3박 ≥ SSW_CHUCK_BB, 그런 마디 8개 이상)의 큰 마디(SSW_CHUCK_RUN마디 이상 이어진 구간) 2·4박 다운을 처크(뮤트)로
     SSW_CHUCK: false, SSW_CHUCK_BB: 0.2, SSW_CHUCK_RUN: 4,
+    // 1.17.0 되풀이 줄이기·원곡과 맞추기: SSW_VAR(수준마다 변주 꼴 SSW_VARS, 같은 수준 안 변주 바꿈 벌점 SSW_VCHG·구절 경계 SSW_VCHG4),
+    //  SSW_EDIT(원곡 센 빈칸 uS ≥ SSW_ADD 더 치기·아주 빈 칸 uS ≤ SSW_DROP 빼기, 수준 SSW_EDIT_L 이상 마디)
+    SSW_VAR: true, SSW_VCHG: 0, SSW_VCHG4: 0, SSW_EDIT: true, SSW_ADD: 1.0, SSW_DROP: -0.6, SSW_EDIT_L: 2, SSW_RUNBREAK: true, SSW_RB_D: 0.05, SSW_VQ: 0.05,
     //  느린 긁기(1.15.0, RAKE): 곡의 끝 코드, 하이라이트 앞 마디 첫 박, 한 마디(RAKE_HOLD박) 넘게 끄는 코드를 여섯 줄 RAKE_BEAT박에 걸쳐 천천히(rakeMark).
     //   [RAKE_MIN, RAKE_MAX]초로 자르고 끝 코드는 RAKE_END배. 하이라이트: 뒤 4마디 − 앞 4마디 크기가 RAKE_RISE dB 이상이고 앞뒤 4마디 안에서 가장 크게 오르는 곳.
     //   실제 녹음 8곡(스트로크 따라)에서 곡마다 1~11곳, 135 BPM 약 0.21초 · 68 BPM 약 0.44초. 크기가 고른 곡(빙고)은 하이라이트를 못 찾음
@@ -5293,9 +5296,18 @@ const Engine = (function () {
   //  3 8분 손 ↓ ↓↑ ↑ ↓↑(포크) / 16분 손 ↓ ↓·↓↑ ↓ ↓·↓↑ / 셋잇단 손 ↓·↑, 4 8분 손 ↓↑↓↑↓↑↓↑ / 16분 손 ↓·↓↑ ·↑↓↑ 되풀이 / 셋잇단 손 ↓↓↑
   const SSW_BEAT = {
     2: { X: 'D-', W: 'DU', O: '-U', N: '--', F: 'DU' },
-    4: { X: 'D---', Y: 'D-DU', Z: '-UDU', N: '----', F: 'DUDU' },
+    4: { X: 'D---', Y: 'D-DU', Z: '-UDU', N: '----', F: 'DUDU', E: 'D-D-', Q: 'D--U' },
     3: { X: 'D--', S: 'D-U', F: 'DDU', N: '---' },
   };
+  // 변주(SSW_VAR, 1.17.0): 4박 마디에서 수준마다 기본 꼴(sswBeat) 말고 고를 수 있는 실제 스트럼 꼴(박마다 SSW_BEAT 글자). 마디마다 원곡과 맞는 쪽을 고름
+  //  8분 손 3: ↓ ↓↑ ↓ ↓↑ · ↓ ↓ ↓↑↓↑ · ↓ ↓↑↓↑↓↑, 4: ↓ ↓↑↓↑↓↑ · ↓↑↓↑ ↑↓↑, 2: ↓↓↓↓↑ · ↓↓↑↓↓ / 16분 손 3: ↓·↓↑ ↓·↓↑ ↓ ↓·↓↑ 등, 2: ↓↓↓↓··↑ · ↓ ↓·↓ ↓ ↓·↓ / 셋잇단 손 3·4
+  const SSW_VARS = {
+    2: { 1: [['X', 'N', 'X', 'W']], 2: [['X', 'X', 'X', 'W'], ['X', 'W', 'X', 'X']], 3: [['X', 'W', 'X', 'W'], ['X', 'X', 'W', 'W'], ['X', 'W', 'W', 'W']], 4: [['X', 'W', 'W', 'W'], ['W', 'W', 'O', 'W']] },
+    4: { 1: [['X', 'N', 'X', 'Q']], 2: [['X', 'X', 'X', 'Q'], ['X', 'E', 'X', 'E']], 3: [['Y', 'Y', 'X', 'Y'], ['X', 'Y', 'Y', 'Y'], ['X', 'E', 'X', 'Y']], 4: [['Y', 'Y', 'Y', 'Y'], ['Y', 'Z', 'Y', 'Y']] },
+    3: { 3: [['X', 'S', 'X', 'S']], 4: [['S', 'F', 'S', 'F'], ['F', 'S', 'F', 'S']] },
+  };
+  // 하프타임 곡(SSW_HALF)의 수준 3 변주: 기본 ↓↑ · ↓ ↓↑ 말고
+  const SSW_VARS_HALF = { 2: [['X', 'N', 'X', 'W'], ['W', 'N', 'X', 'O'], ['W', 'O', 'X', 'W']], 4: [['X', 'N', 'X', 'Y'], ['Y', 'N', 'Y', 'Y']] };
   // 마디 안 k번째 박(박 n개)의 꼴: 수준 L, 칸 R(2·4·3)
   function sswBeat(R, L, k, n) {
     if (L <= 0) return k === 0 ? 'X' : 'N';
@@ -5426,7 +5438,14 @@ const Engine = (function () {
       half = n13 > 8 && n24 > 8 && s13 / n13 - s24 / n24 >= P.SSW_HALF_D;
     }
     // ④ 비터비: 비용 (L − 바람)², 수준을 바꾸면 SSW_CHG(4마디 구절 경계는 SSW_CHG4)
-    const first = on.length ? on[0] : 0, NL = 5, lev = new Int32Array(nbar).fill(base);
+    const first = on.length ? on[0] : 0, NL = 5, lev = new Int32Array(nbar).fill(base), vv = new Int32Array(nbar), rbEnd = new Uint8Array(nbar);
+    let fv = null;
+    const brk = TL.bars.map(b => !!P.SSW_BREAK && b.events.length > 1 && b.events[b.events.length - 1].label.nc && b.events.some(e => !e.label.nc));
+    // 변주(SSW_VAR): 꼴 번호 0 = 기본 꼴, 1~ = SSW_VARS. 하프타임 곡의 수준 3과 4박이 아닌 마디는 기본 꼴만
+    const VR = P.SSW_VAR ? SSW_VARS[R] || {} : null;
+    const VH = VR && half ? SSW_VARS_HALF[R] || [] : [];
+    const varsOf = L => !VR ? [] : half && L === 3 ? VH : VR[L] || [];
+    const keyOf = (L, v, k, n) => v > 0 && n === 4 && varsOf(L)[v - 1] ? varsOf(L)[v - 1][k] : (half && L === 3 && n === 4 ? (R === 2 ? ['W', 'N', 'X', 'W'][k] : ['Y', 'N', 'X', 'Y'][k]) : sswBeat(R, L, k, n));
     if (nbar) {
       const em = (b, L) => (L - want[b]) ** 2 - P.SSW_FIT * fit[b][L] + (L < floor[b] ? 100 : 0);
       let cost = Array.from({ length: NL }, (_, L) => em(0, L)); const back = [];
@@ -5438,9 +5457,41 @@ const Engine = (function () {
       let L = 0; for (let q = 1; q < NL; q++) if (cost[q] < cost[L]) L = q;
       for (let b = nbar - 1; b >= 0; b--) { lev[b] = L; if (b > 0) L = back[b - 1][L]; }
     }
+    // 변주 고르기(SSW_VAR): 수준은 위 비터비 그대로 두고, 마디마다 그 수준의 꼴(0 = 기본, 1~ = SSW_VARS) 가운데 원곡과 맞는 쪽을 다시 비터비로.
+    //  비용 −SSW_FIT × 맞춤 점수, 같은 수준이 이어지는데 꼴을 바꾸면 SSW_VCHG(4마디 구절 경계는 SSW_VCHG4), 수준이 바뀌는 곳은 벌점 없음
+    if (VR && nbar) {
+      const nv = b => 1 + varsOf(lev[b]).length;
+      fv = (b, v) => { const bar = TL.bars[b], L = lev[b]; let z = 0, n = 0;
+        for (let k = 0; k < bar.nBeats; k++) { const i = bar.startBeat + k; if (i + 1 >= nb) break; const bp = BT0[keyOf(L, v, k, bar.nBeats)] || BT0.N; for (let j = 0; j < R; j++) { const x = i * R + j; n++; if (bp[j] !== '-' && !nc.has(x)) z += uS(x) - P.SSW_TH; } }
+        return n ? z / n : 0; };
+      // 조용한 마디(g ≤ SSW_G1)는 변주가 기본 꼴보다 맞춤 점수 SSW_VQ 넘게 나아야 고름(성기게 둔 곳에 픽업이 늘 붙지 않게)
+      const fq = (b, v) => fv(b, v) - (v > 0 && g[b] <= P.SSW_G1 ? P.SSW_VQ : 0);
+      let cost = Array.from({ length: nv(0) }, (_, v) => -P.SSW_FIT * fq(0, v)); const back = [];
+      for (let b = 1; b < nbar; b++) {
+        const ph = (b - first) % 4 === 0, vpen = ph ? P.SSW_VCHG4 : P.SSW_VCHG, same = lev[b] === lev[b - 1], n1 = nv(b), nx = new Array(n1), bk = new Int32Array(n1);
+        for (let v = 0; v < n1; v++) { let best = Infinity, arg = 0; for (let q = 0; q < cost.length; q++) { const c = cost[q] + (same && q !== v ? vpen : 0); if (c < best) { best = c; arg = q; } } nx[v] = best - P.SSW_FIT * fq(b, v); bk[v] = arg; }
+        cost = nx; back.push(bk);
+      }
+      let v = 0; for (let q = 1; q < cost.length; q++) if (cost[q] < cost[v]) v = q;
+      for (let b = nbar - 1; b >= 0; b--) { vv[b] = v; if (b > 0) v = back[b - 1][v]; }
+      // 긴 되풀이 끊기(SSW_RUNBREAK): 같은 수준·꼴의 4박 코드 마디가 4마디 넘게 이어지면, 그 안의 4마디 구절 끝 마디(첫 코드 마디 기준)를
+      //  둘째로 맞는 꼴로(맞춤 점수 차이 SSW_RB_D 안). 그런 꼴이 없으면 끝 박만 바꿈(채움, 8분 손은 원곡 그 박이 약하면 ·↑로 다음 마디에 밀기)
+      if (P.SSW_RUNBREAK) {
+        let r0 = 0;
+        for (let b = 1; b <= nbar; b++) {
+          const cont = b < nbar && chordBar[b] && chordBar[b - 1] && lev[b] === lev[b - 1] && vv[b] === vv[b - 1] && TL.bars[b].nBeats === 4 && TL.bars[b - 1].nBeats === 4;
+          if (cont) continue;
+          if (b - r0 >= 4) for (let q = r0 + 3; q < b; q++) if ((q - first) % 4 === 3 && !brk[q] && !(q + 1 < nbar && brk[q + 1])) {
+            const n1 = nv(q), f0 = fv(q, vv[q]); let alt = -1, fa = -Infinity;
+            for (let w = 0; w < n1; w++) if (w !== vv[q]) { const f = fv(q, w); if (f > fa) { fa = f; alt = w; } }
+            if (alt >= 0 && f0 - fa <= P.SSW_RB_D) vv[q] = alt; else rbEnd[q] = 1;
+          }
+          r0 = b;
+        }
+      }
+    }
     // 칸마다 칠 문자(D·U·-)
     const nX = Math.max(0, nb - 1) * R, cell = new Array(nX).fill('-'), BT = SSW_BEAT[R];
-    const brk = TL.bars.map(b => !!P.SSW_BREAK && b.events.length > 1 && b.events[b.events.length - 1].label.nc && b.events.some(e => !e.label.nc));
     // 처크(SSW_CHUCK): 8분 손 곡에서 큰 4박 코드 마디(g ≥ SSW_GLOUD, 수준 3 이상)의 원곡 2·4박 정박 칸 세기 평균 − 1·3박 평균이 SSW_CHUCK_BB 이상이면
     //  (스네어 백비트가 뚜렷함) 그 마디들의 2·4박 다운을 왼손으로 줄을 막고 치는 뮤트(처크)로. 코드가 바뀌는 칸은 그대로 침
     const chuckBar = new Uint8Array(nbar); let chuckBB = null;
@@ -5461,10 +5512,12 @@ const Engine = (function () {
       let pat = '';
       for (let k = 0; k < b.nBeats; k++) {
         const i = b.startBeat + k; if (i + 1 >= nb) break;
-        let key = half && lev[bi] === 3 && b.nBeats === 4 ? (R === 2 ? ['W', 'N', 'X', 'W'][k] : ['Y', 'N', 'X', 'Y'][k]) : sswBeat(R, lev[bi], k, b.nBeats);
+        let key = VR ? keyOf(lev[bi], vv[bi], k, b.nBeats) : half && lev[bi] === 3 && b.nBeats === 4 ? (R === 2 ? ['W', 'N', 'X', 'W'][k] : ['Y', 'N', 'X', 'Y'][k]) : sswBeat(R, lev[bi], k, b.nBeats);
         // 구절 끝 변화(SSW_PHRASE): 8마디 구절의 끝 마디(첫 코드 마디 기준) 끝 박을 8분 손은 ·↑(다음 마디로 밀기), 16분·셋잇단 손은 채움으로(수준 3 이상)
         //  8분 손의 ·↑는 원곡 그 박 정박 칸이 약할 때만(이 마디 값과 되풀이 짝과 섞은 값 모두 SSW_PHRASE_U 미만, 센 4박을 빼지 않음)
         if (P.SSW_PHRASE && k === b.nBeats - 1 && lev[bi] >= 3 && (bi - first) % 8 === 7 && bi + 1 < nbar && chordBar[bi + 1] && !brk[bi + 1] && (R !== 2 || Math.max(u(i * R), uS(i * R)) < P.SSW_PHRASE_U)) key = R === 2 ? 'O' : 'F';
+        // 긴 되풀이 끊기의 끝 박 변화
+        if (rbEnd[bi] && k === b.nBeats - 1 && lev[bi] >= 2) key = R === 2 && Math.max(u(i * R), uS(i * R)) < P.SSW_PHRASE_U ? 'O' : 'F';
         // ⑤ 채움: 다음 마디 수준이 올라가 3 이상이면 이 마디 끝 박을 채움
         if (P.SSW_FILL && k === b.nBeats - 1 && bi + 1 < nbar && lev[bi + 1] > lev[bi] && lev[bi + 1] >= 3 && chordBar[bi] && !brk[bi + 1]) key = 'F';
         const bp = BT[key] || BT.N; pat += chuckBar[bi] && k % 2 === 1 && bp[0] === 'D' && !change.has(i * R) ? 'x' + bp.slice(1) : bp;   // 처크 자리는 패턴 글자 x
@@ -5475,8 +5528,28 @@ const Engine = (function () {
         for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) if (!nc.has(i * R + j)) cell[i * R + j] = '-'; }
       if (chordBar[bi] && pat) plan.push({ bar: bi, beat: b.startBeat, pat, level: lev[bi] });
     });
-    // ⑥ 코드 바뀜: 박 위는 다운, 박 사이는 진자 방향으로 당겨 치고, 그 칸이 박 바로 앞 칸이면 다음 박(같은 코드)은 치지 않음(붙임)
     const pend = x => { const j = x % R; return R === 3 ? (j === 2 ? 'U' : 'D') : j % 2 ? 'U' : 'D'; };
+    // 원곡 따라 고치기(SSW_EDIT, 1.17.0): 고른 꼴 위에서, 원곡(되풀이 짝과 섞은 칸 세기 uS)이 센 빈칸(uS ≥ SSW_ADD)은 손 흐름 방향으로 더 치고,
+    //  아주 빈 칸(uS ≤ SSW_DROP)은 뺌. 마디 첫 박 정박과 코드가 바뀌는 칸은 빼지 않고, 뺄 때는 그 마디에 센 칸(uS ≥ 0.5)이 따로 있어야 함.
+    //  수준 SSW_EDIT_L 이상 마디만, 조용한 마디(g ≤ SSW_G1)는 더하지 않음(성기게 둔 곳이 바빠지지 않게). 되풀이 구간은 uS가 같아 같게 고쳐짐
+    if (P.SSW_EDIT) {
+      TL.bars.forEach((b, bi) => {
+        if (!chordBar[bi] || brk[bi] || lev[bi] < P.SSW_EDIT_L) return;
+        const xs = []; let mx = -Infinity;
+        for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) { const x = i * R + j; if (nc.has(x)) continue; xs.push([x, k]); mx = Math.max(mx, uS(x)); } }
+        for (const [x, k] of xs) {
+          const v = uS(x);
+          if (cell[x] === '-') { if (v >= P.SSW_ADD && g[bi] > P.SSW_G1) cell[x] = pend(x); }
+          else if (v <= P.SSW_DROP && mx >= 0.5 && !(k === 0 && x % R === 0) && !change.has(x)) cell[x] = '-';
+        }
+      });
+      for (const p of plan) {
+        const b = TL.bars[p.bar]; let pat = '';
+        for (let k = 0; k < b.nBeats; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) { const x = i * R + j, c = cell[x]; pat += j === 0 && c === 'D' && chuckBar[p.bar] && k % 2 === 1 && !change.has(x) ? 'x' : c; } }
+        p.pat = pat;
+      }
+    }
+    // ⑥ 코드 바뀜: 박 위는 다운, 박 사이는 진자 방향으로 당겨 치고, 그 칸이 박 바로 앞 칸이면 다음 박(같은 코드)은 치지 않음(붙임)
     const tie = new Set();
     for (const x of change) {
       if (x >= nX || nc.has(x)) continue;
@@ -5520,7 +5593,7 @@ const Engine = (function () {
     }
     if (dsrc) dynApply(A, TL, out, dsrc, P.DYN_KG, P.DYN_Y0SSW);
     out.plan = plan;
-    out.ssw = { hand: R === 3 ? 'c' : R === 4 ? 16 : 8, base, half, qsec, chuck: chuckBar.some(v => v) ? chuckBB : null, bpm, a16, songOff, shift, swing: phi !== 0.5 ? phi : null, fitMean: [2, 3, 4].map(L => on.length ? on.reduce((z, b) => z + fit[b][L], 0) / on.length : 0), dbg: P.SSW_DBG ? { cellU: x => [u(x), uS(x)], g: Array.from(g), offB: Array.from(offB), actB: Array.from(actB), r: Array.from(r), want: Array.from(want), lev: Array.from(lev), fit: fit.map(f => Array.from(f)) } : null };
+    out.ssw = { hand: R === 3 ? 'c' : R === 4 ? 16 : 8, base, half, qsec, vars: VR ? Array.from(vv) : null, chuck: chuckBar.some(v => v) ? chuckBB : null, bpm, a16, songOff, shift, swing: phi !== 0.5 ? phi : null, fitMean: [2, 3, 4].map(L => on.length ? on.reduce((z, b) => z + fit[b][L], 0) / on.length : 0), dbg: P.SSW_DBG ? { cellU: x => [u(x), uS(x)], g: Array.from(g), offB: Array.from(offB), actB: Array.from(actB), r: Array.from(r), want: Array.from(want), lev: Array.from(lev), fit: fit.map(f => Array.from(f)) } : null };
     return out;
   }
 
@@ -5712,6 +5785,9 @@ const Synth = (function () {
     //  소리가 floorDb(정규화 크기 기준)까지 줄어든 곳에서 fade초 동안 끝냄(길어야 lenCap초)
     tail2: false,
     T2: { floorDb: -45, lenCap: 8, fade: 0.15 },
+    // bright3(1.16.1): 더 쨍한 소리. 해머 펠트 저역 통과의 차단 주파수를 fcK배(위 끝 fcMax Hz)로, 차단 위 기울기 지수를 exp로(1.13까지 1배·9 kHz·2.6)
+    bright3: false,
+    B3: { fcK: 2.5, fcMax: 14000, exp: 2.6 },
   };
   const inharm = m => clamp(2.5e-4 * Math.pow(2, (m - 48) / 16), 1e-4, 4e-3);
   // 배음 하나를 만들 때마다 멈출 수 있는 생성기: 화면을 멈추지 않게 나눠서 합성(pianoV2Steps), 한 번에(pianoV2)
@@ -5725,7 +5801,8 @@ const Synth = (function () {
     const B = inharm(m), fMax = Math.min(0.45 * sr, P.fMax);
     const tau1 = D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax);
     // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음
-    const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel), 700, 9000);
+    const BR = P.bright3 ? P.B3 : null;
+    const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel) * (BR ? BR.fcK : 1), 700, BR ? BR.fcMax : 9000), hExp = BR ? BR.exp : 2.6;
     const nStr = m < 32 ? 1 : (m < 44 ? 2 : 3);
     const rnd = lcg(Math.imul(m + 977, 2654435761) >>> 0);
     const det = [];
@@ -5736,7 +5813,7 @@ const Synth = (function () {
       const fk = k * f0 * Math.sqrt(1 + B * k * k);
       if (fk > fMax) break;
       const comb = Math.abs(Math.sin(Math.PI * k * P.strikePos));
-      const hammer = 1 / (1 + Math.pow(fk / fc, 2.6));
+      const hammer = 1 / (1 + Math.pow(fk / fc, hExp));
       let a = (0.08 + comb) * hammer / Math.pow(k, 0.55);
       if (k === 1 && m < 40) a *= 0.55;                            // 저음은 기본음이 약하고 배음이 큼
       if (a < 1e-3) continue;
@@ -6251,10 +6328,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     wet3: 0.18,                   // 방 잔향 이득(잔향 응답 에너지 1이라 잔향/건조음 에너지 약 −13.5 dB)
     // 방 잔향(작은 방, RT60 1.2초): 확산음 20 ms부터(4 ms 페이드), 초기 반사 6개(ms, 크기), 시간에 따라 어두워짐(dark × RT60초)
     room2: { rt60: 1.2, len: 1.3, pre: 0.02, dark: 0.6, er: [[7, 0.5], [11, 0.42], [15, 0.36], [19, 0.3], [24, 0.25], [31, 0.2]] },
+    // 1.16.1 쨍한 소리(Synth.PIANO2.bright3, 사용자: "피아노 소리 쨍하게"): 해머 펠트 차단 주파수를 높여 2~8 kHz 배음을 키움. 끄면 1.16.0 소리
+    bright: true,
+    shelf: { f: 2500, db: 6 },    // 쨍한 소리의 고역 셸프(2.5 kHz 위를 +6 dB)
     tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
   };
   // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함)
-  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; };
+  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); };
   syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
@@ -6365,12 +6445,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 공통 소리 경로: 음들 → 버스 → [몸통(소리판·기타 몸통) 응답] → (건조음 + 방 잔향) → 고정 보정 이득 → out
   // 압축기는 쓰지 않는다: 꼬리까지 끌어올려 울림이 과하게 길어지기 때문(측정으로 확인)
   //  room(1.13): 주면 makeRoomIR2(room)을 정규화 없이(에너지 1) 씀, 없으면 1.12 방 잔향(makeRoomIR, Web Audio 정규화)
-  function buildChain(out, bodyIR, wetGain, makeup, room) {
+  //  shelf(1.16.1): 주면 몸통 응답 뒤에 고역 셸프({ f: 꺾이는 주파수 Hz, db: 올림 dB })
+  function buildChain(out, bodyIR, wetGain, makeup, room, shelf) {
     const bus = ctx.createGain(), mix = ctx.createGain();
     let src = bus;
     if (bodyIR) {
       try { const body = ctx.createConvolver(); body.normalize = false; body.buffer = stereoIR(bodyIR); bus.connect(body); src = body; } catch (e) { src = bus; }
     }
+    if (shelf) { const hs = ctx.createBiquadFilter(); hs.type = 'highshelf'; hs.frequency.value = shelf.f; hs.gain.value = shelf.db; src.connect(hs); src = hs; }
     src.connect(mix);
     try {
       const conv = ctx.createConvolver(), wet = ctx.createGain();
@@ -6383,7 +6465,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     return bus;
   }
   const buildPianoChain = out => !PIANO.v2 ? buildChain(out, null, 0.22, PIANO.makeup)
-    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.makeup3, PIANO.room2)
+    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.makeup3, PIANO.room2, PIANO.bright ? PIANO.shelf : null)
     : buildChain(out, Synth.soundboardIR(ctx.sampleRate), 0.22, PIANO.makeup2);
   // 통기타 자체 울림(1.15.0, Synth.GUITAR.selfRes): 음들 → 버스 → 몸통 응답 → (건조음 + 공명현 응답 × sympGain) → 보정 이득 → out. 방 잔향은 없음.
   //  공명현은 곡의 기준음(pianoTune)에 맞춤 → 기준음이 바뀌면 경로를 다시 만듦(곡을 불러올 때)
