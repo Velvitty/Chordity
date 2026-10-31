@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.17.0">v1.17.0</span>
+    <span class="ver" title="Chordity 버전 1.18.0">v1.18.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2530,6 +2530,8 @@ const Engine = (function () {
     //    늘 6.5 ms 이르고 11.6 ms 간격으로 끊겨, 실제 녹음에서 박 위 스트로크가 박보다 4~7 ms 일렀음
     //   ST_GRID: 봉우리로 옮기지 않고 칸 시각(박을 4칸·3칸으로 나눈 자리) 그대로 침
     ST_TPCAL: 0, ST_GRID: false,
+    //   ST_BEAT(1.18.0, 켬): 칸 자리(+ 곡 하나의 박 느낌 ±ST_BEAT_MAX초, 스윙 곡은 스윙 자리)에 침. 위 봉우리 옮기기(ST_SNAP)는 이때 쓰지 않음
+    ST_BEAT: true, ST_BEAT_MAX: 0.015,
     //  ST_SPLIT(1.12.1): 칸 자리마다 문턱 — 박 위 칸(0)은 ST_TH_ON, 박 사이 칸(16분·8분 엇박)은 ST_TH_OFF. 끄면 모든 칸이 ST_TH.
     //  밴드 곡에서 엇박의 약한 스트로크(특히 16분 업)를 놓쳐 박마다 다운만 드문드문 치던 것을 고침. 봉우리로 옮기기(ST_SNAP)도 칸 문턱을 넘은 칸에.
     //  Engine.strokes 그대로 채점(끔 → 켬). tests/strum/engscore.js(GuitarSet 180곡, 위 0.58과 같은 채점): F 0.587 → 0.598(정밀도 0.541 → 0.514, 재현율 0.642 → 0.716),
@@ -2614,6 +2616,8 @@ const Engine = (function () {
     //    곡의 RAKE_OUT_MAX 이하)를 찾아 그 앞 마디의 첫 박을 긁음. 끄는 코드(RAKE_HOLD박)는 이 꼬리와 그 앞 마디, 꼬리가 없으면 마지막 두 마디에서만 긁음
     RAKE: true, RAKE_BEAT: 0.5, RAKE_END: 1.6, RAKE_MIN: 0.12, RAKE_MAX: 0.5, RAKE_HOLD: 4, RAKE_RISE: 2.5,
     RAKE_MID_RISE: false, RAKE_MID_HOLD: false, RAKE_OUTRO: true, RAKE_OUT_DB: 6, RAKE_OUT_MIN: 2, RAKE_OUT_MAX: 0.25,
+    //   RAKE_END_MIN·RAKE_END_MAX(1.18.0): 곡의 끝 코드 긁기 시간 범위(초). 0이면 1.17.0(위 식, RAKE_MAX까지)
+    RAKE_END_MIN: 0.6, RAKE_END_MAX: 0.9,
     //  4·8·16비트 스트럼 변주(1.12.0, strumGrid): 묶음마다 원곡 칸 세기에 맞는 교본 패턴을 고름(SG_ADAPT, 끄면 기본 패턴만).
     //  점수 = Σ 칠 칸 (u − 문턱) + 기본 패턴 SG_BASIC, 앞 묶음과 같은 패턴이면 칸마다 SG_STAY(비터비). 문턱은 칸 크기마다(SG_TH4·8·16):
     //  u는 그 칸 크기의 칸끼리 맞춘 값이라 박은 대부분 세고 16분음표 칸은 대부분 약함. GuitarSet 180곡 스트로크 정답으로 정함(기본 패턴만 → 변주,
@@ -4666,11 +4670,23 @@ const Engine = (function () {
     // 반복 구간 맞추기(ST_REP): 판정에 쓸 칸 값 V[x](s.v와 같은 단위, 짝과 섞음). 끄면 s.v 그대로
     const mix = repMix(TL, Float64Array.from(slot, s => s.v), D, x => nc.has(x)), V = x => mix ? mix[x] : slot[x].v;
     const hitV = (s, sv) => (sv - med) / sc >= stTh(s.j) || (s.j % 2 === 1 && sv >= adTh);
+    // 박에 맞추기(ST_BEAT, 1.18.0, 사용자: 스트로크 따라가 박자에 딱 딱 안 들어맞음): 칸 안 봉우리로 옮기지 않고(봉우리는 칸마다 ±5~40 ms 흔들림)
+    //  박을 D칸으로 나눈 자리에 침. 곡 하나의 박 느낌만큼(박 위 센 칸 u ≥ 1의 봉우리 − 칸 시각 중앙값, ±ST_BEAT_MAX초) 모두 같이 옮기고,
+    //  원곡이 스윙(swingRatio가 잼, 곧지 않음)이면 8분 엇박 칸을 φ, 16분 칸을 그 가운데로
+    let tOf = (s, snap) => snap && P.ST_SNAP && !P.ST_GRID ? s.tp : s.t;
+    if (P.ST_BEAT) {
+      const d = slot.filter(s => s.j === 0 && !nc.has(s.x) && (s.v - med) / sc >= 1).map(s => s.tp - s.t).sort((a, b) => a - b);
+      const shift = d.length >= 8 ? clamp(d[d.length >> 1], -P.ST_BEAT_MAX, P.ST_BEAT_MAX) : 0;
+      const sw = D === 4 ? swingRatio(A, TL) : null, phi = sw && sw.measured && !sw.straight ? sw.phi : 0.5;
+      const pos = D === 4 ? [0, phi / 2, phi, (1 + phi) / 2] : [0, 1 / 3, 2 / 3];
+      tOf = s => beats[s.i] + (beats[s.i + 1] - beats[s.i]) * pos[s.j] + shift;
+      out.feel = { shift, phi };
+    }
     for (const s of slot) {
       if (nc.has(s.x)) continue;
       const v = (s.v - med) / sc, own = hitV(s, s.v), strong = mix ? hitV(s, V(s.x)) : own;
       if (!strong && !change.has(s.x)) continue;
-      out.push({ t: strong && own && P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
+      out.push({ t: tOf(s, strong && own), dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar: barOf ? barOf[s.i] : -1, change: change.has(s.x), u: v, j: s.j, i: s.i, k: barOf ? (s.i - TL.bars[barOf[s.i]].startBeat) * D + s.j : -1, sv: v });
       if (barOf) struck.add(barOf[s.i]);
     }
     // 업 고르기(ST_REG): 16분 엇박(홀수 칸, 업) 스트로크는 앞뒤 ST_REG_W마디(박 수가 같은 마디) 가운데 같은 자리를 친 마디가
@@ -4691,7 +4707,7 @@ const Engine = (function () {
         if (s.j === 0 || nc.has(s.x)) continue;
         const bar = barOf[s.i], k = (s.i - TL.bars[bar].startBeat) * D + s.j, v = (s.v - med) / sc;
         if ((hit.has(bar) && hit.get(bar).has(k)) || v < P.ST_REG_ADD || !share(bar, k)) continue;
-        add.push({ t: P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar, change: false, u: v, j: s.j, k, sv: v });
+        add.push({ t: tOf(s, true), dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), bar, change: false, u: v, j: s.j, k, sv: v });
       }
       if (P.ST_REG) for (let q = out.length - 1; q >= 0; q--) { const x = out[q]; if (!x.change && x.j % 2 === 1 && x.bar >= 0 && !share(x.bar, x.k)) out.splice(q, 1); }
       out.push(...add);
@@ -4765,7 +4781,7 @@ const Engine = (function () {
       if (k < 0 || !M.ok[s.i]) continue;
       const v = (s.v - med) / sc;
       if (v < P.NCM_TH || (P.NCM_ACT_ST && !M.regs[k].active)) continue;
-      mut.push(muteOf({ t: P.ST_SNAP && !P.ST_GRID ? s.tp : s.t, dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), change: false }, M.regs[k], s.i));
+      mut.push(muteOf({ t: tOf(s, true), dir: P.ST_DIR !== 'down' && s.j % 2 === 1 ? -1 : 1, vel: clamp(0.6 + 0.12 * v, 0.45, 1), change: false }, M.regs[k], s.i));
       msrc.push({ bar: barOf ? barOf[s.i] : -1, u: clamp(v, -1.25, 2), fb: false, ref: false });
     }
     if (dsrc) dynApply(A, TL, fin.concat(mut), dsrc.concat(msrc), P.DYN_K, P.DYN_Y0S);
@@ -5661,6 +5677,9 @@ const Engine = (function () {
       }
     }
     mark(chord[chord.length - 1], P.RAKE_END, 'end');
+    // 곡의 끝 코드(1.18.0, 사용자: 끝의 "디리링"이 그냥 "챙"처럼 들림): 템포와 관계없이 [RAKE_END_MIN, RAKE_END_MAX]초에 걸쳐 천천히(여섯 줄이면 줄 사이 약 0.12~0.18초).
+    //  1.17.0까지는 박 길이 × RAKE_BEAT × RAKE_END를 RAKE_MAX(0.5초)로 잘라 빠른 곡에서 줄 사이가 50~90 ms로 빠른 스트로크처럼 들렸음
+    if (P.RAKE_END_MIN > 0) { const s = list[chord[chord.length - 1]]; if (s.rake != null) s.rake = clamp(Math.max(s.rake, P.RAKE_BEAT * beatLen(s.t) * P.RAKE_END), P.RAKE_END_MIN, P.RAKE_END_MAX); }
     // 다음 스트로크(뮤트 포함) 30 ms 앞에서 다 긁도록 줄임. RAKE_MIN보다 짧아지면 긁지 않고 원래 방향으로
     list.forEach((s, k) => {
       if (s.rake == null) return;
@@ -5788,6 +5807,12 @@ const Synth = (function () {
     // bright3(1.16.1): 더 쨍한 소리. 해머 펠트 저역 통과의 차단 주파수를 fcK배(위 끝 fcMax Hz)로, 차단 위 기울기 지수를 exp로(1.13까지 1배·9 kHz·2.6)
     bright3: false,
     B3: { fcK: 2.5, fcMax: 14000, exp: 2.6 },
+    // steinway(1.18.0, 사용자: 피아노를 스타인웨이로, 해머링 또렷하게): 콘서트 그랜드 쪽 소리. 1.13 스위치(decay2·attack2)가 켜졌을 때
+    //  ① 해머 타격음: 접촉 잡음 S4.nzDb dB(시정수 S4.nzTau초), 힘 펄스(나무 '똑') S4.pulseDb dB로 키움(1.13은 1·0.015·−12)
+    //  ② 첫 어택의 높은 부분음: 즉음 비율 위 끝 S4.pHi(1.13은 0.2) → 치는 순간 '땅'이 밝고 금방 가라앉음
+    //  ③ 긴 현: 비조화성 × S4.inh, ④ 긴 울림: 기본음 여음 시간 × S4.tauK
+    steinway: false,
+    S4: { nzDb: 6, nzTau: 0.012, pulseDb: -6, pHi: 0.35, inh: 0.75, tauK: 1.2 },
   };
   const inharm = m => clamp(2.5e-4 * Math.pow(2, (m - 48) / 16), 1e-4, 4e-3);
   // 배음 하나를 만들 때마다 멈출 수 있는 생성기: 화면을 멈추지 않게 나눠서 합성(pianoV2Steps), 한 번에(pianoV2)
@@ -5798,8 +5823,9 @@ const Synth = (function () {
     const D = P.decay2 ? P.D2 : null, A = P.attack2 ? P.A2 : null, T = P.tail2 ? P.T2 : null;
     const n = T ? Math.round(sr * T.lenCap) : Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
     const y = new Float32Array(n);
-    const B = inharm(m), fMax = Math.min(0.45 * sr, P.fMax);
-    const tau1 = D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax);
+    const SW = P.steinway && D && A ? P.S4 : null;
+    const B = inharm(m) * (SW ? SW.inh : 1), fMax = Math.min(0.45 * sr, P.fMax);
+    const tau1 = (D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax)) * (SW ? SW.tauK : 1);
     // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음
     const BR = P.bright3 ? P.B3 : null;
     const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel) * (BR ? BR.fcK : 1), 700, BR ? BR.fcMax : 9000), hExp = BR ? BR.exp : 2.6;
@@ -5808,7 +5834,8 @@ const Synth = (function () {
     const det = [];
     for (let q = 0; q < nStr; q++) det.push(q === 0 ? 0 : (rnd() * 2 - 1) * P.cents + (q === 1 ? 0.6 : -0.5));
     const prompt = clamp(0.5 + (m - 60) * 0.006, 0.35, 0.7);     // 즉음 비율: 높은 음일수록 큼
-    const promptOf = fk => D.pLo + (D.pHi - D.pLo) * clamp(Math.log(fk / D.pF1) / Math.log(D.pF2 / D.pF1), 0, 1);
+    const pHi = SW ? SW.pHi : D ? D.pHi : 0;
+    const promptOf = fk => D.pLo + (pHi - D.pLo) * clamp(Math.log(fk / D.pF1) / Math.log(D.pF2 / D.pF1), 0, 1);
     for (let k = 1; k <= P.kMax; k++) {
       const fk = k * f0 * Math.sqrt(1 + B * k * k);
       if (fk > fMax) break;
@@ -5850,7 +5877,7 @@ const Synth = (function () {
     }
     edges(y, sr, 1, T ? 0 : 80);
     normalize(y, sr, 0.12);
-    if (A) hammer2(y, sr, m, fc, vel, A);
+    if (A) hammer2(y, sr, m, fc, vel, SW ? Object.assign({}, A, { nzDb: SW.nzDb, nzTau: SW.nzTau, pulseDb: SW.pulseDb }) : A);
     return T ? trimTail(y, sr, T) : y;
   }
   // 해머 타격음(attack2). 크기는 정규화한 음 크기(0.12) 기준 dB, 세기(vel) 0.55에서. 세기가 두 배면 +6 dB
@@ -6330,11 +6357,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     room2: { rt60: 1.2, len: 1.3, pre: 0.02, dark: 0.6, er: [[7, 0.5], [11, 0.42], [15, 0.36], [19, 0.3], [24, 0.25], [31, 0.2]] },
     // 1.16.1 쨍한 소리(Synth.PIANO2.bright3, 사용자: "피아노 소리 쨍하게"): 해머 펠트 차단 주파수를 높여 2~8 kHz 배음을 키움. 끄면 1.16.0 소리
     bright: true,
+    // 1.18.0 스타인웨이 소리(Synth.PIANO2.steinway, 사용자: "피아노 steinway로, 해머링 또렷하게"): 해머 타격음·첫 어택의 높은 부분음을 키우고 긴 현·긴 울림. 끄면 1.17.0 소리
+    steinway: true,
     shelf: { f: 2500, db: 6 },    // 쨍한 소리의 고역 셸프(2.5 kHz 위를 +6 dB)
     tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
   };
   // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함)
-  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); };
+  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); P2.steinway = !!(on && PIANO.steinway); };
   syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
@@ -6361,6 +6390,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     spreadDown: 0.012,            // 다운 스트로크(낮은 현부터 모든 현)
     spreadUp: 0.008,              // 업 스트로크(위쪽 현 3~4개)
     upVel: 0.72,                  // 업 스트로크 세기 비
+    // 따로 나오는 업 스트로크(1.18.0, 사용자: 다운과 이어지지 않고 따로 나오는 업이 너무 작음): 바로 앞 스트로크가 업이거나 박의 0.6배보다 먼저인
+    //  업(↓·↑의 엇박 업, 16분 ·↑ 등)은 세기를 이만큼 곱함(1.41 = +3 dB). 다운 바로 뒤의 업(↓↑)은 그대로
+    upAlone: 1.41,
+    // 느린 긁기가 들리게(1.18.0, 사용자: 차트엔 긁기인데 소리는 "챙"): 앞 스트로크로 울리던 같은 코드 소리가 더 커서 한 줄씩 들어오는 소리가 묻혔음.
+    //  긁기 첫 줄 시각에 울리던 줄을 rakeDamp초 시정수로 막고, 긁는 줄은 rakeGain배(1.41 = +3 dB)로
+    rakeDamp: 0.04, rakeGain: 1.41,
     // N.C. 뮤트(엔진 NC_MUTE, 1.12.0): 뮤트('칙', 왼손으로 줄을 막고 침)·팜뮤트(낮은 현 파워 코드)
     //  muteGain: 보통 스트로크와 같은 현마다 세기에 곱하는 비. 앱 소리 경로로 렌더링해 잰 값(뮤트는 1배면 0~100 ms에서 보통 스트럼보다
     //   약 10 dB, 팜뮤트는 약 3 dB 작음) → 뮤트 ×1.5(약 −6 dB), 팜뮤트 ×0.8(약 −4.5 dB)로 보통 스트럼보다 조금 작게
@@ -6589,6 +6624,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       out.push({ t0: t, t1: Math.max(t + 0.05, t1), g, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, rake: st[i].rake || 0, strings: Synth.guitarVoicing(g.pcs, g.bassPc) });
     }
     for (const s of out) s.notes = s.strings.map(x => x.m);
+    // 따로 나오는 업(GUITAR.upAlone): 앞 코드 스트로크가 업이거나 박 길이의 0.6배보다 먼저 쳤으면
+    for (let i = 0, prev = null; i < out.length; i++) {
+      const s = out[i]; if (s.mute) continue;
+      if (s.dir < 0) { const bi = lastLE(TL.beats, s.t0), bl = bi >= 0 && bi + 1 < TL.beats.length ? TL.beats[bi + 1] - TL.beats[bi] : 0.5; s.alone = !prev || prev.dir < 0 || s.t0 - prev.t0 > 0.6 * bl; }
+      prev = s;
+    }
     S.strums = out;
     S.strumT = Float64Array.from(out, s => s.t0);
     S.bounceT = null;                                            // 목록이 바뀌면 튀기 차례를 재생 위치에서 다시 셈
@@ -6604,7 +6645,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const up = s.dir < 0, top = s.strings[s.strings.length - 1].s, kind = s.mute || '', dyn = typeof s.db === 'number';
     let list = up ? s.strings.filter(x => x.s >= Math.max(top - 3, s.strings[0].s)).reverse() : s.strings;
     if (up && list.length > 4) list = list.slice(0, 4);
-    const vel = dyn ? Math.pow(10, s.db / 20) : clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1) * (up ? GUITAR.upVel : 1);
+    const vel = (dyn ? Math.pow(10, s.db / 20) : clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1) * (up ? GUITAR.upVel : 1)) * (up && s.alone && GUITAR.upAlone ? GUITAR.upAlone : 1) * (s.rake && GUITAR.rakeGain ? GUITAR.rakeGain : 1);
     const layer = dyn ? strumLayer(s) : vel < 0.55 ? 0 : vel < 0.82 ? 1 : 2;
     const sd = GUITAR.spreadDb;
     let gap;
@@ -6616,6 +6657,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (s.rake && list.length > 1) gap = s.rake / (list.length - 1);                         // 느린 긁기(엔진 RAKE): 여섯 줄을 s.rake초에 걸쳐 드르르릉
     if (!s.rake && GUITAR.lead) when = Math.max(when - (up ? GUITAR.lead.up : GUITAR.lead.down) * gap, ctx.currentTime);   // 스트로크 앞당기기
     if (kind) muteN++; else strumN++;
+    // 느린 긁기: 울리던 줄을 첫 줄 시각에 막아 한 줄씩 들어오는 소리가 들리게
+    if (s.rake && GUITAR.rakeDamp > 0) for (let q = 0; q < 6; q++) {
+      const old = ringing[q];
+      if (old && old.end > when) { try { const p = old.g.gain; p.cancelScheduledValues(when); p.setTargetAtTime(0, when, GUITAR.rakeDamp); old.src.stop(when + 8 * GUITAR.rakeDamp); } catch (e) { } }
+      ringing[q] = null;
+    }
     const kg = kind ? GUITAR.muteGain[kind] || 1 : 1;
     if (kind) for (let q = 0; q < 6; q++) {
       const old = ringing[q];
