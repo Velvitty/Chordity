@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.20.0">v1.20.0</span>
+    <span class="ver" title="Chordity 버전 1.21.0">v1.21.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -528,6 +528,7 @@ body > main { flex: 1 0 auto; }
           <div class="lab">피아노 연주</div>
           <div class="ctl">
             <select id="selPianoMode" aria-label="피아노가 코드를 치는 때">
+              <option value="auto">자동(곡의 리듬으로 곡 따라·싱어송라이터·개성 있게 가운데 고름)</option>
               <option value="song">곡 따라(새로 친 곳만 다시)</option>
               <option value="change">코드가 바뀔 때</option>
               <option value="bar">마디마다 다시</option>
@@ -535,13 +536,14 @@ body > main { flex: 1 0 auto; }
               <option value="ssw">싱어송라이터(곡에 맞춘 반주, 통기타와 다른 리듬)</option>
               <option value="flair">개성 있게(펼침화음·런·끝 코드 굴리기)</option>
             </select>
-            <span class="note">위쪽의 피아노·통기타 버튼으로 인식한 코드를 들려줍니다(둘 다 켜면 함께 칩니다). 원곡과 겹쳐 들으면 코드가 맞는지 귀로 확인할 수 있습니다. 피아노는 여기서 고른 때에 칩니다. 싱어송라이터는 구간 크기에 맞춰 긴 음 위주로(오른손은 통기타보다 한 옥타브 위), 개성 있게는 펼침화음과 구절 끝 런으로 칩니다.</span>
+            <span class="note">위쪽의 피아노·통기타 버튼으로 인식한 코드를 들려줍니다(둘 다 켜면 함께 칩니다). 원곡과 겹쳐 들으면 코드가 맞는지 귀로 확인할 수 있습니다. 피아노는 여기서 고른 때에 칩니다. 자동(기본)은 곡을 연 뒤 원곡의 리듬을 보고, 박이 흔들리거나(루바토) 박마다 치는 소리가 드물면 곡 따라, 박이 꾸준하고 원곡이 박 사이에서 바쁘면 싱어송라이터, 박 사이에 여유가 있으면 개성 있게로 칩니다. 싱어송라이터는 구간 크기에 맞춰 긴 음 위주로(오른손은 통기타보다 한 옥타브 위), 개성 있게는 펼침화음과 구절 끝 런으로 칩니다.</span>
           </div>
         </div>
         <div class="grp">
           <div class="lab">통기타 연주</div>
           <div class="ctl">
             <select id="selGuitarMode" aria-label="통기타가 치는 방식">
+              <option value="auto">자동(곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름)</option>
               <option value="ssw">싱어송라이터(곡에 맞춘 반주)</option>
               <option value="strum">스트로크 따라(원곡 리듬대로)</option>
               <option value="beat4">4비트 스트럼</option>
@@ -549,7 +551,7 @@ body > main { flex: 1 0 auto; }
               <option value="beat16">16비트 스트럼</option>
               <option value="swing">스윙 스트럼</option>
             </select>
-            <span class="note">싱어송라이터(기본)는 통기타 반주자처럼 곡의 템포·느낌으로 8분·16분·셋잇단 손을 정하고, 곡에 맞는 스트럼 그루브(예: <span class="nw">↓ ↓↑ ↑↓↑</span>)를 골라 조용한 구간은 성기게, 큰 구간은 촘촘하게 치며, 되풀이되는 구간은 같게 칩니다. 스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다.</span>
+            <span class="note">자동(기본)은 곡을 연 뒤 원곡의 리듬을 보고, 원곡의 스트럼 꼴이 마디마다 되풀이되거나 박이 흔들리면 스트로크 따라, 꼴이 마디마다 바뀌면 싱어송라이터로 칩니다. 싱어송라이터는 통기타 반주자처럼 곡의 템포·느낌으로 8분·16분·셋잇단 손을 정하고, 곡에 맞는 스트럼 그루브(예: <span class="nw">↓ ↓↑ ↑↓↑</span>)를 골라 조용한 구간은 성기게, 큰 구간은 촘촘하게 치며, 되풀이되는 구간은 같게 칩니다. 스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다.</span>
           </div>
         </div>
         <div class="grp">
@@ -2617,6 +2619,7 @@ const Engine = (function () {
     // 피아노 반주(1.19.0, pianoComp): 느린 곡 기준 PC_SLOW BPM(개성 있게는 늘 펼침, 싱어송라이터는 스탭을 PC_RROLL초 간격으로 굴림),
     //  끝 코드 굴리기 간격 박의 ¼을 [PC_ROLL, PC_ROLLMAX]초로, 통기타와 겹침으로 보는 거리 PC_TOL박
     PC_SLOW: 90, PC_ROLL: 0.06, PC_ROLLMAX: 0.12, PC_TOL: 0.06, PC_RROLL: 0.03,
+    PA_JIT: 0.008, PA_DRIFT: 0.03, PA_PULSE: 0.6, PA_BUSY: 0.35, GA_REP: 0.6,   // 연주 자동(autoModes)
     // 1.17.0 되풀이 줄이기·원곡과 맞추기: SSW_VAR(수준마다 변주 꼴 SSW_VARS, 같은 수준 안 변주 바꿈 벌점 SSW_VCHG·구절 경계 SSW_VCHG4),
     //  SSW_EDIT(원곡 센 빈칸 uS ≥ SSW_ADD 더 치기·아주 빈 칸 uS ≤ SSW_DROP 빼기, 수준 SSW_EDIT_L 이상 마디)
     SSW_VAR: true, SSW_VCHG: 0, SSW_VCHG4: 0, SSW_EDIT: true, SSW_ADD: 1.0, SSW_DROP: -0.6, SSW_EDIT_L: 2, SSW_RUNBREAK: true, SSW_RB_D: 0.05, SSW_VQ: 0.05,
@@ -5637,6 +5640,64 @@ const Engine = (function () {
     return out;
   }
 
+  // 연주 자동(1.21.0, 사용자: "어떨땐 어떤게 더 낫다 판단해서 곡 따라, 싱어송라이터 곡 입력 후에 자동 구분하여 설정", "악보가 아니라 리듬을 봐야지",
+  //  "기타 싱어송라이터 박 따라. 피아노는 개성있게도 포함시켜서 새로 계산", 실제 녹음 「Rough」로 재서 기타·피아노 모두 싱어송라이터가 맞다고 확인):
+  //  원곡의 리듬만 보고 통기타는 싱어송라이터·스트로크 따라, 피아노는 곡 따라·싱어송라이터·개성 있게 가운데 고름.
+  //  재료는 스트로크 따라와 같은 중역 플럭스 칸 세기(stSlots, 박 4칸·겹박자 3칸)와 스트로크 따라 결과. 코드 마디만, 새 코드가 시작하는 칸·N.C. 칸은 뺌.
+  //  ① 박 흔들림 J: 박 간격과 앞뒤 4박 간격 중앙값의 |로그 비|의 중앙값, 템포 바뀜 D8: 이웃한 8박 창 박 간격 중앙값의 |로그 비|의 중앙값
+  //   (루바토·자유 템포면 큼. 합성 루바토 피아노 J 0.77%·D8 6.9%, 꾸준한 곡 D8 0.24% 이하, 점점 느려지는 발라드 1.45%)
+  //  ② 박 위 어택 PB·박 사이 어택 PO: 박 위 칸·박 사이 칸 가운데 플럭스가 곡의 90% 값 이상(v ≥ 1)인 비율.
+  //   코드가 새로 바뀌지 않은 박 위 칸이 16개·박의 25%보다 적으면(스윙 재즈처럼 박마다 코드가 바뀜) PB는 모든 박 위 칸으로
+  //  ③ 스트로크 따라 되풀이 r: 이웃한 같은 박 수 마디끼리 친 칸 집합의 자카드 중앙값(원곡에 되풀이되는 스트럼 꼴이 있으면 큼). 밀도 d는 박당 친 칸 수(보기용)
+  //  피아노: J ≥ PA_JIT(0.8%)이거나 D8 ≥ PA_DRIFT(3%)면 'rubato', 또는 PB < PA_PULSE(60%) 'pulse'면 곡 따라(꼴이 원곡과 어긋나거나 얹을 박이 없음),
+  //   아니면 PO ≥ PA_BUSY(35%) 'busy'면 싱어송라이터(짧은 화음이라 바쁜 원곡과 덜 겹침), 'space'면 개성 있게(펼침화음으로 빈자리를 채움)
+  //  통기타: 'rubato'이거나 r ≥ GA_REP(60%) 'repeat'면 스트로크 따라(원곡 스트럼 꼴을 그대로), 'vary'면 싱어송라이터(꼴이 마디마다 바뀌면 드럼·현악 어택을 섞어 잡은 것)
+  //  실제 녹음: 「Rough」 112 BPM J 0.44%·PB 82%·PO 43%·r 45% → 둘 다 싱어송라이터(사용자 확인), IU 업로드 134 BPM J 0.29%·PB 85%·PO 28%·r 67%
+  //   → 피아노 개성 있게(판정단 1차에서도 이 곡 최고)·통기타 스트로크 따라. 합성곡: 루바토 피아노 J 0.87%, 앰비언트 패드 J 1.41%, 비밥 PB 52% → 피아노 곡 따라
+  //  돌려줌 { piano: { mode: 'song'·'ssw'·'flair', why }, guitar: { mode: 'ssw'·'strum', why }, J, D8, PB, PO, d, r }
+  function autoModes(A, TL) {
+    const out = (pw, gw, f) => Object.assign({ piano: { mode: { rubato: 'song', pulse: 'song', short: 'song', busy: 'ssw', space: 'flair' }[pw], why: pw },
+      guitar: { mode: gw === 'vary' || gw === 'short' ? 'ssw' : 'strum', why: gw } }, f);
+    if (!A || !A.fm || !TL || TL.empty || TL.beats.length < 17) return out('short', 'short', { J: 0, D8: 0, PB: 0, PO: 0, d: 0, r: 0 });
+    const beats = TL.beats, nb = beats.length, R = TL.meter.triple ? 3 : 4, nbar = TL.bars.length;
+    const iv = []; for (let i = 1; i < nb; i++) iv.push(beats[i] - beats[i - 1]);
+    const J = median(iv.map((v, i) => Math.abs(Math.log(v / median(iv.slice(Math.max(0, i - 4), i + 5))))));
+    const d8 = []; for (let i = 8; i + 8 <= iv.length; i++) d8.push(Math.abs(Math.log(median(iv.slice(i - 8, i)) / median(iv.slice(i, i + 8)))));
+    const D8 = median(d8);
+    const chordBar = TL.bars.map(b => b.events.some(e => !e.label.nc)), chg = new Set(), ncX = new Set();
+    TL.bars.forEach(b => b.events.forEach(e => {
+      const x0 = Math.round((b.startBeat + e.off) * R);
+      if (e.label.nc) { for (let k = x0; k < Math.round((b.startBeat + e.off + e.dur) * R); k++) ncX.add(k); } else if (!e.tied) chg.add(x0);
+    }));
+    const barOfX = x => TL.barOfBeat[Math.min(Math.floor(x / R), nb - 1)];
+    let b1 = 0, bn = 0, ba1 = 0, ban = 0, o1 = 0, on = 0;
+    for (const s of stSlots(A, TL, R).slot) {
+      if (ncX.has(s.x) || !chordBar[barOfX(s.x)]) continue;
+      if (s.j === 0) { ban++; if (s.v >= 1) ba1++; }
+      if (chg.has(s.x)) continue;
+      if (s.j === 0) { bn++; if (s.v >= 1) b1++; } else { on++; if (s.v >= 1) o1++; }
+    }
+    const PB = bn >= Math.max(16, 0.25 * ban) ? b1 / bn : ban ? ba1 / ban : 0, PO = on ? o1 / on : 0;
+    // 스트로크 따라가 친 칸(마디 안 자리)
+    const setOf = TL.bars.map(() => new Set());
+    for (const s of strokes(A, TL)) {
+      if (s.mute) continue;
+      let lo = 0, hi = nb - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (beats[m] <= s.t + 0.03) lo = m; else hi = m - 1; }
+      const dt = lo + 1 < nb ? beats[lo + 1] - beats[lo] : beats[lo] - beats[lo - 1], x = lo * R + Math.round((s.t - beats[lo]) / dt * R), bi = barOfX(x);
+      if (bi >= 0 && bi < nbar) setOf[bi].add(x - TL.bars[bi].startBeat * R);
+    }
+    let k = 0, nbt = 0; const jac = [];
+    for (let bi = 0; bi < nbar; bi++) {
+      if (!chordBar[bi]) continue;
+      k += setOf[bi].size; nbt += TL.bars[bi].nBeats;
+      if (bi < 1 || !chordBar[bi - 1] || TL.bars[bi].nBeats !== TL.bars[bi - 1].nBeats) continue;
+      const a = setOf[bi], c = setOf[bi - 1], u = new Set([...a, ...c]).size;
+      if (u) jac.push([...a].filter(x => c.has(x)).length / u);
+    }
+    const d = nbt ? k / nbt : 0, r = median(jac), rub = J >= P.PA_JIT || D8 >= P.PA_DRIFT;
+    return out(rub ? 'rubato' : PB < P.PA_PULSE ? 'pulse' : PO >= P.PA_BUSY ? 'busy' : 'space', rub ? 'rubato' : r >= P.GA_REP ? 'repeat' : 'vary', { J, D8, PB, PO, d, r });
+  }
+
   // 피아노 반주(1.19.0): 마디마다 칠 자리와 손(왼손 베이스·오른손 화음·펼침 음)을 정하고, 실제 음(자리바꿈)은 화면 쪽(ui.js)이 그 자리 코드로 고름.
   //  마디 수준은 통기타 싱어송라이터(sswStrum)의 수준(0~4, 구간 크기·원곡 리듬)을 그대로 씀 → 두 악기가 같은 구간에서 같이 커지고 작아짐.
   //  통기타를 함께 칠 때(opt.gtr = 통기타 스트로크 시각들) 박 사이 피아노 음은 통기타가 치는 자리(±PC_TOL박)를 피함(두 악기가 서로 빈자리를 채움).
@@ -5818,7 +5879,7 @@ const Engine = (function () {
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     strokes: (A, TL) => rakeMark(A, TL, strokes(A, TL)),
-    pianoComp,
+    pianoComp, autoModes,
     strumGrid: (A, TL, mode) => rakeMark(A, TL, mode === 'ssw' && P.SSW ? sswStrum(A, TL) : strumGrid(A, TL, mode === 'ssw' ? 'beat8' : mode)),
     // 테스트용 내부 함수
     _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
@@ -6362,15 +6423,19 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const savedPrefs = (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || localStorage.getItem(OLD_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } })();
   const prefs = Object.assign(
     { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'extended', res: 2, slash: true,
-      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'song', guitarMode: 'ssw', notation: 'name' },
+      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name' },
     savedPrefs);
   // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
   if (savedPrefs.gmv !== 2) { if (prefs.guitarMode === 'strum') prefs.guitarMode = 'ssw'; prefs.gmv = 2; }
+  // 1.21.0부터 통기타 기본이 자동('auto': 곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름): 그 전 기본값(싱어송라이터)으로 저장된 값은 한 번만 자동으로(gmv 3)
+  if (savedPrefs.gmv !== 3) { if (prefs.guitarMode === 'ssw') prefs.guitarMode = 'auto'; prefs.gmv = 3; }
   // 1.20.0부터 코드 종류 기본이 확장('extended', 사용자: "코드 종류 확장을 기본으로"): 그 전 기본값(표준)으로 저장된 값은 한 번만 새 기본으로 옮김(vmv 1). 기본(3화음)을 고른 값은 그대로
   if (savedPrefs.vmv !== 1) { if (prefs.vocab === 'standard') prefs.vocab = 'extended'; prefs.vmv = 1; }
   // 1.20.0부터 코드 변화 단위 기본이 작은박(res 2: ½박, 셋잇단 곡 ⅓박)이고 더 작은박(res 4: ¼박, 셋잇단 곡 ⅙박)도 고름(사용자: "1 ½ 곡은 1 ½ ¼까지,
   //  ⅓ 곡은 1 ⅓ ⅙까지, 각각 ½, ⅓을 기본값으로"): 그 전 기본값(1박)으로 저장된 값은 한 번만 새 기본으로 옮김(rmv 1). ½박을 고른 값은 그대로
   if (savedPrefs.rmv !== 1) { if (+prefs.res !== 2 && +prefs.res !== 4) prefs.res = 2; prefs.rmv = 1; }
+  // 1.21.0부터 피아노 연주 기본이 자동('auto': 곡의 리듬으로 곡 따라·싱어송라이터·개성 있게 가운데 고름): 그 전 기본값(곡 따라)으로 저장된 값은 한 번만 자동으로(pmv 1)
+  if (savedPrefs.pmv !== 1) { if (prefs.pianoMode === 'song') prefs.pianoMode = 'auto'; prefs.pmv = 1; }
   // 1.15.0부터 피아노·통기타 볼륨이 따로: 그 전 저장값(코드 볼륨 하나 = pianoVol)은 통기타 볼륨도 같은 값으로 이어받음
   if (savedPrefs.guitarVol == null && typeof savedPrefs.pianoVol === 'number') prefs.guitarVol = savedPrefs.pianoVol;
   function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) { /* 저장 불가 환경은 무시 */ } }
@@ -6682,7 +6747,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         key: ev.label.nc ? 'N' : ev.pcs.join('.') + '/' + ev.bassPc });
     }));
     buildStrums(segs);                                      // 통기타는 늘 스트로크 따라(켜고 끄기와 따로 만들어 둠)
-    const mode = prefs.pianoMode;
+    const mode = pianoMode();
     // 1.19.0 피아노 반주(엔진 pianoComp): 'ssw' 싱어송라이터(곡에 맞춘 반주, 통기타와 다른 긴 음 리듬, 오른손 PIANO.sswUp 반음 위),
     //  'flair' 개성 있게(펼침화음·런·끝 코드 굴리기). 부분: F 베이스+화음, B 베이스, O 베이스 옥타브, R 오른손 화음, A 펼침 음(사다리 = 베이스, 오른손 음, 그 한 옥타브 위)
     if (mode === 'ssw' || mode === 'flair') {
@@ -6746,7 +6811,18 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  'strum' 스트로크 따라(원곡 리듬), 'beat4'·'beat8'·'beat16' 4·8·16비트(곡의 박에 맞춘 교본 패턴 변주),
   //  'swing' 스윙(박마다 셋잇단 길게-짧게 -.--.--.--.-, 원곡이 스윙이면 그 비율로)
   const GUITAR_MODES = ['ssw', 'strum', 'beat4', 'beat8', 'beat16', 'swing'];
-  const guitarMode = () => GUITAR_MODES.indexOf(prefs.guitarMode) > 0 ? prefs.guitarMode : 'ssw';
+  // 연주 방식: 자동('auto', 1.21.0 기본)이면 곡을 연 뒤 엔진 autoModes가 원곡 리듬으로 고른 방식(곡이 없으면 피아노 곡 따라·통기타 싱어송라이터)
+  const guitarMode = () => prefs.guitarMode === 'auto' ? (S.auto ? S.auto.guitar.mode : 'ssw') : GUITAR_MODES.indexOf(prefs.guitarMode) > 0 ? prefs.guitarMode : 'ssw';
+  const pianoMode = () => prefs.pianoMode === 'auto' ? (S.auto ? S.auto.piano.mode : 'song') : prefs.pianoMode;
+  const PM_NAME = { song: '곡 따라', ssw: '싱어송라이터', flair: '개성 있게' };
+  const AUTO_WHY = { rubato: '박이 흔들림', pulse: '박마다 치는 소리가 드묾', busy: '원곡이 박 사이에서 바쁨', space: '원곡 박 사이에 여유가 있음',
+    repeat: '원곡 스트럼 꼴이 되풀이됨', vary: '원곡 스트럼 꼴이 마디마다 바뀜', short: '곡이 짧음' };
+  // 자동 칸 이름에 고른 방식과 까닭을 보임
+  function autoLabel() {
+    const a = S.auto, op = $('selPianoMode').querySelector('option[value="auto"]'), og = $('selGuitarMode').querySelector('option[value="auto"]');
+    if (op) op.textContent = a ? '자동: ' + PM_NAME[a.piano.mode] + '(' + AUTO_WHY[a.piano.why] + ')' : '자동(곡의 리듬으로 곡 따라·싱어송라이터·개성 있게 가운데 고름)';
+    if (og) og.textContent = a ? '자동: ' + gmName(a.guitar.mode) + '(' + AUTO_WHY[a.guitar.why] + ')' : '자동(곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름)';
+  }
   const gmName = m => m === 'swing' ? '스윙' : m === 'ssw' ? '싱어송라이터' : m === 'strum' ? '스트로크 따라' : m.slice(4) + '비트';
   // 통기타: 스트로크마다 그 자리 코드의 운지(Synth.guitarVoicing). 다음 스트로크나 N.C.까지 울림
   //  N.C. 뮤트 스트로크(엔진 NC_MUTE, s.mute 'dead'·'palm'): 코드 구간에 넣지 않고 뮤트 운지(Synth.muteVoicing)로. 다음 스트로크까지, 길어야 GUITAR.muteRing
@@ -7249,6 +7325,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 설정이 바뀔 때마다: 타임라인 재구성 → 화면 갱신 → 메트로놈 재동기화
   function rebuild() {
     S.TL = Engine.buildTimeline(S.A, S.set);
+    S.auto = Engine.autoModes(S.A, S.TL); autoLabel();
     S.trow = planTempoRow(S.TL);
     buildFlat();
     buildUnits();
@@ -7415,7 +7492,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  통기타를 끄면 칸을 비우고 마디 높이도 원래대로(#chart.gm)
   // 통기타 스트로크 기호 통통 튀기(1.15.0): 재생 위치가 스트로크 시각 BOUNCE_LEAD초 앞에 오면 그 기호(느린 긁기 물결선도)를 BOUNCE_MS 동안
   //  0.125초 만에 부풀며 위로 살짝 뛰었다가, 내려앉으며 용수철처럼 납작해진 뒤 다시 서면서 원래 크기로. 바닥(아래 가운데)을 축으로.
-  //  재생 중에만(멈춤·끌기·움직임 줄이기 설정이면 없음), 위치를 옮기면 그 뒤 스트로크부터 다시 셈
+  //  재생 중에만(멈춤·끌기·움직임 줄이기 설정이면 없음), 위치를 옮기면 그 뒤 스트로크부터 다시 셈.
+  //  1.21.0(사용자: "다운스트로크는 아랫쪽으로 점프하게끔"): 다운 ⊓(뮤트·긁기의 다운 포함)은 아래로 뛰고 윗변(위 가운데)을 축으로 납작해짐(BOUNCE_KF_DOWN),
+  //  업 V는 그대로 위로. 느린 긁기 물결선("느리게 박자에 맞춰서 흔들리면서 튀게")은 rakeKF: 치는 순간 아래로 튀고, 두 박 동안
+  //  박 가운데마다 왼쪽(−12°)·오른쪽(+9°)으로 흔들리며 다음 박에서 한 번 더 튐(곡의 박 길이를 따르므로 느린 곡일수록 느리게)
   const BOUNCE_LEAD = 0.1, BOUNCE_MS = 330;
   const BOUNCE_KF = [
     { offset: 0, transform: 'translateY(0) scale(1, 1)', easing: 'cubic-bezier(.2, .7, .3, 1)' },
@@ -7426,6 +7506,20 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     { offset: 0.91, transform: 'translateY(0) scale(0.97, 1.03)', easing: 'ease-out' },
     { offset: 1, transform: 'translateY(0) scale(1, 1)' },
   ];
+  const BOUNCE_KF_DOWN = BOUNCE_KF.map(k => Object.assign({}, k, { transform: k.transform.replace('translateY(-5px)', 'translateY(5px)'), transformOrigin: '50% 0' }));
+  // 물결선: lead초 뒤 치고, 박 길이 bl로 두 박. 시각(초)으로 적은 자리를 전체 길이로 나눠 오프셋으로
+  function rakeKF(lead, bl) {
+    const T = lead + 2 * bl, at = x => Math.min(1, Math.max(0, x / T));
+    return [
+      { offset: 0, transform: 'translateY(0) rotate(0deg) scale(1, 1)', easing: 'cubic-bezier(.2, .7, .3, 1)' },
+      { offset: at(lead), transform: 'translateY(4px) rotate(-4deg) scale(1.35, 1.35)', easing: 'ease-in-out' },             // 치는 순간 아래로
+      { offset: at(lead + 0.5 * bl), transform: 'translateY(2px) rotate(-12deg) scale(1.2, 1.2)', easing: 'ease-in-out' },   // 첫 박 가운데: 왼쪽
+      { offset: at(lead + bl), transform: 'translateY(0) rotate(0deg) scale(1.1, 1.1)', easing: 'ease-out' },                // 다음 박: 가운데
+      { offset: at(lead + 1.1 * bl), transform: 'translateY(3px) rotate(2deg) scale(1.2, 1.2)', easing: 'ease-in-out' },    // 다음 박에 한 번 더 튐
+      { offset: at(lead + 1.5 * bl), transform: 'translateY(1px) rotate(9deg) scale(1.08, 1.08)', easing: 'ease-in-out' },  // 둘째 박 가운데: 오른쪽
+      { offset: 1, transform: 'translateY(0) rotate(0deg) scale(1, 1)' },
+    ].map(k => Object.assign(k, { transformOrigin: '50% 100%' }));
+  }
   S.bounceLog = [];
   window.__chordityBounces = () => S.bounceLog.slice();
   function bounceStrokes(t) {
@@ -7434,9 +7528,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (S.bounceT == null || t < S.bounceT - 0.05 || t > S.bounceT + 0.5) S.bounceK = lastLE(S.strumT, t + BOUNCE_LEAD) + 1;
     S.bounceT = t;
     while (S.bounceK < st.length && st[S.bounceK].t0 - BOUNCE_LEAD <= t) {
-      const s = st[S.bounceK++];
-      for (const el of [s.el, s.rkEl]) if (el && el.isConnected && el.animate) el.animate(BOUNCE_KF, { duration: BOUNCE_MS });
-      if (s.el && s.el.isConnected) { S.bounceLog.push({ t0: s.t0, at: t }); if (S.bounceLog.length > 64) S.bounceLog.shift(); }
+      const s = st[S.bounceK++], dn = s.dir > 0;
+      if (s.el && s.el.isConnected && s.el.animate) s.el.animate(dn ? BOUNCE_KF_DOWN : BOUNCE_KF, { duration: BOUNCE_MS });
+      if (s.rkEl && s.rkEl.isConnected && s.rkEl.animate) {
+        const bt = S.TL.beats, i = Math.min(bt.length - 2, Math.max(0, lastLE(bt, s.t0))), bl = bt.length > 1 ? bt[i + 1] - bt[i] : 0.5, lead = Math.max(0, s.t0 - t);
+        s.rkEl.animate(rakeKF(lead, bl), { duration: Math.round((lead + 2 * bl) * 1000) });
+      }
+      if (s.el && s.el.isConnected) { S.bounceLog.push({ t0: s.t0, at: t, dir: s.dir, rake: !!s.rkEl }); if (S.bounceLog.length > 64) S.bounceLog.shift(); }
     }
   }
   function renderStrokeMarks() {
@@ -8026,6 +8124,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
       rows.push(['코드 변화 단위', ({ 2: '½박', 3: '⅓박', 4: '¼박', 6: '⅙박' })[TL.res] || '1박']);
+      // 연주 자동(엔진 autoModes): 고른 방식과 원곡 리듬 값(직접 고른 방식이면 그렇다고)
+      if (S.auto) {
+        const a = S.auto, pc = x => Math.round(x * 100) + '%';
+        rows.push(['원곡 리듬', '박 흔들림 ' + (a.J * 100).toFixed(2) + '%, 템포 바뀜 ' + (a.D8 * 100).toFixed(2) + '%, 박 위 어택 ' + pc(a.PB) + ', 박 사이 어택 ' + pc(a.PO) + ', 스트럼 꼴 되풀이 ' + pc(a.r) + ' (박당 ' + a.d.toFixed(2) + '번)']);
+        rows.push(['피아노 자동', PM_NAME[a.piano.mode] + ' (' + AUTO_WHY[a.piano.why] + ')' + (prefs.pianoMode === 'auto' ? '' : ', 지금은 직접 고른 방식')]);
+        rows.push(['통기타 자동', gmName(a.guitar.mode) + ' (' + AUTO_WHY[a.guitar.why] + ')' + (prefs.guitarMode === 'auto' ? '' : ', 지금은 직접 고른 방식')]);
+      }
       // 무반주(엔진 ACAP): 반주 없이 노래(한 줄 선율)만 나와 코드를 적지 않은(N.C.) 구간. 마디 번호와 시각(끝은 마지막 박이 끝나는 시각)
       const ac = TL.acap || [], nB = TL.beats.length;
       rows.push(['무반주', ac.length ? ac.map(([a, b]) => {
@@ -8044,16 +8149,32 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       rows.push(['카멜롯', (kk.length ? kk : [TL.key]).map(k => k.cam).join(' → ')]);
       rows.push(['비트 수', String(TL.beats.length)]);
       // 통기타 4·8·16비트: 묶음(보통 한 마디)마다 고른 스트럼 패턴을 많이 쓴 순으로(↓ 다운, ↑ 업, · 쉼)
+      const topPats = (list, show) => list.slice(0, 4).map(([p, n]) => show(p) + ' ' + n + '번').join(', ') + (list.length > 4 ? ' 외 ' + (list.length - 4) + '가지' : '');
       if (S.strumPlan && S.strumPlan.length) {
         const cnt = new Map(); for (const x of S.strumPlan) cnt.set(x.pat, (cnt.get(x.pat) || 0) + 1);
-        const sym = p => p.replace(/D/g, '↓').replace(/U/g, '↑').replace(/-/g, '·').replace(/x/g, '×');
+        // 1.21.0(사용자: "스트로크 빈곳에 ✗넣기"): 치지 않는 칸은 ✗(헛스트로크), 그래서 뮤트·처크는 ×에서 M(차트의 뮤트 꺾쇠 글자)으로
+        const sym = p => p.replace(/D/g, '↓').replace(/U/g, '↑').replace(/-/g, '✗').replace(/x/g, 'M');
         const gm = guitarMode(), sw = S.strumSwing;
         // 스윙(단박자): 박마다 두 칸 xy를 셋잇단 꼴 x·y로(사용자 표기 -.- = ↓·↑, 길게-짧게)
         const show = gm === 'swing' && sw && !sw.compound ? p => sym(p.replace(/(.)(.)/g, '$1-$2')) : sym;
-        const ssw = S.strumSsw, head = gm === 'ssw' && ssw ? '싱어송라이터(' + (ssw.hand === 'c' ? '셋잇단 손' : ssw.hand + '분음표 손') + (ssw.swing ? ', 스윙 ' + ssw.swing.toFixed(2) : '') + (ssw.chuck != null ? ', 2·4박 처크 ' + (S.strums || []).filter(s => s.chuck).length + '번' : '') + ') ' : gm !== 'swing' ? gmName(gm) + ' ' : !sw ? '스윙 ' : sw.compound ? '스윙(겹박자 셋잇단 ↓·↑) '
+        const ssw = S.strumSsw, head = gm === 'ssw' && ssw ? '싱어송라이터(' + (ssw.hand === 'c' ? '셋잇단 손' : ssw.hand + '분음표 손') + (ssw.swing ? ', 스윙 ' + ssw.swing.toFixed(2) : '') + (ssw.chuck != null ? ', 2·4박 처크 ' + (S.strums || []).filter(s => s.chuck).length + '번' : '') + ') ' : gm !== 'swing' ? gmName(gm) + ' ' : !sw ? '스윙 ' : sw.compound ? '스윙(겹박자 셋잇단 ↓✗↑) '
           : '스윙(엇박 ' + sw.phi.toFixed(2) + '박 자리, 길게:짧게 ' + (sw.phi / (1 - sw.phi)).toFixed(1) + ':1, '
             + (sw.measured ? '원곡에서 잼' : (Math.abs(sw.fallback - 2 / 3) < 1e-9 ? '기본값 셋잇단' : '기본값') + ', ' + (sw.straight ? '원곡은 곧음' : '원곡에서 못 잼')) + ') ';   // 못 잼: 엇박이 뚜렷하지 않아 믿을 수 없음
-        rows.push(['통기타 스트럼', head + [...cnt].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([p, n]) => show(p) + ' ' + n + '번').join(', ') + (cnt.size > 4 ? ' 외 ' + (cnt.size - 4) + '가지' : '')]);
+        rows.push(['통기타 스트럼', (prefs.guitarMode === 'auto' ? '자동: ' : '') + head + topPats([...cnt].sort((a, b) => b[1] - a[1]), show)]);
+      } else if (S.strums && S.strums.length) {
+        // 스트로크 따라(1.21.0, 사용자: "[스트로크 따라]랑 피아노 패턴도 나오게"): 미리 정한 꼴이 없으므로 실제로 친 스트로크를 마디마다 박 칸 꼴로 모음
+        const pl = barPatterns(S.strums.map(x => ({ t: x.t0, x })), c => c[0].x.mute ? 'M' : c[0].x.dir > 0 ? '↓' : '↑', '✗');
+        if (pl.length) rows.push(['통기타 스트럼', (prefs.guitarMode === 'auto' ? '자동: ' : '') + gmName(guitarMode()) + ' ' + topPats(pl, x => x)]);
+      }
+      // 피아노 패턴(1.21.0): 고른 방식으로 실제로 치는 타건을 마디마다 박 칸 꼴로(● 두 음 이상, ○ 한 음, · 없음). 싱어송라이터·개성 있게는 손 짜임도
+      if (S.strikes && S.strikes.length) {
+        const pm = pianoMode(), pl = barPatterns(S.strikes.map(x => ({ t: x.t0, x })), c => c.reduce((a, y) => a + y.x.notes.length, 0) >= 2 ? '●' : '○');
+        let mix = '';
+        if (pm === 'ssw' || pm === 'flair') {
+          const n = { A: 0, C: 0, B: 0 }; for (const x of S.strikes) n[x.comp === 'A' ? 'A' : x.comp === 'B' ? 'B' : 'C']++;
+          mix = '(펼침 ' + n.A + '·화음 ' + n.C + '·베이스 ' + n.B + '번) ';
+        }
+        if (pl.length) rows.push(['피아노 패턴', (prefs.pianoMode === 'auto' ? '자동: ' : '') + PM_LONG[pm] + ' ' + mix + topPats(pl, x => x)]);
       }
       // 통기타 N.C. 뮤트(엔진 NC_MUTE): 원곡에 리듬이 있는 N.C. 구간에서 친 뮤트·팜뮤트 수(지금 치는 방식 기준)와 팜뮤트 음(그 자리 조의 철자로 파워 코드 이름)
       const mutes = (S.strums || []).filter(s => s.mute && !s.chuck);
@@ -8074,19 +8195,45 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     $('info').innerHTML = rows.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>').join('');
   }
 
+  const PM_LONG = { song: '곡 따라', change: '코드가 바뀔 때', bar: '마디마다 다시', beat: '박마다', ssw: '싱어송라이터', flair: '개성 있게' };
+  // 마디마다 친 자리 꼴(분석 정보의 통기타 스트럼·피아노 패턴): items [{t}]를 박 칸(4칸, 겹박자 3칸)에 넣고 symOf(그 칸의 items) → 글자, 빈 칸 '·'.
+  //  주 박자의 코드 마디만(못갖춘마디·N.C. 마디 빼고). 4칸 격자에서 16분 엇박 칸을 한 번도 안 쓰면 8분 격자로 줄임(박 사이 띄움 없음, 4·8·16비트와 같은 꼴),
+  //  16분·셋잇단 격자는 박마다 띄움. 빈 칸 글자는 empty(통기타는 ✗). 돌려줌 [[꼴, 마디 수]] 많이 쓴 순
+  function barPatterns(items, symOf, empty = '·') {
+    const TL = S.TL; if (!TL || TL.empty) return [];
+    const b = TL.beats, nb = b.length, R = TL.meter.triple ? 3 : 4, m = TL.meter.m, cells = new Map();
+    for (const it of items) {
+      let i = Math.min(nb - 2, Math.max(0, lastLE(b, it.t + 0.03))), j = Math.round((it.t - b[i]) / (b[i + 1] - b[i]) * R);
+      if (j >= R) { i++; j = 0; }
+      const x = i * R + j; if (!cells.has(x)) cells.set(x, []); cells.get(x).push(it);
+    }
+    const pats = [];
+    TL.bars.forEach(bar => {
+      if (bar.pickup || bar.nBeats !== m || !bar.events.some(e => !e.label.nc)) return;
+      const q = []; for (let k = 0; k < m * R; k++) { const c = cells.get(bar.startBeat * R + k); q.push(c ? symOf(c) : empty); }
+      pats.push(q);
+    });
+    const half = R === 4 && !pats.some(q => q.some((c, k) => k % 2 && c !== empty)), per = half ? 2 : R, cnt = new Map();
+    for (const q of pats) {
+      const r = half ? q.filter((c, k) => k % 2 === 0) : q;
+      const str = r.map((c, k) => (k && k % per === 0 && !half ? ' ' : '') + c).join('');
+      cnt.set(str, (cnt.get(str) || 0) + 1);
+    }
+    return [...cnt].sort((a, c) => c[1] - a[1]);
+  }
   // 작은박 단위 이름: 셋잇단 곡(엔진 subRes 3)은 ⅓박, 그 밖은 ½박
   const subUnit = TL => TL && TL.subRes === 3 ? '⅓박' : '½박', subUnit2 = TL => TL && TL.subRes === 3 ? '⅙박' : '¼박';
   const resOf = r => +r === 1 || +r === 4 ? +r : 2;   // 저장값 → 엔진 res(1박·작은박 2·더 작은박 4), 모르는 값은 기본(2)
   const OPN = { half: '½박 옮김', x2: '템포 ×2', d2: '템포 ÷2', d3: '템포 ÷3' };
   // 보정 패널의 설정 기본값(저장되는 설정). 음량·테마·켜기/끄기 버튼은 여기서 다루지 않음
-  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'song', guitarMode: 'ssw', accent: true, autoscroll: true, offsetMs: 0 };
+  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'auto', guitarMode: 'auto', accent: true, autoscroll: true, offsetMs: 0 };
   function settingParts() {
     const p = [];
     if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'standard') p.push('코드 표준');
     if (resOf(prefs.res) === 1) p.push('1박 단위'); else if (resOf(prefs.res) === 4) p.push(subUnit2(S.TL) + ' 단위');
     if (!prefs.slash) p.push('베이스음 표기 끔');
-    if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때'); else if (prefs.pianoMode === 'ssw') p.push('피아노 싱어송라이터'); else if (prefs.pianoMode === 'flair') p.push('피아노 개성 있게');
-    if (guitarMode() !== 'ssw') p.push('통기타 ' + gmName(guitarMode()));
+    if (prefs.pianoMode === 'song') p.push('피아노 곡 따라'); else if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때'); else if (prefs.pianoMode === 'ssw') p.push('피아노 싱어송라이터'); else if (prefs.pianoMode === 'flair') p.push('피아노 개성 있게');
+    if (prefs.guitarMode !== 'auto') p.push('통기타 ' + gmName(guitarMode()));
     if (!prefs.accent) p.push('첫 박 강조 끔');
     if (!prefs.autoscroll) p.push('자동 스크롤 끔');
     if (prefs.offsetMs) p.push('클릭 타이밍 ' + (prefs.offsetMs > 0 ? '+' : '') + prefs.offsetMs + ' ms');
@@ -8354,7 +8501,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (prefs.guitar) { player.resyncPiano('g'); if (player.playing) player.schedule(); }
     else cancelVoices('g');
     // 피아노 싱어송라이터·개성 있게는 통기타를 함께 칠 때 통기타 자리를 피하므로 다시 만듦
-    if (S.TL && (prefs.pianoMode === 'ssw' || prefs.pianoMode === 'flair')) { buildStrikes(); player.resyncPiano('p'); if (player.playing) player.schedule(); }
+    if (S.TL && (pianoMode() === 'ssw' || pianoMode() === 'flair')) { buildStrikes(); renderInfo(); player.resyncPiano('p'); if (player.playing) player.schedule(); }
     if (S.TL) renderStrokeMarks();
   }
 
@@ -8363,7 +8510,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     $('pianoBtn').setAttribute('aria-pressed', String(prefs.piano));
     $('guitarBtn').setAttribute('aria-pressed', String(prefs.guitar));
     $('selPianoMode').value = prefs.pianoMode;
-    $('selGuitarMode').value = guitarMode();
+    $('selGuitarMode').value = prefs.guitarMode === 'auto' ? 'auto' : guitarMode();
     document.querySelectorAll('[data-vol="piano"]').forEach(o => { o.value = prefs.pianoVol; });
     document.querySelectorAll('[data-vol="guitar"]').forEach(o => { o.value = prefs.guitarVol; });
     document.querySelectorAll('[data-vol="music"]').forEach(o => { o.value = prefs.musicVol; });
@@ -8398,7 +8545,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   $('selPianoMode').addEventListener('change', e => {
     prefs.pianoMode = e.target.value; savePrefs(); renderApplied();
     if (!S.TL) return;
-    buildStrikes(); player.resyncPiano('p'); if (player.playing) player.schedule();
+    buildStrikes(); renderInfo(); player.resyncPiano('p'); if (player.playing) player.schedule();
   });
   $('selGuitarMode').addEventListener('change', e => {
     prefs.guitarMode = e.target.value; savePrefs(); renderApplied();
