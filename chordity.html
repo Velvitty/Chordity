@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.19.0">v1.19.0</span>
+    <span class="ver" title="Chordity 버전 1.20.0">v1.20.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -519,6 +519,7 @@ body > main { flex: 1 0 auto; }
             <select id="selRes" aria-label="코드 변화 단위">
               <option value="1">1박 단위</option>
               <option value="2">½박 단위</option>
+              <option value="4">¼박 단위</option>
             </select>
             <label class="chk"><input type="checkbox" id="chkSlash"> 베이스음 표기 (G/B)</label>
           </div>
@@ -2522,6 +2523,14 @@ const Engine = (function () {
     //  1.75: ⅓ 바뀜은 1.5만큼 잡고 박 사이 바뀜 수는 ½박과 비슷. RES3_LAMS(0 = RES3_LAMK와 같음): 박 사이 칸만 다른 배율.
     //  박 위 1.5·박 사이 2.0은 합성곡 ⅓ 바뀜 제자리 16개 중 10(1.75는 14)이라 넣지 않음
     RES3: true, RES3_LAMK: 1.75, RES3_LAMS: 0,
+    //  더 작은박(1.20.0, 사용자: "1 ½ 곡은 1 ½ ¼까지, ⅓ 곡은 1 ⅓ ⅙까지"): 코드 변화 단위 res 4를 고르면 ½박 곡은 ¼박, 셋잇단 곡은 ⅙박 슬롯.
+    //  RESF_LAMK: 슬롯이 두 배라 같은 벌점이면 바뀜이 싸지므로 모든 벌점에 곱하는 배율(⅙박은 RES3_LAMK에 더해 곱함).
+    //  RESF_ODD: 박 사이 칸 가운데 ½(⅓) 자리가 아닌 칸(16분 e·a, 셋잇단 사이)만 더 곱하는 배율(그 자리 바뀜은 드묾).
+    //  RESF_KEEP: 같은 곡을 ½(⅓)박으로 먼저 읽은 코드에 주는 방출 가산점(사용자: "코드 수가 더 많아야지" — 작은박에서 찾은 코드는 지키고
+    //  짧은 코드를 더함). 0이면 따로 읽음(그때는 ½박 코드의 약 80%만 남고 배율 2.0이면 코드 수가 ½박보다 적었음).
+    //  실제 녹음 한 곡(IU 업로드 133마디, 1박 181·½박 232개) 훑기 — 배율/가산점: 2.0/0 → 227개·½박 코드 188 남음, 1.25/1 → 238·223,
+    //  0.75/1.5 → 264·222, 0.6/1.5 → 279·221, 0.5/1.5 → 297·220(16분 자리 26), 0.5/2 → 278·222. 1박 → ½박만큼(+28%) 늘고 ½박 코드 95%를 지키는 0.5/1.5
+    RESF_LAMK: 0.5, RESF_ODD: 1.0, RESF_KEEP: 1.5,
     //  스트로크 따라(1.12.0, 통기타 코드 연주): 중역(200~2500 Hz) 스펙트럼 플럭스를 박 칸(박당 4칸, 겹박자 3칸)마다 재서 곡 안 중앙값·90% 값으로
     //  맞춘 세기가 ST_TH 이상이면 그 칸에서 침(시각은 칸 안 플럭스 봉우리, ST_SNAP). 코드가 새로 바뀐 칸은 늘 침. 칸 홀짝으로 다운·업(ST_DIR 'odd16').
     //  GuitarSet 180곡 현별 음 정답(현 3개 이상이 60 ms 안에 울린 묶음)으로 정함: 문턱 0.5에서 F 0.58(록 0.59, 펑크 0.62), 방향 70%
@@ -3993,8 +4002,14 @@ const Engine = (function () {
     }
 
     // 최종 코드 (1박 또는 작은박 해상도). 작은박은 ½박, 셋잇단(박이 셋으로 나뉘는) 곡은 ⅓박(RES3)
-    const subRes = P.RES3 && sub.triple ? 3 : 2, res = set.res === 2 ? subRes : 1, nS = n * res;
+    const subRes = P.RES3 && sub.triple ? 3 : 2, res = set.res === 4 ? subRes * 2 : set.res === 2 ? subRes : 1, nS = n * res;
     const t0 = new Float64Array(nS), t1 = new Float64Array(nS), lam = new Float64Array(nS);
+    // 더 작은박(res 4·6)은 같은 곡을 작은박(res 2)으로 먼저 읽어 두고(coarse: 작은박 슬롯마다 코드 id), 방출에서 그 코드에 RESF_KEEP을 더함
+    let coarse = null;
+    if ((res === 4 || res === 6) && P.RESF_KEEP > 0 && !set._coarse) {
+      const c = buildTimeline(A, Object.assign({}, set, { res: 2, _coarse: true }));
+      if (c && !c.empty && c.labIds && c.labIds.length * 2 === nS) coarse = c.labIds;
+    }
     for (let i = 0; i < n; i++) {
       const a = F.t0[i], b = F.t1[i];
       for (let r = 0; r < res; r++) {
@@ -4006,6 +4021,8 @@ const Engine = (function () {
     }
     // ⅓박이면 박마다 방출이 셋(½박은 둘)이라 같은 벌점으로는 바뀜이 상대적으로 싸짐 → 벌점을 RES3_LAMK배(½박과 같은 비율이면 3/2)
     if (res === 3) for (let s = 0; s < nS; s++) lam[s] *= s % 3 ? (P.RES3_LAMS || P.RES3_LAMK) : P.RES3_LAMK;   // RES3_LAMS: 박 사이 칸만 따로(0이면 RES3_LAMK)
+    // ¼박·⅙박(res 4·6): 박마다 방출이 ½·⅓박의 두 배 → 모든 벌점 RESF_LAMK배(⅙박은 RES3_LAMK도), ½·⅓ 자리가 아닌 박 사이 칸은 RESF_ODD배 더
+    if (res === 4 || res === 6) for (let s = 0; s < nS; s++) lam[s] *= (res === 6 ? P.RES3_LAMK : 1) * P.RESF_LAMK * (s % 2 ? P.RESF_ODD : 1);
     if (P.BASS_LAM) {                                    // 마디 안(첫 박 아님) 바뀜 벌점을 베이스 변화(이웃 박 베이스 분포의 코사인 거리)만큼 줄임
       const bq = aggregate(A.harm.bass, A.harm.hopB, F.t0, F.t1), bE = new Float64Array(n);
       for (let i = 0; i < n; i++) { let s2 = 0; for (let k = 0; k < 12; k++) s2 += bq[i * 12 + k] * bq[i * 12 + k]; bE[i] = Math.sqrt(s2); }
@@ -4060,6 +4077,7 @@ const Engine = (function () {
         if (C < P.REP_CONS) repOn = false;
       }
       if (repOn) e = repApply(e, st, rp, nS);
+      if (coarse) { const K = st.length, ix = new Map(st.map((x, k) => [x.id, k])); for (let s = 0; s < nS; s++) { const k = ix.get(coarse[s >> 1]); if (k !== undefined) e[s * K + k] += P.RESF_KEEP; } }
       // 무반주 칸(ACAP)은 코드 상태를 막아 N만 남김. 반복 투표 뒤라 다른 반복이 되살리지 못하고, 두 크로마 판정(SC_ROOT)·파워 코드 다시 풀기·
       //  경계 다듬기(EDGE_ATTACK·LATE_EDGE·DB_SHORT, REP_EDGE면 이 점수)가 모두 이 점수를 씀. 그 뒤 다듬기는 N을 코드로 바꾸지 않음
       if (acapS) { const K = st.length; for (let s = 0; s < nS; s++) if (acapS[s]) for (let k = 0; k < K; k++) if (st[k].root >= 0) e[s * K + k] = -1e9; }
@@ -4618,7 +4636,8 @@ const Engine = (function () {
         return { tonic: g.key.tonic, mode: g.key.mode, score: g.key.score, name: keyName(g.key), cam: camelot(g.key.tonic, g.key.mode),
           startBeat: b, bar: bi, barNum: bar.num, beat: bar.pickup ? (m - bar.nBeats) + off + 1 : off + 1, t0: beats[b] };
       }),
-      sub, subRes, settings: set,                          // subRes: 작은박을 켜면 박을 몇으로 나누는지(2 또는 셋잇단 곡 3)
+      labIds: set._coarse ? Array.from(lab, k => states[k].id) : null,   // 더 작은박이 먼저 읽는 작은박 코드(슬롯마다 코드 id)
+      sub, subRes, settings: set,                          // subRes: 작은박을 켜면 박을 몇으로 나누는지(2 또는 셋잇단 곡 3). 더 작은박(res 4)은 그 두 배
       acap: acap.runs,                                     // 무반주 구간(ACAP): [[시작 박, 끝 박), …] — 코드 N.C., 통기타 뮤트 없음
       rep: rp ? { res, start: rp.start, pj: rp.pj, pw: rp.pw } : null,   // 반복 짝(REP): 슬롯 s(박 ⌊s/res⌋)의 짝 슬롯 pj[start[s]..start[s+1]), 가중 pw(통기타 스트로크 반복 맞추기용)
       dbg: { z, lab0: Array.from(lab0, k => st0[k].id), treb: F.treb, bass: F.bass, acap: acap.stat },   // 진단용
@@ -6342,11 +6361,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const PREF_KEY = 'chordity-prefs-v1', OLD_PREF_KEY = 'madi-code-prefs-v1';   // 이전 이름(마디 코드)의 저장값은 그대로 옮겨 옴
   const savedPrefs = (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || localStorage.getItem(OLD_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } })();
   const prefs = Object.assign(
-    { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'standard', res: 1, slash: true,
+    { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'extended', res: 2, slash: true,
       piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'song', guitarMode: 'ssw', notation: 'name' },
     savedPrefs);
   // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
   if (savedPrefs.gmv !== 2) { if (prefs.guitarMode === 'strum') prefs.guitarMode = 'ssw'; prefs.gmv = 2; }
+  // 1.20.0부터 코드 종류 기본이 확장('extended', 사용자: "코드 종류 확장을 기본으로"): 그 전 기본값(표준)으로 저장된 값은 한 번만 새 기본으로 옮김(vmv 1). 기본(3화음)을 고른 값은 그대로
+  if (savedPrefs.vmv !== 1) { if (prefs.vocab === 'standard') prefs.vocab = 'extended'; prefs.vmv = 1; }
+  // 1.20.0부터 코드 변화 단위 기본이 작은박(res 2: ½박, 셋잇단 곡 ⅓박)이고 더 작은박(res 4: ¼박, 셋잇단 곡 ⅙박)도 고름(사용자: "1 ½ 곡은 1 ½ ¼까지,
+  //  ⅓ 곡은 1 ⅓ ⅙까지, 각각 ½, ⅓을 기본값으로"): 그 전 기본값(1박)으로 저장된 값은 한 번만 새 기본으로 옮김(rmv 1). ½박을 고른 값은 그대로
+  if (savedPrefs.rmv !== 1) { if (+prefs.res !== 2 && +prefs.res !== 4) prefs.res = 2; prefs.rmv = 1; }
   // 1.15.0부터 피아노·통기타 볼륨이 따로: 그 전 저장값(코드 볼륨 하나 = pianoVol)은 통기타 볼륨도 같은 값으로 이어받음
   if (savedPrefs.guitarVol == null && typeof savedPrefs.pianoVol === 'number') prefs.guitarVol = savedPrefs.pianoVol;
   function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) { /* 저장 불가 환경은 무시 */ } }
@@ -6985,7 +7009,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRender = offlineRender;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
   window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0 }));
-  window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
+  window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), res: S.TL.res, bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
   window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '' }));   // 피아노 타건(시험용)
 
   // ---------------- 재생기 + 메트로놈 스케줄러 ----------------
@@ -7138,7 +7162,25 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   function setPlayingUI(on) {
     showEl($('icoPlay'), !on); showEl($('icoPause'), on);
     $('play').setAttribute('aria-label', on ? '일시정지' : '재생');
+    if (on) wake.get(); else wake.put();
   }
+  // 재생 중 화면 켜 두기(1.20.0, 사용자: "재생 중에 화면 안 어두워지고 안 꺼지게"): Screen Wake Lock을 재생 시작에 잡고 멈춤·끝에 놓음.
+  //  탭이 가려지면 브라우저가 스스로 놓으므로 다시 보일 때 재생 중이면 다시 잡음(visibilitychange). 지원하지 않거나 거절되면 화면은 평소대로
+  const wake = {
+    on: true, lock: null, want: false, busy: false,
+    async get() {
+      this.want = true;
+      if (!this.on || this.lock || this.busy || !navigator.wakeLock || document.visibilityState !== 'visible') return;
+      this.busy = true;
+      try {
+        const l = await navigator.wakeLock.request('screen');
+        if (this.want) { this.lock = l; l.addEventListener('release', () => { if (this.lock === l) this.lock = null; }); }
+        else l.release().catch(() => { });   // 기다리는 사이 멈춤
+      } catch (e) { /* 절전 모드·권한 정책 등 */ } finally { this.busy = false; }
+    },
+    put() { this.want = false; const l = this.lock; this.lock = null; if (l) l.release().catch(() => { }); }
+  };
+  window.__chordityWake = () => ({ want: wake.want, held: !!wake.lock });   // 시험용
 
   // ---------------- 불러오기·분석 ----------------
   function setProgress(f, label) {
@@ -7194,7 +7236,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     S.buffer = buf; S.A = A; S.name = file.name.replace(/\.[^.]+$/, '');
     // 피아노를 이 녹음의 기준음에 맞춤(0.5 cent 넘게 달라지면 다시 합성)
     if (Math.abs(A.harm.tuning - pianoTune) > 0.005) { clearSynthCache(); pianoTune = A.harm.tuning; if (ctx && Synth.GUITAR.selfRes) guitarBus = buildGuitarChain(guitarGain); }
-    S.set = Object.assign(Engine.defaultSettings(), { vocab: prefs.vocab, res: +prefs.res === 2 ? 2 : 1, slash: !!prefs.slash });
+    S.set = Object.assign(Engine.defaultSettings(), { vocab: prefs.vocab, res: resOf(prefs.res), slash: !!prefs.slash });
     player.pausedAt = 0;
     $('busy').hidden = true; $('app').hidden = false;
     $('title').textContent = S.name;
@@ -7290,15 +7332,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const cents = A.harm.tuning * 100;
     $('fTune').textContent = 'A4 ' + (440 * Math.pow(2, A.harm.tuning / 12)).toFixed(1) + ' Hz';
     $('fTune').title = (cents >= 0 ? '+' : '') + cents.toFixed(0) + ' cent';
-    const optAuto = $('selMeter').querySelector('option[value="auto"]'), optSub = $('selRes').querySelector('option[value="2"]');
+    const optAuto = $('selMeter').querySelector('option[value="auto"]'), optSub = $('selRes').querySelector('option[value="2"]'), optSub2 = $('selRes').querySelector('option[value="4"]');
     if (TL.empty) {
       $('fBpm').textContent = '–'; $('tBpm').textContent = '–'; $('fMeter').textContent = '–'; $('fKey').textContent = '–'; $('fBars').textContent = '0';
-      optAuto.textContent = '자동'; optSub.textContent = '½박 단위'; $('selRes').title = '';
+      optAuto.textContent = '자동'; optSub.textContent = '½박 단위'; optSub2.textContent = '¼박 단위'; $('selRes').title = '';
       return;
     }
-    // 작은박: 박이 셋으로 나뉘는(셋잇단) 곡은 ⅓박 단위
-    optSub.textContent = subUnit(TL) + ' 단위';
-    $('selRes').title = TL.subRes === 3 ? '셋잇단 곡이라 한 박을 셋으로 나눕니다' : '';
+    // 작은박: 박이 셋으로 나뉘는(셋잇단) 곡은 ⅓박·⅙박 단위
+    optSub.textContent = subUnit(TL) + ' 단위'; optSub2.textContent = subUnit2(TL) + ' 단위';
+    $('selRes').title = TL.subRes === 3 ? '셋잇단 곡이라 한 박을 셋(더 작게는 여섯)으로 나눕니다' : '';
     const tps = TL.tempos && TL.tempos.length ? TL.tempos : null, mts = TL.meters && TL.meters.length ? TL.meters : null;
     S.bpmShown = null;
     $('fBpm').textContent = (tps ? Math.round(tps[0].bpm) : TL.bpm.toFixed(1)) + (TL.meter.triple ? ' (점4분)' : '');
@@ -7983,7 +8025,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       + ' 다시 잡음 (' + l43.curBpm.toFixed(1) + ' → ' + l43.toBpm.toFixed(1) + ' BPM' + (l43.flip ? ', 스네어 자리로 반 박 옮김' : '') + ')' : '그대로 유지']);
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
-      rows.push(['코드 변화 단위', TL.res === 3 ? '⅓박' : TL.res === 2 ? '½박' : '1박']);
+      rows.push(['코드 변화 단위', ({ 2: '½박', 3: '⅓박', 4: '¼박', 6: '⅙박' })[TL.res] || '1박']);
       // 무반주(엔진 ACAP): 반주 없이 노래(한 줄 선율)만 나와 코드를 적지 않은(N.C.) 구간. 마디 번호와 시각(끝은 마지막 박이 끝나는 시각)
       const ac = TL.acap || [], nB = TL.beats.length;
       rows.push(['무반주', ac.length ? ac.map(([a, b]) => {
@@ -8033,14 +8075,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   // 작은박 단위 이름: 셋잇단 곡(엔진 subRes 3)은 ⅓박, 그 밖은 ½박
-  const subUnit = TL => TL && TL.subRes === 3 ? '⅓박' : '½박';
+  const subUnit = TL => TL && TL.subRes === 3 ? '⅓박' : '½박', subUnit2 = TL => TL && TL.subRes === 3 ? '⅙박' : '¼박';
+  const resOf = r => +r === 1 || +r === 4 ? +r : 2;   // 저장값 → 엔진 res(1박·작은박 2·더 작은박 4), 모르는 값은 기본(2)
   const OPN = { half: '½박 옮김', x2: '템포 ×2', d2: '템포 ÷2', d3: '템포 ÷3' };
   // 보정 패널의 설정 기본값(저장되는 설정). 음량·테마·켜기/끄기 버튼은 여기서 다루지 않음
-  const PREF_DEFAULT = { vocab: 'standard', res: 1, slash: true, pianoMode: 'song', guitarMode: 'ssw', accent: true, autoscroll: true, offsetMs: 0 };
+  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'song', guitarMode: 'ssw', accent: true, autoscroll: true, offsetMs: 0 };
   function settingParts() {
     const p = [];
-    if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'extended') p.push('코드 확장');
-    if (+prefs.res === 2) p.push(subUnit(S.TL) + ' 단위');
+    if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'standard') p.push('코드 표준');
+    if (resOf(prefs.res) === 1) p.push('1박 단위'); else if (resOf(prefs.res) === 4) p.push(subUnit2(S.TL) + ' 단위');
     if (!prefs.slash) p.push('베이스음 표기 끔');
     if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때'); else if (prefs.pianoMode === 'ssw') p.push('피아노 싱어송라이터'); else if (prefs.pianoMode === 'flair') p.push('피아노 개성 있게');
     if (guitarMode() !== 'ssw') p.push('통기타 ' + gmName(guitarMode()));
@@ -8395,7 +8438,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   $('dsNext').addEventListener('click', () => { if (!S.A) return; S.set.downShift += 1; rebuild(); });
   $('selMeter').addEventListener('change', e => { const v = e.target.value; S.set.meter = v === 'auto' ? 'auto' : +v; S.set.downShift = 0; rebuild(); });
   $('selVocab').addEventListener('change', e => { S.set.vocab = prefs.vocab = e.target.value; savePrefs(); rebuild(); });
-  $('selRes').addEventListener('change', e => { S.set.res = prefs.res = +e.target.value; savePrefs(); rebuild(); });
+  $('selRes').addEventListener('change', e => { S.set.res = prefs.res = resOf(e.target.value); savePrefs(); rebuild(); });
   $('chkSlash').addEventListener('change', e => { S.set.slash = prefs.slash = e.target.checked; savePrefs(); rebuild(); });
   // 코드 표기(음이름·카멜롯·로마 숫자): 차트 위 선택 막대. 화면만 다시 그림(분석·타임라인은 그대로)
   const notBtns = () => Array.from(document.querySelectorAll('#notation [data-not]'));
@@ -8498,7 +8541,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   onMq(narrow, () => { if (S.TL && !$('app').hidden) { renderChart(); S.cur.bar = -1; S.cur.beat = -1; } });
   // 차트를 다시 그리지 않는 작은 폭 변화(30px 이하, 다시 그리기 전 150ms)에도 알약은 폭이 그대로라 템포 줄 배치를 다시 함
   if (window.ResizeObserver) { let rw = -1; new ResizeObserver(() => { const w = $('chart').clientWidth; if (w !== rw) { rw = w; layoutChords(); layoutTempoRow(); S.boxDirty = true; } }).observe($('chart')); }
-  document.addEventListener('visibilitychange', () => { if (player.playing) player.schedule(); });
+  document.addEventListener('visibilitychange', () => { if (player.playing) { player.schedule(); wake.get(); } });
 
   if (!AC) showError('이 브라우저는 Web Audio API를 지원하지 않아 사용할 수 없습니다.');
   requestAnimationFrame(frame);
