@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.23.1">v1.23.1</span>
+    <span class="ver" title="Chordity 버전 1.23.2">v1.23.2</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -6671,6 +6671,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 1.23.0 왼손(엔진 P.PC_LH): 베이스 A1~G♯2(lhLo부터 한 옥타브), 10도는 lhTop(G3)까지, 옥타브 아래로 내려도 lhMin(E1) 위. 오른손 음역 가운데(마디 수준 0~4)와
     //  보통 방식(곡 따라 등)의 오른손 세기 배(수준 0~4, 1.22.0까지는 늘 1). lhVel·lhVelComp: 왼손 꼴 세기 배(보통 방식·싱어송라이터와 개성 있게; 음이 늘어 피아노 전체가 0.9~2 dB 커지던 것을 1.22.0 크기로)
     lhLo: 33, lhTop: 55, lhMin: 28, lhVel: 0.72, lhVelComp: 0.85, rhCen: [60, 61, 62, 64, 66], lvVel: [0.72, 0.82, 0.92, 1.03, 1.15],
+    // 느린 곡 화음 굴리기(1.23.2, 사용자: "피아노도 느린 곡에서 화음 굴려 치게"): 통기타 slowRoll과 같은 템포 비중(bpmHi BPM 아래로 내려갈수록, bpmLo 아래면 다)으로
+    //  두 음 넘는 화음(왼손 꼴 빼고)을 아래 음부터 굴림. 맨 아래 ~ 맨 위 시간 = 박 길이 × soft(가장 여린 구간 수준 0) ~ loud(가장 큰 구간 수준 4),
+    //  그 사이는 수준에 따라 비를 고르게, max초로 자르고 × 템포 비중, 다음 타건까지·손 떼기까지의 room배 안, min초보다 짧아지면 굴리지 않음
+    slowRoll: { on: true, bpmHi: 92, bpmLo: 66, soft: 0.16, loud: 0.05, min: 0.03, max: 0.25, room: 0.6 },
     makeupG: 1.26,                // grand 경로 보정 이득: 고역이 줄어 K 가중 크기가 0.9~1.0 dB 작아진 것을 채움(1.21.0과 같은 크기)
     tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
   };
@@ -6969,7 +6973,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const lo = Math.min(m0, m1 == null ? m0 : m1), hi = Math.max(m0, m1 == null ? m0 : m1);
       let pick = m1 != null ? lad.filter(m => m > lo && m < hi).sort((x, y) => Math.abs(x - (lo + hi) / 2) - Math.abs(y - (lo + hi) / 2))[0] : null;
       if (pick == null) pick = lad.find(m => m > m0 && m !== m1) ?? lad.find(m => m !== m0) ?? m0;
-      return { t0: t, t1: Math.max(t + 0.05, Math.min(end, Math.max(te, a1))), g: lh.g, notes: [pick], vels: [DENS.fillVel * (lh.vels ? Math.max(...lh.vels) : 0.5)], comp: 'L', lad, role: 'fill' };
+      return { t0: t, t1: Math.max(t + 0.05, Math.min(end, Math.max(te, a1))), g: lh.g, notes: [pick], vels: [DENS.fillVel * (lh.vels ? Math.max(...lh.vels) : 0.5)], comp: 'L', lad, role: 'fill', L: lh.L };
     }
     const notes = [...new Set(a.flatMap(s => s.notes))].sort((x, y) => x - y);
     const vOf = m => { for (const s of a) { const k = s.notes.indexOf(m); if (k >= 0) return s.vels ? s.vels[k] : null; } return null; };
@@ -6983,8 +6987,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (pick == null) pick = m0;
       ns = [pick]; vs = [DENS.fillVel * (vOf(m0) || 0.5)];
     }
-    return { t0: t, t1: Math.max(t + 0.05, Math.min(end, Math.max(te, a1))), g: s0.g, notes: ns, vels: vs, comp: s0.comp, lad: s0.lad };
+    return { t0: t, t1: Math.max(t + 0.05, Math.min(end, Math.max(te, a1))), g: s0.g, notes: ns, vels: vs, comp: s0.comp, lad: s0.lad, L: s0.L };
   }
+  // 타건마다 다음 타건(같은 자리 20 ms 안은 빼고)까지의 시간(1.23.2 화음 굴리기가 넘지 않게)
+  function strikeRoom(out) { let j = 0; for (let i = 0; i < out.length; i++) { if (j < i + 1) j = i + 1; while (j < out.length && out[j].t0 <= out[i].t0 + 0.02) j++; out[i].room = j < out.length ? out[j].t0 - out[i].t0 : Infinity; } }
   // 타임라인 → 타건 목록. 피아노 모드: song(곡 따라), change(코드가 바뀔 때), bar(마디마다 다시), beat(박마다).
   //  통기타는 스트로크 따라: 원곡에서 친 리듬(엔진 Engine.strokes)대로 다운·업 스트로크
   function buildStrikes() {
@@ -7029,11 +7035,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         else { const lad = [bass].concat(rh0, rh0.map(m => m + 12)); if (e.k >= lad.length) continue; const m0 = lad[e.k]; notes = [e.k > 0 && up ? m0 + up : m0]; vels = [(e.k === 0 ? 0.62 : 0.5) * e.v / 0.6]; }
         // 굴림(e.roll초): 아래 음부터 한 음씩
         const lad = [bass].concat(rh, rh.map(m => m + 12)).filter(m => m <= 96);   // 밀도 채우기(densify)에서 한 음 사이 코드 음을 고를 사다리
-        if (e.roll > 0 && notes.length > 1) { const grp = out.length; notes.forEach((m, q) => out.push({ t0: e.t + q * e.roll, t1: e.end, g, notes: [m], vels: [vels[q]], comp: e.part, lad, grp })); }
-        else out.push({ t0: e.t, t1: e.end, g, notes, vels, comp: e.part, lad });
+        // 1.23.2: 화음 굴리기(PIANO.slowRoll)를 켜면 굴리는 화음도 한 타건으로 두고 치는 때 굴림(엔진 간격 e.roll은 가장 짧은 간격 minRoll)
+        if (e.roll > 0 && notes.length > 1 && !(PIANO.slowRoll && PIANO.slowRoll.on)) { const grp = out.length; notes.forEach((m, q) => out.push({ t0: e.t + q * e.roll, t1: e.end, g, notes: [m], vels: [vels[q]], comp: e.part, lad, grp, L: e.L })); }
+        else out.push({ t0: e.t, t1: e.end, g, notes, vels, comp: e.part, lad, L: e.L, minRoll: e.roll > 0 && notes.length > 1 ? e.roll : 0 });
       }
       out.splice(0, out.length, ...densify(out, TL, pianoFill));   // ssw·flair는 늘 밀도 조절(DENS_P)
       S.densP = DENS.on;
+      strikeRoom(out);
       S.strikes = out;
       S.strikeT = Float64Array.from(out, s => s.t0);
       return;
@@ -7064,6 +7072,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const levAt = t => lev ? lev[TL.barOfBeat[Math.min(n - 1, Math.max(0, lastLE(b, t + 1e-4)))]] : 3;
     for (const s of out) {
       const L = Math.max(0, Math.min(4, levAt(s.t0)));
+      s.L = L;                                                // 구간 수준(1.23.2 느린 곡 화음 굴리기의 셈여림)
       if (s.g.key !== lastKey) {
         const v = voicing(s.g.pcs, s.g.bassPc, cen, LHON ? top : null);
         lastNotes = v.notes; lastKey = s.g.key; top = v.notes[v.notes.length - 1];
@@ -7088,6 +7097,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
     S.densP = DENS.on && DENS_P.includes(mode);
     if (S.densP) { const dense = densify(out, TL, pianoFill); out.splice(0, out.length, ...dense); }
+    strikeRoom(out);
     S.strikes = out;
     S.strikeT = Float64Array.from(out, s => s.t0);
   }
@@ -7245,13 +7255,33 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const strikeReady = s => !!s.strings || !PIANO.v2 || s.notes.every(m => pianoCache.has(m));
   const LATE_OK = 0.3;                    // 준비가 늦은 타건을 그래도 칠 수 있는 지연(초). 넘으면 건너뜀
   // 타건 하나 울리기(악기에 따라)
-  function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else playChord(s.notes, when, endAt, s.vels); }
+  function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else playChord(s.notes, when, endAt, s.vels, pianoRollOf(s, endAt - when)); }
+  // 1.23.2 느린 곡 화음 굴리기(PIANO.slowRoll): 음 사이 간격(초). 세 음 이상 화음만(왼손 꼴 빼고), 그 자리 박 길이로 템포 비중 w, 구간 수준(s.L)으로 굴리는 시간
+  //  s.minRoll: 엔진이 정한 굴림 간격(싱어송라이터 느린 곡 스탭·마디 가운데 코드 PC_RROLL)이 있으면 그보다 짧게 굴리지 않음
+  //  left: 치는 때부터 손을 떼는 때(endAt)까지 남은 초. 재생을 화음 끝 근처에서 다시 시작하거나 늦게 친 화음은 그 안에서 다 굴림(맨 윗음이 다음 화음 위로 넘어가지 않게)
+  function pianoRollOf(s, left) {
+    const sr = PIANO.slowRoll, m0 = s.minRoll || 0;
+    if (!sr || !sr.on || s.comp === 'L' || !s.notes || s.notes.length < 3 || !S.TL || S.TL.beats.length < 2) return m0;
+    const bt = S.TL.beats, i = Math.min(bt.length - 2, Math.max(0, lastLE(bt, s.t0))), bl = bt[i + 1] - bt[i], w = clamp((sr.bpmHi - 60 / bl) / (sr.bpmHi - sr.bpmLo), 0, 1);
+    if (w <= 0) return m0;
+    const k = clamp((s.L == null ? 2 : s.L) / 4, 0, 1);
+    let tot = Math.min(bl * sr.soft * Math.pow(sr.loud / sr.soft, k), sr.max) * w;
+    if (s.room > 0 && isFinite(s.room)) tot = Math.min(tot, sr.room * s.room);
+    if (left != null && isFinite(left)) tot = Math.min(tot, sr.room * Math.max(0, left));
+    if (tot < sr.min - 1e-9) return m0;                                                     // min초보다 짧은 굴림은 들리지 않으므로 치지 않음(템포 경계 근처·자리가 좁을 때)
+    const gap = Math.max(m0, tot / (s.notes.length - 1));
+    S.rollLog.push({ t: s.t0, n: s.notes.length, roll: gap * (s.notes.length - 1), L: s.L, room: s.room, left }); if (S.rollLog.length > 4096) S.rollLog.shift();   // (시험용)
+    return gap;
+  }
   // 같은 피아노 음을 다시 치면 앞 소리는 짧게 막음(해머가 같은 현을 다시 침): 펼침화음·반주에서 같은 음이 페달로 겹쳐 쌓이지 않게
   const pianoRing = new Map();
-  function playChord(notes, when, endAt, vels) {
+  function playChord(notes, when0, endAt, vels, roll) {
     const nRH = notes.length - 1;
-    if (PIANO.tieMax > 0) endAt = Math.min(endAt, when + PIANO.tieMax);   // (끔) 오래 끌어 둔 코드는 손을 뗌
+    if (PIANO.tieMax > 0) endAt = Math.min(endAt, when0 + PIANO.tieMax);   // (끔) 오래 끌어 둔 코드는 손을 뗌
+    // 굴리기(roll초 간격): 낮은 음부터 차례로
+    const rank = roll > 0 ? notes.map((m, i) => notes.filter((x, j) => x < m || (x === m && j < i)).length) : null;
     notes.forEach((m, i) => {
+      const when = rank ? when0 + rank[i] * roll : when0;
       const buf = pianoNote(m);
       const rel = PIANO.v2 ? Synth.pianoRelease(m) : PIANO.release;
       const src = ctx.createBufferSource();
@@ -7355,19 +7385,19 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   // 시험용: 코드 연주(와 원곡)를 지금 앱과 같은 소리 경로로 오프라인 렌더링해 스테레오 Float32Array 두 개로 돌려줌.
-  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, slowRoll: 1.23.1 느린 곡 펼쳐 치기 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
+  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, slowRoll: 1.23.1 느린 곡 펼쳐 치기 여부, pianoRoll: 1.23.2 느린 곡 화음 굴리기 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
   //  piano·guitar·guitarMode를 빼면 지금 상태를 따름
   async function offlineRender(from, dur, opt) {
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
     const oc = new OfflineAudioContext(2, Math.ceil(dur * sr), sr);
     try {
-      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; if (opt.slowRoll != null) GUITAR.slowRoll.on = !!opt.slowRoll; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
+      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; if (opt.slowRoll != null) GUITAR.slowRoll.on = !!opt.slowRoll; if (opt.pianoRoll != null) PIANO.slowRoll.on = !!opt.pianoRoll; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
@@ -7390,7 +7420,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
       strumN = saved.strumN; muteN = saved.muteN;
-      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
+      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
@@ -7398,7 +7428,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRender = offlineRender;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
   window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0, fill: !!s.fill }));
-  S.gapLog = [];
+  S.gapLog = []; S.rollLog = [];
+  window.__chordityRollOf = (t, L, n, room, left) => { const k = S.rollLog.length, r = pianoRollOf({ t0: t, L, notes: new Array(n || 4).fill(60), room: room == null ? Infinity : room }, left); S.rollLog.length = Math.min(S.rollLog.length, k); return r * ((n || 4) - 1); };   // (시험용) 그 자리·수준의 굴리는 시간(초), 기록은 그대로
+  window.__chordityRolls = () => S.rollLog.splice(0);                                  // (시험용) 피아노가 굴려 친 화음 {t, n, roll(맨 아래 ~ 맨 위 초), L}(1.23.2)
   window.__chordityGaps = () => S.gapLog.splice(0);                                    // (시험용) 통기타가 친 스트로크의 줄 사이·세기 dB(1.23.1 느린 곡 펼쳐 치기)
   window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), res: S.TL.res, bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
   window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '', fill: !!s.fill, vel: s.vels ? Math.max(...s.vels) : null, role: s.role || '' }));   // 피아노 타건(시험용)
