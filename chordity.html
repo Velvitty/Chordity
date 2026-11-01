@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.23.0">v1.23.0</span>
+    <span class="ver" title="Chordity 버전 1.23.1">v1.23.1</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -6692,6 +6692,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     //  빠르기 = 세기 db(엔진 셈여림, 없으면 20·log10(vel))가 lo dB 이하면 slow배, hi dB 이상이면 fast배, 그 사이는 dB에 따라 비를 고르게(가운데 dB에서 1배),
     //  현 사이 간격 = 기준 ÷ 빠르기(사용자: 세게 칠수록 점점 빠르게 1.25배까지, 여리게 칠수록 점점 느리게 0.8배까지)
     spreadDb: { on: true, down: 0.0062, up: 0.0070, fast: 1.25, slow: 0.8, lo: -15, hi: 3 },
+    // 느린 곡 펼쳐 치기(1.23.1, 사용자: "느린 곡일때 셈여림 여릴수록 드르르르링 하고 쳐봐. 세도 어느정도 드리링 치고"): 그 자리 템포가 bpmHi BPM 아래로 내려갈수록
+    //  (bpmLo 아래면 다) 다운 스트로크 여섯 줄을 훑는 시간을 박 길이의 soft배(여릴 때, spreadDb.lo dB 이하) ~ loud배(셀 때, spreadDb.hi dB 이상)로,
+    //  그 사이는 dB에 따라 비를 고르게. [min, max]초로 자르고 다음 스트로크까지의 room배를 넘지 않게(박자가 밀리지 않게). 업(위쪽 3~4줄)은 줄 사이를 up배.
+    //  펼쳐 칠 때는 첫 줄을 박에 맞춤(앞당기기는 보통 간격으로). 빠른 곡(bpmHi 이상)은 1.23.0과 같음
+    slowRoll: { on: true, bpmHi: 92, bpmLo: 66, soft: 0.28, loud: 0.09, min: 0.05, max: 0.4, room: 0.7, up: 0.8 },
     //  spreadDb를 끄면 1.15.0까지: 현 사이 간격 × (1.25 − 0.5 × 세기), 다운 0.012(실제 곡 보통 세기 0.7에서 10.8 ms, 여섯 줄 54 ms → 드르륵 느리게 들림)·업 0.008
     // 스트로크 앞당기기(1.15.1, 현 사이 간격 단위): 첫 현을 (lead × 간격)만큼 일찍 쳐서 스트로크 소리가 가장 크게 일어나는 때(중역 온셋 봉우리,
     //  1 ms 간격)가 엔진 스트로크 시각에 오게(음수면 늦춤). 「빙고」 통기타 렌더링(스트로크 따라)에서 앞당기지 않으면 봉우리가 예약 시각보다
@@ -7156,6 +7161,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (s.dir < 0) { const bi = lastLE(TL.beats, s.t0), bl = bi >= 0 && bi + 1 < TL.beats.length ? TL.beats[bi + 1] - TL.beats[bi] : 0.5; s.alone = !prev || prev.dir < 0 || s.t0 - prev.t0 > 0.6 * bl; }
       prev = s;
     }
+    for (let i = 0; i < out.length; i++) out[i].room = i + 1 < out.length ? out[i + 1].t0 - out[i].t0 : Infinity;   // 다음 스트로크까지(느린 곡 펼쳐 치기)
     S.strums = out;
     S.strumT = Float64Array.from(out, s => s.t0);
     S.bounceT = null;                                            // 목록이 바뀌면 튀기 차례를 재생 위치에서 다시 셈
@@ -7180,8 +7186,21 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       gap = (up ? sd.up : sd.down) / (sd.slow * Math.pow(sd.fast / sd.slow, k));
     } else gap = (up ? GUITAR.spreadUp : GUITAR.spreadDown) * (1.25 - 0.5 * (dyn ? s.tone : vel));
     if (s.span && list.length > 1) gap = Math.min(gap, 0.45 * s.span / (list.length - 1));   // 빠른 16분음표에서도 한 칸의 절반 안에 다 침
+    const gap0 = gap, sr = GUITAR.slowRoll;
+    // 느린 곡 펼쳐 치기(1.23.1): 그 자리 박 길이로 템포 비중 w, 셈여림으로 여섯 줄 훑는 시간 → 줄 사이
+    if (sr && sr.on && !s.rake && !kind && list.length > 1 && S.TL && S.TL.beats.length > 1) {
+      const bt = S.TL.beats, i = Math.min(bt.length - 2, Math.max(0, lastLE(bt, s.t0))), bl = bt[i + 1] - bt[i], w = clamp((sr.bpmHi - 60 / bl) / (sr.bpmHi - sr.bpmLo), 0, 1);
+      if (w > 0) {
+        const k = clamp(((dyn ? s.db : 20 * Math.log10(Math.max(vel, 1e-4))) - sd.lo) / (sd.hi - sd.lo), 0, 1);
+        let tot = clamp(bl * sr.soft * Math.pow(sr.loud / sr.soft, k), sr.min, sr.max);
+        if (s.room > 0 && isFinite(s.room)) tot = Math.min(tot, sr.room * s.room);
+        const g = tot / 5 * (up ? sr.up : 1);                                                // 다운 여섯 줄 = 줄 사이 다섯
+        if (g > gap) gap = gap + w * (g - gap);
+      }
+    }
     if (s.rake && list.length > 1) gap = s.rake / (list.length - 1);                         // 느린 긁기(엔진 RAKE): 여섯 줄을 s.rake초에 걸쳐 드르르릉
-    if (!s.rake && GUITAR.lead) when = Math.max(when - (up ? GUITAR.lead.up : GUITAR.lead.down) * gap, ctx.currentTime);   // 스트로크 앞당기기
+    if (!s.rake && GUITAR.lead) when = Math.max(when - (up ? GUITAR.lead.up : GUITAR.lead.down) * gap0, ctx.currentTime);   // 스트로크 앞당기기(보통 간격으로)
+    if (!kind && !s.rake) { S.gapLog.push({ t: s.t0, db: dyn ? s.db : 20 * Math.log10(Math.max(vel, 1e-4)), gap, n: list.length }); if (S.gapLog.length > 4096) S.gapLog.shift(); }   // (시험용) 친 줄 사이
     if (kind) muteN++; else strumN++;
     // 느린 긁기: 울리던 줄을 첫 줄 시각에 막아 한 줄씩 들어오는 소리가 들리게
     if (s.rake && GUITAR.rakeDamp > 0) for (let q = 0; q < 6; q++) {
@@ -7336,19 +7355,19 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   // 시험용: 코드 연주(와 원곡)를 지금 앱과 같은 소리 경로로 오프라인 렌더링해 스테레오 Float32Array 두 개로 돌려줌.
-  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
+  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, slowRoll: 1.23.1 느린 곡 펼쳐 치기 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
   //  piano·guitar·guitarMode를 빼면 지금 상태를 따름
   async function offlineRender(from, dur, opt) {
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
     const oc = new OfflineAudioContext(2, Math.ceil(dur * sr), sr);
     try {
-      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
+      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; if (opt.slowRoll != null) GUITAR.slowRoll.on = !!opt.slowRoll; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
@@ -7371,7 +7390,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
       strumN = saved.strumN; muteN = saved.muteN;
-      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
+      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
@@ -7379,6 +7398,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRender = offlineRender;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
   window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0, fill: !!s.fill }));
+  S.gapLog = [];
+  window.__chordityGaps = () => S.gapLog.splice(0);                                    // (시험용) 통기타가 친 스트로크의 줄 사이·세기 dB(1.23.1 느린 곡 펼쳐 치기)
   window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), res: S.TL.res, bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
   window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '', fill: !!s.fill, vel: s.vels ? Math.max(...s.vels) : null, role: s.role || '' }));   // 피아노 타건(시험용)
 
