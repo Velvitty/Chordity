@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.21.0">v1.21.0</span>
+    <span class="ver" title="Chordity 버전 1.22.0">v1.22.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -5999,6 +5999,15 @@ const Synth = (function () {
     //  ③ 긴 현: 비조화성 × S4.inh, ④ 긴 울림: 기본음 여음 시간 × S4.tauK
     steinway: false,
     S4: { nzDb: 6, nzTau: 0.012, pulseDb: -6, pHi: 0.35, inh: 0.75, tauK: 1.2 },
+    // grand(1.22.0, 사용자: "피아노 소리가 너무 하프시코드 같잖아. 스테인웨이 피아노처럼"): 1.13 스위치가 켜졌을 때 bright3를 대신함.
+    //  실제 스타인웨이(아이오와 MIS 무향실 녹음 C3·C4·C5 mf·ff)와 견주면 1.18~1.21 소리는 4~16 kHz가 20~40 dB 크고, 울림 동안에도 줄지 않으며
+    //  C4의 1~6번 배음이 거의 같은 크기(실제는 기본음이 가장 크고 2~4번이 −7~−21 dB)라 뜯는 현처럼 들렸음
+    //  ① 해머 펠트: 차단 주파수 (fc0 + fcF·f0)(0.55 + 1.1v), 기울기 지수 exp(옥타브당 6·exp dB)
+    //  ② 배음 크기 1/k^kExp(1.13까지 0.55): 기본음 쪽 몸통
+    //  ③ 높은 배음일수록 빨리 줄게: 여음 시간 지수 pexp(1.13 0.6), 즉음 시간은 여음 시간의 tFk배를 넘지 않음(1.13은 0.2초 밑으로 안 내려가 높은 배음이 더 오래 남음)
+    //  ④ 해머 타격음을 낮은 '쿵'으로: 접촉 잡음 nzHp~min(nzLp, fc) Hz·nzDb dB·nzTau초, 힘 펄스(소리판을 거쳐 나무 '똑') pulseDb dB·폭 × pulseW
+    grand: false,
+    G5: { fcK: 1.5, fcMax: 9000, exp: 2.6, fTop: 6000, topExp: 6, kExp: 0.7, fr: 150, pexp: 0.7, tFk: 0.5, pHi: 0.35, nzHp: 400, nzLp: 3000, nzDb: 0, nzTau: 0.01, pulseDb: -4, pulseW: 1.4 },
   };
   const inharm = m => clamp(2.5e-4 * Math.pow(2, (m - 48) / 16), 1e-4, 4e-3);
   // 배음 하나를 만들 때마다 멈출 수 있는 생성기: 화면을 멈추지 않게 나눠서 합성(pianoV2Steps), 한 번에(pianoV2)
@@ -6009,28 +6018,32 @@ const Synth = (function () {
     const D = P.decay2 ? P.D2 : null, A = P.attack2 ? P.A2 : null, T = P.tail2 ? P.T2 : null;
     const n = T ? Math.round(sr * T.lenCap) : Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
     const y = new Float32Array(n);
-    const SW = P.steinway && D && A ? P.S4 : null;
+    const SW = P.steinway && D && A ? P.S4 : null, G = P.grand && D && A ? P.G5 : null;
     const B = inharm(m) * (SW ? SW.inh : 1), fMax = Math.min(0.45 * sr, P.fMax);
     const tau1 = (D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax)) * (SW ? SW.tauK : 1);
     // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음
-    const BR = P.bright3 ? P.B3 : null;
-    const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel) * (BR ? BR.fcK : 1), 700, BR ? BR.fcMax : 9000), hExp = BR ? BR.exp : 2.6;
+    const BR = P.bright3 && !G ? P.B3 : null;
+    const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel) * (G ? G.fcK : BR ? BR.fcK : 1), 700, G ? G.fcMax : BR ? BR.fcMax : 9000);
+    const hExp = G ? G.exp : BR ? BR.exp : 2.6, kExp = G ? G.kExp : 0.55, pexp = G ? G.pexp : D ? D.pexp : 0.75;
     const nStr = m < 32 ? 1 : (m < 44 ? 2 : 3);
     const rnd = lcg(Math.imul(m + 977, 2654435761) >>> 0);
     const det = [];
     for (let q = 0; q < nStr; q++) det.push(q === 0 ? 0 : (rnd() * 2 - 1) * P.cents + (q === 1 ? 0.6 : -0.5));
     const prompt = clamp(0.5 + (m - 60) * 0.006, 0.35, 0.7);     // 즉음 비율: 높은 음일수록 큼
-    const pHi = SW ? SW.pHi : D ? D.pHi : 0;
+    const pHi = G ? G.pHi : SW ? SW.pHi : D ? D.pHi : 0;
     const promptOf = fk => D.pLo + (pHi - D.pLo) * clamp(Math.log(fk / D.pF1) / Math.log(D.pF2 / D.pF1), 0, 1);
     for (let k = 1; k <= P.kMax; k++) {
       const fk = k * f0 * Math.sqrt(1 + B * k * k);
       if (fk > fMax) break;
       const comb = Math.abs(Math.sin(Math.PI * k * P.strikePos));
-      const hammer = 1 / (1 + Math.pow(fk / fc, hExp));
-      let a = (0.08 + comb) * hammer / Math.pow(k, 0.55);
+      const hammer = 1 / (1 + Math.pow(fk / fc, hExp)) / (G ? 1 + Math.pow(fk / G.fTop, G.topExp) : 1);
+      let a = (0.08 + comb) * hammer / Math.pow(k, kExp);
       if (k === 1 && m < 40) a *= 0.55;                            // 저음은 기본음이 약하고 배음이 큼
+      if (G && G.fr) a /= 1 + (G.fr / fk) * (G.fr / fk);          // grand: 소리판이 낮은 부분음을 잘 내보내지 못함(fr Hz 아래 옥타브당 −12 dB)
       if (a < 1e-3) continue;
-      const tS = Math.max(0.1, tau1 * Math.pow(f0 / fk, D ? D.pexp : 0.75)), tF = D ? clamp(tS * D.tF, D.tFmin, D.tFmax) : Math.max(0.04, tS * 0.12);
+      const tS = Math.max(0.1, tau1 * Math.pow(f0 / fk, pexp));
+      let tF = D ? clamp(tS * D.tF, D.tFmin, D.tFmax) : Math.max(0.04, tS * 0.12);
+      if (G) tF = Math.min(tF, tS * G.tFk);
       const pr = D ? promptOf(fk) : prompt;
       const len = Math.min(n, Math.ceil(sr * tS * Math.log(a / 1e-5)));
       const strings = k <= P.multiK ? nStr : 1;
@@ -6063,7 +6076,8 @@ const Synth = (function () {
     }
     edges(y, sr, 1, T ? 0 : 80);
     normalize(y, sr, 0.12);
-    if (A) hammer2(y, sr, m, fc, vel, SW ? Object.assign({}, A, { nzDb: SW.nzDb, nzTau: SW.nzTau, pulseDb: SW.pulseDb }) : A);
+    if (A) hammer2(y, sr, m, fc, vel, G ? Object.assign({}, A, { nzHp: G.nzHp, nzLp: G.nzLp, nzOrd: 2, nzDb: G.nzDb, nzTau: G.nzTau, pulseDb: G.pulseDb, pulseMs: A.pulseMs * G.pulseW, pulseMin: A.pulseMin * G.pulseW, pulseMax: A.pulseMax * G.pulseW })
+      : SW ? Object.assign({}, A, { nzDb: SW.nzDb, nzTau: SW.nzTau, pulseDb: SW.pulseDb }) : A);
     return T ? trimTail(y, sr, T) : y;
   }
   // 해머 타격음(attack2). 크기는 정규화한 음 크기(0.12) 기준 dB, 세기(vel) 0.55에서. 세기가 두 배면 +6 dB
@@ -6073,12 +6087,13 @@ const Synth = (function () {
     const rz = lcg((m * 7919 + 29) >>> 0);
     const nN = Math.min(y.length, Math.round(sr * A.nzTau * 8)), x = new Float32Array(nN);
     const ch = Math.exp(-2 * Math.PI * A.nzHp / sr), cl = Math.exp(-2 * Math.PI * Math.min(A.nzLp, fc * 1.6) / sr);
-    let hp = 0, prev = 0, lp = 0;
+    let hp = 0, prev = 0, lp = 0, lp2 = 0;
     for (let i = 0; i < nN; i++) {
       const w = rz() * 2 - 1;
       hp = ch * (hp + w - prev); prev = w;
       lp = lp * cl + hp * (1 - cl);
-      x[i] = lp * (1 - Math.exp(-i / (sr * A.nzRise))) * Math.exp(-i / (sr * A.nzTau));
+      lp2 = A.nzOrd === 2 ? lp2 * cl + lp * (1 - cl) : lp;          // grand: 저역 통과 두 번(차단 위 옥타브당 −12 dB, 8 kHz 위 '칙' 없앰)
+      x[i] = lp2 * (1 - Math.exp(-i / (sr * A.nzRise))) * Math.exp(-i / (sr * A.nzTau));
     }
     const n5 = Math.min(nN, Math.round(sr * 0.005));
     let e = 0; for (let i = 0; i < n5; i++) e += x[i] * x[i];
@@ -6555,11 +6570,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     sswUp: 12,                    // 피아노 반주(싱어송라이터·개성 있게)의 오른손을 높일 때 이만큼(반음) 위로: 통기타 화음 음역(대개 E2~E4)과 겹치지 않게
     // 1.18.0 스타인웨이 소리(Synth.PIANO2.steinway, 사용자: "피아노 steinway로, 해머링 또렷하게"): 해머 타격음·첫 어택의 높은 부분음을 키우고 긴 현·긴 울림. 끄면 1.17.0 소리
     steinway: true,
-    shelf: { f: 2500, db: 6 },    // 쨍한 소리의 고역 셸프(2.5 kHz 위를 +6 dB)
+    shelf: { f: 2500, db: 6 },    // 쨍한 소리의 고역 셸프(2.5 kHz 위를 +6 dB). grand가 켜지면 쓰지 않음
+    // 1.22.0 그랜드 소리(Synth.PIANO2.grand, 사용자: "피아노 소리가 너무 하프시코드 같잖아. 스테인웨이 피아노처럼"): bright3·고역 셸프 대신
+    //  실제 스타인웨이 녹음의 대역 크기에 맞춘 해머 펠트(1~4 kHz는 밝게, 6 kHz 위는 가파르게 줄임)·기본음 쪽 몸통·낮은 해머 '쿵'. 끄면 1.21.0 소리
+    grand: true,
+    makeupG: 1.26,                // grand 경로 보정 이득: 고역이 줄어 K 가중 크기가 0.9~1.0 dB 작아진 것을 채움(1.21.0과 같은 크기)
     tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
   };
   // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함)
-  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); P2.steinway = !!(on && PIANO.steinway); };
+  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); P2.steinway = !!(on && PIANO.steinway); P2.grand = !!(on && PIANO.grand); };
   syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
@@ -6696,7 +6715,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     return bus;
   }
   const buildPianoChain = out => !PIANO.v2 ? buildChain(out, null, 0.22, PIANO.makeup)
-    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.makeup3, PIANO.room2, PIANO.bright ? PIANO.shelf : null)
+    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.grand ? PIANO.makeupG : PIANO.makeup3, PIANO.room2, PIANO.bright && !PIANO.grand ? PIANO.shelf : null)
     : buildChain(out, Synth.soundboardIR(ctx.sampleRate), 0.22, PIANO.makeup2);
   // 통기타 자체 울림(1.15.0, Synth.GUITAR.selfRes): 음들 → 버스 → 몸통 응답 → (건조음 + 공명현 응답 × sympGain) → 보정 이득 → out. 방 잔향은 없음.
   //  공명현은 곡의 기준음(pianoTune)에 맞춤 → 기준음이 바뀌면 경로를 다시 만듦(곡을 불러올 때)
@@ -6733,6 +6752,110 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
     return { notes: [bass].concat(best.notes), cen: best.cen };
   }
+  // 1.22.0 악기 밀도(사용자: "1 1/2 1/4 빠르기를 설정하라고 한 이유는 악기 밀도 때문이야 … 두 배 빠르게 했을 때 악기가 더 많이 연주되고, 네 배 더 많이 연주되고"):
+  //  코드 변화 단위가 1박 → ½박 → ¼박(셋잇단 곡 1박 → ⅓박 → ⅙박)으로 갈수록 피아노 타건·통기타 스트로크가 1 → 2 → 4배(셋잇단 1 → 3 → 6배).
+  //  치는 곳 수(50 ms 안 타건과 한 화음을 굴린 음들(grp)은 한 곳으로 셈)를 N(고른 방식이 만든 수)이라 하면
+  //  · 1박: 박 위(박자 세기 2 이상: 마디 첫 박 4, 마디 가운데 박 3, 박 2 / 작은박 1, 그 밖 0)와 코드가 바뀌는 곳·느린 긁기만 남김 → N1곳.
+  //    뺀 타건이 같은 코드였으면 앞 타건을 그 끝까지 울림(빈 틈 없게)
+  //  · 작은박(기본 ½·⅓박): max(N, TL.subRes × N1)곳. 박 위에서만 치는 방식(곡 따라·박마다·4비트 등)은 박 사이를 채워 1박의 두(셋) 배, 박 사이도 치는 방식은 그대로
+  //  · 더 작은박(¼·⅙박): 작은박 수의 두 배
+  //  채우기: 이웃한 두 묶음 사이 빈 곳 가운데 가장 긴 것(TL.res 격자 칸 수, 같으면 앞)부터 가운데(격자에 맞춤)에 하나씩, 격자 두 칸보다 짧은 빈 곳은 나누지 않음
+  //    (마지막 묶음 뒤 곡 끝 울림은 채우지 않음).
+  //    더한 것은 fill(조금 여리게): 피아노는 앞 타건 음을 화음으로 다시(한 음이면 다음 음과의 사이 코드 음), 통기타는 격자 진자 규칙(짝수 칸 다운·홀수 칸 업).
+  //    빈 곳 앞 코드가 끝나는 곳을 넘지 않고, 느린 긁기 뒤는 채우지 않음. 그래서 촘촘한 꼴(16분음표가 이미 많은 곳)은 두 배에 못 미칠 수 있음
+  //  곡에 맞춰 치는 방식만(피아노 곡 따라·싱어송라이터·개성 있게, 통기타 싱어송라이터·스트로크 따라: DENS_P·DENS_G). 이름이 곧 리듬인 방식
+  //  (코드가 바뀔 때·마디마다·박마다, 4·8·16비트·스윙)은 그대로
+  //  (시험용) 페이지가 열리기 전에 window.__chordityDensOff = true면 끔: 방식마다 꼴을 1박 단위에서 보는 시험(e2e-guitar)
+  const DENS = { on: !window.__chordityDensOff, tie: 0.05, tol: 0.08, fillVel: 0.75, fillDb: -2.5 };
+  const DENS_P = ['song', 'ssw', 'flair'], DENS_G = ['ssw', 'strum'];
+  const densF = TL => DENS.on && TL && !TL.empty && TL.subRes ? TL.res / TL.subRes : 1;
+  // 시각 → 박 좌표(박 번호 + 박 안 자리)와 그 반대
+  const beatX = (TL, t) => { const b = TL.beats, i = Math.min(b.length - 2, Math.max(0, lastLE(b, t + 1e-4))); return i + (t - b[i]) / (b[i + 1] - b[i]); };
+  const beatT = (TL, x) => { const b = TL.beats, i = Math.min(b.length - 2, Math.max(0, Math.floor(x))); return b[i] + (x - i) * (b[i + 1] - b[i]); };
+  // 박자 세기: 마디 첫 박 4, 마디 가운데 박(박 수가 짝수일 때) 3, 박 2, 작은박(1/subRes 자리) 1, 그 밖 0
+  function beatStrength(TL, x) {
+    const i = Math.floor(x + DENS.tol), fr = x - i;
+    if (Math.abs(fr) <= DENS.tol) {
+      const bar = TL.bars[TL.barOfBeat[Math.min(TL.beats.length - 1, Math.max(0, i))]];
+      if (!bar) return 2;
+      const j = i - bar.startBeat;
+      return j === 0 || j >= bar.nBeats ? 4 : bar.nBeats % 2 === 0 && j === bar.nBeats / 2 ? 3 : 2;
+    }
+    const u = fr * TL.subRes; return Math.abs(u - Math.round(u)) <= DENS.tol * TL.subRes ? 1 : 0;
+  }
+  // list(시각 차례, t0·t1·g)를 단위에 맞춰 줄이거나 채움. fill(a, b, t, x, te)는 묶음 a 뒤(b는 그 빈 곳 끝 묶음), 시각 t(박 좌표 x)에 넣을 항목(못 넣으면 null), te는 빈 곳 끝 시각
+  function densify(list, TL, fill) {
+    if (!DENS.on || !TL || TL.empty || !TL.subRes || list.length < 2) return list;
+    const units = [];
+    for (const s of list) {
+      const u = units[units.length - 1], z = u && u.items[u.items.length - 1];
+      if (z && (s.t0 - z.t0 < DENS.tie || (s.grp != null && s.grp === z.grp))) u.items.push(s); else units.push({ t: s.t0, items: [s] });
+    }
+    const keyOf = a => a.mute ? 'M' : a.g ? a.g.key : '';
+    units.forEach((u, k) => {
+      u.x = beatX(TL, u.t); u.str = beatStrength(TL, u.x); u.key = keyOf(u.items[0]);
+      u.must = !k || u.key !== units[k - 1].key || u.items.some(s => s.rake);
+    });
+    // 1박에 남길 묶음: 박 위(세기 2 이상)와 꼭 칠 곳(첫 묶음·코드가 바뀌는 곳·느린 긁기)
+    for (const u of units) u.keep1 = u.must || u.str >= 2;
+    const n1 = units.filter(u => u.keep1).length;
+    if (TL.res === 1) {
+      const out = []; let keep = null;
+      for (const u of units) {
+        if (u.keep1) { keep = u; out.push(...u.items); continue; }
+        if (keep && keep.key === u.key) { const e = Math.max(...u.items.map(s => s.t1)); for (const s of keep.items) s.t1 = Math.max(s.t1, e); }
+      }
+      return out;
+    }
+    const target = Math.max(units.length, TL.subRes * n1) * (TL.res > TL.subRes ? 2 : 1);
+    if (target <= units.length) return list;
+    // 빈 곳 더미(가장 긴 것 먼저, 같으면 앞): [칸 수, x0, x1, 앞 항목들, 끝 묶음 항목들]
+    const R = TL.res, heap = [], less = (p, q) => p[0] > q[0] + 1e-9 || (Math.abs(p[0] - q[0]) <= 1e-9 && p[1] < q[1]);
+    const push = g => { heap.push(g); let i = heap.length - 1; while (i) { const j = (i - 1) >> 1; if (!less(heap[i], heap[j])) break; [heap[i], heap[j]] = [heap[j], heap[i]]; i = j; } };
+    const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && less(heap[l], heap[m])) m = l; if (r < heap.length && less(heap[r], heap[m])) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
+    // 마지막 묶음 뒤(곡의 끝 코드 울림·끝 굴림)는 채우지 않음
+    units.forEach((u, k) => {
+      const nx = units[k + 1];
+      if (!nx || u.items.some(s => s.rake)) return;
+      push([(nx.x - u.x) * R, u.x, nx.x, u.items, nx.items]);
+    });
+    const add = [];
+    while (units.length + add.length < target && heap.length) {
+      const [L, x0, x1, a, b] = pop();
+      if (L < 2 - 1e-6) break;
+      let xm = Math.round((x0 + x1) / 2 * R) / R;
+      if (xm - x0 < 1 / R - 1e-6) xm += 1 / R; else if (x1 - xm < 1 / R - 1e-6) xm -= 1 / R;
+      if (xm - x0 < 1 / R - 1e-6 || x1 - xm < 1 / R - 1e-6) continue;
+      const it = fill(a, b, beatT(TL, xm), xm, beatT(TL, x1));
+      if (!it) continue;
+      it.fill = true; add.push(it);
+      push([(xm - x0) * R, x0, xm, a, [it]]); push([(x1 - xm) * R, xm, x1, [it], b]);
+    }
+    add.sort((p, q) => p.t0 - q.t0);
+    const out = []; let j = 0;
+    for (const s of list) { while (j < add.length && add[j].t0 < s.t0) out.push(add[j++]); out.push(s); }
+    while (j < add.length) out.push(add[j++]);
+    return out;
+  }
+  // 피아노 밀도 채우기: 앞 묶음 음을 한 번에(화음, 셈여림 DENS.fillVel배). 한 음(펼침·베이스)이면 다음 묶음도 한 음일 때 두 음 사이 코드 음(사다리), 없으면 사다리 한 칸 위
+  //  울림은 빈 곳 끝(te)까지, 그 코드가 끝나는 곳(앞 타건 끝과 코드 구간 끝 가운데 늦은 쪽)을 넘지 않음. 그 뒤면 넣지 않음
+  function pianoFill(a, b, t, x, te) {
+    const s0 = a[0], a1 = Math.max(...a.map(s => s.t1)), end = Math.max(a1, s0.g ? s0.g.t1 : 0);
+    if (t > end - 0.03) return null;
+    const notes = [...new Set(a.flatMap(s => s.notes))].sort((x, y) => x - y);
+    const vOf = m => { for (const s of a) { const k = s.notes.indexOf(m); if (k >= 0) return s.vels ? s.vels[k] : null; } return null; };
+    // 곡 따라·코드가 바뀔 때·마디마다·박마다(vels 없음)는 playChord 기본 세기(베이스 0.62, 오른손 0.5·√(3/음 수))의 DENS.fillVel배
+    let ns = notes, vs = s0.vels ? notes.map(m => DENS.fillVel * (vOf(m) || 0.5)) : notes.map((m, i) => DENS.fillVel * (i === 0 ? 0.62 : 0.5 * Math.sqrt(3 / Math.max(1, notes.length - 1))));
+    if (notes.length === 1 && s0.lad) {
+      const m0 = notes[0], m1 = b && b.length === 1 && b[0].notes.length === 1 && b[0].g === s0.g ? b[0].notes[0] : null, lad = s0.lad;
+      const lo = Math.min(m0, m1 == null ? m0 : m1), hi = Math.max(m0, m1 == null ? m0 : m1);
+      let pick = m1 != null ? lad.filter(m => m > lo && m < hi).sort((x, y) => Math.abs(x - (lo + hi) / 2) - Math.abs(y - (lo + hi) / 2))[0] : null;
+      if (pick == null) pick = lad.find(m => m > m0 && m !== m1);
+      if (pick == null) pick = m0;
+      ns = [pick]; vs = [DENS.fillVel * (vOf(m0) || 0.5)];
+    }
+    return { t0: t, t1: Math.max(t + 0.05, Math.min(end, Math.max(te, a1))), g: s0.g, notes: ns, vels: vs, comp: s0.comp, lad: s0.lad };
+  }
   // 타임라인 → 타건 목록. 피아노 모드: song(곡 따라), change(코드가 바뀔 때), bar(마디마다 다시), beat(박마다).
   //  통기타는 스트로크 따라: 원곡에서 친 리듬(엔진 Engine.strokes)대로 다운·업 스트로크
   function buildStrikes() {
@@ -6768,9 +6891,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         else if (e.part === 'R') { notes = rh; vels = rh.map(() => r0); }
         else { const lad = [bass].concat(rh0, rh0.map(m => m + 12)); if (e.k >= lad.length) continue; const m0 = lad[e.k]; notes = [e.k > 0 && up ? m0 + up : m0]; vels = [(e.k === 0 ? 0.62 : 0.5) * e.v / 0.6]; }
         // 굴림(e.roll초): 아래 음부터 한 음씩
-        if (e.roll > 0 && notes.length > 1) notes.forEach((m, q) => out.push({ t0: e.t + q * e.roll, t1: e.end, g, notes: [m], vels: [vels[q]], comp: e.part }));
-        else out.push({ t0: e.t, t1: e.end, g, notes, vels, comp: e.part });
+        const lad = [bass].concat(rh, rh.map(m => m + 12)).filter(m => m <= 96);   // 밀도 채우기(densify)에서 한 음 사이 코드 음을 고를 사다리
+        if (e.roll > 0 && notes.length > 1) { const grp = out.length; notes.forEach((m, q) => out.push({ t0: e.t + q * e.roll, t1: e.end, g, notes: [m], vels: [vels[q]], comp: e.part, lad, grp })); }
+        else out.push({ t0: e.t, t1: e.end, g, notes, vels, comp: e.part, lad });
       }
+      out.splice(0, out.length, ...densify(out, TL, pianoFill));   // ssw·flair는 늘 밀도 조절(DENS_P)
+      S.densP = DENS.on;
       S.strikes = out;
       S.strikeT = Float64Array.from(out, s => s.t0);
       return;
@@ -6804,6 +6930,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       }
       s.notes = lastNotes;
     }
+    S.densP = DENS.on && DENS_P.includes(mode);
+    if (S.densP) { const dense = densify(out, TL, pianoFill); out.splice(0, out.length, ...dense); }
     S.strikes = out;
     S.strikeT = Float64Array.from(out, s => s.t0);
   }
@@ -6857,6 +6985,19 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       }
       out.push({ t0: t, t1: Math.max(t + 0.05, t1), g, dir: st[i].dir, vel: st[i].vel, db: st[i].db, tone: st[i].tone, acc: st[i].acc, span: st[i].span, rake: st[i].rake || 0, strings: Synth.guitarVoicing(g.pcs, g.bassPc) });
     }
+    // 1.22.0 악기 밀도(densify): 채우는 스트로크는 격자 진자 규칙으로 방향, 셈여림 DENS.fillDb dB(세기 DENS.fillVel배), 칸 길이 span.
+    //  앞이 코드 스트로크면 그 운지로 그 코드 끝까지, 뮤트면 같은 뮤트(다음 스트로크까지), 처크(코드 구간 2·4박 뮤트)면 그 앞 코드 스트로크의 운지로
+    const prevChord = new Map(); { let pc = null; for (const x of out) { if (!x.mute) pc = x; prevChord.set(x, pc); } }
+    const fillG = (a, b, t, x, te) => {
+      const s = a[a.length - 1], R = TL.res, slot = ((Math.round(x * R) % R) + R) % R, bi = Math.min(TL.beats.length - 2, Math.max(0, Math.floor(x)));
+      const base = { t0: t, dir: slot % 2 ? -1 : 1, vel: s.vel != null ? s.vel * DENS.fillVel : s.vel, db: typeof s.db === 'number' ? s.db + DENS.fillDb : s.db, tone: s.tone, acc: false, span: (TL.beats[bi + 1] - TL.beats[bi]) / R, rake: 0 };
+      if (s.mute && !s.chuck) return Object.assign(base, { t1: Math.max(t + 0.05, Math.min(te, t + GUITAR.muteRing)), mute: s.mute, chuck: false, pc: s.pc, strings: s.strings });
+      const c = s.mute ? prevChord.get(s) : s;                   // 채운 스트로크(prevChord에 없음)는 코드든 뮤트든 위에서 처리됨
+      if (!c || t > c.t1 - 0.03) return null;
+      return Object.assign(base, { t1: c.t1, g: c.g, strings: c.strings });
+    };
+    S.densG = DENS.on && DENS_G.includes(gm); S.densGx = false;
+    if (S.densG) { const d = densify(out, TL, fillG); S.densGx = d.length !== out.length; out.splice(0, out.length, ...d); }   // densGx: 밀도로 수가 바뀜(미리 정한 꼴 대신 실제 꼴을 보임)
     for (const s of out) s.notes = s.strings.map(x => x.m);
     // 따로 나오는 업(GUITAR.upAlone): 앞 코드 스트로크가 업이거나 박 길이의 0.6배보다 먼저 쳤으면
     for (let i = 0, prev = null; i < out.length; i++) {
@@ -7042,19 +7183,19 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   // 시험용: 코드 연주(와 원곡)를 지금 앱과 같은 소리 경로로 오프라인 렌더링해 스테레오 Float32Array 두 개로 돌려줌.
-  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
+  //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
   //  piano·guitar·guitarMode를 빼면 지금 상태를 따름
   async function offlineRender(from, dur, opt) {
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
     const oc = new OfflineAudioContext(2, Math.ceil(dur * sr), sr);
     try {
-      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
+      ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
@@ -7077,16 +7218,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
       strumN = saved.strumN; muteN = saved.muteN;
-      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
+      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
   }
   window.__chordityRender = offlineRender;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
-  window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0 }));
+  window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0, fill: !!s.fill }));
   window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), res: S.TL.res, bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
-  window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '' }));   // 피아노 타건(시험용)
+  window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '', fill: !!s.fill }));   // 피아노 타건(시험용)
 
   // ---------------- 재생기 + 메트로놈 스케줄러 ----------------
   // 클릭은 setInterval 타이밍이 아니라 AudioContext 시계에 미리(200 ms 앞) 예약한다.
@@ -7542,7 +7683,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     chart.classList.toggle('gm', on);
     for (const be of S.barEls) if (be && be.gm) be.gm.textContent = '';
     if (!on) return;
-    const b = TL.beats, nb = b.length, D = TL.meter.triple ? 3 : 4, snap = guitarMode() === 'strum';
+    const b = TL.beats, nb = b.length, D = TL.res === 6 && S.densG ? 6 : TL.meter.triple ? 3 : 4, snap = guitarMode() === 'strum' || (S.densG && densF(TL) > 1);
     // 시각 → 박 좌표(박 번호 + 박 안 자리)
     const beatPos = t => {
       let i = Math.min(nb - 2, Math.max(0, lastLE(b, t + 0.03)));
@@ -8123,7 +8264,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       + ' 다시 잡음 (' + l43.curBpm.toFixed(1) + ' → ' + l43.toBpm.toFixed(1) + ' BPM' + (l43.flip ? ', 스네어 자리로 반 박 옮김' : '') + ')' : '그대로 유지']);
     if (!TL.empty) {
       rows.push(['박 세분', TL.sub.triple ? '3분할 (셋잇단, 복합박자)' : '2분할']);
-      rows.push(['코드 변화 단위', ({ 2: '½박', 3: '⅓박', 4: '¼박', 6: '⅙박' })[TL.res] || '1박']);
+      // 1.22.0: 단위가 곧 악기 밀도(1박 대비 TL.res배, densify)
+      rows.push(['코드 변화 단위', (({ 2: '½박', 3: '⅓박', 4: '¼박', 6: '⅙박' })[TL.res] || '1박') + ((S.densP || S.densG) && TL.res > 1 ? '(악기 밀도 1박의 ' + TL.res + '배)' : '')]);
       // 연주 자동(엔진 autoModes): 고른 방식과 원곡 리듬 값(직접 고른 방식이면 그렇다고)
       if (S.auto) {
         const a = S.auto, pc = x => Math.round(x * 100) + '%';
@@ -8150,7 +8292,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       rows.push(['비트 수', String(TL.beats.length)]);
       // 통기타 4·8·16비트: 묶음(보통 한 마디)마다 고른 스트럼 패턴을 많이 쓴 순으로(↓ 다운, ↑ 업, · 쉼)
       const topPats = (list, show) => list.slice(0, 4).map(([p, n]) => show(p) + ' ' + n + '번').join(', ') + (list.length > 4 ? ' 외 ' + (list.length - 4) + '가지' : '');
-      if (S.strumPlan && S.strumPlan.length) {
+      if (S.strumPlan && S.strumPlan.length && !S.densGx) {
         const cnt = new Map(); for (const x of S.strumPlan) cnt.set(x.pat, (cnt.get(x.pat) || 0) + 1);
         // 1.21.0(사용자: "스트로크 빈곳에 ✗넣기"): 치지 않는 칸은 ✗(헛스트로크), 그래서 뮤트·처크는 ×에서 M(차트의 뮤트 꺾쇠 글자)으로
         const sym = p => p.replace(/D/g, '↓').replace(/U/g, '↑').replace(/-/g, '✗').replace(/x/g, 'M');
@@ -8196,12 +8338,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
 
   const PM_LONG = { song: '곡 따라', change: '코드가 바뀔 때', bar: '마디마다 다시', beat: '박마다', ssw: '싱어송라이터', flair: '개성 있게' };
-  // 마디마다 친 자리 꼴(분석 정보의 통기타 스트럼·피아노 패턴): items [{t}]를 박 칸(4칸, 겹박자 3칸)에 넣고 symOf(그 칸의 items) → 글자, 빈 칸 '·'.
+  // 마디마다 친 자리 꼴(분석 정보의 통기타 스트럼·피아노 패턴): items [{t}]를 박 칸(4칸, 겹박자 3칸, ⅙박 단위 6칸)에 넣고 symOf(그 칸의 items) → 글자, 빈 칸 '·'.
   //  주 박자의 코드 마디만(못갖춘마디·N.C. 마디 빼고). 4칸 격자에서 16분 엇박 칸을 한 번도 안 쓰면 8분 격자로 줄임(박 사이 띄움 없음, 4·8·16비트와 같은 꼴),
   //  16분·셋잇단 격자는 박마다 띄움. 빈 칸 글자는 empty(통기타는 ✗). 돌려줌 [[꼴, 마디 수]] 많이 쓴 순
   function barPatterns(items, symOf, empty = '·') {
     const TL = S.TL; if (!TL || TL.empty) return [];
-    const b = TL.beats, nb = b.length, R = TL.meter.triple ? 3 : 4, m = TL.meter.m, cells = new Map();
+    const b = TL.beats, nb = b.length, R = TL.res === 6 ? 6 : TL.meter.triple ? 3 : 4, m = TL.meter.m, cells = new Map();
     for (const it of items) {
       let i = Math.min(nb - 2, Math.max(0, lastLE(b, it.t + 0.03))), j = Math.round((it.t - b[i]) / (b[i + 1] - b[i]) * R);
       if (j >= R) { i++; j = 0; }
