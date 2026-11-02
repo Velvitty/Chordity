@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.23.2">v1.23.2</span>
+    <span class="ver" title="Chordity 버전 1.23.3">v1.23.3</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -2619,6 +2619,9 @@ const Engine = (function () {
     // 피아노 반주(1.19.0, pianoComp): 느린 곡 기준 PC_SLOW BPM(개성 있게는 늘 펼침, 싱어송라이터는 스탭을 PC_RROLL초 간격으로 굴림),
     //  끝 코드 굴리기 간격 박의 ¼을 [PC_ROLL, PC_ROLLMAX]초로, 통기타와 겹침으로 보는 거리 PC_TOL박
     PC_SLOW: 90, PC_ROLL: 0.06, PC_ROLLMAX: 0.12, PC_TOL: 0.06, PC_RROLL: 0.03,
+    // 1.23.3(사용자: "피아노가 그래도 하프시코드같아"): 끝 코드 일곱 음을 0.36~0.72초에 걸쳐 고르게 굴리던 하프 같은 펼침을 피아노답게 빠르게(간격 박의 ¼을 [PC_ROLL2, PC_ROLLMAX2]초로 자름:
+    //  박이 0.14초보다 길면(428 BPM 아래, 곧 모든 곡) 늘 0.035초 → 일곱 음 0.21초). 끄면 1.23.2와 같음
+    PC_EROLL: true, PC_ROLL2: 0.025, PC_ROLLMAX2: 0.035,
     // 피아노 왼손(1.23.0, 사용자: "피아노 왼손(저음~중음) 활용, 어떤 패턴을 골라도 전반적으로 너무 단조로움"): 마디마다 왼손 꼴(pianoLH)을 골라
     //  베이스 한 음 대신 저음~중음을 움직이고, 구간이 다시 나오면 다른 꼴·구절 끝 경과음·펼침 모양 바꾸기로 단조로움을 줄임. 끄면 1.22.0과 같음
     //  PC_FAST BPM 이상은 8분 꼴을 4분 꼴로, PC_BALLAD BPM 아래는 4분 펼침을 8분 펼침으로
@@ -5785,7 +5788,7 @@ const Engine = (function () {
   //   스탭 꼴은 4마디 구절(같은 수준)마다 하나, 느린 곡(PC_SLOW BPM 아래)의 스탭은 PC_RROLL초 간격으로 살짝 굴림, 4마디 구절 끝 박 &에 위로 두 음 픽업
   //  'flair' 개성 있게: 수준 2 이하나 느린 곡은 8분 펼침(겹박자는 박마다 셋), 3은 왼손 1·3박 + 오른손 펼침(110 BPM 이상 4분, 아래 8분, 한 옥타브 위),
   //   4는 왼손 옥타브 + 오른손 스탭(한 옥타브 위), 4마디 구절 끝 박은 위로 올라가는 16분 런(수준 2 이상)
-  //  곡의 끝 코드는 두 방식 모두 아래에서 위로 한 음씩 굴림(간격 박의 ¼, PC_ROLL~PC_ROLLMAX초). N.C.와 마지막 코드 뒤로는 치지 않음.
+  //  곡의 끝 코드는 두 방식 모두 아래에서 위로 한 음씩 굴림(간격 박의 ¼, PC_ROLL~PC_ROLLMAX초, 1.23.3부터 PC_ROLL2~PC_ROLLMAX2초). N.C.와 마지막 코드 뒤로는 치지 않음.
   //  돌려줌: [{ t, end, part('F' 베이스+화음, 'B' 베이스, 'O' 베이스 옥타브, 'R' 오른손 화음, 'A' 사다리 음, 'L' 왼손(1.23.0, role·dn)), k, v(세기 비), hi(0·1), roll(초, 화음을 굴리는 간격) }]
   //  1.23.0(PC_LH): B·O·F의 베이스 대신 왼손 꼴(pianoLH), 펼침은 구절마다 쓸어 올림·나눔과 모양을 돌려 씀
   function pianoComp(A, TL, mode, opt) {
@@ -5880,11 +5883,11 @@ const Engine = (function () {
       for (const e of lh) { const c = chordAt(e.x); out.push({ x: e.x, part: 'L', k: 0, v: clamp(e.v, 0.2, 1), hi: 0, roll: 0, endX: e.endX, role: e.role, dn: e.dn, L: c ? lev[c.bi] : 3 }); }
       out.sort((a, b) => a.x - b.x);
     }
-    // 곡의 끝 코드: 그 뒤 음은 빼고, 아래에서 위로 한 음씩 굴림(간격 박의 ¼, PC_ROLL~PC_ROLLMAX초)
+    // 곡의 끝 코드: 그 뒤 음은 빼고, 아래에서 위로 한 음씩 굴림(간격 박의 ¼, PC_ROLL~PC_ROLLMAX초, 1.23.3 PC_EROLL이면 PC_ROLL2~PC_ROLLMAX2초 — 실제 곡에서는 늘 PC_ROLLMAX2)
     let res = out;
     if (isFinite(lastOn)) {
       res = out.filter(o => o.x < lastOn - 1e-6);
-      const e = chordAt(lastOn), gap = clamp(bl(lastOn) / 4, P.PC_ROLL, P.PC_ROLLMAX);
+      const e = chordAt(lastOn), gap = P.PC_EROLL ? clamp(bl(lastOn) / 4, P.PC_ROLL2, P.PC_ROLLMAX2) : clamp(bl(lastOn) / 4, P.PC_ROLL, P.PC_ROLLMAX);
       for (let k = 0; k <= 6; k++) res.push({ x: lastOn, part: 'A', k, v: 0.6, hi: 0, roll: 0, endX: e.x1, dt: k * gap, L: lev[e.bi] });
     }
     for (const o of res) { o.t = tAt(o.x) + (o.dt || 0); o.end = Math.max(o.t + 0.05, tAt(o.endX)); delete o.endX; delete o.x; delete o.dt; }
@@ -6083,7 +6086,11 @@ const Synth = (function () {
     // tail2: 정해 둔 버퍼 길이(2.8~6.5초, 끝에서 80 ms 페이드: 그때 아직 음 크기의 −12~−34 dB) 대신
     //  소리가 floorDb(정규화 크기 기준)까지 줄어든 곳에서 fade초 동안 끝냄(길어야 lenCap초)
     tail2: false,
-    T2: { floorDb: -45, lenCap: 8, fade: 0.15 },
+    //  lenCapG2(1.23.3 검토 뒤): grand2면 14초. grand2·wound로 저음이 길게 울려(앱 설정 bright3·steinway·grand·grand2·wound, 세기 0.55) 88건반 중 55음이
+    //   8초 한도에 닿고 그때 아직 −28~−32 dB(0.1~0.4초 기준, A0~G2)였음 → 한 번 쳐서 8초 넘게 누르면(끝 코드, 같은 코드가 마디를 넘어 이어질 때 페달)
+    //   0.15초 만에 끊겨 댐퍼가 일찍 내려온 듯했음. 14초면 C2(−43.5 dB, 거의 floorDb) 하나만 닿고 나머지는 floorDb에서 저절로 끝남(12초면 아직 −39~−42 dB).
+    //   88건반 버퍼 합 126 → 157 MB(48 kHz, 곡은 그 일부), 88건반 합성 시간 약 +40%. 7.85초 앞의 표본은 같음. grand2를 끄면 8초 그대로
+    T2: { floorDb: -45, lenCap: 8, fade: 0.15, lenCapG2: 14 },
     // bright3(1.16.1): 더 쨍한 소리. 해머 펠트 저역 통과의 차단 주파수를 fcK배(위 끝 fcMax Hz)로, 차단 위 기울기 지수를 exp로(1.13까지 1배·9 kHz·2.6)
     bright3: false,
     B3: { fcK: 2.5, fcMax: 14000, exp: 2.6 },
@@ -6096,58 +6103,136 @@ const Synth = (function () {
     // grand(1.22.0, 사용자: "피아노 소리가 너무 하프시코드 같잖아. 스테인웨이 피아노처럼"): 1.13 스위치가 켜졌을 때 bright3를 대신함.
     //  실제 스타인웨이(아이오와 MIS 무향실 녹음 C3·C4·C5 mf·ff)와 견주면 1.18~1.21 소리는 4~16 kHz가 20~40 dB 크고, 울림 동안에도 줄지 않으며
     //  C4의 1~6번 배음이 거의 같은 크기(실제는 기본음이 가장 크고 2~4번이 −7~−21 dB)라 뜯는 현처럼 들렸음
-    //  ① 해머 펠트: 차단 주파수 (fc0 + fcF·f0)(0.55 + 1.1v), 기울기 지수 exp(옥타브당 6·exp dB)
-    //  ② 배음 크기 1/k^kExp(1.13까지 0.55): 기본음 쪽 몸통
+    //  ① 해머 펠트: 차단 주파수 (900 + 9·f0)(0.55 + 1.1v) × fcK(fcMax Hz까지), 기울기 지수 exp(옥타브당 6·exp dB), fTop Hz 위는 topExp로 가파르게 줄임
+    //  ② 배음 크기 1/k^kExp(1.13까지 0.55): 기본음 쪽 몸통, fr Hz 아래 부분음은 소리판이 잘 내보내지 못함
     //  ③ 높은 배음일수록 빨리 줄게: 여음 시간 지수 pexp(1.13 0.6), 즉음 시간은 여음 시간의 tFk배를 넘지 않음(1.13은 0.2초 밑으로 안 내려가 높은 배음이 더 오래 남음)
     //  ④ 해머 타격음을 낮은 '쿵'으로: 접촉 잡음 nzHp~min(nzLp, fc) Hz·nzDb dB·nzTau초, 힘 펄스(소리판을 거쳐 나무 '똑') pulseDb dB·폭 × pulseW
     grand: false,
     G5: { fcK: 1.5, fcMax: 9000, exp: 2.6, fTop: 6000, topExp: 6, kExp: 0.7, fr: 150, pexp: 0.7, tFk: 0.5, pHi: 0.35, nzHp: 400, nzLp: 3000, nzDb: 0, nzTau: 0.01, pulseDb: -4, pulseW: 1.4 },
+    // grand2(1.23.3, 사용자: "피아노가 그래도 하프시코드같아"): grand가 켜졌을 때 그 위에서. 아이오와 스타인웨이 mf 22음·ff 11음(C2~E♭6, 좌우 마이크를 따로 잼)과
+    //  견주면 1.22.0 소리는 ⓐ 해머 펠트 차단이 음이 높을수록 올라가(C4 5.6 kHz, C5 위 9 kHz) 높은 음에도 배음 5~10개가 크게 남고(C4 위 5~16번 배음이 20~45 dB 큼),
+    //  ⓑ 타격 위치 빗살이 2~4번 배음을 기본음보다 키워(C4 날 소리 1~4번 −2 0 0 −1 dB, 실제 0 −7 −17 −19) 뜯는 현처럼, ⓒ 현 소리가 0 ms에 다 올라오고
+    //  2~12 kHz '틱'이 앞에 붙어 뜯는 첫 소리, ⓓ 높은 음이 고르게 길게 울리고(실제는 '땅' 하고 금방 줄어든 뒤 여음), 기본음에 맥놀이가 없었음
+    //  ① 배음 모양: 펠트 차단 fh = min(fhMax, fh0·2^(−(m−60)/fhOct))·(0.55 + 1.1v)/1.155 Hz(음이 높을수록 내려감, 옥타브당 6·fhExp dB)와 G5의 fTop 위 가파른 줄임,
+    //     배음 기울기 1/k^ke(ke = max(0, kExp + kS·(m−60)/12): C4 0.1, C5 0.9, C6 1.7), E3 위 기본음 × (1 + b1·clamp((m − b1m)/8, 0, 1)),
+    //     저음 기본음 × 0.55는 뺌(실제 녹음에 맞춤). 건너뛰기·길이 기준은 가장 큰 배음에 대한 비(aMin·lenRel: 높은 음 배음이 작아져도 음이 사라지지 않게)
+    //  ② 첫 소리: 현 소리가 riseMs ms 시정수로 올라옴, 해머 잡음은 nzHp~nzLp Hz 낮은 '쿵'(nzDb dB, nzDbM 위로 반음당 nzDbS dB 작게, nzTau초), 힘 펄스 pulseDb dB
+    //  ③ 감쇠: 높은 배음 여음 지수 pexp, 즉음 비율 위 끝 pHi(+ 반음당 prM(C4 밑은 prMlo)·(m − 60), prCap 반음까지), 즉음 시간 clamp(여음 × tFr, tFmin, D2.tFmax)
+    //  ④ 비조화성: 실제 부분음 주파수에 맞춤 B = clamp(max(iFloor, iB48·2^((m−48)/iOct)), 1e-4, iMax)(1.22.0은 16반음마다 두 배 × 0.75)
+    //  ⑤ 맥놀이: 현 사이를 ±dHz Hz(× 1 ± dVar/2) 더 벌림, G3(dm0) 위로 dmw0반음에 걸쳐 늘고 E5(dm1) 아래로 dmw1반음에 걸쳐 줄어듦(기본음이 두 단계로 줄며 맥놀이)
+    //  소리판은 SOUNDBOARD.v3와 함께 씀(배음 모양을 v3를 거친 소리로 맞춤). 끄면 1.23.2와 샘플 단위로 같음
+    grand2: false,
+    G6: { fh0: 1300, fhOct: 30, fhMax: 2000, fhExp: 3, kExp: 0.1, kS: 0.8, b1: 0.2, b1m: 52, aMin: 3e-4, lenRel: 3e-5,
+      riseMs: 5, nzHp: 200, nzLp: 800, nzDb: -12, nzDbS: 0.5, nzDbM: 64, nzTau: 0.05, pulseDb: -10,
+      pexp: 0.45, pHi: 0.55, prM: 0.016, prMlo: 0.006, prCap: 16, tFr: 0.08, tFmin: 0.15,
+      iFloor: 1.2e-4, iB48: 1.16e-4, iOct: 8, iMax: 8e-3, dHz: 0.2, dVar: 0.6, dm0: 55, dmw0: 7, dm1: 76, dmw1: 8,
+      // soft(1.23.3, 사용자: "피아노 쨍하게 빼" → 비교 샘플 A(지금 소리)·B(덜 쨍하게)·C(많이 덜 쨍하게)를 듣고 "B로 하자"): 켜면 S6가 위 값을 덮음.
+      //  첫 50 ms의 1~2·2~4 kHz가 실제 mf보다 7 dB 커서(mf와 ff 사이) 펠트 차단을 1300 → 1000 Hz로 내리고(C4 첫 50 ms 1~2 kHz −10 → −13 dB, 2~4 kHz −31 → −36 dB,
+      //  실제 mf −17·−38) 높은 배음의 즉음 비율(pHi 0.55 → 0.3, prM 0.016 → 0.006)을 줄이고 여음 지수 pexp를 0.45 → 0.4로 낮춰 높은 배음이 조금 더 오래 남게.
+      //  C(fh0 850·pexp 0.3)는 울림의 1~2 kHz까지 3 dB 어두워져 사용자가 B를 고름. 끄면 샘플 A 소리
+      soft: true, S6: { fh0: 1000, pHi: 0.3, prM: 0.006, pexp: 0.4 } },
+    // vary(1.23.3 같은 음 변형, ui.js PIANO.rr, 사용자: "피아노 소리가 기계로 만든 가상악기 소리같아"): 1.23.3까지는 같은 음을 칠 때마다 캐시한 한 파형(배음 위상·현 사이 위상·
+    //  해머 잡음이 같음)이 크기만 달리 찍혀(같은 음 두 타건의 첫 0.5초 상관 1.00) 되풀이가 기계처럼 들림 → 음마다 변형을 따로 만듦.
+    //  pianoV2Steps(m, sr, tune, vel, variant, maxLen): variant 0(또는 없음)은 지금과 샘플 단위로 같음. variant ≥ 1이면 ① 모든 배음의 위상을 변형마다 다른 난수로
+    //  (조율 차·감쇠·크기는 그대로: 기본 난수 열을 그대로 소비), ② 현 사이 위상 ±strPh rad(맥놀이가 다른 자리에서 시작), ③ 해머 접촉 잡음의 난수 씨앗을 바꿈.
+    //  maxLen > 0이면 그 길이(초)로 짧게 만들고 끝 fade초를 올림 코사인으로 줄임(재생 쪽이 그 안에 끝나는 타건에만 씀: 기억 공간이 기본 버퍼의 약 maxLen/8).
+    //  크기는 기본과 같은 식으로 정규화(첫 0.3초 RMS)
+    vary: { strPh: 0.4, fade: 0.3 },
+    // wound(1.23.3 저음, 사용자: "저음을 좀더 깊게 울림있게 그랜드피아노처럼", "저음은 용수철로 감겨있는 현이라는걸 생각해"): grand2가 켜졌을 때 그 위에서.
+    //  구리선을 감은 저음 현(C3 아래: 스타인웨이는 A0~E1 홑현, F1부터 두 줄)의 성질. 아이오와 스타인웨이 저음 녹음(B♭0~C3 ff·mf, 좌우 마이크 따로 잼)과 견주면 1.23.3 저음은
+    //  ⓐ 맨 아래 옥타브의 모든 부분음이 첫 0.5초에 즉음으로 −10~−13 dB/s 꺼져 뜯는 소리(녹음의 C1~A1은 1~24번 부분음이 처음부터 −2~−5 dB/s로 고르게 천천히 줄고, C2 위부터 보통 피아노처럼 즉음·여음 두 단계),
+    //  ⓑ 기본음·2번 배음(44~177 Hz)이 음 크기 대비 3~5 dB 작음, ⓒ 1~4 kHz가 실제 mf보다 10~20 dB 밝아 ff 같음(2 kHz 펠트 상한에 걸린 50~64번 배음), ⓓ B♭0~C1 비조화성이 실제(2.5~2.9e-4)의 절반.
+    //  비중 둘: 감쇠 wd = clamp((mD1 − m)/(mD1 − mD0), 0, 1)(F♯1 아래 1, A1 0.5, C2 위 0), 해머·현·소리판 wh = clamp((mH1 − m)/(mH1 − mH0), 0, 1)(C2 아래 1, C3 위 0)
+    //  ① 비조화성: 맨 아래 감은 현은 굵은 심선·짧은 길이라 B가 다시 커짐 → B = max(B, wB0·2^(−(m − 21)/wBoct))(B♭0 2.8e-4, C1 2.2e-4, E♭1 1.5e-4, G♭1 위는 그대로)
+    //  ② 감쇠(wd): 무거운 감은 홑현(큰 특성 임피던스, 소리판 첫 공진 아래의 기본음)은 저음 다리로 에너지를 천천히 내보내 모든 부분음이 오래 울림:
+    //     즉음 비율 − wd·prDn(첫 0.5초가 안 꺼짐), 기본음 여음 시간 × tauK(녹음 기본음 τ 4~5초, 1.23.3은 6.6초), 여음 지수 pexp → pexpW(높은 부분음도 비슷하게 오래).
+    //     C2 위는 녹음도 즉음·여음 두 단계이고 1.23.3 울림(0.5~3초)이 이미 녹음만큼 길어 그대로 둠
+    //  ③ 해머(wh·wd): 무겁고 무른 저음 해머(접촉 3~4 ms)의 펠트 차단 fh × 2^(−wh·fhOct − wd·fhOctLo), 기울기 지수 fhExp → fhExpW(가파르게: 1~2 kHz는 조금, 2~4 kHz는 더 줄임).
+    //     처음 안(fhOct 0.1·fhOctLo 0.2·fhExpW 6, 2~4 kHz C1 −17 → −34 dB로 녹음 mf·ff 가운데)과 ⑤ 감은 현의 내부 마찰(1 kHz 위 감쇠율에 (f/2500)²/s)은 사용자가 듣고
+    //     "조금 탁하다": 저음이 어두워진 만큼 피아노 전체의 1.4~2.8 kHz가 −3 dB·2.8~6 kHz가 −10 dB(IU) → 마찰을 빼고 해머를 1.23.3 밝기로 되돌린 안(D)을 고른 뒤
+    //     "해머 소리를 원래 밝기 말고 조금만 더 어둡게" → 세 단계 가운데 가운데(fhOct 0.05·fhOctLo 0.1·fhExpW 4: 피아노 전체 1.4~2.8 kHz −0.7·2.8~6 kHz −3.9 dB, D 대비)
+    //  ④ 두 줄 현: 홑현은 mono 아래(1.23.3은 A♭1 아래), F1~G1도 두 줄(조율 차는 1.23.3 그대로).
+    //     두 번째 현을 2.2~2.8 cent 벌리던 안은 뺌: 4번 위 부분음이 0.2~1.5초에 맥놀이 골을 지나 300~1200 Hz가 비고(G♭1~E♭2 355~710 Hz −4 dB) A1~A2 1~2.5초 울림이 2 dB 줄었으며, 녹음의 A1·C2는 맥놀이가 거의 없음
+    //  ⑤ 소리판 저역 깎기(wh): G5.fr(150 Hz 아래 옥타브당 −12 dB)를 fr Hz로 내림(0.4~1.4초, 음 크기 대비: G♭1~E♭2 44~88 Hz +5 dB·88~177 Hz +3 dB로 녹음과 2 dB 안,
+    //     왼손 음역 A1~C3 88~177 Hz +1.5 dB로 녹음보다 아직 1.5~2.5 dB 작음)
+    //  ⑥ 크기: 정규화(앞 0.3초) 뒤 음 전체(해머 타격음까지)를 lvD·wd + lvH·wh dB 조절해 1초 K 가중 크기를 1.23.3처럼 음마다 고르게(실제 녹음도 저음이 가운데 음역보다 크지 않음)
+    //  177~355 Hz가 녹음보다 3~6 dB 두꺼운 것(소리판 응답의 63~300 Hz 봉우리에 타격 위치 빗살 최대인 3~5번 배음이 걸림)은 1.23.3부터 있던 것으로 여기서 고치지 않음.
+    //  끄면 1.23.3과 샘플 단위로 같고(소리판 응답도), 켜도 C3 위 음은 같음
+    wound: false,
+    W6: { mD0: 30, mD1: 36, mH0: 36, mH1: 48, wB0: 3.2e-4, wBoct: 5.5, prDn: 0.4, tauK: 0.75, pexpW: 0.3, fhOct: 0.05, fhOctLo: 0.1, fhExpW: 4,
+      mono: 29, fr: 100, lvD: -1.61, lvH: -0.75 },
   };
   const inharm = m => clamp(2.5e-4 * Math.pow(2, (m - 48) / 16), 1e-4, 4e-3);
   // 배음 하나를 만들 때마다 멈출 수 있는 생성기: 화면을 멈추지 않게 나눠서 합성(pianoV2Steps), 한 번에(pianoV2)
-  function pianoV2(m, sr, tune, vel) { const g = pianoV2Steps(m, sr, tune, vel); let r; do { r = g.next(); } while (!r.done); return r.value; }
-  function* pianoV2Steps(m, sr, tune, vel) {
+  //  variant·maxLen(1.23.3 PIANO2.vary): 같은 음 변형 번호(0 = 기본)와 변형 버퍼 길이(초, 0이면 기본 길이)
+  function pianoV2(m, sr, tune, vel, variant, maxLen) { const g = pianoV2Steps(m, sr, tune, vel, variant, maxLen); let r; do { r = g.next(); } while (!r.done); return r.value; }
+  function* pianoV2Steps(m, sr, tune, vel, variant, maxLen) {
     vel = vel == null ? 0.6 : vel;
     const f0 = f0Of(m, tune), P = PIANO2;
     const D = P.decay2 ? P.D2 : null, A = P.attack2 ? P.A2 : null, T = P.tail2 ? P.T2 : null;
-    const n = T ? Math.round(sr * T.lenCap) : Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
+    // vary: 변형(variant ≥ 1)은 씨앗 vh로 위상·잡음 난수를 바꾸고 maxLen초로 짧게(없으면 기본 길이)
+    const VR = variant > 0 && P.vary ? P.vary : null, vh = VR ? Math.imul(variant + 1, 0x9E3779B1) >>> 0 : 0;
+    const n0 = T ? Math.round(sr * (P.grand2 && P.grand && T.lenCapG2 ? T.lenCapG2 : T.lenCap)) : Math.round(sr * clamp(P.lenMax - (m - 36) * 0.075, P.lenMin, P.lenMax));
+    const n = VR && maxLen > 0 ? Math.min(n0, Math.round(sr * maxLen)) : n0;
     const y = new Float32Array(n);
-    const SW = P.steinway && D && A ? P.S4 : null, G = P.grand && D && A ? P.G5 : null;
-    const B = inharm(m) * (SW ? SW.inh : 1), fMax = Math.min(0.45 * sr, P.fMax);
-    const tau1 = (D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax)) * (SW ? SW.tauK : 1);
-    // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음
+    const SW = P.steinway && D && A ? P.S4 : null, G = P.grand && D && A ? P.G5 : null, G2 = P.grand2 && G ? (P.G6.soft ? Object.assign({}, P.G6, P.G6.S6) : P.G6) : null;   // grand2.soft: S6가 G6를 덮음
+    const W = G2 && P.wound ? P.W6 : null, wd = W ? clamp((W.mD1 - m) / (W.mD1 - W.mD0), 0, 1) : 0, wh = W ? clamp((W.mH1 - m) / (W.mH1 - W.mH0), 0, 1) : 0;   // wound: 감쇠 비중 wd, 해머·현·소리판 비중 wh(C3 위 0)
+    const B0 = G2 ? clamp(Math.max(G2.iFloor, G2.iB48 * Math.pow(2, (m - 48) / G2.iOct)), 1e-4, G2.iMax) : inharm(m) * (SW ? SW.inh : 1), fMax = Math.min(0.45 * sr, P.fMax);
+    const B = W ? Math.max(B0, W.wB0 * Math.pow(2, -(m - 21) / W.wBoct)) : B0;   // wound ①
+    const tau0 = (D ? clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) : clamp(P.tauMax * Math.pow(2, -(m - 36) / 15), P.tauMin, P.tauMax)) * (SW ? SW.tauK : 1);
+    const tau1 = wd > 0 ? tau0 * (1 - wd * (1 - W.tauK)) : tau0;   // wound ②
+    // 해머 펠트의 저역 통과: 세게 칠수록, 높은 음일수록 차단 주파수가 높음(grand2는 음이 높을수록 낮은 fh)
     const BR = P.bright3 && !G ? P.B3 : null;
     const fc = clamp((900 + 9 * f0) * (0.55 + 1.1 * vel) * (G ? G.fcK : BR ? BR.fcK : 1), 700, G ? G.fcMax : BR ? BR.fcMax : 9000);
-    const hExp = G ? G.exp : BR ? BR.exp : 2.6, kExp = G ? G.kExp : 0.55, pexp = G ? G.pexp : D ? D.pexp : 0.75;
-    const nStr = m < 32 ? 1 : (m < 44 ? 2 : 3);
+    const hExp = G ? G.exp : BR ? BR.exp : 2.6, kExp = G ? G.kExp : 0.55, pexp0 = G2 ? G2.pexp : G ? G.pexp : D ? D.pexp : 0.75;
+    const pexp = wd > 0 ? pexp0 + wd * (W.pexpW - pexp0) : pexp0;   // wound ②
+    const fhB = G2 ? Math.min(G2.fhMax, G2.fh0 * Math.pow(2, -(m - 60) / G2.fhOct)) * (0.55 + 1.1 * vel) / 1.155 : 0, ke = G2 ? Math.max(0, G2.kExp + G2.kS * (m - 60) / 12) : 0;
+    const fh = wh > 0 ? fhB * Math.pow(2, -wh * W.fhOct - wd * W.fhOctLo) : fhB, fhExp = G2 ? (wh > 0 ? G2.fhExp + wh * (W.fhExpW - G2.fhExp) : G2.fhExp) : 0;   // wound ③
+    const frW = G ? (wh > 0 ? G.fr + (W.fr - G.fr) * wh : G.fr) : 0;   // wound ⑤: 소리판 저역 깎기(끄면 G5.fr)
+    const nStr = m < (W ? W.mono : 32) ? 1 : (m < 44 ? 2 : 3);   // wound ④: 홑현 경계
     const rnd = lcg(Math.imul(m + 977, 2654435761) >>> 0);
+    const rp = VR ? lcg((Math.imul(m + 977, 2654435761) ^ vh) >>> 0) : null;   // vary: 변형의 배음·현 위상 난수(조율 차 det는 그대로)
     const det = [];
     for (let q = 0; q < nStr; q++) det.push(q === 0 ? 0 : (rnd() * 2 - 1) * P.cents + (q === 1 ? 0.6 : -0.5));
+    // grand2 ⑤: 현 사이를 Hz로 더 벌림(조율 차 cent와 같은 쪽으로 더해 서로 지우지 않음). 따로 둔 난수라 위상 등 다른 난수는 그대로
+    const rh = G2 ? lcg(Math.imul(m + 4111, 2246822519) >>> 0) : null, detHz = [];
+    for (let q = 0; q < nStr; q++) detHz.push(G2 && q > 0 ? (det[q] >= 0 ? 1 : -1) * G2.dHz * clamp((m - G2.dm0) / G2.dmw0, 0, 1) * clamp((G2.dm1 - m) / G2.dmw1, 0, 1) * (1 - G2.dVar / 2 + G2.dVar * rh()) : 0);
     const prompt = clamp(0.5 + (m - 60) * 0.006, 0.35, 0.7);     // 즉음 비율: 높은 음일수록 큼
-    const pHi = G ? G.pHi : SW ? SW.pHi : D ? D.pHi : 0;
+    const pHi = G2 ? G2.pHi : G ? G.pHi : SW ? SW.pHi : D ? D.pHi : 0;
     const promptOf = fk => D.pLo + (pHi - D.pLo) * clamp(Math.log(fk / D.pF1) / Math.log(D.pF2 / D.pF1), 0, 1);
+    // k번 배음의 처음 크기
+    const amp = (k, fk) => {
+      const comb = Math.abs(Math.sin(Math.PI * k * P.strikePos));
+      const hammer = G2 ? 1 / (1 + Math.pow(fk / fh, fhExp)) / (1 + Math.pow(fk / G.fTop, G.topExp))
+        : 1 / (1 + Math.pow(fk / fc, hExp)) / (G ? 1 + Math.pow(fk / G.fTop, G.topExp) : 1);
+      let a = (0.08 + comb) * hammer / Math.pow(k, G2 ? ke : kExp);
+      if (k === 1 && m < 40 && !G2) a *= 0.55;                     // 저음은 기본음이 약하고 배음이 큼
+      if (k === 1 && G2) a *= 1 + G2.b1 * clamp((m - G2.b1m) / 8, 0, 1);   // grand2: 가운데·높은 음은 기본음이 가장 큼
+      if (G && frW) a /= 1 + (frW / fk) * (frW / fk);            // grand: 소리판이 낮은 부분음을 잘 내보내지 못함(fr Hz 아래 옥타브당 −12 dB; wound ⑤는 fr을 내림)
+      return a;
+    };
+    let aRef = 1;                                                  // grand2: 가장 큰 배음(건너뛰기·길이 기준)
+    if (G2) { aRef = 0; for (let k = 1; k <= P.kMax; k++) { const fk = k * f0 * Math.sqrt(1 + B * k * k); if (fk > fMax) break; aRef = Math.max(aRef, amp(k, fk)); } }
     for (let k = 1; k <= P.kMax; k++) {
       const fk = k * f0 * Math.sqrt(1 + B * k * k);
       if (fk > fMax) break;
-      const comb = Math.abs(Math.sin(Math.PI * k * P.strikePos));
-      const hammer = 1 / (1 + Math.pow(fk / fc, hExp)) / (G ? 1 + Math.pow(fk / G.fTop, G.topExp) : 1);
-      let a = (0.08 + comb) * hammer / Math.pow(k, kExp);
-      if (k === 1 && m < 40) a *= 0.55;                            // 저음은 기본음이 약하고 배음이 큼
-      if (G && G.fr) a /= 1 + (G.fr / fk) * (G.fr / fk);          // grand: 소리판이 낮은 부분음을 잘 내보내지 못함(fr Hz 아래 옥타브당 −12 dB)
-      if (a < 1e-3) continue;
+      const a = amp(k, fk);
+      if (a < (G2 ? G2.aMin * aRef : 1e-3)) continue;
       const tS = Math.max(0.1, tau1 * Math.pow(f0 / fk, pexp));
-      let tF = D ? clamp(tS * D.tF, D.tFmin, D.tFmax) : Math.max(0.04, tS * 0.12);
+      let tF = D ? clamp(tS * (G2 ? G2.tFr : D.tF), G2 ? G2.tFmin : D.tFmin, D.tFmax) : Math.max(0.04, tS * 0.12);
       if (G) tF = Math.min(tF, tS * G.tFk);
-      const pr = D ? promptOf(fk) : prompt;
-      const len = Math.min(n, Math.ceil(sr * tS * Math.log(a / 1e-5)));
+      const pr0 = D ? (G2 ? clamp(promptOf(fk) + (m < 60 ? G2.prMlo : G2.prM) * Math.min(m - 60, G2.prCap), 0.1, 0.95) : promptOf(fk)) : prompt;
+      const pr = wd > 0 ? clamp(pr0 - wd * W.prDn, 0.05, 0.95) : pr0;   // wound ②: 즉음 비율
+      const len = Math.min(n, Math.ceil(sr * tS * Math.log(a / (G2 ? G2.lenRel * aRef : 1e-5))));
       const strings = k <= P.multiK ? nStr : 1;
       const df = Math.exp(-1 / (tF * sr)), ds = Math.exp(-1 / (tS * sr));
-      const ph = rnd() * 2 * Math.PI;
+      const ph0 = rnd() * 2 * Math.PI, ph = VR ? rp() * 2 * Math.PI : ph0;   // vary: 변형마다 다른 위상(기본 난수 열은 그대로 소비해 variant 0이 같게)
       for (let q = 0; q < strings; q++) {
         // 현마다 조율 차와 약간 다른 감쇠(현끼리 결합이 달라 이중 감쇠가 생김)
-        const w = 2 * Math.PI * fk * Math.pow(2, det[q] / 1200) / sr, cw = Math.cos(w), sw = Math.sin(w);
+        const w = (detHz[q] ? 2 * Math.PI * (fk * Math.pow(2, det[q] / 1200) + detHz[q]) : 2 * Math.PI * fk * Math.pow(2, det[q] / 1200)) / sr, cw = Math.cos(w), sw = Math.sin(w);
         const dsq = Math.pow(ds, 1 + 0.12 * q);
-        let re = Math.cos(ph), im = Math.sin(ph), ef = pr * a / strings, es = (1 - pr) * a / strings;
+        const phq = VR && q > 0 && VR.strPh > 0 ? ph + VR.strPh * (rp() * 2 - 1) : ph;   // vary: 현 사이 위상 ±strPh rad(맥놀이가 다른 자리에서 시작)
+        let re = Math.cos(phq), im = Math.sin(phq), ef = pr * a / strings, es = (1 - pr) * a / strings;
         for (let i = 0; i < len; i++) {
           const r = re * cw - im * sw; im = re * sw + im * cw; re = r;
           y[i] += im * (ef + es); ef *= df; es *= dsq;
@@ -6155,6 +6240,10 @@ const Synth = (function () {
         }
       }
       yield k;
+    }
+    if (G2) {                                                      // grand2 ②: 현 소리가 riseMs ms 시정수로 올라옴(펠트 해머가 현을 미는 시간, 정규화 전이라 크기는 그대로)
+      const tr = G2.riseMs / 1000, nr = Math.min(n, Math.round(sr * tr * 10));
+      for (let i = 0; i < nr; i++) y[i] *= 1 - Math.exp(-i / (sr * tr));
     }
     if (!A) {
       // 해머 노크(소리판을 두드리는 낮은 '쿵')와 펠트 잡음(1.12)
@@ -6170,15 +6259,23 @@ const Synth = (function () {
     }
     edges(y, sr, 1, T ? 0 : 80);
     normalize(y, sr, 0.12);
-    if (A) hammer2(y, sr, m, fc, vel, G ? Object.assign({}, A, { nzHp: G.nzHp, nzLp: G.nzLp, nzOrd: 2, nzDb: G.nzDb, nzTau: G.nzTau, pulseDb: G.pulseDb, pulseMs: A.pulseMs * G.pulseW, pulseMin: A.pulseMin * G.pulseW, pulseMax: A.pulseMax * G.pulseW })
-      : SW ? Object.assign({}, A, { nzDb: SW.nzDb, nzTau: SW.nzTau, pulseDb: SW.pulseDb }) : A);
+    const HG = G2 ? { nzHp: G2.nzHp, nzLp: G2.nzLp, nzDb: G2.nzDb - G2.nzDbS * Math.max(0, m - G2.nzDbM), nzTau: G2.nzTau, pulseDb: G2.pulseDb } : G;   // grand2 ②: 낮은 '쿵'
+    if (A) hammer2(y, sr, m, fc, vel, G ? Object.assign({}, A, { nzHp: HG.nzHp, nzLp: HG.nzLp, nzOrd: 2, nzDb: HG.nzDb, nzTau: HG.nzTau, pulseDb: HG.pulseDb, pulseMs: A.pulseMs * G.pulseW, pulseMin: A.pulseMin * G.pulseW, pulseMax: A.pulseMax * G.pulseW })
+      : SW ? Object.assign({}, A, { nzDb: SW.nzDb, nzTau: SW.nzTau, pulseDb: SW.pulseDb }) : A, vh);
+    if (W && (wd > 0 || wh > 0)) { const g = Math.pow(10, (W.lvD * wd + W.lvH * wh) / 20); if (g !== 1) for (let i = 0; i < n; i++) y[i] *= g; }   // wound ⑥: 크기 고르게
+    if (VR && maxLen > 0) {                                        // vary: 짧은 변형은 끝 fade초를 올림 코사인으로 줄여 끝냄(재생 쪽이 그 안에 끝나는 타건에만 씀)
+      const nf = Math.min(n, Math.round(sr * VR.fade));
+      for (let i = 0; i < nf; i++) y[n - 1 - i] *= 0.5 - 0.5 * Math.cos(Math.PI * i / nf);
+      return y;
+    }
     return T ? trimTail(y, sr, T) : y;
   }
   // 해머 타격음(attack2). 크기는 정규화한 음 크기(0.12) 기준 dB, 세기(vel) 0.55에서. 세기가 두 배면 +6 dB
-  function hammer2(y, sr, m, fc, vel, A) {
+  //  vh(1.23.3 vary): 변형의 씨앗(0 또는 없음이면 그대로)
+  function hammer2(y, sr, m, fc, vel, A, vh) {
     const vg = vel / 0.55, base = 0.12 * vg;
     // ① 접촉 잡음: 백색 잡음 → 1극 고역 통과 → 1극 저역 통과(펠트 차단 주파수의 1.6배를 넘지 않음)
-    const rz = lcg((m * 7919 + 29) >>> 0);
+    const rz = lcg(((m * 7919 + 29) ^ (vh || 0)) >>> 0);
     const nN = Math.min(y.length, Math.round(sr * A.nzTau * 8)), x = new Float32Array(nN);
     const ch = Math.exp(-2 * Math.PI * A.nzHp / sr), cl = Math.exp(-2 * Math.PI * Math.min(A.nzLp, fc * 1.6) / sr);
     let hp = 0, prev = 0, lp = 0, lp2 = 0;
@@ -6209,6 +6306,36 @@ const Synth = (function () {
   }
   // 음역별 놓을 때의 감쇠(댐퍼): 낮은 음은 천천히, 맨 위 음역(댐퍼 없음)은 길게
   const pianoRelease = m => m >= 89 ? 0.6 : clamp(0.16 - (m - 40) * 0.0015, 0.07, 0.16);
+  // 페달 소리(1.23.3, 사용자: "페달 밟는 소리도"): 'down' 밟을 때 = 낮은 '쿵'(55~80 Hz 감쇠 사인 + 250 Hz 아래 잡음 터짐)에 희미한 기계 '끽'(0.8~2.5 kHz),
+  //  'up' 뗄 때 = 가벼운 딸깍(3 kHz 아래, 수 ms)과 댐퍼가 현에 내려앉는 '푸'(200~1200 Hz 잡음, 30~50 ms). variant(0, 1, 2, …)마다 난수가 달라 매번 조금 다름.
+  //  길이 0.25초, 첫 0.1초 RMS를 0.12(음 크기 기준)로 맞춤 → 재생 쪽 dB 이득이 음 크기 기준
+  function pedalNoise(sr, kind, variant) {
+    const n = Math.round(sr * 0.25), y = new Float32Array(n), r = lcg(((kind === 'down' ? 5101 : 7307) + 977 * (variant | 0)) >>> 0);
+    const lp1 = f => Math.exp(-2 * Math.PI * f / sr);
+    if (kind === 'down') {
+      const f = 55 + 25 * r(), w = 2 * Math.PI * f / sr, tau = 0.05 + 0.03 * r(), a = 0.5 + 0.2 * r(), tN = 0.015 + 0.01 * r(), tC = 0.02 + 0.015 * r(), gC = 0.08 + 0.06 * r();
+      const cN = lp1(250), cC = lp1(2500), cH = lp1(800); let lo = 0, hp = 0, prev = 0, bp = 0;
+      for (let i = 0; i < n; i++) {
+        const t = i / sr, w1 = r() * 2 - 1, w2 = r() * 2 - 1;
+        lo = lo * cN + w1 * (1 - cN);                                      // 낮은 잡음(펠트·나무)
+        hp = cH * (hp + w2 - prev); prev = w2; bp = bp * cC + hp * (1 - cC);   // 0.8~2.5 kHz 띠('끽')
+        y[i] = a * Math.sin(w * i) * Math.exp(-t / tau) * (1 - Math.exp(-t / 0.004)) + 1.5 * lo * Math.exp(-t / tN) + gC * bp * Math.exp(-t / tC);
+      }
+    } else {
+      const tK = 0.004 + 0.003 * r(), tF = 0.03 + 0.02 * r(), gF = 0.5 + 0.2 * r(), gK = 0.25 + 0.15 * r();
+      const cK = lp1(3000), cF = lp1(1200), cFh = lp1(200); let k = 0, f = 0, fh = 0, fp = 0;
+      for (let i = 0; i < n; i++) {
+        const t = i / sr, w1 = r() * 2 - 1, w2 = r() * 2 - 1;
+        k = k * cK + w1 * (1 - cK);                                        // 딸깍
+        fh = cFh * (fh + w2 - fp); fp = w2; f = f * cF + fh * (1 - cF);     // 200~1200 Hz '푸'
+        y[i] = gK * k * Math.exp(-t / tK) + gF * f * Math.exp(-t / tF) * (1 - Math.exp(-t / 0.006));
+      }
+    }
+    edges(y, sr, 1, 30);
+    const n1 = Math.round(sr * 0.1); let e = 0; for (let i = 0; i < n1; i++) e += y[i] * y[i];
+    const g = 0.12 / (Math.sqrt(e / n1) + 1e-9); for (let i = 0; i < n; i++) y[i] *= g;
+    return y;
+  }
 
   // ---------------- 모드 임펄스 응답(소리판·기타 몸통) ----------------
   // 직접음 + 감쇠하는 공진 모드 여러 개(로그 간격, 난수 위상). 피아노 소리판·기타 몸통의 나무 울림
@@ -6237,8 +6364,40 @@ const Synth = (function () {
     return ir;
   }
   // 소리판 1.13 스위치(SOUNDBOARD.v2): 직접음 고침 + 모드 비율·감쇠·기울기. 끄면 1.12와 같음
-  const SOUNDBOARD = { v2: false, ratio: 1.2, tau0: 0.05, tauExp: 0.75, tilt: 0.6 };
-  const soundboardIR = sr => SOUNDBOARD.v2
+  // v3(1.23.3, PIANO2.grand2와 함께): v2 모드 응답은 난수 위상 모드 160개가 서로 간섭해 정해진 주파수에 −20~−40 dB 골이 생김
+  //  (C4 기본음이 왼쪽에서 2번 배음보다 −11 dB, G4는 −21 dB: 음마다 기본음이 들쭉날쭉 깎여 콧소리·뜯는 소리, 이웃 음 크기가 최대 8 dB 뜀)
+  //  → 옥타브로 고르게 한 v2 응답(같은 음색 기울기·크기)에 맞춘 최소 위상 쌍2차 필터 줄(bq: [종류, Hz, dB, Q], 0.32 dB rms) + 나무 울림을 위한
+  //  약한 낮은 모드(60~lowHi Hz, lowModes개, 에너지의 lowShare, 좌우가 달라 넓이 유지). 채널마다 에너지 1
+  const SOUNDBOARD = { v2: false, ratio: 1.2, tau0: 0.05, tauExp: 0.75, tilt: 0.6,
+    v3: false, bq: [['hp', 56, 0, 0.6], ['ls', 364, 8.3, 0.6], ['ls', 2127, 8.4, 0.6], ['pk', 111, 3.7, 0.8]], lowShare: 0.25, lowModes: 40, lowHi: 350, lowSeed: 4242 };
+  // 쌍2차 필터 줄의 임펄스 응답(len 샘플): 'hp' 고역 통과, 'ls' 저역 셸프, 'pk' 피크(RBJ 쿡북)
+  function bqIR(sr, len, list) {
+    const y = new Float32Array(len); y[0] = 1;
+    for (const [t, f0, g, Q] of list) {
+      const A = Math.pow(10, g / 40), w = 2 * Math.PI * f0 / sr, c = Math.cos(w), al = Math.sin(w) / (2 * Q);
+      let b0, b1, b2, a0, a1, a2;
+      if (t === 'ls') { const sA = 2 * Math.sqrt(A) * al; b0 = A * ((A + 1) - (A - 1) * c + sA); b1 = 2 * A * ((A - 1) - (A + 1) * c); b2 = A * ((A + 1) - (A - 1) * c - sA); a0 = (A + 1) + (A - 1) * c + sA; a1 = -2 * ((A - 1) + (A + 1) * c); a2 = (A + 1) + (A - 1) * c - sA; }
+      else if (t === 'pk') { b0 = 1 + al * A; b1 = -2 * c; b2 = 1 - al * A; a0 = 1 + al / A; a1 = -2 * c; a2 = 1 - al / A; }
+      else { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; a0 = 1 + al; a1 = -2 * c; a2 = 1 - al; }
+      let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+      for (let i = 0; i < len; i++) { const x = y[i], v = (b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0; x2 = x1; x1 = x; y2 = y1; y1 = v; y[i] = v; }
+    }
+    return y;
+  }
+  function smoothIR(sr) {
+    const SB = SOUNDBOARD, len = Math.round(sr * 0.35), out = [], fin = Math.round(sr * 0.02);
+    // 낮은 모드: modalIR(ratio 1)의 모드 부분(직접음 뺀 곳, 에너지 0.5)
+    const low = SB.lowShare > 0 ? modalIR(sr, { len: 0.35, seed: SB.lowSeed, direct: 1, ratio: 1, modes: SB.lowModes, fLo: 60, fHi: SB.lowHi, tau0: SB.tau0, tauExp: SB.tauExp, gain: 0.55, fix: true }) : null;
+    for (let c = 0; c < 2; c++) {
+      const d = bqIR(sr, len, SB.bq);
+      for (let i = 0; i < fin; i++) d[len - 1 - i] *= i / fin;
+      if (low) { let es = 0; for (let i = 0; i < len; i++) es += d[i] * d[i]; const g = Math.sqrt(SB.lowShare * es / 0.5); for (let i = 1; i < len; i++) d[i] += g * low[c][i]; }
+      let e = 0; for (let i = 0; i < len; i++) e += d[i] * d[i]; const k = 1 / Math.sqrt(e); for (let i = 0; i < len; i++) d[i] *= k;
+      out.push(d);
+    }
+    return out;
+  }
+  const soundboardIR = sr => SOUNDBOARD.v3 ? smoothIR(sr) : SOUNDBOARD.v2
     ? modalIR(sr, { len: 0.35, seed: 4242, direct: 1, ratio: SOUNDBOARD.ratio, modes: 160, fLo: 70, fHi: 4500, tau0: SOUNDBOARD.tau0, tauExp: SOUNDBOARD.tauExp, gain: 0.55, fix: true, tilt: SOUNDBOARD.tilt })
     : modalIR(sr, { len: 0.35, seed: 4242, direct: 1, ratio: 1.2, modes: 160, fLo: 70, fHi: 4500, tau0: 0.09, tauExp: 0.5, gain: 0.55 });
   // 기타 몸통: 공기 공명(약 100 Hz)과 앞판(약 200 Hz) 모드를 키운 짧은 응답
@@ -6264,6 +6423,67 @@ const Synth = (function () {
         }
       }
       for (let i = 0; i < fin; i++) d[len - 1 - i] *= i / fin;          // 끝을 부드럽게
+    }
+    let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
+    const g = 1 / Math.sqrt(e / 2); for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
+    return ir;
+  }
+
+  // 피아노 공명현(1.23.3, ui.js PIANO.reso, 사용자: "피아노 소리가 기계로 만든 가상악기 소리같아"): 페달을 밟으면 댐퍼가 모두 올라가 치지 않은 현 88개(A0~C8)가
+  //  다리를 거쳐 함께 울림(실제 그랜드의 페달 울림 '후광'). 통기타 공명현(sympIR)과 같은 방식: 현마다 부분음 k(비조화성 B는 grand2 식, fMax Hz·kMax개까지,
+  //  합성음과 같은 현 사이 조율 차·Hz 벌림·현 수라 친 음의 부분음이 제 현과 꼭 맞음, PIANO2.wound면 감은 저음 현의 비조화성·현 수·감쇠도)가 크기 1/k^kExp(uniK번 배음까지 현 2~3가닥), 감쇠 시정수
+  //  τ = 그 음의 여음 시정수(D2) × tauK × (f0/fk)^pexp(tauMin~tauMax초)로 울리는 감쇠 사인의 합(len초, 끝 fade초 페이드). 좌우는 음마다 직접음과 같은 자리(pan)에
+  //  위상은 따로(넓은 후광). 이 응답에 날 소리(소리판 앞)를 통과시켜 PIANO.reso.gain만큼 소리판 앞에 더하면 배음이 겹치는 현(옥타브·5도·…)이 길게 남고
+  //  타격의 넓은 대역이 모든 현을 살짝 울림. 에너지 합 2(두 채널을 함께 맞춤: 저음 현이 왼쪽이라 좌 1.33·우 0.67), 기준음(tune)을 따름(기준음이 바뀌면 ui.js가 응답을 다시 만듦)
+  //  만들기: 감쇠 사인 7천 개를 샘플마다 돌리면 2.5초가 걸려, 감쇠 사인 하나의 닫힌 꼴 스펙트럼(a·e^{jφ}(1 − z^N)/(2j(1 − z·e^{−jθ})), z = r·e^{jω})을 봉우리 둘레
+  //  ±K칸(크기가 봉우리의 eps까지)에만 더하고 역 FFT 한 번(약 0.25초). 샘플마다 돌린 정확한 응답과의 차는 에너지 −32 dB(로렌츠 꼬리를 자른 만큼: C 화음의 공명 소리에서
+  //  첫 50 ms −27 dB, 그 뒤 −39~−48 dB). 현 하나(채널 하나)·FFT 단계마다 멈출 수 있는 생성기(pianoSympIRSteps)라 실시간 재생에서는 나눠 만듦(ui.js, 한 번에 8 ms 안팎)
+  const PSYMP = { lo: 21, hi: 108, len: 2.5, fade: 0.4, fMax: 3500, kMax: 64, kExp: 0.8, tauK: 0.35, tauMin: 0.25, tauMax: 0.8, pexp: 0.4, uniK: 64, eps: 3e-3, seed: 9173 };
+  function* fftSteps(re, im, inv) {                                 // 기수 2 FFT(제자리), inv면 역변환(1/n 포함). 단계마다 멈출 수 있음(실시간에 화면을 멈추지 않게)
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+    yield 0;
+    for (let len = 2; len <= n; len <<= 1) { const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a); for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let j = 0; j < len / 2; j++) { const k = i + j + len / 2, ur = re[i + j], ui = im[i + j], vr = re[k] * cr - im[k] * ci, vi = re[k] * ci + im[k] * cr; re[i + j] = ur + vr; im[i + j] = ui + vi; re[k] = ur - vr; im[k] = ui - vi; const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t; } } if (len >= 4096) yield len; }
+    if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+  }
+  function pianoSympIR(sr, tune) { const g = pianoSympIRSteps(sr, tune); let r; do { r = g.next(); } while (!r.done); return r.value; }
+  function* pianoSympIRSteps(sr, tune) {
+    const S = PSYMP, P = PIANO2, D = P.D2, G2 = P.G6, W = P.grand2 && P.wound ? P.W6 : null, len = Math.round(sr * S.len), fin = Math.round(sr * S.fade), ir = [new Float32Array(len), new Float32Array(len)];   // W: 감은 저음 현(PIANO2.wound)도 합성음과 같게
+    let N = 1; while (N < len) N <<= 1;
+    for (let c = 0; c < 2; c++) {
+      const r = lcg(S.seed + 101 * c), R = new Float64Array(N), I = new Float64Array(N);
+      for (let m = S.lo; m <= S.hi; m++) {
+        yield m;
+        const wd = W ? clamp((W.mD1 - m) / (W.mD1 - W.mD0), 0, 1) : 0, B0 = clamp(Math.max(G2.iFloor, G2.iB48 * Math.pow(2, (m - 48) / G2.iOct)), 1e-4, G2.iMax);
+        const f0 = f0Of(m, tune), B = W ? Math.max(B0, W.wB0 * Math.pow(2, -(m - 21) / W.wBoct)) : B0;
+        const tau1 = clamp(D.tauMax * Math.pow(2, -(m - 36) / D.oct), D.tauMin, D.tauMax) * S.tauK * (wd > 0 ? 1 - wd * (1 - W.tauK) : 1);
+        const nStr = m < (W ? W.mono : 32) ? 1 : (m < 44 ? 2 : 3), rnd = lcg(Math.imul(m + 977, 2654435761) >>> 0), det = [];          // pianoV2Steps와 같은 난수·조율 차·현 수
+        for (let q = 0; q < nStr; q++) det.push(q === 0 ? 0 : (rnd() * 2 - 1) * P.cents + (q === 1 ? 0.6 : -0.5));
+        const rh = lcg(Math.imul(m + 4111, 2246822519) >>> 0), detHz = [];
+        for (let q = 0; q < nStr; q++) detHz.push(q > 0 ? (det[q] >= 0 ? 1 : -1) * G2.dHz * clamp((m - G2.dm0) / G2.dmw0, 0, 1) * clamp((G2.dm1 - m) / G2.dmw1, 0, 1) * (1 - G2.dVar / 2 + G2.dVar * rh()) : 0);
+        const x = (clamp((m - 60) / 36, -0.5, 0.5) + 1) * Math.PI / 4, gp = c === 0 ? Math.cos(x) : Math.sin(x);           // 직접음과 같은 자리(ui.js playChord의 pan)
+        for (let k = 1; k <= S.kMax; k++) {
+          const fk = k * f0 * Math.sqrt(1 + B * k * k);
+          if (fk > Math.min(S.fMax, sr / 2 - 200)) break;
+          const ns = k <= S.uniK ? nStr : 1, a = gp / Math.pow(k, S.kExp) / Math.sqrt(ns), tau = clamp(tau1 * Math.pow(f0 / fk, S.pexp), S.tauMin, S.tauMax);
+          const dec = Math.exp(-1 / (tau * sr)), K = Math.min(N / 2, Math.ceil(N / (2 * Math.PI * S.eps * tau * sr))), rN = Math.pow(dec, N);
+          for (let q = 0; q < ns; q++) {
+            const w = 2 * Math.PI * (fk * Math.pow(2, det[q] / 1200) + detHz[q]) / sr, ph = r() * 2 * Math.PI, kc = w * N / (2 * Math.PI);
+            // h[n] = a·sin(ωn + φ)·dec^n (n < N)의 DFT: A/(1 − z·e^{−jθ}), A = (a/2)(−j)·e^{jφ}(1 − z^N)
+            const zNr = rN * Math.cos(w * N), zNi = rN * Math.sin(w * N), e1r = Math.cos(ph) * (1 - zNr) + Math.sin(ph) * zNi, e1i = Math.sin(ph) * (1 - zNr) - Math.cos(ph) * zNi;
+            const Ar = a / 2 * e1i, Ai = -a / 2 * e1r, k0 = Math.max(0, Math.floor(kc - K)), k1 = Math.min(N / 2, Math.ceil(kc + K));
+            for (let kk = k0; kk <= k1; kk++) {
+              const th = 2 * Math.PI * kk / N, dr = 1 - dec * Math.cos(w - th), di = -dec * Math.sin(w - th), dd = dr * dr + di * di;
+              R[kk] += (Ar * dr + Ai * di) / dd; I[kk] += (Ai * dr - Ar * di) / dd;
+            }
+          }
+        }
+      }
+      for (let k = 1; k < N / 2; k++) { R[N - k] = R[k]; I[N - k] = -I[k]; }                                       // 실수 응답: 켤레 대칭
+      I[0] = 0; I[N / 2] = 0;
+      yield* fftSteps(R, I, true);
+      const d = ir[c]; for (let i = 0; i < len; i++) d[i] = R[i];
+      for (let i = 0; i < fin; i++) d[len - 1 - i] *= 0.5 - 0.5 * Math.cos(Math.PI * i / fin);
     }
     let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
     const g = 1 / Math.sqrt(e / 2); for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
@@ -6506,7 +6726,7 @@ const Synth = (function () {
     return best.strings;
   }
 
-  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, f0Of };
+  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
 </script>
@@ -6535,9 +6755,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name' },
     savedPrefs);
   // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
-  if (savedPrefs.gmv !== 2) { if (prefs.guitarMode === 'strum') prefs.guitarMode = 'ssw'; prefs.gmv = 2; }
   // 1.21.0부터 통기타 기본이 자동('auto': 곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름): 그 전 기본값(싱어송라이터)으로 저장된 값은 한 번만 자동으로(gmv 3)
-  if (savedPrefs.gmv !== 3) { if (prefs.guitarMode === 'ssw') prefs.guitarMode = 'auto'; prefs.gmv = 3; }
+  //  1.23.3: 단계 번호를 '보다 작으면'으로 봄. 1.21.0~1.23.2는 '같지 않으면'이라 gmv 3으로 저장된 값을 열 때 1단계(스트로크 따라 → 싱어송라이터)가 다시 돌고 gmv가 2로 내려가,
+  //  고른 스트로크 따라·싱어송라이터가 한 번 다시 열면 싱어송라이터로, 두 번이면 자동으로 바뀌었음
+  const gmv0 = +savedPrefs.gmv || 0;
+  if (gmv0 < 2 && prefs.guitarMode === 'strum') prefs.guitarMode = 'ssw';
+  if (gmv0 < 3 && prefs.guitarMode === 'ssw') prefs.guitarMode = 'auto';
+  prefs.gmv = Math.max(3, gmv0);
   // 1.20.0부터 코드 종류 기본이 확장('extended', 사용자: "코드 종류 확장을 기본으로"): 그 전 기본값(표준)으로 저장된 값은 한 번만 새 기본으로 옮김(vmv 1). 기본(3화음)을 고른 값은 그대로
   if (savedPrefs.vmv !== 1) { if (prefs.vocab === 'standard') prefs.vocab = 'extended'; prefs.vmv = 1; }
   // 1.20.0부터 코드 변화 단위 기본이 작은박(res 2: ½박, 셋잇단 곡 ⅓박)이고 더 작은박(res 4: ¼박, 셋잇단 곡 ⅙박)도 고름(사용자: "1 ½ 곡은 1 ½ ¼까지,
@@ -6659,6 +6883,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     wet3: 0.18,                   // 방 잔향 이득(잔향 응답 에너지 1이라 잔향/건조음 에너지 약 −13.5 dB)
     // 방 잔향(작은 방, RT60 1.2초): 확산음 20 ms부터(4 ms 페이드), 초기 반사 6개(ms, 크기), 시간에 따라 어두워짐(dark × RT60초)
     room2: { rt60: 1.2, len: 1.3, pre: 0.02, dark: 0.6, er: [[7, 0.5], [11, 0.42], [15, 0.36], [19, 0.3], [24, 0.25], [31, 0.2]] },
+    // 1.23.3 홀 잔향(사용자: "리버브도 넣어" → "너무 세게 말고 좀 약하게", "약하게만 넣어"): room2 대신 makeHallIR(room3)을 wetH 이득으로. 끄면 1.23.2와 같음(room2, wet3).
+    //  room2는 크기는 작지 않아도(잔향만 K 가중 건조음보다 −11.4~−12.5 LU) 에너지의 53%가 80 ms 안이라 울림보다 방 느낌으로 들림 →
+    //  홀 모양: RT60 가운데(500 Hz·1 kHz) 1.78초, 125·250 Hz는 1.11배, 2 kHz 0.93, 4 kHz 0.74, 8 kHz 0.56배(따뜻한 꼬리), 확산음 25 ms부터 50 ms 동안 일어남
+    //  (80 ms 안 에너지 28%), 초기 반사 3개는 작게, 2.2초. wetH 0.18(wet3와 같은 보냄): 소리판 응답 ⊛ (δ + wet·잔향)의 80 ms 뒤 에너지 +3.0 dB
+    //  (C80 15.3 → 12.3 dB), 잔향만의 크기 −10.5~−11.3 LU, 곡 전체 크기 −0.03~+0.13 LU(합성곡 3곡). 더 약하게 0.15(+1.6 dB), 조금 더 0.23(+5.0 dB)
+    //  그 뒤 사용자: "콘서트홀 리버브 다량"(샘플 B·H1~H3 중 "2.3에 웻 0.40") → 콘서트홀 모양 RT60 2.8·2.3·1.2초(낮은·가운데·높은 대역), 확산음 35 ms부터 80 ms, 3.5초, 보냄 0.40(+6.9 dB).
+    //  가벼운 홀(1.78초, 0.18)은 roomLight로 남김
+    hall: true, wetH: 0.4,
+    room3: { len: 3.5, pre: 0.035, fin: 0.08, xo: [300, 2400], rt: [2.8, 2.3, 1.2], er: [[16, 0.25], [24, 0.2], [33, 0.15]] },
+    roomLight: { len: 2.2, pre: 0.025, fin: 0.05, xo: [300, 2400], rt: [2.2, 1.75, 0.95], er: [[12, 0.3], [17, 0.25], [22, 0.2]], wet: 0.18 },
     // 1.16.1 쨍한 소리(Synth.PIANO2.bright3, 사용자: "피아노 소리 쨍하게"): 해머 펠트 차단 주파수를 높여 2~8 kHz 배음을 키움. 끄면 1.16.0 소리
     bright: true,
     sswUp: 12,                    // 피아노 반주(싱어송라이터·개성 있게)의 오른손을 높일 때 이만큼(반음) 위로: 통기타 화음 음역(대개 E2~E4)과 겹치지 않게
@@ -6674,12 +6908,79 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 느린 곡 화음 굴리기(1.23.2, 사용자: "피아노도 느린 곡에서 화음 굴려 치게"): 통기타 slowRoll과 같은 템포 비중(bpmHi BPM 아래로 내려갈수록, bpmLo 아래면 다)으로
     //  두 음 넘는 화음(왼손 꼴 빼고)을 아래 음부터 굴림. 맨 아래 ~ 맨 위 시간 = 박 길이 × soft(가장 여린 구간 수준 0) ~ loud(가장 큰 구간 수준 4),
     //  그 사이는 수준에 따라 비를 고르게, max초로 자르고 × 템포 비중, 다음 타건까지·손 떼기까지의 room배 안, min초보다 짧아지면 굴리지 않음
-    slowRoll: { on: true, bpmHi: 92, bpmLo: 66, soft: 0.16, loud: 0.05, min: 0.03, max: 0.25, room: 0.6 },
+    slowRoll: { on: true, bpmHi: 92, bpmLo: 66, soft: 0.16, loud: 0.05, min: 0.03, max: 0.25, room: 0.6,
+      // 1.23.3 굴림 모양(사용자: "피아노가 그래도 하프시코드같아"): 1.23.2는 고른 간격·같은 세기로 굴려 하프시코드 펼침처럼 들림 → 손가락이 빨라지듯
+      //  간격을 acc배씩 줄이고(맨 아래 ~ 맨 위 시간은 그대로) 맨 윗음 topDb dB, 맨 아래와 맨 위 사이 음 innerDb dB. on: false면 1.23.2와 같음
+      shape: { on: true, acc: 0.7, topDb: 2.5, innerDb: -1 } },
     makeupG: 1.26,                // grand 경로 보정 이득: 고역이 줄어 K 가중 크기가 0.9~1.0 dB 작아진 것을 채움(1.21.0과 같은 크기)
+    // 1.23.3 그랜드 소리 고침(Synth.PIANO2.grand2 + SOUNDBOARD.v3, 사용자: "피아노가 그래도 하프시코드같아"): grand가 켜졌을 때 그 위에서 실제 스타인웨이 녹음에 맞춘
+    //  배음 모양(가운데·높은 음은 기본음이 가장 크고 높은 음일수록 맑게), 음마다 기본음을 깎던 소리판 골 없앰, 5 ms로 올라오는 첫 소리와 낮은 '쿵',
+    //  높은 음은 '땅' 하고 줄어든 뒤 여음, 기본음 맥놀이. 끄면 1.23.2 소리
+    grand2: true,
+    // 1.23.3 저음 깊게(Synth.PIANO2.wound, 사용자: "저음을 좀더 깊게 울림있게 그랜드피아노처럼", "저음은 용수철로 감겨있는 현이라는걸 생각해"): grand2 위에서 C3 아래 저음을
+    //  구리선 감은 현답게(기본음·2번 배음이 굵고 맨 아래 옥타브는 첫 0.5초가 안 꺼지고 모든 부분음이 오래·비조화성 두 배, F1부터 두 줄 현, 저음 해머는 1.23.3보다 조금 무르게).
+    //  음마다 크기는 1.23.3과 같게 맞춤(makeupR 그대로). 끄면 1.23.3 저음
+    wound: true,
+    makeupR: 1.15,                // grand2 경로 보정 이득(1.23.2와 같은 크기: 합성곡 6곡 × 피아노만 세 방식 30초 K 가중, 1.23.3 전부 넣고 1.38에서 평균 +1.58 LU(콘서트홀 0.40·페달·저음·기계 소리 줄이기) → ×10^(−1.58/20))
+    // 1.23.3 오른손 높이기는 통기타를 함께 칠 때만(liftGtrOnly): sswUp은 통기타 음역을 피하려는 것인데 1.23.2까지는 피아노만 칠 때도 싱어송라이터·개성 있게의
+    //  오른손이 C5~E6 '띵' 음역(가장 높은 음 중앙값 E5, 실제 반주는 A♯3~D4)이라 가늘게 들림. 올리지 않은 오른손은 unliftG배(가운데 음역이 더 크고 길게 울려 같은 크기로)
+    liftGtrOnly: true, unliftG: 0.75,
+    // 1.23.3 셈여림 흔들림(human): 1.23.2까지는 같은 꼴이 마디마다 같은 세기(한 마디 뒤 같은 음의 78~95%가 0.25 dB 안)라 기계처럼 들림 →
+    //  음마다 고정 난수(곡 씨앗 + 타건 차례·음높이로 정해 늘 같은 소리) 표준편차 sd dB(±clip dB 안) + 2박 창 안 윗음 평균보다 높은 음은 반음당 c dB(선율 쪽이 조금 크게)
+    //  + 4마디 구절 아치(arch·(sin(π(마디 + ½)/4) − 0.64) dB: 가운데 두 마디 +0.7, 처음·끝 마디 −0.6), 곡 전체 세기(세기² × 울리는 시간)는 그대로. on: false면 1.23.2와 같음
+    human: { on: true, sd: 1.3, clip: 3, c: 0.15, arch: 2.5 },
+    // 1.23.3 서스테인 페달(pedal, 사용자: "서스테인 조금 걸고" → "서스테인은 다음 키 누를때까지 지속해줘" → "다음 같은 키를 누를때까지" → "아니다 다음 코드까지로 해줘"):
+    //  hold 'chord'(기본)면 모든 타건(왼손 꼴·채움·스탭 포함)이 그 코드가 끝날 때(다음 코드)까지 울리고(페달을 밟은 채 코드가 바뀔 때 바꾸듯) 댐퍼가 lag초 뒤에 내려옴
+    //  (실제 연주는 다음 코드 35~64 ms 뒤에 페달을 바꿈), 댐퍼 감쇠 시정수는 rel배(0.07~0.16 → 0.14~0.32초). 같은 음을 다시 칠 때 앞 소리를 막는 것은 그대로(해머가 같은 현을 다시 침).
+    //  hold 'key'면 페달을 내내 밟은 것처럼 손을 떼지 않음(같은 음을 다시 치거나 저절로 사라질 때까지). hold false면 타건마다 정한 때(엔진 e.end·코드 끝)에 lag·rel로 뗌. on: false면 1.23.2와 같음
+    //  lag 0.04·rel 2: 사용자가 샘플 F(0.04·2배)·F2(0.02·1.2배)를 듣고 F를 고름("F", "FB")
+    //  페달 소리(noise, 사용자: "페달 밟는 소리도"): 코드가 바뀔 때 페달을 바꾸는 소리(Synth.pedalNoise). 뗄 때('up': 딸깍 + 댐퍼가 내려앉는 '푸')는 새 코드 lag초 뒤,
+    //  밟을 때('down': 낮은 '쿵')는 그 press초 뒤. 크기는 음 크기 기준 dB(downDb·upDb), nVar가지 변형과 ±jit dB·±jitMs ms를 곡 씨앗 + 페달 차례 해시로 골라 매번 조금 다름(같은 곡은 늘 같음).
+    //  피아노 버스(소리판·홀)를 거침. N.C.로 들어가면 떼기만, 첫 코드는 밟기만. noise: false면 없음
+    //  downDb −20·upDb −26: 처음 −24·−30을 듣고 "페달 살짝 너무 약해" → +4 dB
+    pedal: { on: true, hold: 'chord', lag: 0.04, rel: 2, noise: true, downDb: -20, upDb: -26, press: 0.09, nVar: 3, jit: 2, jitMs: 12 },
     tieMax: 0,                    // (끔) 회색으로 끌어 둔 코드도 이 초가 지나면 손을 뗌. 0 = 다음 타건까지 누름(실제 녹음의 79%가 다음 타건에서 뗌)
+    // 1.23.3 기계 소리 줄이기(사용자: "피아노 소리가 기계로 만든 가상악기 소리같아"). 사용자가 고른 음색 B·콘서트홀 잔향 0.40·페달 F(코드 끝까지, lag 0.04·rel 2)는 그대로 두고
+    //  사람이 실제 피아노를 칠 때와 다른 점만 고침(아래 다섯 스위치, 비교 렌더링·실제 녹음과 견주어 잼). 스위치마다 on: false면 그 부분은 지금과 같음(타건 목록·노드·버퍼가 같음)
+    //  ① touch 타건 세기 음색: 음 버퍼가 해머 세기 0.55 하나라 여리게 쳐도 음색이 같고 크기만 작았음(큰 소리를 줄여 튼 것처럼: 첫 50 ms 2~4 kHz/전체가 세기에 따라 0 dB/dB).
+    //   실제 스타인웨이(아이오와 MIS pp→mf, 첫 2~50 ms)는 1 dB 여릴수록 전체 대비 1 kHz −0.8 dB, 2 kHz 위 −1.4 dB → 음마다 고역 셸프 하나(BiquadFilter highshelf f Hz,
+    //   기본음의 f0k배 아래로는 내리지 않음: 높은 음은 기본음 그대로)를 세기 이득이 기준보다 d dB 작으면 −k·d′ dB로(d′: knee dB까지는 d²/(2·knee)로 부드럽게 시작하고
+    //   그 뒤 d − knee/2, d는 max dB까지). 이 셸프 모양이 실제 pp→mf 곡선과 0.05~0.8 dB rms로 맞음(저역 통과는 0.5~3.1 dB). 기준 ref(dB)가 null이면 그 타건 목록(곡·연주
+    //   방식)의 음별 세기 이득 중앙값(S.touchRef, 곡마다 −7.9~−9.2 dB): 보통 세기 타건(중앙값에서 1 dB 여려도 2~4 kHz −0.4 dB)과 센 타건은 사용자가 고른 지금 음색 그대로
+    //   (세게 쳐도 더 쨍해지지 않음), 그보다 여린 타건만 어두워짐(3 dB 여리면 2~4 kHz −3.3 dB, 6 dB −8 dB, 9 dB −13 dB: 실제 −4·−8·−12 dB)
+    //   검증 뒤: 곡 전체 중앙값 하나는 음역마다 세기 균형(왼손 세기 배 lhVel 등)이 달라 보통 세기의 왼손 음까지 0.5~1.3 dB 어둡게 함 → 그 음 ±win반음 안 음들의 중앙값(minN개 넘을 때,
+    //   S.touchRefM, 모자라면 곡 전체 중앙값)을 기준으로. 곡 전체로 정해 재생 시작 자리와 상관없이 같음
+    touch: { on: true, ref: null, k: 1.8, knee: 2, max: 12, f: 870, f0k: 2, win: 6, minN: 12 },
+    //  ② rr 같은 음 변형(round-robin): 같은 음을 칠 때마다 똑같은 파형(배음 위상·현 사이 위상·해머 잡음)이 크기만 달리 찍혀 되풀이가 기계처럼 들림 → 음마다 변형 K개
+    //   (0 = 기본 버퍼, 1~K−1 = Synth.PIANO2.vary로 만든 len초 버퍼, 캐시 'm|v')를 바로 앞 같은 음과 다르게 번갈아 침(곡 씨앗 + 타건 차례 해시, pianoReal).
+    //   변형은 그 타건 소리가 len초 안에 사라질 때(손 떼는 때 + 댐퍼 시정수 × 3 ≤ 시작 + len − 페이드)만, hi(F♯5) 위는 기본만(기본음 하나가 커서 변형이 거의 같음).
+    //   기억 공간: 변형을 쓰는 음마다 + (K − 1) × 0.56 MB(44.1 kHz; 기본 버퍼는 길어야 14초 약 2.5 MB, 곡 하나 23~25음 약 46~49 MB(48 kHz)), 합성 시간 음마다 + 약 45%
+    rr: { on: true, K: 2, len: 3.2, hi: 78 },
+    //  ③ timing 타건 시각: 모든 타건이 박 격자에 정확히, 화음의 음이 같은 표본에서 시작하고, 굴림은 늘 같은 간격(곡마다 한 꼴), 댐퍼는 늘 0.04초 뒤였음 →
+    //   통기타는 그대로 격자에 두고 피아노만 ⓐ 타건 전체를 천천히 흐르는 흔들림(시정수 tau초 AR(1), 표준편차 sd초) + 타건마다 wsd초(합 ±clip초: 박을 따라가되 사람처럼),
+    //   ⓑ 굴리지 않는 두 음 넘는 화음은 음마다 asd초 흔들림 + 큰 음일수록 일찍(vdb초/dB, ±vclip초: 세게 친 해머가 먼저 닿음, Goebl 2001) + 왼손 꼴이 아니면 맨 윗음 lead초 앞섬
+    //   (화음 평균 시각은 그대로, 음마다 ±aclip초; 실제 화음 비동시성 표준편차 8~13 ms·윗음 6~9 ms 앞섬 — Goebl 2001·Repp 1996, 반주라 조금 작게),
+    //   ⓒ 굴림은 전체 길이 ±roll(비), 간격마다 ±gap(비), 굴림 모양(slowRoll.shape.acc) ±acc, ⓓ 코드가 바뀔 때 댐퍼가 lag ± damp초(코드 구간마다 한 값, 평균 0.04초 그대로).
+    //   난수는 곡 씨앗 + 타건 차례(같은 곡은 어느 환경에서도 같은 소리), 타건 목록(t0·t1)은 그대로이고 치는 때(playChord)만 옮김.
+    //   db: 음마다 이득 dB. 같은 때 친 옥타브·화음 음들이 늘 같은 위상으로 시작해 겹치는 배음(C3의 2번 배음과 C4 등)이 늘 같은 꼴로 상쇄·보강되던 것이 시각이 흔들리면
+    //   실제 피아노처럼 그때그때 달라져, 상쇄가 많던 곡은 K 가중 크기가 커짐(합성곡·실제 곡 6구간 +0.0~+0.5 LU) → 그 가운데만큼 줄임(타건 세기 음색은 줄이기 전 세기로)
+    timing: { on: true, sd: 0.005, tau: 1.5, wsd: 0.003, clip: 0.015, asd: 0.006, aclip: 0.015, vdb: 0.0015, vclip: 0.004, lead: 0.006, roll: 0.12, gap: 0.2, acc: 0.08, damp: 0.008, db: -0.25 },
+    //  ④ reso 공명현: 페달을 밟은 그랜드는 치지 않은 현 88개가 함께 울려 타건 뒤에 후광이 피어오르는데(샘플 피아노의 '페달 공명') 친 음의 부분음뿐이었음 →
+    //   Synth.pianoSympIR(현 88개 부분음의 공명 응답 2.5초, 기준음을 따름)에 날 소리를 통과시켜 gain배로 소리판 앞에 더함(소리판·홀을 함께 거침).
+    //   gain 0.01 = 공명이 타건 뒤 0.05~0.3초·0.3~1초에 직접음의 약 −23·−20 dB. 페달을 코드 끝까지 밟으므로 늘 켜 둠(앞 코드의 공명은 제 감쇠 0.25~0.8초로 사라짐).
+    //   노드: 2.5초 스테레오 convolver 하나(홀 잔향과 비슷한 CPU), 응답은 실시간이면 현 하나마다 8 ms씩 나눠 만듦
+    //   mono(1.23.3 검토 뒤): 공명 convolver에 좌우를 합친 한 채널을 보냄. 피아노 버스는 이미 음마다 좌우 자리(StereoPanner)에 놓였고 공명 응답도 현마다
+    //   같은 법칙으로 좌우에 놓여, 두 채널을 따로 넣으면 좌우 자리가 두 번 걸려 바깥 음의 공명이 직접음의 두 배쯤 바깥(E1 직접 +7.7 → 공명 +14.5 dB)에 놓였음.
+    //   합치면 공명이 현마다 그 현의 자리(= 그 음의 직접음 자리)에. 가운데 음의 크기는 같음. 끄면 처음(두 채널)
+    reso: { on: true, gain: 0.01, mono: true },
+    //  ⑤ hallSum 홀 잔향을 가운데서: 홀 convolver가 왼쪽·오른쪽을 따로 받아 잔향 꼬리가 음마다의 좌우 자리를 따라감(낮은 음 잔향은 왼쪽, 높은 음은 오른쪽;
+    //   실제 홀의 꼬리는 소리가 어디서 나든 퍼져 좌우가 고름) → 홀에는 좌우를 합친 한 채널을 보냄(나오는 것은 홀 응답의 두 채널이라 넓음).
+    //   합치면 좌우로 치우친 음·좌우가 다른 소리판 낮은 모드의 보냄이 줄어 보냄을 db dB 올리고, 좌우가 다른 소리판 낮은 모드가 합치며 지워진 홀 꼬리의 63~125 Hz(1~1.8 dB)를
+    //   저역 셸프(lsF Hz, +lsDb dB)로 되돌림(검증: 홀 꼬리 63~125 Hz가 끈 것과 ±0.4 dB 안, 사용자가 고른 콘서트홀 저음 그대로)
+    hallSum: { on: true, db: 0.2, lsF: 200, lsDb: 2.25 },
   };
-  // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함)
-  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); P2.steinway = !!(on && PIANO.steinway); P2.grand = !!(on && PIANO.grand); };
+  // 합성 스위치를 PIANO.v3에 맞춤(바꾸면 피아노 음 캐시를 비워야 함). grand2는 고른 소리판(SOUNDBOARD.v3)과 함께
+  const syncPianoV3 = () => { const P2 = Synth.PIANO2, on = !!(PIANO.v2 && PIANO.v3); P2.decay2 = P2.attack2 = P2.tail2 = on; Synth.SOUNDBOARD.v2 = on; P2.bright3 = !!(on && PIANO.bright); P2.steinway = !!(on && PIANO.steinway); P2.grand = !!(on && PIANO.grand); P2.grand2 = Synth.SOUNDBOARD.v3 = !!(on && PIANO.grand && PIANO.grand2); P2.wound = !!(P2.grand2 && PIANO.wound); };
   syncPianoV3();
   const GUITAR = {
     makeup: 0.98,                 // 기타 경로 고정 보정 이득: 렌더링으로 재서 피아노 코드와 같은 크기로(몸통 응답 +6 dB 상쇄, 두 곡에서 ±1 dB 안)
@@ -6690,6 +6991,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     makeup2: 0.88,                // 현별 음색(Synth.GUITAR.tone2)일 때: 같은 0.98이면 통기타만 렌더링이 K 가중 +1.0~+1.2 dB, A 가중 0~−0.1 dB(합성곡 3곡,
                                   //  굵은 현에 기본음이 실림) → −0.9 dB 덜어 K +0.1~+0.3·A −0.9~−1.0 dB에서 둘의 가운데로(피아노·음악과의 크기를 그대로)
     variants: 2,                  // 같은 음도 들뜸 잡음을 몇 가지로 바꿔 가며(같은 스트로크가 기계처럼 똑같이 들리지 않게)
+    // 1.23.3 고정 변형(사용자: "랜덤성이 없도록"): 변형 번호 = 곡 씨앗 + 스트로크 차례(코드 스트로크·뮤트를 따로 셈, 재생을 어디서 시작해도 같은 자리는 같은 소리).
+    //  끄면 1.23.2처럼 재생하며 센 수(strumN·muteN: 재생을 시작한 자리에 따라 달라짐)
+    seedVar: true,
     cacheMax: 48,                 // 기억해 둘 기타 음 버퍼 수(3초 모노, 48개 ≈ 28 MB). 합성이 음마다 약 2 ms라 넘치면 오래 안 쓴 것부터 버림
     // 현 사이 간격(1.15.1, spreadDb): 기준은 GuitarSet 반주 녹음(현별 픽업 음 시작)에서 다섯 현 넘게 친 스트로크의 현 사이 간격 중앙값
     //  다운 6.2 ms(768개, 여섯 줄 펼침 중앙값 27 ms·10% 15 ms·90% 49 ms, 곡 템포와 거의 무관)·업 7.0 ms(403개).
@@ -6731,16 +7035,20 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const voices = [];                      // 울리고 있거나 예약된 음
   const toBuffer = y => { const b = ctx.createBuffer(1, y.length, ctx.sampleRate); if (b.copyToChannel) b.copyToChannel(y, 0); else b.getChannelData(0).set(y); return b; };
   // 피아노 음: 미리 만드는 중(나눠서 합성 중)이던 음이면 남은 부분만 마저 만듦
-  const pianoJobs = new Map();            // MIDI 음 → 합성 생성기(v2)
-  function pianoNote(m) {
-    let b = pianoCache.get(m);
+  const pianoJobs = new Map();            // MIDI 음(변형이면 'm|v') → 합성 생성기(v2)
+  //  v(1.23.3 PIANO.rr): 같은 음 변형 번호(0 또는 없음 = 기본 버퍼, 캐시 열쇠는 MIDI 음 그대로). 변형은 캐시 'm|v'에 rr.len초 버퍼(Synth.PIANO2.vary)
+  const rrKey = (m, v) => v > 0 ? m + '|' + v : m;
+  const pianoSteps = (m, v) => v > 0 ? Synth.pianoV2Steps(m, ctx.sampleRate, pianoTune, PIANO.vel, v, PIANO.rr.len) : Synth.pianoV2Steps(m, ctx.sampleRate, pianoTune, PIANO.vel);
+  function pianoNote(m, v) {
+    const key = rrKey(m, v);
+    let b = pianoCache.get(key);
     if (b) return b;
     if (PIANO.v2) {
-      const g = pianoJobs.get(m) || Synth.pianoV2Steps(m, ctx.sampleRate, pianoTune, PIANO.vel);
+      const g = pianoJobs.get(key) || pianoSteps(m, v);
       let r; do { r = g.next(); } while (!r.done);
-      pianoJobs.delete(m); b = toBuffer(r.value);
+      pianoJobs.delete(key); b = toBuffer(r.value);
     } else b = toBuffer(Synth.pianoV1(m, ctx.sampleRate, pianoTune));
-    pianoCache.set(m, b);
+    pianoCache.set(key, b);
     return b;
   }
   // 기타 음 버퍼. kind('dead' 뮤트·'palm' 팜뮤트)가 있으면 뮤트 음(Synth.guitarMute, 1초)을 따로 캐시
@@ -6756,7 +7064,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     while (c.size > max) c.delete(c.keys().next().value);
     return b;
   }
-  const clearSynthCache = () => { pianoCache.clear(); pianoJobs.clear(); guitarCache.clear(); muteCache.clear(); };
+  const clearSynthCache = () => { pianoCache.clear(); pianoJobs.clear(); guitarCache.clear(); muteCache.clear(); if (typeof pedalCache !== 'undefined') pedalCache.clear(); };
   // 방 잔향 임펄스 응답: 시간이 지날수록 어두워지며 사라지는 잡음(1.6초)
   function makeRoomIR() {
     const sr = ctx.sampleRate, len = Math.round(sr * 1.6);
@@ -6797,31 +7105,91 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
     return ir;
   }
+  // 1.23.3 홀 잔향 IR(PIANO.hall): makeRoomIR2와 같은 틀(씨앗 잡음·지수 감쇠·초기 반사·두 채널 에너지 2로 맞춤)에 대역별 감쇠만 더함.
+  //  순수 함수 makeHallIR(표본율, H) → [Float32Array L, Float32Array R]: 같은 표본율이면 늘 같은 값.
+  //  잡음을 2차 저역 통과 두 개(H.xo Hz: 낮은·높은 경계)로 낮은·가운데·높은 대역으로 나누고(셋을 더하면 원래 잡음) 대역마다 RT60(H.rt초)으로 줄임
+  //   → 저음은 조금 길고 고음은 빨리 사라지는 따뜻한 꼬리(room2의 시간에 따라 어두워지는 저역 통과 대신). 확산음은 H.pre초부터 H.fin초 동안
+  //   서서히 일어남(어택 바로 뒤를 덜 덮어, 같은 꼬리에 잔향 전체 크기가 덜 커짐)
+  function makeHallIR(sr, H) {
+    const len = Math.round(sr * H.len), ir = [new Float32Array(len), new Float32Array(len)];
+    const [aL, aH] = H.xo.map(f => 1 - Math.exp(-2 * Math.PI * f / sr)), [rL, rM, rH] = H.rt.map(T => Math.exp(-6.9078 / (T * sr)));
+    for (let c = 0; c < 2; c++) {
+      const d = ir[c], p0 = Math.round(sr * H.pre), fin = Math.round(sr * H.fin);
+      let seed = 777 + c * 4242, l1 = 0, l2 = 0, h1 = 0, h2 = 0, eL = 1, eM = 1, eH = 1;   // 저역 통과 상태(경계마다 2단), 대역별 감쇠
+      for (let i = 0; i < len; i++, eL *= rL, eM *= rM, eH *= rH) {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        const x = seed / 4294967296 * 2 - 1;
+        l1 += (x - l1) * aL; l2 += (l1 - l2) * aL; h1 += (x - h1) * aH; h2 += (h1 - h2) * aH;
+        if (i < p0) continue;
+        // 낮은 대역 l2, 가운데 h2 − l2, 높은 x − h2를 대역마다 감쇠해 더함, 확산음 시작은 fin초 올림 코사인
+        d[i] = (l2 * eL + (h2 - l2) * eM + (x - h2) * eH) * (i - p0 < fin ? 0.5 - 0.5 * Math.cos(Math.PI * (i - p0) / fin) : 1);
+      }
+      // 초기 반사: makeRoomIR2와 같음(채널마다 조금 다른 시각, 부호를 바꿔 가며, 3샘플로 퍼뜨림)
+      H.er.forEach(([ms, g], j) => {
+        const i = Math.round(sr * (ms * (c ? 1.07 : 1) + (c ? 0.3 : 0)) / 1000), s = (j % 2 ? -1 : 1) * g;
+        if (i + 2 < len) { d[i] += 0.5 * s; d[i + 1] += s; d[i + 2] += 0.5 * s; }
+      });
+    }
+    let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
+    const g = 1 / Math.sqrt(e / 2);
+    for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
+    return ir;
+  }
   const stereoIR = ir => { const b = ctx.createBuffer(2, ir[0].length, ctx.sampleRate); for (let c = 0; c < 2; c++) b.getChannelData(c).set(ir[c]); return b; };
   // 공통 소리 경로: 음들 → 버스 → [몸통(소리판·기타 몸통) 응답] → (건조음 + 방 잔향) → 고정 보정 이득 → out
   // 압축기는 쓰지 않는다: 꼬리까지 끌어올려 울림이 과하게 길어지기 때문(측정으로 확인)
-  //  room(1.13): 주면 makeRoomIR2(room)을 정규화 없이(에너지 1) 씀, 없으면 1.12 방 잔향(makeRoomIR, Web Audio 정규화)
+  //  room(1.13): 주면 makeRoomIR2(room)을 정규화 없이(에너지 1) 씀, 없으면 1.12 방 잔향(makeRoomIR, Web Audio 정규화). 1.23.3: room에 xo(대역 경계)가 있으면 홀 잔향(makeHallIR)
   //  shelf(1.16.1): 주면 몸통 응답 뒤에 고역 셸프({ f: 꺾이는 주파수 Hz, db: 올림 dB })
-  function buildChain(out, bodyIR, wetGain, makeup, room, shelf) {
+  //  reso(1.23.3 PIANO.reso): 주면 공명현 가지(버스 → 공명 응답 → reso.gain → 몸통 응답 앞)를 더함. 응답은 pianoResoTune이 만들어 끼움(bus.reso)
+  //  sum(1.23.3 PIANO.hallSum): 주면 잔향 convolver가 좌우를 합친 한 채널을 받고(꼬리가 음마다의 좌우 자리를 따르지 않음) 보냄 이득 + sum.db dB
+  function buildChain(out, bodyIR, wetGain, makeup, room, shelf, reso, sum) {
     const bus = ctx.createGain(), mix = ctx.createGain();
-    let src = bus;
+    let src = bus, body = null;
     if (bodyIR) {
-      try { const body = ctx.createConvolver(); body.normalize = false; body.buffer = stereoIR(bodyIR); bus.connect(body); src = body; } catch (e) { src = bus; }
+      try { body = ctx.createConvolver(); body.normalize = false; body.buffer = stereoIR(bodyIR); bus.connect(body); src = body; } catch (e) { body = null; src = bus; }
     }
+    if (reso && reso.on) { const g = ctx.createGain(); g.gain.value = reso.gain; g.connect(body || mix); bus.reso = { bus, g, conv: null, tok: 0 }; pianoResoTune(bus.reso); }
     if (shelf) { const hs = ctx.createBiquadFilter(); hs.type = 'highshelf'; hs.frequency.value = shelf.f; hs.gain.value = shelf.db; src.connect(hs); src = hs; }
     src.connect(mix);
     try {
       const conv = ctx.createConvolver(), wet = ctx.createGain();
-      if (room) { conv.normalize = false; conv.buffer = stereoIR(makeRoomIR2(room)); } else conv.buffer = makeRoomIR();   // normalize는 buffer보다 먼저
-      wet.gain.value = wetGain;
-      src.connect(conv); conv.connect(wet); wet.connect(mix);
+      if (room) { conv.normalize = false; conv.buffer = stereoIR(room.xo ? makeHallIR(ctx.sampleRate, room) : makeRoomIR2(room)); } else conv.buffer = makeRoomIR();   // normalize는 buffer보다 먼저
+      let k = 1;
+      let ls = null;
+      if (sum) { try { conv.channelCount = 1; conv.channelCountMode = 'explicit'; k = Math.pow(10, sum.db / 20); } catch (e) { } }   // 1.23.3 홀에 좌우를 합쳐 보냄(되지 않는 브라우저는 그대로)
+      //  sum.lsDb: 좌우가 다른 소리판 낮은 모드는 합치면 일부 지워져 홀 꼬리의 63~125 Hz가 1~1.8 dB 줄어듦 → 보냄에 저역 셸프(sum.lsF Hz, +lsDb dB)로 되돌림(곡 세 개 전체 소리 옥타브 대역 rms 0.2 dB)
+      if (sum && sum.lsDb && conv.channelCount === 1) { try { ls = ctx.createBiquadFilter(); ls.type = 'lowshelf'; ls.frequency.value = sum.lsF; ls.gain.value = sum.lsDb; } catch (e) { ls = null; } }
+      wet.gain.value = wetGain * k;
+      if (ls) { src.connect(ls); ls.connect(conv); } else src.connect(conv);
+      conv.connect(wet); wet.connect(mix);
     } catch (e) { /* 잔향 없이도 동작 */ }
     mix.gain.value = makeup;
     mix.connect(out);
     return bus;
   }
+  // 1.23.3 공명현 응답(PIANO.reso)을 지금 기준음(pianoTune)으로 만들어 끼우고 앞 것은 뺌. 오프라인 렌더링은 바로, 실시간은 현 하나마다 8 ms씩 나눠(화면을 멈추지 않게;
+  //  다 될 때까지는 앞 응답이나 공명 없이 울림). 기준음이 바뀌면(곡을 불러올 때) 다시 부름
+  function pianoResoTune(R) {
+    if (!R) return;
+    const cx = ctx, tok = ++R.tok, steps = Synth.pianoSympIRSteps(cx.sampleRate, pianoTune);
+    const put = ir => {
+      if (tok !== R.tok) return;
+      try {
+        const b = cx.createBuffer(2, ir[0].length, cx.sampleRate); for (let c = 0; c < 2; c++) b.getChannelData(c).set(ir[c]);
+        const cv = cx.createConvolver(); cv.normalize = false; cv.buffer = b;
+        if (PIANO.reso.mono) { cv.channelCount = 1; cv.channelCountMode = 'explicit'; }   // 좌우를 합쳐 받음(좌우 자리를 두 번 걸지 않게)
+        R.bus.connect(cv); cv.connect(R.g);
+        if (R.conv) { try { R.bus.disconnect(R.conv); R.conv.disconnect(); } catch (e) { } }
+        R.conv = cv;
+      } catch (e) { /* 공명 없이도 동작 */ }
+    };
+    if (typeof OfflineAudioContext !== 'undefined' && cx instanceof OfflineAudioContext) { let r; do { r = steps.next(); } while (!r.done); put(r.value); return; }
+    //  1.23.3: 미리 만들기가 앞 20초 화음을 만드는 동안(warmUrgent)은 기다렸다가(최대 10초) 만듦 → 재생을 누른 직후 첫 화음 합성과 다투지 않음
+    (async () => { let waited = 0; for (;;) { if (warmUrgent && waited < 10000) { await new Promise(res => setTimeout(res, 50)); waited += 50; if (tok !== R.tok) return; continue; } const t0 = performance.now(); let r; do { r = steps.next(); } while (!r.done && performance.now() - t0 < 8); if (r.done) { put(r.value); return; } await new Promise(res => setTimeout(res, 0)); if (tok !== R.tok) return; } })();
+  }
   const buildPianoChain = out => !PIANO.v2 ? buildChain(out, null, 0.22, PIANO.makeup)
-    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.wet3, PIANO.grand ? PIANO.makeupG : PIANO.makeup3, PIANO.room2, PIANO.bright && !PIANO.grand ? PIANO.shelf : null)
+    : PIANO.v3 ? buildChain(out, Synth.soundboardIR(ctx.sampleRate), PIANO.hall ? PIANO.wetH : PIANO.wet3, PIANO.grand ? (PIANO.grand2 ? PIANO.makeupR : PIANO.makeupG) : PIANO.makeup3, PIANO.hall ? PIANO.room3 : PIANO.room2, PIANO.bright && !PIANO.grand ? PIANO.shelf : null,
+      PIANO.grand && PIANO.grand2 && PIANO.reso && PIANO.reso.on ? PIANO.reso : null, PIANO.hall && PIANO.hallSum && PIANO.hallSum.on ? PIANO.hallSum : null)   // 1.23.3 공명현·홀에 합쳐 보냄
     : buildChain(out, Synth.soundboardIR(ctx.sampleRate), 0.22, PIANO.makeup2);
   // 통기타 자체 울림(1.15.0, Synth.GUITAR.selfRes): 음들 → 버스 → 몸통 응답 → (건조음 + 공명현 응답 × sympGain) → 보정 이득 → out. 방 잔향은 없음.
   //  공명현은 곡의 기준음(pianoTune)에 맞춤 → 기준음이 바뀌면 경로를 다시 만듦(곡을 불러올 때)
@@ -6837,6 +7205,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     } catch (e) { /* 공명현 없이도 동작 */ }
     mix.gain.value = makeup;
     mix.connect(out);
+    bus.out = mix;                                  // 기준음이 바뀌어 경로를 다시 만들 때 옛 경로를 떼어 냄
     return bus;
   }
   const buildGuitarChain = out => Synth.GUITAR.selfRes ? buildGuitarSelf(out, GUITAR.makeup3)
@@ -6991,20 +7360,73 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
   // 타건마다 다음 타건(같은 자리 20 ms 안은 빼고)까지의 시간(1.23.2 화음 굴리기가 넘지 않게)
   function strikeRoom(out) { let j = 0; for (let i = 0; i < out.length; i++) { if (j < i + 1) j = i + 1; while (j < out.length && out[j].t0 <= out[i].t0 + 0.02) j++; out[i].room = j < out.length ? out[j].t0 - out[i].t0 : Infinity; } }
+  // 1.23.3 페달 소리 자리(PIANO.pedal.noise): 코드 구간 경계마다 뗌('up', 새 코드 lag초 뒤)·밟음('down', 그 press초 뒤). 같은 코드가 이어지면 바꾸지 않음, N.C.로 들어가면 떼기만, 첫 코드는 밟기만
+  function buildPedals(segs) {
+    const pd = PIANO.pedal, out = [];
+    if (pd && pd.on && pd.noise) {
+      let prev = null, down = false;                       // down: 페달을 밟고 있음(밟지 않은 짧은 코드 뒤에는 떼지 않음)
+      for (const g of segs) {
+        if (prev && !prev.nc && (g.nc || g.key !== prev.key) && down) { out.push({ t: g.t0 + pd.lag, kind: 'up' }); down = false; }
+        // 밟음은 이 코드 덩어리가 press + 2·jitMs(0.114초)보다 길 때만(아주 짧은 코드는 다음 코드의 뗌보다 늦게 밟아 순서가 뒤바뀜 — ¼박·132 BPM 넘는 곡 등)
+        if (!g.nc && (!prev || prev.nc || g.key !== prev.key) && (g.t1r != null ? g.t1r : g.t1) - g.t0 > pd.press + 2 * (pd.jitMs || 0) / 1000) {   // ±jitMs 흔들림이 있어도 다음 뗌보다 먼저
+          out.push({ t: g.t0 + pd.lag + pd.press, kind: 'down' }); down = true; }
+        prev = g;
+      }
+      out.sort((a, b) => a.t - b.t);                       // 시각 차례(재생기의 이분 탐색이 정렬을 가정)
+      out.forEach((p, i) => { p.i = i; });                 // 차례(난수 열쇠)
+    }
+    S.pedals = out; S.pedalT = Float64Array.from(out, p => p.t);
+  }
+  // 1.23.3 서스테인 페달(PIANO.pedal.hold): 타건마다 손을 떼는 때(t1)를 늘림. 'key' = 떼지 않음(음이 저절로 사라지거나 같은 음을 다시 칠 때까지: 버퍼 길이 안),
+  //  'chord' = 그 코드가 끝날 때(g.t1r: 다음 코드·N.C.)까지(페달을 밟은 채 코드가 바뀔 때 바꾸듯). 같은 코드가 마디를 넘어 이어지면 마디 줄에서 떼지 않음
+  //  (처음에는 마디마다의 구간 끝 g.t1이라, 페달 소리는 밟은 채인데 마디 줄 40 ms 뒤에 댐퍼가 내려옴 — 검토에서 찾음)
+  function pedalHold(out) {
+    const pd = PIANO.pedal; if (!pd || !pd.on || !pd.hold) return;
+    for (const s of out) { s.t1e = s.t1; if (pd.hold === 'key') s.t1 = Math.max(s.t1, s.t0 + 30); else if (s.g) { const e = s.g.t1r != null ? s.g.t1r : s.g.t1; if (isFinite(e) && e > s.t1) s.t1 = e; } }   // t1e: 페달 없이 손을 떼는 때(시험용)
+  }
+  // 1.23.3 셈여림 흔들림(PIANO.human): 타건 세기(vels)에 음마다 고정 난수 + 윗음 선율 쪽 + 4마디 구절 아치를 dB로 더하고, 곡 전체 세기(세기² × 울리는 시간)는 그대로.
+  //  난수는 곡 씨앗 + 타건 차례·음높이로 정해 같은 곡은 늘 같은 소리(되풀이 재생·시험이 같음). 구절은 마디 번호 1부터 넷씩(못갖춘마디는 앞 구절 끝). 세기가 없는 타건은 그대로
+  const hashU = (a, b) => { let h = Math.imul(a + 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b + 0x7f4a7c15, 0xc2b2ae35); h ^= h >>> 13; h = Math.imul(h, 0x27d4eb2f); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  // 곡 씨앗(1.23.3, 사용자: "곡별로 … 한 곡 당 불러오면 모든 환경에서 똑같도록, 랜덤성이 없도록"): 세기 흔들림·페달 소리·변형의 난수 열쇠는 타건 시각(ms, 브라우저 디코더에 따라
+  //  몇 ms 다를 수 있음)이 아니라 곡 씨앗(박 수·마디 수) + 차례(정수)로 → 같은 곡을 불러오면 어느 브라우저·표본율에서도 같은 값. Math.random은 재생 경로에 없음
+  const songSeed = () => S.TL ? ((S.TL.beats.length * 7919 + S.TL.bars.length * 104729) >>> 0) : 0;
+  const gaussH = (a, b) => Math.sqrt(-2 * Math.log(Math.max(1e-9, hashU(a, b)))) * Math.cos(2 * Math.PI * hashU(b + 17, a + 31));
+  function pianoHuman(out, TL) {
+    const H = PIANO.human;
+    if (!H || !H.on || !TL || !TL.beats || TL.beats.length < 2) return;
+    const b = TL.beats, nb = b.length, list = out.filter(s => s.vels && s.notes && s.vels.length === s.notes.length);
+    if (!list.length) return;
+    const xOf = t => { const i = Math.min(nb - 2, Math.max(0, lastLE(b, t + 1e-4))); return i + (t - b[i]) / (b[i + 1] - b[i]); };
+    const pw = () => list.reduce((p, s) => p + clamp(s.t1 - s.t0, 0.05, 1.5) * s.vels.reduce((q, v) => q + v * v, 0), 0);
+    const p0 = pw(), xs = list.map(s => xOf(s.t0)), win = new Map();
+    list.forEach((s, i) => { const k = Math.floor((xs[i] + 0.03) / 2); if (!win.has(k)) win.set(k, []); win.get(k).push(s); });
+    const ref = new Map();                                   // 2박 창마다 가장 낮은 음과 그 위 음들의 평균
+    for (const [k, ss] of win) { let lo = Infinity, sum = 0, c = 0; for (const s of ss) for (const m of s.notes) lo = Math.min(lo, m); for (const s of ss) for (const m of s.notes) if (m !== lo) { sum += m; c++; } ref.set(k, { lo, mm: c ? sum / c : 0, c }); }
+    list.forEach((s, i) => {
+      const w = ref.get(Math.floor((xs[i] + 0.03) / 2)), bar = TL.bars[TL.barOfBeat[Math.min(nb - 1, Math.max(0, Math.floor(xs[i] + 1e-6)))]];
+      const ph = (((bar ? bar.num : 1) - 1) % 4 + 4) % 4, arch = H.arch * (Math.sin(Math.PI * (ph + 0.5) / 4) - 0.64), ms = songSeed() + i * 31;   // 난수 열쇠: 곡 씨앗 + 타건 차례(시각이 아니라, 어떤 환경에서도 같게)
+      s.vels = s.vels.map((v, q) => { const m = s.notes[q], j = clamp(H.sd * gaussH(ms, m), -H.clip, H.clip), c = w.c && m !== w.lo ? H.c * (m - w.mm) : 0; return v * Math.pow(10, (j + c + arch) / 20); });
+    });
+    const k = Math.sqrt(p0 / (pw() || p0));
+    for (const s of list) s.vels = s.vels.map(v => v * k);
+  }
   // 타임라인 → 타건 목록. 피아노 모드: song(곡 따라), change(코드가 바뀔 때), bar(마디마다 다시), beat(박마다).
   //  통기타는 스트로크 따라: 원곡에서 친 리듬(엔진 Engine.strokes)대로 다운·업 스트로크
   function buildStrikes() {
     const TL = S.TL, out = [];
-    if (!TL || TL.empty) { S.strikes = out; S.strikeT = new Float64Array(0); S.strums = []; S.strumT = new Float64Array(0); return; }
+    if (!TL || TL.empty) { S.strikes = out; S.strikeT = new Float64Array(0); S.strums = []; S.strumT = new Float64Array(0); buildPedals([]); return; }   // 페달도 비움(앞 곡의 페달 소리가 남지 않게)
     const b = TL.beats, n = b.length;
     const tAt = x => { const i = Math.min(n - 2, Math.max(0, Math.floor(x))); return b[i] + (x - i) * (b[i + 1] - b[i]); };
     const segs = [];
     TL.bars.forEach(bar => bar.events.forEach(ev => {
       const x0 = bar.startBeat + ev.off, x1 = x0 + ev.dur;
       segs.push({ x0, x1, t0: tAt(x0), t1: tAt(x1), nc: ev.label.nc, pcs: ev.pcs, bassPc: ev.bassPc, tied: !!ev.tied,
-        key: ev.label.nc ? 'N' : ev.pcs.join('.') + '/' + ev.bassPc });
+        key: ev.label.nc ? 'N' : ev.pcs.join('.') + '/' + ev.bassPc, gi: segs.length });   // gi: 코드 구간 차례(1.23.3 댐퍼 흔들림의 난수 열쇠)
     }));
+    // 1.23.3: 같은 코드가 마디를 넘어 이어지는 구간들은 한 덩어리 — t1r: 덩어리 끝(다음 코드·N.C.), rgi: 덩어리 마지막 구간의 차례(페달·댐퍼 흔들림이 씀)
+    for (let i = segs.length - 1; i >= 0; i--) { const g = segs[i], nx = segs[i + 1]; const same = !g.nc && nx && !nx.nc && nx.key === g.key; g.t1r = same ? nx.t1r : g.t1; g.rgi = same ? nx.rgi : g.gi; }
     buildStrums(segs);                                      // 통기타는 늘 스트로크 따라(켜고 끄기와 따로 만들어 둠)
+    buildPedals(segs);                                      // 1.23.3 페달 소리 자리
     const mode = pianoMode();
     // 1.19.0 피아노 반주(엔진 pianoComp): 'ssw' 싱어송라이터(곡에 맞춘 반주, 통기타와 다른 긴 음 리듬, 오른손 PIANO.sswUp 반음 위),
     //  'flair' 개성 있게(펼침화음·런·끝 코드 굴리기). 부분: F 베이스+화음, B 베이스, O 베이스 옥타브, R 오른손 화음, A 펼침 음(사다리 = 베이스, 오른손 음, 그 한 옥타브 위)
@@ -7025,14 +7447,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
           out.push({ t0: e.t, t1: e.end, g, notes: r.notes, vels: r.notes.map(() => vv), comp: 'L', lad: r.lad, role: e.role });
           continue;
         }
-        const bass = v.notes[0], rh0 = v.notes.slice(1), up = e.hi && rh0[rh0.length - 1] + PIANO.sswUp <= 88 ? PIANO.sswUp : 0, rh = rh0.map(m => m + up);
-        const b0 = 0.62 * e.v / 0.6, r0 = 0.5 * Math.sqrt(3 / rh.length) * e.v / 0.6;
+        // 1.23.3(PIANO.liftGtrOnly): 오른손을 sswUp 위로 높이는 건 통기타를 함께 칠 때만. 올리지 않은 오른손은 unliftG배(가운데 음역이 더 크고 길게 울려서)
+        const lift = e.hi && (prefs.guitar || !PIANO.liftGtrOnly), ug = e.hi && !lift ? PIANO.unliftG : 1;
+        const bass = v.notes[0], rh0 = v.notes.slice(1), up = lift && rh0[rh0.length - 1] + PIANO.sswUp <= 88 ? PIANO.sswUp : 0, rh = rh0.map(m => m + up);
+        const b0 = 0.62 * e.v / 0.6, r0 = ug * 0.5 * Math.sqrt(3 / rh.length) * e.v / 0.6;
         let notes, vels;
         if (e.part === 'F') { notes = [bass].concat(rh); vels = [b0].concat(rh.map(() => r0)); }
         else if (e.part === 'B') { notes = [bass]; vels = [b0]; }
         else if (e.part === 'O') { const o = bass - 12 >= 28 ? bass - 12 : bass + 12; notes = [Math.min(o, bass), Math.max(o, bass)]; vels = [0.85 * b0, 0.85 * b0]; }
         else if (e.part === 'R') { notes = rh; vels = rh.map(() => r0); }
-        else { const lad = [bass].concat(rh0, rh0.map(m => m + 12)); if (e.k >= lad.length) continue; const m0 = lad[e.k]; notes = [e.k > 0 && up ? m0 + up : m0]; vels = [(e.k === 0 ? 0.62 : 0.5) * e.v / 0.6]; }
+        else { const lad = [bass].concat(rh0, rh0.map(m => m + 12)); if (e.k >= lad.length) continue; const m0 = lad[e.k]; notes = [e.k > 0 && up ? m0 + up : m0]; vels = [(e.k === 0 ? 0.62 : 0.5 * ug) * e.v / 0.6]; }
         // 굴림(e.roll초): 아래 음부터 한 음씩
         const lad = [bass].concat(rh, rh.map(m => m + 12)).filter(m => m <= 96);   // 밀도 채우기(densify)에서 한 음 사이 코드 음을 고를 사다리
         // 1.23.2: 화음 굴리기(PIANO.slowRoll)를 켜면 굴리는 화음도 한 타건으로 두고 치는 때 굴림(엔진 간격 e.roll은 가장 짧은 간격 minRoll)
@@ -7041,7 +7465,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       }
       out.splice(0, out.length, ...densify(out, TL, pianoFill));   // ssw·flair는 늘 밀도 조절(DENS_P)
       S.densP = DENS.on;
+      pianoHuman(out, TL);
+      pedalHold(out);
       strikeRoom(out);
+      pianoReal(out);                                       // 1.23.3 시각 흔들림·같은 음 변형
       S.strikes = out;
       S.strikeT = Float64Array.from(out, s => s.t0);
       return;
@@ -7097,9 +7524,55 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
     S.densP = DENS.on && DENS_P.includes(mode);
     if (S.densP) { const dense = densify(out, TL, pianoFill); out.splice(0, out.length, ...dense); }
+    pianoHuman(out, TL);
+    pedalHold(out);
     strikeRoom(out);
+    pianoReal(out);                                         // 1.23.3 시각 흔들림·같은 음 변형
     S.strikes = out;
     S.strikeT = Float64Array.from(out, s => s.t0);
+  }
+  // 1.23.3 사람이 치듯(PIANO.touch·timing·rr): 타건 세기 음색의 기준 S.touchRef(음별 세기 이득 중앙값 dB), 타건마다 차례 s.k(난수 열쇠), 시각 흔들림 s.dt초(천천히 흐르는 AR(1) + 타건마다), 댐퍼 흔들림 s.dmp초(코드 구간 끝에서 떼면
+  //  그 구간마다 한 값: 페달을 한 번 바꿈), 음별 변형 s.rr(0 = 기본). 시각 순서로 곡 전체를 한 번에 정함(난수 열쇠는 곡 씨앗 + 차례: 같은 곡은 늘 같음, 재생을 어디서 시작해도 같음)
+  function pianoReal(out) {
+    out.forEach((s, k) => { s.k = k; });
+    // 타건 세기 음색의 기준(PIANO.touch.ref가 null일 때): 음별 세기 이득(playChord와 같은 식, 굴림 모양 빼고)의 중앙값 dB
+    const gs = []; for (const s of out) if (s.notes) s.notes.forEach((m, i) => gs.push(20 * Math.log10(Math.max(1e-4, s.vels ? s.vels[i] : i === 0 ? 0.62 : 0.5 * Math.sqrt(3 / (s.notes.length - 1))))));
+    gs.sort((a, b) => a - b); S.touchRef = gs.length ? gs[gs.length >> 1] : null;
+    //  touch.win: 음마다 그 음 ±win 반음 안 음들의 세기 이득 중앙값(minN개 넘을 때)을 기준으로 — 손·음역마다 정한 크기 균형(왼손 lhVel·오른손 lvVel, 베이스 0.62 등)은 음색을 바꾸지 않고
+    //   그 음역에서 평소보다 여린 타건만 어두워짐(하나의 중앙값이면 발라드 곡 따라에서 왼손이 오른손보다 4.5 dB 작아 평소 왼손 타건도 −0.5~−1.3 dB 어두워졌음)
+    S.touchRefM = null;
+    const TW = PIANO.touch && PIANO.touch.win > 0 ? PIANO.touch : null;
+    if (TW) { const gm = []; for (const s of out) if (s.notes) s.notes.forEach((m, i) => gm.push([m, 20 * Math.log10(Math.max(1e-4, s.vels ? s.vels[i] : i === 0 ? 0.62 : 0.5 * Math.sqrt(3 / (s.notes.length - 1))))]));
+      S.touchRefM = new Float32Array(128).fill(NaN); for (let m = 21; m <= 108; m++) { const a = gm.filter(x => Math.abs(x[0] - m) <= TW.win).map(x => x[1]); if (a.length >= (TW.minN || 12)) { a.sort((x, y) => x - y); S.touchRefM[m] = a[a.length >> 1]; } } }
+    const T = PIANO.timing && PIANO.timing.on ? PIANO.timing : null, R = PIANO.v2 && PIANO.rr && PIANO.rr.on && PIANO.rr.K > 1 ? PIANO.rr : null;
+    if (!T && !R) return;
+    const seed = songSeed(), pd = PIANO.pedal && PIANO.pedal.on ? PIANO.pedal : null, last = new Map(), fade = Synth.PIANO2.vary ? Synth.PIANO2.vary.fade : 0;
+    let c = 0, tp = null;
+    const order = out.map((s, k) => k).sort((a, b) => out[a].t0 - out[b].t0 || a - b), nextSame = new Array(out.length);   // nextSame[k][q]: 그 음의 다음 타건 시각
+    if (R) { const nx = new Map(); for (let i = order.length - 1; i >= 0; i--) { const s = out[order[i]]; if (!s.notes) continue; nextSame[order[i]] = s.notes.map(m => nx.has(m) ? nx.get(m) : Infinity); for (const m of s.notes) nx.set(m, s.t0); } }
+    for (const k of order) {
+      const s = out[k], key = seed + k * 53;
+      if (T) {
+        const rho = tp == null ? 0 : Math.exp(-Math.max(0, s.t0 - tp) / T.tau);       // 앞 타건과 가까울수록 같은 쪽으로(천천히 흐름)
+        c = rho * c + Math.sqrt(1 - rho * rho) * T.sd * gaussH(key, 2001); tp = s.t0;
+        s.dt = clamp(c + T.wsd * gaussH(key, 2003), -T.clip, T.clip);
+        const ge = s.g ? (s.g.t1r != null ? s.g.t1r : s.g.t1) : NaN, gk = s.g && s.g.gi != null && isFinite(ge) && Math.abs(s.t1 - ge) < 1e-6 ? seed + (s.g.rgi != null ? s.g.rgi : s.g.gi) * 59 + 7 : key;   // 같은 때 떼는 음은 같은 흔들림
+        s.dmp = pd ? clamp(T.damp * gaussH(gk, 2007), -2 * T.damp, 2 * T.damp) : 0;
+      }
+      if (R && s.notes) {                                   // 변형: 소리가 변형 길이 안에 사라지는 타건만(가장 이른 시작·가장 늦은 댐퍼로 봄), 바로 앞 같은 음의 변형은 피함
+        //  1.23.3: 같은 음을 다시 치면 앞 소리는 그때 막히므로(playChord) 울리는 끝은 다음 같은 음 타건까지(시각 흔들림보다 멀 때만). 페달이 같은 코드 덩어리 끝까지
+        //  누르면서 t1만 보면 마디마다 다시 치는 화음의 변형이 절반쯤 사라졌음(검토에서 찾음)
+        const end = s.t1 + (pd ? pd.lag + (s.dmp || 0) : 0), t0 = s.t0 - (T ? T.clip + T.aclip : 0), gap = T ? T.clip + T.aclip : 0;
+        s.rr = s.notes.map((m, q) => {
+          if (m > R.hi) return 0;
+          let v = 0;
+          const ns = nextSame[k] ? nextSame[k][q] : Infinity, e = ns - s.t0 > gap ? Math.min(end, ns) : end;
+          if (e + 3 * Synth.pianoRelease(m) * (pd ? pd.rel : 1) <= t0 + R.len - fade) { const p = last.get(m); v = Math.floor(hashU(key, m + 3000) * (p == null ? R.K : R.K - 1)); if (p != null && v >= p) v++; }
+          last.set(m, v);
+          return v;
+        });
+      }
+    }
   }
   // 통기타가 치는 방식: 'ssw' 싱어송라이터(1.16.0 기본: 곡의 템포·느낌·구간 크기로 반주자처럼 그루브를 골라 치고 되풀이 구간은 같게, 엔진 sswStrum),
   //  'strum' 스트로크 따라(원곡 리듬), 'beat4'·'beat8'·'beat16' 4·8·16비트(곡의 박에 맞춘 교본 패턴 변주),
@@ -7172,6 +7645,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       prev = s;
     }
     for (let i = 0; i < out.length; i++) out[i].room = i + 1 < out.length ? out[i + 1].t0 - out[i].t0 : Infinity;   // 다음 스트로크까지(느린 곡 펼쳐 치기)
+    // 차례: 소리 변형을 고르는 열쇠(1.23.3 GUITAR.seedVar). 코드 스트로크와 뮤트를 따로 세어 N.C. 뮤트를 켜고 꺼도 코드 스트로크의 변형은 그대로(1.12.0부터의 성질)
+    if (GUITAR.seedVar) { let ci = 0, mi = 0; for (const s of out) s.i = s.mute ? mi++ : ci++; }
     S.strums = out;
     S.strumT = Float64Array.from(out, s => s.t0);
     S.bounceT = null;                                            // 목록이 바뀌면 튀기 차례를 재생 위치에서 다시 셈
@@ -7179,7 +7654,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 통기타 한 번 치기: 다운은 낮은 현부터 모든 현, 업은 위쪽 현 3~4개를 높은 현부터. 같은 현을 다시 치면 앞 소리는 멈춤(피크가 현을 막음)
   //  뮤트 스트로크(s.mute)는 같은 간격·방향 규칙으로 뮤트 음(1초 버퍼, 짧게 사라짐)을 치고, 치기 전에 울리던 현을 모두 막음(왼손이 줄 위에)
   const ringing = [null, null, null, null, null, null];
-  let strumN = 0, muteN = 0;   // 뮤트는 따로 세어 코드 스트로크의 변형 차례를 바꾸지 않음(N.C. 밖 소리가 그대로)
+  let strumN = 0, muteN = 0;   // GUITAR.seedVar를 끈 경우(1.23.2)의 변형 차례: 재생하며 셈. 뮤트는 따로 세어 코드 스트로크의 변형 차례를 바꾸지 않음
   //  셈여림(엔진 DYN, s.db가 수): 진폭 = 10^(db/20) 그대로(업 세기 비·바닥 없음), 현마다 세기는 실제로 친 현 수로 맞춤(업이 위쪽 현 3~4개만 쳐서 작아지지 않게),
   //   소리 층과 현 사이 간격은 마디마다 같은 tone으로(acc면 한 층 위)
   const strumLayer = s => typeof s.db === 'number' ? Math.min(2, (s.tone < 0.55 ? 0 : s.tone < 0.82 ? 1 : 2) + (s.acc ? 1 : 0)) : 1;
@@ -7228,7 +7703,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const at = when + i * gap;
       const old = ringing[x.s];
       if (old && old.end > at) { try { const p = old.g.gain; p.cancelScheduledValues(at); p.setTargetAtTime(0, at, 0.008); old.src.stop(at + 0.06); } catch (e) { } }
-      const buf = guitarNote(x.m, layer, ((kind ? muteN : strumN) + i) % GUITAR.variants, kind, x.s);
+      const buf = guitarNote(x.m, layer, ((s.i != null ? songSeed() + s.i : (kind ? muteN : strumN)) + i) % GUITAR.variants, kind, x.s);   // 변형: 곡 씨앗 + 스트로크 차례(1.23.3 seedVar, 랜덤성 없음)
       const src = ctx.createBufferSource(); src.buffer = buf;
       const gS = !kind && Synth.GUITAR.tone2 && Synth.GUITAR.gainS ? Synth.GUITAR.gainS[x.s] : 1;      // 현마다 이득(tone2, 없으면 1)
       const g = ctx.createGain(), v0 = vel * (0.62 + 0.08 * (5 - x.s) / 5) * Math.sqrt(4 / (dyn ? list.length : s.strings.length)) * kg * gS;
@@ -7252,14 +7727,25 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
   }
   // 이 타건의 음이 다 준비됐는가: 피아노 v2는 합성이 음마다 수십 ms라, 아직이면 재생 쪽에서 기다림(화면을 멈추지 않게)
-  const strikeReady = s => !!s.strings || !PIANO.v2 || s.notes.every(m => pianoCache.has(m));
+  const strikeReady = s => !!s.strings || !PIANO.v2 || s.notes.every((m, q) => pianoCache.has(rrKey(m, s.rr ? s.rr[q] : 0)));   // 1.23.3: 고른 변형(PIANO.rr)까지
   const LATE_OK = 0.3;                    // 준비가 늦은 타건을 그래도 칠 수 있는 지연(초). 넘으면 건너뜀
+  // 타건 q가 곡 시각 cur에 울리고 있어야 할 '지금 타건'인가. 왼손 꼴·채움은 cur 앞의 마지막 타건일 때만(1.23.2까지와 같음),
+  //  화음은 그 뒤 cur까지의 타건이 모두 왼손 꼴·채움이면(1.23.3: 싱어송라이터·개성 있게는 같은 시각의 오른손 화음 뒤에 왼손 'L'이 와서,
+  //  차례로만 보면 화음이 지금 타건이 아니게 되어 재생 직후 늦은 첫 화음이 빠졌음 — 검토에서 찾음)
+  const curStrike = (q, cur) => {
+    const st = S.strikes, j = lastLE(S.strikeT, cur);
+    if (q > j) return false;
+    if (st[q].comp === 'L' || st[q].fill) return q === j;
+    for (let k = q + 1; k <= j; k++) if (st[k].comp !== 'L' && !st[k].fill) return false;
+    return true;
+  };
   // 타건 하나 울리기(악기에 따라)
-  function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else playChord(s.notes, when, endAt, s.vels, pianoRollOf(s, endAt - when)); }
+  function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else { const o = {}, r = pianoRollOf(s, endAt - when, o); playChord(s.notes, when, endAt, s.vels, r, o.slow, s); } }
   // 1.23.2 느린 곡 화음 굴리기(PIANO.slowRoll): 음 사이 간격(초). 세 음 이상 화음만(왼손 꼴 빼고), 그 자리 박 길이로 템포 비중 w, 구간 수준(s.L)으로 굴리는 시간
   //  s.minRoll: 엔진이 정한 굴림 간격(싱어송라이터 느린 곡 스탭·마디 가운데 코드 PC_RROLL)이 있으면 그보다 짧게 굴리지 않음
   //  left: 치는 때부터 손을 떼는 때(endAt)까지 남은 초. 재생을 화음 끝 근처에서 다시 시작하거나 늦게 친 화음은 그 안에서 다 굴림(맨 윗음이 다음 화음 위로 넘어가지 않게)
-  function pianoRollOf(s, left) {
+  //  out: 주면 느린 곡 굴림으로 정했을 때 out.slow = true(1.23.3 굴림 모양을 그때만)
+  function pianoRollOf(s, left, out) {
     const sr = PIANO.slowRoll, m0 = s.minRoll || 0;
     if (!sr || !sr.on || s.comp === 'L' || !s.notes || s.notes.length < 3 || !S.TL || S.TL.beats.length < 2) return m0;
     const bt = S.TL.beats, i = Math.min(bt.length - 2, Math.max(0, lastLE(bt, s.t0))), bl = bt[i + 1] - bt[i], w = clamp((sr.bpmHi - 60 / bl) / (sr.bpmHi - sr.bpmLo), 0, 1);
@@ -7271,27 +7757,66 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (tot < sr.min - 1e-9) return m0;                                                     // min초보다 짧은 굴림은 들리지 않으므로 치지 않음(템포 경계 근처·자리가 좁을 때)
     const gap = Math.max(m0, tot / (s.notes.length - 1));
     S.rollLog.push({ t: s.t0, n: s.notes.length, roll: gap * (s.notes.length - 1), L: s.L, room: s.room, left }); if (S.rollLog.length > 4096) S.rollLog.shift();   // (시험용)
+    if (out) out.slow = true;
     return gap;
   }
   // 같은 피아노 음을 다시 치면 앞 소리는 짧게 막음(해머가 같은 현을 다시 침): 펼침화음·반주에서 같은 음이 페달로 겹쳐 쌓이지 않게
   const pianoRing = new Map();
-  function playChord(notes, when0, endAt, vels, roll) {
+  // 1.23.3 타건 세기 음색(PIANO.touch): 세기 이득 vel이 기준(ref dB, null이면 타건 목록의 중앙값 S.touchRef)보다 d dB 작으면 고역 셸프 −k·d′ dB
+  //  (d′: knee까지 부드럽게, f Hz, 기본음의 f0k배 아래로는 내리지 않음). 기준 위면 null(지금 소리 그대로)
+  function pianoTouch(m, vel) {
+    const T = PIANO.touch;
+    if (!T || !T.on || !PIANO.v2 || !PIANO.v3) return null;
+    const rm = S.touchRefM && m >= 0 && m < 128 && isFinite(S.touchRefM[m]) ? S.touchRefM[m] : null;   // touch.win: 그 음역의 기준
+    const d = Math.min(T.max, (T.ref != null ? T.ref : rm != null ? rm : S.touchRef != null ? S.touchRef : -8.4) - 20 * Math.log10(Math.max(vel, 1e-4))), kn = T.knee || 0;
+    const de = d <= 0 ? 0 : d < kn ? d * d / (2 * kn) : d - kn / 2;      // 기준 근처는 부드럽게(knee)
+    if (!(de > 0.03)) return null;
+    const hs = ctx.createBiquadFilter(); hs.type = 'highshelf'; hs.frequency.value = Math.max(T.f, T.f0k * Synth.f0Of(m, pianoTune)); hs.gain.value = -T.k * de;
+    return hs;
+  }
+  //  s(1.23.3): 그 타건(PIANO.timing의 s.dt·s.dmp·s.k, PIANO.rr의 s.rr). 없으면 1.23.3 그대로
+  function playChord(notes, when0, endAt, vels, roll, slow, s) {
     const nRH = notes.length - 1;
     if (PIANO.tieMax > 0) endAt = Math.min(endAt, when0 + PIANO.tieMax);   // (끔) 오래 끌어 둔 코드는 손을 뗌
+    const pd = PIANO.pedal && PIANO.pedal.on ? PIANO.pedal : null;         // 1.23.3 서스테인 조금: 댐퍼가 lag초 늦게, rel배 천천히
+    const TM = PIANO.timing && PIANO.timing.on && s && s.k != null ? PIANO.timing : null, key = TM ? songSeed() + s.k * 53 : 0;   // 1.23.3 사람이 치듯(난수 열쇠: 곡 씨앗 + 타건 차례)
+    if (pd) endAt += pd.lag + (TM && s.dmp ? s.dmp : 0);                 // 1.23.3: 댐퍼가 lag ± damp초(코드 구간마다 한 값)
     // 굴리기(roll초 간격): 낮은 음부터 차례로
     const rank = roll > 0 ? notes.map((m, i) => notes.filter((x, j) => x < m || (x === m && j < i)).length) : null;
+    // 1.23.3 굴림 모양(PIANO.slowRoll.shape, 느린 곡 굴림 slow일 때만): 간격이 acc배씩 줄고(맨 아래 ~ 맨 위 시간 roll × (음 수 − 1)은 그대로) 맨 윗음이 크게
+    const sh = rank && slow && notes.length >= 3 && PIANO.slowRoll.shape && PIANO.slowRoll.shape.on ? PIANO.slowRoll.shape : null;
+    let offs = null;
+    if (sh) { const n = notes.length; let w = 1, sum = 0; const g = []; for (let k = 1; k < n; k++) { g.push(w); sum += w; w *= sh.acc; } offs = [0]; for (let k = 1; k < n; k++) offs.push(offs[k - 1] + roll * (n - 1) * g[k - 1] / sum); }
+    // 1.23.3 굴림 흔들림(timing.roll·gap·acc): 굴림마다 전체 길이·간격·모양이 조금씩 다름(맨 아래 음은 그 자리, 엔진의 고른 굴림도)
+    if (TM && rank && roll > 0) {
+      const n = notes.length, acc = sh ? clamp(sh.acc + TM.acc * gaussH(key, 2011), 0.5, 0.9) : 1, gp = [];
+      let w = 1, sum = 0; for (let k = 1; k < n; k++) { const x = w * clamp(1 + TM.gap * gaussH(key, 2020 + k), 0.6, 1.4); gp.push(x); sum += x; w *= acc; }
+      const tot = roll * (n - 1) * clamp(1 + TM.roll * gaussH(key, 2013), 0.75, 1.25);
+      offs = [0]; for (let k = 1; k < n; k++) offs.push(offs[k - 1] + tot * gp[k - 1] / sum);
+    }
+    const vOf = i => (vels ? vels[i] : i === 0 ? 0.62 : 0.5 * Math.sqrt(3 / nRH)) * (sh ? Math.pow(10, (rank[i] === notes.length - 1 ? sh.topDb : rank[i] > 0 ? sh.innerDb : 0) / 20) : 1);
+    // 1.23.3 화음 비동시성(timing.asd·vdb·lead): 굴리지 않는 두 음 넘는 화음은 음마다 흔들림 + 큰 음일수록 일찍 + 왼손 꼴이 아니면 맨 윗음이 앞섬, 평균 0(화음 시각은 타건 흔들림 s.dt만)
+    let dA = null;
+    if (TM && !rank && notes.length >= 2) {
+      const db = notes.map((m, i) => 20 * Math.log10(Math.max(vOf(i), 1e-4))), mdb = db.reduce((p, q) => p + q, 0) / db.length, top = Math.max(...notes);
+      const a = notes.map((m, i) => TM.asd * gaussH(key, m + 1000) - clamp(TM.vdb * (db[i] - mdb), -TM.vclip, TM.vclip) - (m === top && s.comp !== 'L' ? TM.lead : 0)), ma = a.reduce((p, q) => p + q, 0) / a.length;
+      dA = a.map(x => clamp(x - ma, -TM.aclip, TM.aclip));
+    }
+    const dS = TM ? s.dt || 0 : 0, kT = TM && TM.db ? Math.pow(10, TM.db / 20) : 1;   // kT: timing.db(시각이 흔들려 커진 크기를 되돌림)
     notes.forEach((m, i) => {
-      const when = rank ? when0 + rank[i] * roll : when0;
-      const buf = pianoNote(m);
-      const rel = PIANO.v2 ? Synth.pianoRelease(m) : PIANO.release;
+      const w0 = rank ? when0 + (offs ? offs[rank[i]] : rank[i] * roll) : when0;
+      const when = TM ? Math.max(ctx.currentTime, w0 + dS + (dA ? dA[i] : 0)) : w0;   // 1.23.3 시각 흔들림(시작 전으로는 안 감)
+      const buf = pianoNote(m, s && s.rr ? s.rr[i] : 0);                 // 1.23.3 같은 음 변형(PIANO.rr, 0 = 기본)
+      const rel = (PIANO.v2 ? Synth.pianoRelease(m) : PIANO.release) * (pd ? pd.rel : 1);
       const src = ctx.createBufferSource();
       src.buffer = buf;
       const g = ctx.createGain();
-      const vel = vels ? vels[i] : i === 0 ? 0.62 : 0.5 * Math.sqrt(3 / nRH);
+      const vel = vOf(i);
       const old = pianoRing.get(m);
       if (old && old.end > when && old.when < when) { try { const p = old.g.gain; p.cancelScheduledValues(when); p.setTargetAtTime(0, when, 0.03); old.src.stop(when + 0.25); } catch (e) { } }
-      g.gain.value = vel;
-      src.connect(g);
+      g.gain.value = vel * kT;
+      const hs = pianoTouch(m, vel);                         // 1.23.3 타건 세기 음색: 여린 타건은 고역 셸프를 거쳐
+      if (hs) { src.connect(hs); hs.connect(g); } else src.connect(g);
       let out = g;
       if (ctx.createStereoPanner) {                          // 낮은 음은 왼쪽, 높은 음은 오른쪽(연주자 시점)
         const pn = ctx.createStereoPanner();
@@ -7301,15 +7826,30 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       out.connect(pianoBus);
       src.start(when);
       if (endAt < when + buf.duration) {                     // 다음 코드에서 댐퍼가 내려오듯 부드럽게 멈춤
-        g.gain.setValueAtTime(vel, endAt);
+        g.gain.setValueAtTime(vel * kT, endAt);
         g.gain.setTargetAtTime(0, endAt, rel);
         src.stop(endAt + 8 * rel);
       }
       const v = { src, g, when, ins: 'p', end: Math.min(endAt + 8 * rel, when + buf.duration) };
       pianoRing.set(m, v);
       voices.push(v);
-      src.onended = () => { const k = voices.indexOf(v); if (k >= 0) voices.splice(k, 1); try { out.disconnect(); g.disconnect(); } catch (e) { } };
+      src.onended = () => { const k = voices.indexOf(v); if (k >= 0) voices.splice(k, 1); try { out.disconnect(); g.disconnect(); if (hs) hs.disconnect(); } catch (e) { } };
     });
+  }
+  // 1.23.3 페달 소리 울리기: p = {t(곡 시각), kind 'up'·'down'}, when = 오디오 시각. 변형·크기·시각 흔들림은 곡 씨앗 + 페달 차례 해시로(같은 곡은 늘 같음), 피아노 버스(소리판·홀)로
+  const pedalCache = new Map();
+  function playPedal(p, when) {
+    const pd = PIANO.pedal; if (!pd || !pd.on || !pd.noise || !pianoBus) return;
+    const ms = songSeed() + (p.i | 0) * 37, v = Math.min(pd.nVar - 1, Math.floor(hashU(ms, p.kind === 'down' ? 11 : 13) * pd.nVar)), key = p.kind + '|' + v;   // 열쇠: 곡 씨앗 + 차례
+    let buf = pedalCache.get(key); if (!buf) { buf = toBuffer(Synth.pedalNoise(ctx.sampleRate, p.kind, v)); pedalCache.set(key, buf); }
+    const db = (p.kind === 'down' ? pd.downDb : pd.upDb) + (hashU(ms, 17) * 2 - 1) * pd.jit, dt = (hashU(ms, 19) * 2 - 1) * pd.jitMs / 1000;
+    const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = Math.pow(10, db / 20); src.connect(g);
+    let out = g;
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = -0.15 + 0.3 * hashU(ms, 23); g.connect(pn); out = pn; }   // 페달은 가운데 근처
+    out.connect(pianoBus);
+    const t0 = Math.max(when + dt, ctx.currentTime); src.start(t0);
+    const vv = { src, g, when: t0, ins: 'p', end: t0 + buf.duration }; voices.push(vv);
+    src.onended = () => { const k = voices.indexOf(vv); if (k >= 0) voices.splice(k, 1); try { out.disconnect(); g.disconnect(); } catch (e) { } };
   }
   // 울리는 음 멈추기: ins 'p'(피아노)·'g'(통기타)만, 없으면 모두
   function cancelVoices(ins) {
@@ -7332,6 +7872,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 곡에 필요한 음을 지금 위치부터 나오는 순서대로 미리 합성(재생 중 끊김 방지). 피아노 v2는 배음 단위로 나눠
   //  한 번에 약 10 ms씩만 만들고 화면에 차례를 넘김(50 ms 넘게 멈추는 작업이 없게). 통기타는 보통 세기 층만 미리
   let warmToken = 0;
+  let warmUrgent = false;                    // 1.23.3: 미리 만들기가 앞 20초 화음을 만드는 중(공명현 응답 만들기는 그동안 기다림: 재생을 누른 직후 첫 화음이 늦지 않게)
   async function warmPiano() {
     if (!ctx || !(prefs.piano || prefs.guitar)) return;
     const tok = ++warmToken, need = [], t = player.pos();
@@ -7341,34 +7882,40 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const from = Math.max(0, lastLE(times, t));
       for (let q = 0; q < list.length; q++) {
         const s = list[(from + q) % list.length], kind = s.mute || '', layer = gtr ? strumLayer(s) : 1;      // 통기타 뮤트 스트로크는 뮤트 음(kind)으로, 셈여림이면 그 소리 층으로
-        const ns = gtr && s.strings ? s.strings.map(x => ({ m: x.m, str: kind ? null : x.s })) : s.notes.map(m => ({ m, str: null }));
-        for (const { m, str } of ns) if (!need.some(x => x.m === m && x.str === str && x.gtr === gtr && x.kind === kind && x.layer === layer) && (gtr || !pianoCache.has(m))) need.push({ m, str, gtr, kind, layer });
+        const ns = gtr && s.strings ? s.strings.map(x => ({ m: x.m, str: kind ? null : x.s, v: 0 })) : s.notes.map((m, q) => ({ m, str: null, v: s.rr ? s.rr[q] : 0 }));   // v: 1.23.3 같은 음 변형(PIANO.rr)
+        for (const { m, str, v } of ns) if (!need.some(x => x.m === m && x.v === v && x.str === str && x.gtr === gtr && x.kind === kind && x.layer === layer) && (gtr || !pianoCache.has(rrKey(m, v)))) need.push({ m, v, str, gtr, kind, layer });
       }
     };
     // 1.23.0: 피아노는 앞으로 20초 안의 화음(왼손 꼴·채움 빼고)을 먼저 → 재생을 바로 시작해도 화음이 빠지지 않게
     if (prefs.piano && S.strikes) { const ix = []; S.strikes.forEach((s, q) => { if (s.comp !== 'L' && !s.fill && s.t0 >= t - 1 && s.t0 < t + 20) ix.push(q); }); add(ix.map(q => S.strikes[q]), Float64Array.from(ix, q => S.strikes[q].t0), false); }
+    const nNear = need.length;                                 // 1.23.3: 이만큼(앞 20초 화음)을 만드는 동안은 warmUrgent(공명현 응답 만들기가 기다림)
     if (prefs.piano) add(S.strikes, S.strikeT, false);
     if (prefs.guitar) add(S.strums, S.strumT, true);
     const yieldNow = () => new Promise(r => setTimeout(r, 0));
-    for (const { m, str, gtr, kind, layer } of need) {
+    warmUrgent = nNear > 0;
+    for (let qi = 0; qi < need.length; qi++) {
+      const { m, v, str, gtr, kind, layer } = need[qi];
       if (tok !== warmToken) return;
+      if (qi >= nNear) warmUrgent = false;
       if (gtr) {
         if ((kind ? muteCache : guitarCache).size + GUITAR.variants <= (kind ? GUITAR.muteCacheMax : GUITAR.cacheMax)) for (let v = 0; v < GUITAR.variants; v++) guitarNote(m, layer, v, kind, str);
         await yieldNow(); continue;
       }
-      if (pianoCache.has(m)) continue;
+      const key = rrKey(m, v);                               // 1.23.3: 변형(PIANO.rr)이면 'm|v'
+      if (pianoCache.has(key)) continue;
       if (!PIANO.v2) { pianoNote(m); await yieldNow(); continue; }
-      let g = pianoJobs.get(m);
-      if (!g) { g = Synth.pianoV2Steps(m, ctx.sampleRate, pianoTune, PIANO.vel); pianoJobs.set(m, g); }
+      let g = pianoJobs.get(key);
+      if (!g) { g = pianoSteps(m, v); pianoJobs.set(key, g); }
       for (;;) {
         const t0 = performance.now(); let r;
         do { r = g.next(); } while (!r.done && performance.now() - t0 < 10);
-        if (r.done) { if (pianoJobs.get(m) === g) { pianoJobs.delete(m); if (!pianoCache.has(m)) pianoCache.set(m, toBuffer(r.value)); } break; }
+        if (r.done) { if (pianoJobs.get(key) === g) { pianoJobs.delete(key); if (!pianoCache.has(key)) pianoCache.set(key, toBuffer(r.value)); } break; }
         await yieldNow();
         if (tok !== warmToken) return;
-        if (pianoCache.has(m) || pianoJobs.get(m) !== g) break;                 // 재생 쪽에서 먼저 마저 만들었으면
+        if (pianoCache.has(key) || pianoJobs.get(key) !== g) break;             // 재생 쪽에서 먼저 마저 만들었으면
       }
     }
+    if (tok === warmToken) warmUrgent = false;
   }
 
   function decode(ab) {
@@ -7387,17 +7934,30 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 시험용: 코드 연주(와 원곡)를 지금 앱과 같은 소리 경로로 오프라인 렌더링해 스테레오 Float32Array 두 개로 돌려줌.
   //  window.__chordityRender(시작 초, 길이 초, {music: 원곡 섞는 비, piano: 피아노 켬, guitar: 통기타 켬, v2: 피아노 v2 여부, v3: 1.13 피아노 여부, grand: 1.22 그랜드 소리 여부, slowRoll: 1.23.1 느린 곡 펼쳐 치기 여부, pianoRoll: 1.23.2 느린 곡 화음 굴리기 여부, guitarMode: 통기타 치는 방식, pianoMode: 피아노 치는 때})
   //  piano·guitar·guitarMode를 빼면 지금 상태를 따름
+  const REAL = ['touch', 'rr', 'timing', 'reso', 'hallSum'];   // 1.23.3 기계 소리 줄이기 스위치(PIANO)
   async function offlineRender(from, dur, opt) {
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN };
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
+      grand2: PIANO.grand2, human: PIANO.human.on, shape: PIANO.slowRoll.shape.on, lift: PIANO.liftGtrOnly, hall: PIANO.hall, wetH: PIANO.wetH, pedal: PIANO.pedal.on, pedalO: PIANO.pedal, soft: Synth.PIANO2.G6.soft, room3: PIANO.room3, wound: PIANO.wound,
+      real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
     const oc = new OfflineAudioContext(2, Math.ceil(dur * sr), sr);
     try {
       ctx = oc; if (opt.v2 != null) PIANO.v2 = !!opt.v2; if (opt.v3 != null) PIANO.v3 = !!opt.v3; if (opt.grand != null) PIANO.grand = !!opt.grand; if (opt.slowRoll != null) GUITAR.slowRoll.on = !!opt.slowRoll; if (opt.pianoRoll != null) PIANO.slowRoll.on = !!opt.pianoRoll; syncPianoV3(); if (opt.guitarMode) prefs.guitarMode = opt.guitarMode; if (opt.pianoMode) prefs.pianoMode = opt.pianoMode;
+      // 1.23.3 스위치(비교·시험용): grand2 소리, human 셈여림 흔들림, rollShape 굴림 모양, liftGtrOnly 오른손 높이기는 통기타와 함께일 때만, hall 홀 잔향
+      if (opt.grand2 != null) { PIANO.grand2 = !!opt.grand2; syncPianoV3(); } if (opt.human != null) PIANO.human.on = !!opt.human; if (opt.rollShape != null) PIANO.slowRoll.shape.on = !!opt.rollShape; if (opt.liftGtrOnly != null) PIANO.liftGtrOnly = !!opt.liftGtrOnly;
+      if (opt.hall != null) PIANO.hall = !!opt.hall; if (opt.wetH != null) PIANO.wetH = +opt.wetH;   // wetH: 홀 잔향 보냄 이득(세 단계 샘플 비교용)
+      if (opt.pedal != null) PIANO.pedal.on = !!opt.pedal; if (opt.soft != null) Synth.PIANO2.G6.soft = !!opt.soft;   // pedal 서스테인 조금, soft 쨍함 뺀 소리
+      if (opt.wound != null) { PIANO.wound = !!opt.wound; syncPianoV3(); }   // wound: 저음 깊게(비교 샘플용)
+      if (opt.seedVar != null) GUITAR.seedVar = !!opt.seedVar;   // seedVar: 통기타 고정 변형(끄면 1.23.2처럼 렌더링 처음부터 셈)
+      if (opt.room3) PIANO.room3 = Object.assign({}, PIANO.room3, opt.room3);   // room3: 홀 잔향 모양 덮어쓰기(비교 샘플용)
+      if (opt.pedalP) PIANO.pedal = Object.assign({}, PIANO.pedal, opt.pedalP);   // pedalP: 페달 hold·lag·rel 덮어쓰기(비교 샘플용)
+      // 1.23.3 기계 소리 줄이기(비교·시험용): touch·rr·timing·reso·hallSum 켬·끔(real: 다섯 가지를 한꺼번에), touchP·rrP·timingP·resoP·hallSumP: 값 덮어쓰기
+      for (const k of REAL) { const on = opt[k] != null ? opt[k] : opt.real; if (on != null || opt[k + 'P']) PIANO[k] = Object.assign({}, PIANO[k], opt[k + 'P'] || {}, on != null ? { on: !!on } : {}); }
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
@@ -7415,12 +7975,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
           strike(st, Math.max(0, st.t0 - from), Math.max(0.05, st.t1 - from));
         }
       }
+      if (usePiano) for (const p of S.pedals || []) if (p.t >= from - 0.02 && p.t < from + dur) playPedal(p, Math.max(0, p.t - from));   // 1.23.3 페달 소리
       const r = await oc.startRendering();
       return [r.getChannelData(0), r.getChannelData(1)];
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
       strumN = saved.strumN; muteN = saved.muteN;
-      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
+      ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll;
+      PIANO.grand2 = saved.grand2; PIANO.human.on = saved.human; PIANO.slowRoll.shape.on = saved.shape; PIANO.liftGtrOnly = saved.lift; PIANO.hall = saved.hall; PIANO.wetH = saved.wetH; PIANO.pedal = saved.pedalO; PIANO.pedal.on = saved.pedal; Synth.PIANO2.G6.soft = saved.soft; PIANO.room3 = saved.room3; PIANO.wound = saved.wound; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
+      REAL.forEach((k, i) => { PIANO[k] = saved.real[i]; }); GUITAR.seedVar = saved.seedVar;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
@@ -7433,13 +7996,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRolls = () => S.rollLog.splice(0);                                  // (시험용) 피아노가 굴려 친 화음 {t, n, roll(맨 아래 ~ 맨 위 초), L}(1.23.2)
   window.__chordityGaps = () => S.gapLog.splice(0);                                    // (시험용) 통기타가 친 스트로크의 줄 사이·세기 dB(1.23.1 느린 곡 펼쳐 치기)
   window.__chordityTL = () => S.TL ? { beats: Array.from(S.TL.beats), res: S.TL.res, bars: S.TL.bars.map(b => ({ s: b.startBeat, n: b.nBeats, ch: b.events.map(e => (e.label.nc ? 'N.C.' : e.label.text) + '@' + (e.off + 1)).join(' ') })) } : null;   // 박·마디(시험용)
-  window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, notes: s.notes.slice(), part: s.comp || '', fill: !!s.fill, vel: s.vels ? Math.max(...s.vels) : null, role: s.role || '' }));   // 피아노 타건(시험용)
+  window.__chordityPedals = () => (S.pedals || []).map(p => ({ t: p.t, kind: p.kind }));   // 페달 소리 자리(시험용, 1.23.3)
+  window.__chordityStrikes = () => (S.strikes || []).map(s => ({ t0: s.t0, t1: s.t1, t1e: s.t1e != null ? s.t1e : s.t1, notes: s.notes.slice(), part: s.comp || '', fill: !!s.fill, vel: s.vels ? Math.max(...s.vels) : null, role: s.role || '' }));   // 피아노 타건(시험용)
 
   // ---------------- 재생기 + 메트로놈 스케줄러 ----------------
   // 클릭은 setInterval 타이밍이 아니라 AudioContext 시계에 미리(200 ms 앞) 예약한다.
   // 음악 소스와 같은 시계를 쓰므로 클릭 = startCtx + (비트 시각 − 재생 시작 위치) 로 샘플 단위 정렬된다.
   const player = {
-    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, nextStrum: 0, timer: 0, clicks: [], subFrom: -1,
+    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, nextStrum: 0, nextPedal: 0, timer: 0, clicks: [], subFrom: -1,
     dur() { return S.buffer ? S.buffer.duration : 0; },
     // 시작 예약(60 ms) 전에는 이동한 지점으로 고정: 그래야 → 키를 연달아(자동 반복) 눌러도 다음 마디로 계속 넘어감
     pos() { return this.playing ? this.startOff + Math.max(0, ctx.currentTime - this.startCtx) : this.pausedAt; },
@@ -7493,7 +8057,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       cancelVoices(ins);
       const t = this.playing ? Math.max(this.startOff, this.pos()) : this.pausedAt;
       const doP = !ins || ins === 'p', doG = !ins || ins === 'g';
-      if (doP) { this.nextStrike = lastLE(S.strikeT, t - 1e-4) + 1; this.restart = null; }
+      if (doP) { this.nextStrike = lastLE(S.strikeT, t - 1e-4) + 1; this.nextPedal = lastLE(S.pedalT || [], t - 1e-4) + 1; this.restart = null; }
       if (doG) this.nextStrum = lastLE(S.strumT || [], t - 1e-4) + 1;
       if ((prefs.piano || prefs.guitar) && S.strikes) warmPiano();      // 옮긴 자리부터 다시 미리 만들기
       if (!this.playing) return;
@@ -7502,8 +8066,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const g = doG && prefs.guitar && S.strums ? S.strums[this.nextStrum - 1] : null, nx = g ? S.strums[this.nextStrum] : null;
       if (g && !g.mute && t < g.t1 - 0.1 && !(nx && nx.t0 < t + 0.1)) strike(Object.assign({}, g, { dir: 1 }), Math.max(ctx.currentTime, this.startCtx + (t - this.startOff)), this.startCtx + (g.t1 - this.startOff));
       if (!doP || !prefs.piano) return;
-      // 코드 한가운데서 재생을 시작하면 지금 코드를 곧바로 한 번 울림(음이 아직 준비 중이면 schedule에서 준비되는 대로)
-      const s = S.strikes[this.nextStrike - 1];
+      // 코드 한가운데서 재생을 시작하면 지금 코드를 곧바로 한 번 울림(음이 아직 준비 중이면 schedule에서 준비되는 대로).
+      //  1.23.3: 그 앞의 왼손 꼴·채움 너머 아직 울리는 화음이 있으면 그 화음을(싱어송라이터는 같은 시각의 화음 뒤에 왼손이 와서 베이스 음만 다시 울렸음)
+      let s = S.strikes[this.nextStrike - 1];
+      if (s && (s.comp === 'L' || s.fill)) for (let q = this.nextStrike - 2; q >= 0; q--) { const c = S.strikes[q]; if (c.comp === 'L' || c.fill) continue; if (t < c.t1 - 0.1) s = c; break; }
+      //  1.23.3: 0.1초 안에 화음 타건이 있으면 다시 울리지 않음(통기타와 같은 규칙). 페달이 같은 코드 덩어리 끝까지 누르면서, 같은 코드가 이어지는 마디 줄에서
+      //  재생을 시작하면 앞 마디 화음을 다시 울리고 그 마디 화음도 쳐서 같은 음이 겹쳤음(검토에서 찾음)
+      for (let q = this.nextStrike; s && q < S.strikes.length && S.strikes[q].t0 < t + 0.1; q++) if (S.strikes[q].comp !== 'L' && !S.strikes[q].fill) s = null;
       this.restart = s && t < s.t1 - 0.1 ? s : null;
       if (this.restart && strikeReady(s)) { strike(s, Math.max(ctx.currentTime, this.startCtx + (t - this.startOff)), this.startCtx + (s.t1 - this.startOff)); this.restart = null; }
     },
@@ -7565,9 +8134,23 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         if (prefs.piano && s.t0 < this.dur() && when >= now - LATE_OK) {
           // 1.23.0: 준비 안 된 왼손 꼴·밀도 채움 음은 기다리지 않고 건너뜀(뒤의 화음을 막지 않게)
           if (!strikeReady(s)) { if (s.comp === 'L' || s.fill) { this.nextStrike++; continue; } break; }   // 화음은 다음 차례(25 ms 뒤)에 다시
-          if (when >= now - 0.01 || this.nextStrike === lastLE(S.strikeT, cur)) strike(s, Math.max(when, now), this.startCtx + (s.t1 - this.startOff));
-        }
+          if (when >= now - 0.01 || curStrike(this.nextStrike, cur)) {
+            strike(s, Math.max(when, now), this.startCtx + (s.t1 - this.startOff));
+            if (this.restart && this.restart !== s && this.restart.t0 < s.t0 && s.comp !== 'L' && !s.fill) this.restart = null;   // 1.23.3: 새 화음을 쳤으면 기다리던 앞 화음은 다시 울리지 않음
+          }
+        } else if (prefs.piano && s.t0 < this.dur() && s.comp !== 'L' && !s.fill && cur < s.t1 - 0.1 && curStrike(this.nextStrike, cur)) this.restart = s;
+        //  1.23.3: LATE_OK 넘게 늦은 화음도 지금 자리가 아직 그 화음 안이면 건너뛰지 않고 준비되는 대로 지금 침(가운데서 재생을 시작할 때와 같이).
+        //   재생을 누른 직후 미리 만들기가 첫 화음을 다 못 만들었을 때 첫 화음(과 그 뒤 2초쯤)이 빠지던 것
         this.nextStrike++;
+      }
+      // 1.23.3 페달 소리(피아노가 켜졌을 때만, 꺼져 있어도 차례는 넘겨 둠)
+      const ps = S.pedals || [];
+      while (this.nextPedal < ps.length) {
+        const p = ps[this.nextPedal];
+        if (p.t > horizon) break;
+        const when = this.startCtx + (p.t - this.startOff);
+        if (prefs.piano && when >= now - 0.01 && p.t < this.dur()) playPedal(p, Math.max(when, now));
+        this.nextPedal++;
       }
       // 통기타 스트로크(꺼져 있어도 차례는 넘겨 둠 → 켜면 바로 지금 자리부터)
       const gs = S.strums || [];
@@ -7659,7 +8242,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (token !== loadToken) return;
     S.buffer = buf; S.A = A; S.name = file.name.replace(/\.[^.]+$/, '');
     // 피아노를 이 녹음의 기준음에 맞춤(0.5 cent 넘게 달라지면 다시 합성)
-    if (Math.abs(A.harm.tuning - pianoTune) > 0.005) { clearSynthCache(); pianoTune = A.harm.tuning; if (ctx && Synth.GUITAR.selfRes) guitarBus = buildGuitarChain(guitarGain); }
+    if (Math.abs(A.harm.tuning - pianoTune) > 0.005) { clearSynthCache(); pianoTune = A.harm.tuning; if (ctx && Synth.GUITAR.selfRes) { if (guitarBus && guitarBus.out) try { guitarBus.out.disconnect(); } catch (e) { } guitarBus = buildGuitarChain(guitarGain); } if (ctx && pianoBus && pianoBus.reso) pianoResoTune(pianoBus.reso); }   // 1.23.3 공명현도 기준음을 따름
     S.set = Object.assign(Engine.defaultSettings(), { vocab: prefs.vocab, res: resOf(prefs.res), slash: !!prefs.slash });
     player.pausedAt = 0;
     $('busy').hidden = true; $('app').hidden = false;
