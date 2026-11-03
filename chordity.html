@@ -416,7 +416,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.5">v1.26.5</span>
+    <span class="ver" title="Chordity 버전 1.26.6">v1.26.6</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -9017,6 +9017,7 @@ const Synth = (function () {
   //   vel(0~1)은 음색(채 접촉 시간 → 밝기, 어택·클릭, rock의 포화)만 바꾸고 크기는 재생 쪽(vel^velExp × 10^(mix[kit][kind]/20))
   //   variant 0은 늘 같은 소리(기준 음높이·치는 자리), 1, 2, …는 잡음을 새로 뽑고 음높이(±0.6%)·감쇠·치는 자리를 살짝 흔듦(라운드 로빈)
   //  drumRoomIR(sr, kit) → [L, R] 방 잔향(초기 반사 + 3대역 잡음 꼬리, 두 채널 에너지 2: makeHallIR과 같은 기준, 젖은 소리만)
+  //  drumBandRoomIR(sr, kit) → [L, R] 1.26.6 밴드룸 잔향(8 × 6 × 3 m 합주실 거울상 초기 반사 + 확산 꼬리, 두 채널 에너지 2, 젖은 소리만, DRUM.bandRoom)
   //  음색 기준: MDB Drums(MedleyDB 23곡 드럼 트랙)의 고립 타격 대역 에너지·감쇠에 맞춤(막은 0.5~2 kHz의 빽빽한 높은 모드, 스네어 줄은 생각보다 작게, 하이햇은 1~5 kHz '칙'도)
   const DRUM = {
     kinds: ['kick', 'snare', 'side', 'hhc', 'hho', 'hhp', 'ride', 'bell', 'crash', 'tomH', 'tomM', 'tomL'],
@@ -9121,6 +9122,20 @@ const Synth = (function () {
       light: { kick: -2.5, snare: -2, side: 2, hhc: -7.5, hho: -8.5, hhp: -4.5, ride: -10, bell: -7.5, crash: -6.5, tomH: -1.5, tomM: -1, tomL: -0.5 },
     },
   };
+  // 1.26.6 밴드룸(사용자: "드럼 리미터 빼고 퍽퍽 퍼지는 소리 빼고 실제 밴드 드럼처럼 밴드부 드럼처럼 잔향"): 학교 밴드부 합주실에서 친 키트의 방 소리(drumBandRoomIR, 젖은 소리만)
+  //  옛 방(room)은 에너지 85~96%가 첫 80 ms 안(2~29 ms 촘촘한 초기 반사 + 0.4~0.6초 꼬리)이라 타격마다 짧은 덩어리로 붙음 → 방 크기·자리에서 거울상으로 반사 시각을 셈:
+  //  dim 방 [길이 x, 너비 y, 높이 z] m, src 키트 자리(스네어 높이), mic [왼쪽, 오른쪽] 듣는 자리(관객 시점, 키트에서 3.7 m, 1.2 m 벌림: 좌우 반사 시각이 달라 넓게), c 소리 빠르기 m/s,
+  //  beta 면마다 반사 크기 [x0 키트 뒤 벽, x1 듣는 쪽 벽, y0·y1 옆벽, z0 바닥(마루), z1 천장(흡음 천장재)], order 거울상 차수(면에 부딪힌 횟수 합),
+  //  erLp 반사 한 번 낮은 통과 Hz(한 번 더 부딪힐 때마다 × erLpK: 벽·공기가 고역을 먹음), scat 반사마다 흩어짐(짧은 잡음 꼬리) [크기, τ초],
+  //  직접음은 넣지 않음(건조음이 직접음): 첫 반사는 바닥 12.9 ms(방 마이크 거리만큼 늦음) → 타격(0~10 ms)은 건조하게 앞에, 방은 그 뒤에.
+  //  tail 확산 꼬리: xo 대역 경계 Hz, rt 대역별 RT60(낮은·가운데·높은, 가운데 0.95초: 밴드부 합주실 0.7~1.0초; 초기 반사까지 넣은 슈뢰더 RT60은 0.8초 언저리), bg 대역 크기(낮은 대역 작게: 킥 저역이 방에서 웅웅 쌓이지 않게),
+  //   rise 첫 반사부터 쌓이는 시간(초), share 젖은 소리 에너지 중 꼬리 몫, hp·lp 젖은 소리 고역·저역 통과 Hz(방 소리는 건조음보다 어둡게: 하이햇·심벌이 방에서 '쉬-' 하고 쌓이지 않게),
+  //   len 길이(초), fade 끝 페이드(초)
+  //  wet: 키트마다 보냄 dB(ui.js DRUM.band 경로), hiG: 키트마다 높은 대역 꼬리 크기 배(가벼운 키트·브러시는 조금 어둡게)
+  DRUM.bandRoom = { dim: [8, 6, 3], src: [2.0, 3.0, 0.9], mic: [[5.6, 2.4, 1.6], [5.6, 3.6, 1.6]], c: 343,
+    beta: [0.8, 0.75, 0.8, 0.8, 0.85, 0.55], order: 3, erLp: 9000, erLpK: 0.6, scat: [0.35, 0.0015],
+    tail: { xo: [250, 3000], rt: [0.85, 0.95, 0.7], bg: [0.45, 1, 0.55], rise: 0.05, share: 0.8, hp: 120, lp: 9000 }, len: 1.3, fade: 0.12,
+    wet: { rock: -12, light: -13 }, hiG: { rock: 1, light: 0.8 } };
   // 브러시 키트(1.26.0 키트 고르기): 가벼운 키트에 스네어만 브러시(brush 1: 크랙 없이 느린 어택 + 쓸림). 크기·섞음·방은 가벼운 키트 그대로
   DRUM.kit.brush = Object.assign({}, DRUM.kit.light, { snare: Object.assign({}, DRUM.kit.light.snare, { brush: 1 }) });
   DRUM.lvl.brush = DRUM.lvl.light; DRUM.mix.brush = DRUM.mix.light;
@@ -9424,9 +9439,72 @@ const Synth = (function () {
     return ir;
   }
 
+  // 1.26.6 밴드룸 잔향(젖은 소리만, 두 채널 에너지 2): 거울상 초기 반사(3차까지, 좌우 다른 자리) + 3대역 잡음 확산 꼬리(채널마다 다른 씨앗). DRUM.bandRoom 참고
+  function drumBandRoomIR(sr, kit) {
+    const B = DRUM.bandRoom, T = B.tail, len = Math.round(sr * B.len), ir = [new Float32Array(len), new Float32Array(len)];
+    const light = kit !== 'rock', hiG = B.hiG[light ? 'light' : 'rock'], N = B.order, s = B.src;
+    // 축 하나에서 n번 비친 거울상 좌표와 두 벽(0, L)에 부딪힌 횟수
+    const ax = (n, L, x) => ({ p: n * L + (n % 2 ? L - x : x), a: n > 0 ? Math.floor(n / 2) : Math.ceil(-n / 2), b: n > 0 ? Math.ceil(n / 2) : Math.floor(-n / 2) });
+    let eEr = 0, t1 = Infinity;
+    const er = [], tl = [];
+    for (let c = 0; c < 2; c++) {
+      const m = B.mic[c], r = lcg(52711 + 389 * c + (light ? 17 : 0)), byK = [];
+      for (let k = 0; k <= N; k++) byK.push(new Float64Array(len));
+      for (let nx = -N; nx <= N; nx++) for (let ny = -N; ny <= N; ny++) for (let nz = -N; nz <= N; nz++) {
+        const k = Math.abs(nx) + Math.abs(ny) + Math.abs(nz);
+        if (!k || k > N) continue;                       // 직접음(k 0)은 건조음 몫
+        const X = ax(nx, B.dim[0], s[0]), Y = ax(ny, B.dim[1], s[1]), Z = ax(nz, B.dim[2], s[2]);
+        const d = Math.hypot(X.p - m[0], Y.p - m[1], Z.p - m[2]), t = d / B.c, q = t * sr, i = Math.floor(q), f = q - i;
+        if (i + 2 >= len) continue;
+        const g = Math.pow(B.beta[0], X.a) * Math.pow(B.beta[1], X.b) * Math.pow(B.beta[2], Y.a) * Math.pow(B.beta[3], Y.b) * Math.pow(B.beta[4], Z.a) * Math.pow(B.beta[5], Z.b) / d;
+        const y = byK[k], sg = r() < 0.5 ? -1 : 1;           // 흩어짐 꼬리의 부호는 반사마다 다르게(벽 요철)
+        y[i] += g * (1 - f); y[i + 1] += g * f;
+        const ns = Math.round(sr * B.scat[1] * 6), cs = Math.exp(-1 / (sr * B.scat[1]));
+        for (let j = 1, e = g * B.scat[0]; j < ns && i + j < len; j++, e *= cs) y[i + j] += sg * e * (r() * 2 - 1);
+        t1 = Math.min(t1, t);
+      }
+      // 부딪힌 횟수마다 낮은 통과(한 극, 앞뒤 두 번: 위상 없이 고역만 줄임)
+      const y = new Float64Array(len);
+      for (let k = 1; k <= N; k++) {
+        const a = 1 - Math.exp(-2 * Math.PI * Math.min(B.erLp * Math.pow(B.erLpK, k - 1), 0.45 * sr) / sr), z = byK[k];
+        let v = 0; for (let i = 0; i < len; i++) { v += (z[i] - v) * a; z[i] = v; }
+        v = 0; for (let i = len - 1; i >= 0; i--) { v += (z[i] - v) * a; z[i] = v; }
+        for (let i = 0; i < len; i++) y[i] += z[i];
+      }
+      er.push(y); for (let i = 0; i < len; i++) eEr += y[i] * y[i];
+    }
+    // 확산 꼬리: 첫 반사 무렵부터 rise 동안 올림 코사인으로 쌓이고 대역마다 RT60으로 줄어듦(시각 0 기준)
+    const [aL, aH] = T.xo.map(f => 1 - Math.exp(-2 * Math.PI * f / sr)), [rL, rM, rH] = T.rt.map(x => Math.exp(-6.9078 / (x * sr)));
+    const i1 = Math.round(sr * t1), nr = Math.max(1, Math.round(sr * T.rise));
+    let eT = 0;
+    for (let c = 0; c < 2; c++) {
+      const d = new Float64Array(len), r = lcg(91733 + 613 * c + (light ? 29 : 0));
+      let l1 = 0, l2 = 0, h1 = 0, h2 = 0, eL = T.bg[0], eM = T.bg[1], eH = T.bg[2] * hiG;
+      for (let i = 0; i < len; i++, eL *= rL, eM *= rM, eH *= rH) {
+        const x = r() * 2 - 1;
+        l1 += (x - l1) * aL; l2 += (l1 - l2) * aL; h1 += (x - h1) * aH; h2 += (h1 - h2) * aH;
+        if (i < i1) continue;
+        d[i] = (l2 * eL + (h2 - l2) * eM + (x - h2) * eH) * (i - i1 < nr ? 0.5 - 0.5 * Math.cos(Math.PI * (i - i1) / nr) : 1);
+        eT += d[i] * d[i];
+      }
+      tl.push(d);
+    }
+    const gT = Math.sqrt(T.share / (1 - T.share) * eEr / (eT + 1e-30)), hp = biqCoef(sr, 'hp', T.hp, 0, 0.7), lp = biqCoef(sr, 'lp', Math.min(T.lp, 0.45 * sr), 0, 0.7), nf = Math.round(sr * B.fade);
+    for (let c = 0; c < 2; c++) {
+      const o = ir[c];
+      for (let i = 0; i < len; i++) o[i] = er[c][i] + gT * tl[c][i];
+      biqRun(o, hp); biqRun(o, lp);
+      for (let i = 0; i < nf; i++) o[len - 1 - i] *= 0.5 - 0.5 * Math.cos(Math.PI * i / nf);
+    }
+    let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
+    const g = 1 / Math.sqrt(e / 2);
+    for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
+    return ir;
+  }
+
   return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of,
     ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB,
-    DRUM, drumHit, drumRoomIR };
+    DRUM, drumHit, drumRoomIR, drumBandRoomIR };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
 </script>
@@ -9758,6 +9836,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  Engine.drums: 격자 칸마다 킥·스네어·하이햇·심벌·탐) 합성 키트(Synth.drumHit, 샘플 파일 없음)로 다시 침. 키트는 함께 치는 악기를 따름(kitFor):
   //  일렉 기타가 치면 'rock', 통기타·피아노와 함께면 'light', 드럼만 켜면 고른 기타 소리를 따름(일렉이면 rock).
   //  소리 경로: 타격 버퍼 → 세기(vel^velExp × 키트 섞음 dB × 흔들림) → 좌우 자리(Synth.DRUM.pan) → drumBus → (건조음 + 방 잔향 Synth.drumRoomIR) → 버스 압축(comp) → makeup → drumGain(드럼 볼륨) → master.
+  //   (1.26.6부터 기본은 band: drumBus → (건조음 + 밴드룸 잔향 Synth.drumBandRoomIR) → makeupB → drumGain, 아래 band 절)
   //  끄면(기본) 드럼 소리 경로를 만들지 않고 목록도 예약하지 않음: 피아노·기타 목록·렌더링은 1.25.0과 같음(피아노·기타 목록은 드럼 설정을 읽지 않음).
   //  on: 끄면 버튼을 눌러도 소리 없음. comp: 드럼 버스 압축(실제 밴드 믹스처럼, 사용자: "드럼에 컴프를 걸어"). 끄면 압축 전 1.26.0 경로 그대로(makeup0, 압축 노드 없음).
   //   까닭: 드럼은 봉우리 대 크기(참 봉우리 − 통합 크기)가 rock 21.0·light 24.8·brush 21.7 dB(통기타 14.4·일렉 10.2)라 압축 없이는 크기를 짝 기타에 맞추면 봉우리가 +7~+12 dBTP이고
@@ -9774,13 +9853,27 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //   드럼만 참 봉우리 중앙값 −2.6·−3.3·−3.7 dBTP(최대 −2.3), 밴드 중앙값 +2.9·+3.7·+3.7 dBTP(최대 +5.0, 압축 전 평균 +4.5·+6.5·+4.4),
   //   실시간 리미터 밴드 크기 손실 평균 −0.45·−0.49·−0.50 LU(최악 −0.86, 3 dB 넘게 누르는 창 0.4~0.5%; 압축 전 −0.37·−0.50·−0.32), 압축 GR(10 ms 창, 소리 있는 창) 중앙값 0.1~0.2 dB·
   //   95% 7.0·5.6·4.6 dB(깎기 포함 8.2·7.9·6.2), 대부분의 창은 거의 안 눌리고 큰 타격만 → 펌핑 적음.
+  //  band(1.26.6, 사용자: "드럼 리미터 빼고 퍽퍽 퍼지는 소리 빼고 실제 밴드 드럼처럼 밴드부 드럼처럼 잔향"): 드럼 버스 압축·깎기를 빼고 건조음 + 밴드부 합주실 잔향(Synth.drumBandRoomIR, 보냄 Synth.DRUM.bandRoom.wet
+  //   rock −12·light·brush −13 dB) → makeupB → drumGain. 끄면 위 1.26.5 경로 그대로(comp·makeup·makeup0·bus·옛 방). 압축기 미리 보기가 없어 bus.lat 0(playDrum이 일찍 치지 않음).
+  //   '퍽퍽 퍼지는' 까닭(같은 타격을 1.26.5 사슬 단계별로 통과시켜 잼): 압축기(Chromium 자동 보정 이득 포함) + makeup이 타격 뒤를 들어 올림. 홀로 친 스네어(세기 0.9)의 건조음 대비 크기가
+  //   0~10 ms +1.8 dB인데 80~200 ms +10.5·200~500 ms +15.8 dB(rock; light는 깎기로 어택 0~2 ms −2.7 dB, 뒤는 +10.7·+15.4) → 치고 나서 몸통이 부풀어 오름.
+  //   깎기 왜곡(깎기 앞뒤 차의 에너지, 첫 30 ms 신호 대비)은 light 킥 −3.1·스네어 −4.4 dB(rock −7.8·−11.4)로 어택이 뭉개짐(타격마다 '퍽').
+  //   그루브(100 BPM, 킥·스네어·8분 햇)의 선명도(타격 0~15 ms 대 40~120 ms 크기 차): 스네어 rock 9.5 → 5.1·light 11.6 → 4.8 dB, 킥 10.9 → 4.5·15.0 → 6.7 dB(건조음 → 1.26.5),
+  //   스네어 앞 바닥(직전 20 ms) −48 → −31 dB. 옛 방만(압축 없이)은 스네어 10.0·11.5 dB로 거의 그대로라 방이 아니라 압축·깎기가 까닭(합성 타격 drumHit은 그대로 둠).
+  //   밴드룸: 첫 반사 12.8 ms(듣는 자리가 키트에서 3.7 m)라 타격 첫 10 ms는 건조음과 같고, 확산 꼬리가 50 ms 동안 쌓여 타격 뒤에 피어나 0.9초(슈뢰더 RT60)에 걸쳐 사라짐.
+  //   선명도 스네어 6.6·10.8 dB, 킥 10.4·13.1 dB(rock·light), 건조 대 잔향 에너지 8.6·7.5 dB, 봉우리는 건조음과 같음.
+  //  makeupB: 압축이 없어 봉우리 대 크기가 rock 20.5·light 24.9·brush 21.5 dB(1.26.5 11.0·10.8·10.3) → 드럼만을 짝 기타와 같은 크기(0 LU)로 하면 실시간 리미터(master)의 밴드 크기 손실이
+  //   평균 −1.14·−1.40·−1.06 LU(3 dB 넘게 누르는 10 ms 창 3.8·5.0·3.3%: 리미터가 타격마다 밴드 전체를 누름 = 다시 리미터) → 손실이 1.26.5(−0.45·−0.49·−0.50 LU) 이하이고
+  //   3 dB 넘게 누르는 창이 1% 이하인 가장 큰 수준(0.5 dB 걸음)으로: 드럼만 − 짝 기타 곡 중앙값 −3.5·−5.0·−3.0 LU(1.26.0 압축 전 −4.5 LU와 비슷, 더 크게는 드럼 볼륨으로).
+  //   그때 손실 평균 −0.43·−0.40·−0.49 LU(최악 −0.73·−0.59·−0.72), 3 dB 넘게 누르는 창 0.93·0.93·0.83%, 드럼만 참 봉우리 중앙값 +2.7·+5.4·+4.7 dBTP, 밴드(피아노+기타+드럼) +4.3·+6.0·+5.8 dBTP.
+  //   측정은 1.26.0 comp와 같은 8곡·30초·44.1 kHz·BS.1770-4·오프라인 master(곡 중앙값). 경로가 선형이라 드럼 크기는 makeupB에 정비례.
   //  bus.compLat·osLat: 압축기 미리 보기(초)·2배 오버샘플 지연(표본), clipRange: 깎기 곡선 입력 범위(±8 = +18 dBFS),
   //  layers: 세기 층 경계(at)와 층마다 합성 세기(vel: 음색만, 크기는 재생 쪽),
   //  rr: 같은 소리의 변형 수(바로 앞과 다른 것을 곡 씨앗 + 차례로 고름), cacheMB: 드럼 버퍼 크기 합 상한(48 kHz 기준),
   //  jitDb·jitMs: 사람 손 흔들림(표준편차, 곡 씨앗 + 차례로 고정: 어디서 재생해도 같은 자리는 같은 소리), chokeTau: 닫는 하이햇(닫힘·페달)이 울리던 열린 하이햇을 막는 시정수,
   //  openTau: 새 열린 하이햇이 앞 열린 하이햇을 막는 시정수(크래시·라이드는 막지 않음), tickMs: 재생 쪽(25 ms 차례)에서 없는 버퍼를 바로 만드는 시간 상한(넘으면 다음 차례에),
   //  kind: 엔진 종류 → 합성 종류, warm: 미리 만들기 차례(심벌은 길어 뒤로)
-  const DRUM = { on: true, comp: true, makeup: { rock: 4.26, light: 5.0, brush: 4.74 }, makeup0: { rock: 7.45, light: 8.3, brush: 6.3 },
+  const DRUM = { on: true, band: true, makeupB: { rock: 7.96, light: 7.72, brush: 7.65 }, comp: true, makeup: { rock: 4.26, light: 5.0, brush: 4.74 }, makeup0: { rock: 7.45, light: 8.3, brush: 6.3 },
     bus: { inDb: -10, compLat: 0.006, osLat: 128, clipRange: 8,
       rock: { th: -22, knee: 6, ratio: 4, att: 0.006, rel: 0.12, clip: [-12, 6] }, light: { th: -22, knee: 8, ratio: 3, att: 0.008, rel: 0.12, clip: [-14, 6] }, brush: { th: -24, knee: 10, ratio: 2.5, att: 0.01, rel: 0.15, clip: [-14, 6] } },
     layers: { at: [0.5, 0.8], vel: [0.35, 0.65, 0.92] }, rr: 4, cacheMB: 48, jitDb: 0.8, jitMs: 1.5, chokeTau: 0.012, openTau: 0.03, tickMs: 12,
@@ -10010,6 +10103,18 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   function buildDrumChain(out, kit) {
     const bus = ctx.createGain(), mix = ctx.createGain(), R = Synth.DRUM && Synth.DRUM.kit && Synth.DRUM.kit[kit] && Synth.DRUM.kit[kit].room;
     bus.connect(mix);
+    if (DRUM.band && typeof Synth.drumBandRoomIR === 'function') {
+      // 1.26.6 밴드룸(DRUM.band): 건조음 + 밴드부 합주실 잔향(Synth.drumBandRoomIR, 젖은 소리만, 두 채널 에너지 2) × 10^(bandRoom.wet/20) → makeupB → out. 압축기·깎기 없음 → 지연 없음(bus.lat 0)
+      const rk = kit === 'rock' ? 'rock' : 'light', BR = Synth.DRUM.bandRoom;
+      try {
+        const room = ctx.createConvolver(), wet = ctx.createGain();
+        room.normalize = false; room.buffer = irBuf('dband|' + rk, () => Synth.drumBandRoomIR(ctx.sampleRate, rk));
+        wet.gain.value = Math.pow(10, BR.wet[rk] / 20);
+        bus.connect(room); room.connect(wet); wet.connect(mix);
+      } catch (e) { /* 잔향 없이도 동작 */ }
+      mix.gain.value = DRUM.makeupB[kit] || 1; mix.connect(out); bus.kit = kit; bus.out = mix; bus.lat = 0;
+      return bus;
+    }
     try {
       const room = ctx.createConvolver(), wet = ctx.createGain();
       room.normalize = false; room.buffer = irBuf('droom|' + kit, () => Synth.drumRoomIR(ctx.sampleRate, kit));
@@ -11168,7 +11273,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (useDrums) { await drumReady(); if (S.drumTL !== S.TL) buildDrums(); }
     const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, tone: prefs.guitarTone, eDrive: ELEC.drive, eRiff: ELEC.riff, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
       grand2: PIANO.grand2, human: PIANO.human.on, shape: PIANO.slowRoll.shape.on, lift: PIANO.liftGtrOnly, hall: PIANO.hall, wetH: PIANO.wetH, pedal: PIANO.pedal.on, pedalO: PIANO.pedal, soft: Synth.PIANO2.G6.soft, room3: PIANO.room3, wound: PIANO.wound,
-      real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar, drumGain, drumBus };
+      real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar, drumGain, drumBus, dBand: DRUM.band };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
@@ -11194,6 +11299,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       prefs.guitar = useGuitar;                    // 피아노 반주가 통기타 자리를 피할지(렌더링에 통기타를 넣는지에 따라)
       buildStrikes();
       const kitR = KIT_NAME[opt.drumKit] ? opt.drumKit : kitPick() || kitFor(usePiano, useGuitar, electricOn());   // 1.26.0 드럼 키트
+      if (opt.drumBand != null) DRUM.band = !!opt.drumBand;   // 1.26.6 drumBand: 밴드룸 경로 켬/끔(끄면 1.26.5 압축 경로, 비교 샘플용)
       dRing.hh = null;
       if (useDrums) { drumGain = oc.createGain(); drumGain.gain.value = prefs.drumsVol; drumGain.connect(oc.destination); drumBus = buildDrumChain(drumGain, kitR); }
       if (opt.music) { const m = oc.createBufferSource(), g = oc.createGain(); m.buffer = S.buffer; g.gain.value = opt.music; m.connect(g); g.connect(oc.destination); m.start(0, from); }
@@ -11217,7 +11323,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll;
       PIANO.grand2 = saved.grand2; PIANO.human.on = saved.human; PIANO.slowRoll.shape.on = saved.shape; PIANO.liftGtrOnly = saved.lift; PIANO.hall = saved.hall; PIANO.wetH = saved.wetH; PIANO.pedal = saved.pedalO; PIANO.pedal.on = saved.pedal; Synth.PIANO2.G6.soft = saved.soft; PIANO.room3 = saved.room3; PIANO.wound = saved.wound; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       REAL.forEach((k, i) => { PIANO[k] = saved.real[i]; }); GUITAR.seedVar = saved.seedVar;
-      drumGain = saved.drumGain; drumBus = saved.drumBus; dRing.hh = null;
+      drumGain = saved.drumGain; drumBus = saved.drumBus; dRing.hh = null; DRUM.band = saved.dBand;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
