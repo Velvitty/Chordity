@@ -257,7 +257,7 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 .slashes i.hit { background: var(--ink); opacity: 1 !important; height: 19px; }
 /* 통기타 스트로크 기호(1.14.0, 통기타를 켰을 때만): 코드 이름(지금 코드 상자 아래 끝 49px)과 빗금 사이 칸. 다운 Π·업 V는 그 박 자리 빗금 가운데
    (칸 왼쪽 + 6.5px)에, 뮤트 구간은 처음~끝 기호를 잇는 꺾쇠(양 끝이 아래로 꺾임) 위 가운데에 M. 켜면 마디를 칸만큼 높임(빗금·템포 줄은 아래에 그대로) */
-.bar .gm { display: none; position: absolute; left: 12px; right: 10px; top: 50px; height: 22px; pointer-events: none; }
+.bar .gm { display: none; position: absolute; left: 12px; right: 10px; top: 44px; height: 22px; pointer-events: none; }
 #chart.gm .bar { height: 106px; }
 #chart.gm .bar .gm { display: block; }
 /* 기호는 글꼴과 상관없이 같은 꼴로 그림(clip-path로 자른 색 면): 다운 ⊓(위 막대 굵게), 업 V. 글자(Π·V)는 접근성 트리에서 빠진 칸 안에만 */
@@ -364,7 +364,7 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
   .line { grid-template-columns: 26px minmax(0, 1fr); }
   .line .num { padding-right: 5px; }
   .bar { height: 78px; }
-  .bar .gm { top: 47px; height: 21px; }
+  .bar .gm { top: 41px; height: 21px; }
   #chart.gm .bar { height: 101px; }
   .bar .dm { top: 47px; height: 21px; }
   #chart.dm .bar { height: 101px; }
@@ -416,7 +416,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.4">v1.26.4</span>
+    <span class="ver" title="Chordity 버전 1.26.5">v1.26.5</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
