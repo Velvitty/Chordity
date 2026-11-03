@@ -19,6 +19,7 @@
   --hl-ink: #1b2433;
   --box: #ffed85;          /* 지금 코드 상자: 연한 형광펜. 잉크 13.2:1 */
   --soft: #4e5662;         /* 회색 코드 이름(끌어 둔 코드, N.C.): 진행 채움 위 4.6:1, 상자 위 6.3:1, 차트 면 위 7.2:1, 잉크와 2.1:1 떨어져 회색으로 보임 */
+  --dfocus: #e3c6ff;       /* 1.26.2 드럼 줄 진행 띠(형광 연보라, 잉크 대비 높음) */
   --fill: #ffc061;         /* 지금 코드 상자 안 진행 채움(주황). 잉크 9.6:1, 상자 노랑과 1.37:1 */
   --wave: rgba(27, 36, 51, .22);
   --wave-played: rgba(27, 36, 51, .7);
@@ -34,14 +35,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
-    --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110;
+    --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78;
     --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
-  --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110;
+  --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78;
   --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
   color-scheme: dark;
 }
@@ -282,6 +283,16 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 #chart.gm.dm .bar .dm { top: 72px; height: 18px; }
 .dm b { position: absolute; bottom: 1px; margin-left: 6.5px; transform: translateX(-50%); font: 400 16px/16px "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", "Noto Sans Math", "Noto Sans Symbols 2", "Noto Sans Symbols", var(--ui-font); color: var(--pencil); white-space: nowrap; }
 .bar.cur .dm b { color: var(--ink); }
+/* 1.26.2 드럼 줄 진행: 형광펜 같은 연보라 띠가 마디 처음부터 재생 위치까지 차오름(코드 상자의 주황 채움처럼). 기호는 그 위에 */
+.dm .dhl { position: absolute; left: -6px; top: -2px; bottom: -3px; width: 0; max-width: calc(100% + 12px); background: var(--dfocus); border-radius: 6px; }
+/* 1.26.2 가장 최근에 친 드럼 기호 확대: 코드 이름(.chord.zoom)과 같은 때·빠르기(0.1초에 커지고 0.7초에 줄어듦), 아래 가운데 축 */
+.dm b { transform-origin: 50% 70%; transition: transform .7s cubic-bezier(.35, 0, .25, 1); }
+/*  지금 친 기호는 크게(1.9배, 위에 그림), 다음 기호는 아주 조금(1.2배), 다다음은 더 조금(1.07배) */
+.dm b.zoom { transform: translateX(-50%) scale(1.9); transition: transform .1s cubic-bezier(.2, .8, .3, 1); z-index: 2; }
+.dm b.z1 { transform: translateX(-50%) scale(1.2); transition: transform .1s cubic-bezier(.2, .8, .3, 1); z-index: 1; }
+.dm b.z2 { transform: translateX(-50%) scale(1.07); transition: transform .1s cubic-bezier(.2, .8, .3, 1); }
+#chart.still .dm b { transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .dm b, .dm b.zoom, .dm b.z1, .dm b.z2 { transition: none; } }
 .bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; line-height: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; padding: 0 3px; border-radius: 3px; }   /* 상자 아래 끝이 코드 칸 위(12px)를 넘지 않게. 바탕은 비워 지금 코드 상자 윗변을 가리지 않음 */
 .bar.pickup .tag { right: auto; left: 10px; }
 .bar .pillrow { position: absolute; top: -4px; z-index: 3; display: flex; gap: 4px; }
@@ -397,7 +408,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.1">v1.26.1</span>
+    <span class="ver" title="Chordity 버전 1.26.2">v1.26.2</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -11821,8 +11832,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const on = !!(drumsOn() && TL && !TL.empty && S.barEls.length && ds && ds.length && S.drumTL === TL);
     chart.classList.toggle('dm', on);
     for (const be of S.barEls) if (be && be.dm) be.dm.textContent = '';
+    S.dmEls = new Map(); S.dmAll = []; S.dmKey = new Map(); S.dmR = 4; S.dmCur = { bar: -1, k: 0, zs: null };       // 1.26.2 보라 진행: 마디 → [{t, el}](시각 차례)
     if (!on) return;
     const b = TL.beats, nb = b.length, R = (S.drumInfo && S.drumInfo.R) || (TL.meter.triple ? 3 : 4);
+    S.dmR = R;
     const cells = new Map();                                // 격자 칸(박 좌표 × R, 정수) → 합성 종류 모음
     for (const h of ds) {
       let i = Math.min(nb - 2, Math.max(0, lastLE(b, h.t0 + 0.03))), x = Math.round(Math.max(0, (h.t0 - b[i]) / (b[i + 1] - b[i])) * R);
@@ -11835,9 +11848,41 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (!g || bi == null || !S.barEls[bi] || !S.barEls[bi].dm || !S.barGeo[bi]) continue;
       const bar = TL.bars[bi], geo = S.barGeo[bi], d = document.createElement('b');
       d.textContent = g; d.style.left = ((geo.shift + gx - bar.startBeat) / geo.slots * 100).toFixed(3) + '%';
+      const bi0 = Math.floor(gx + 1e-9), tc = b[bi0] + (gx - bi0) * (b[Math.min(nb - 1, bi0 + 1)] - b[bi0]);
+      let L = S.dmEls.get(bi); if (!L) { L = []; S.dmEls.set(bi, L); } L.push({ t: tc, el: d, key }); S.dmKey.set(key, d);
       let f = frags.get(bi); if (!f) { f = document.createDocumentFragment(); frags.set(bi, f); } f.appendChild(d);
     }
-    for (const [bi, f] of frags) S.barEls[bi].dm.appendChild(f);
+    for (const [bi, f] of frags) { const hl = document.createElement('i'); hl.className = 'dhl'; S.barEls[bi].dm.appendChild(hl); S.barEls[bi].dm.appendChild(f); }   // dhl: 형광 연보라 진행 띠(기호 뒤)
+    for (const L of S.dmEls.values()) L.sort((a, c) => a.t - c.t);
+    S.dmAll = [].concat(...[...S.dmEls.keys()].sort((a, c) => a - c).map(k => S.dmEls.get(k)));   // 곡 전체 시각 차례(다음·다다음 기호가 다음 마디에 있어도)
+  }
+  // 1.26.2 드럼 악보 진행(사용자: "그 본 코드 주황색으로 갈때 드럼 포커스도 보라색으로 가게" → "아니 배경이 보라색으로" → "형광펜처럼 형광 연보라"):
+  //  지금 코드 상자의 주황 채움이 재생 위치까지 차오르듯, 지금 마디의 드럼 줄 뒤에 형광펜 같은 연보라 띠(.dhl)가 마디 처음부터 재생 위치까지 참.
+  //  마디를 떠나면 비움. 친 기호에는 on(시험용 표시, 색은 그대로). DRUM_FOCUS false면 1.26.1과 같음
+  const DRUM_FOCUS = true;
+  function drumFocus(bi, t, off) {
+    if (!DRUM_FOCUS || !S.dmEls) return;
+    const C = S.dmCur || (S.dmCur = { bar: -1, k: 0 });
+    const hlOf = b => S.barEls[b] && S.barEls[b].dm ? S.barEls[b].dm.querySelector('.dhl') : null;
+    if (bi !== C.bar) { const P = S.dmEls.get(C.bar); if (P) for (const x of P) x.el.classList.remove('on'); const h0 = hlOf(C.bar); if (h0) h0.style.width = '0'; C.bar = bi; C.k = 0; C.w = -1; }
+    const hl = bi >= 0 ? hlOf(bi) : null, G = S.barGeo[bi];
+    if (hl && G) { const w = clamp((G.shift + off) / G.slots, 0, 1); if (Math.abs(w - (C.w || 0)) > 0.0005) { hl.style.width = (w * 100).toFixed(2) + '%'; C.w = w; } }
+    const L = S.dmEls.get(bi);
+    let k = 0; if (L) while (k < L.length && L[k].t <= t + 0.005) k++;
+    if (L && k !== C.k) for (let q = Math.min(k, C.k); q < Math.max(k, C.k); q++) L[q].el.classList.toggle('on', q < k);
+    C.k = k;
+    // 1.26.2 확대(사용자: "확대되는 효과도 똑같은 딜레이로 시작 끝" → "현재 치는 드럼 좀 많이 크게 확대. 다음 드럼은 아주 작게 확대 다다음 드럼은 더더더더 작게 확대"):
+    //  → "박자로 확대하는거라 다음 박자가 없고 다다음 박자만 있으면 아주 작게가 아니라 더더더더작게만 확대하는거야":
+    //  코드 이름 확대와 같은 때·빠르기(0.1초에 커지고 0.7초에 줄어듦)로, 지금 친 기호(zoom, 가장 최근 타격)는 크게,
+    //  격자 칸으로 바로 다음 칸의 기호(z1)는 아주 조금, 그다음 칸의 기호(z2)는 더 조금(다음 칸이 비면 z1 없이 z2만). 재생 중일 때만, 다음 마디로 넘어가는 칸도
+    const A = S.dmAll || [], TLb = S.TL.beats, nbb = TLb.length, R = S.dmR || 4;
+    const g = player.playing && bi >= 0 ? (() => { let lo = 0, hi = A.length; while (lo < hi) { const m = (lo + hi) >> 1; if (A[m].t <= t + 0.005) lo = m + 1; else hi = m; } return lo; })() : -1;
+    let cur = null;
+    if (g >= 0) { const i = Math.min(nbb - 2, Math.max(0, lastLE(TLb, t + 0.005))); cur = i * R + Math.min(R - 1, Math.floor(Math.max(0, (t + 0.005 - TLb[i]) / (TLb[i + 1] - TLb[i])) * R)); }
+    const want = g >= 0 ? [g > 0 ? A[g - 1].el : null, S.dmKey.get(cur + 1) || null, S.dmKey.get(cur + 2) || null] : [null, null, null];
+    const cls = ['zoom', 'z1', 'z2'], had = C.zs || [null, null, null];
+    for (let q = 0; q < 3; q++) if (had[q] !== want[q]) { if (had[q]) had[q].classList.remove(cls[q]); if (want[q]) want[q].classList.add(cls[q]); }
+    C.zs = want;
   }
 
   // 템포 줄에 그릴 것을 박 단위로 정리: 엔진이 겹치는 구간을 주더라도 화면에는 겹쳐 그리지 않음
@@ -12655,6 +12700,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     S.boxDirty = false; S.boxSnap = false;
     stepBoxes();
     fillBoxes(u >= 0 ? bi : -1, off);
+    drumFocus(bi, t, off);                                 // 1.26.2 드럼 줄 형광 연보라 진행
     const ei = lastLE(S.flatT, t);
     if (ei !== S.cur.ev) {
       S.cur.ev = ei;
