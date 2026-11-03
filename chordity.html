@@ -132,6 +132,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .now .cur { font-family: var(--chord-font); font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -.01em; }
 .now .nxt { font-size: 13px; color: var(--pencil); white-space: nowrap; }
 .now .nxt b { font-family: var(--chord-font); font-size: 17px; color: var(--ink); font-weight: 700; }
+/* 1.26.0 다음 코드까지 남은 박: 밝게는 이중 원 숫자(⓵~⓾), 어둡게는 검은 원 숫자(❶~❿). 둘 다 넣어 두고 테마로 하나만 보임(테마를 바꿔도 곧바로) */
+.now .nxt .bl { font: 400 17px/1 "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", "Noto Sans Symbols 2", var(--ui-font), sans-serif; color: var(--ink); }
+.now .nxt .bl i { font-style: normal; }
+.now .nxt .bl .dk { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .now .nxt .bl .lt { display: none; }
+  :root:not([data-theme="light"]) .now .nxt .bl .dk { display: inline; }
+}
+:root[data-theme="dark"] .now .nxt .bl .lt { display: none; }
+:root[data-theme="dark"] .now .nxt .bl .dk { display: inline; }
 .leds { display: flex; align-items: center; gap: 7px; }
 .leds i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--pencil); transition: background-color .06s; }
 .leds i.down { width: 16px; height: 16px; }
@@ -144,7 +154,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .vols label { display: flex; align-items: center; gap: 6px; }
 .vols-narrow { display: none; }
 .vols-wide { margin-left: auto; }
-.vols-wide input[type=range] { width: 84px; }
+.vols-wide { gap: 12px; }
+.vols-wide input[type=range] { width: 60px; }   /* 1.26.0 볼륨 다섯(드럼 더함): 84px이면 1180px 화면에서도 둘째 줄로 내려감 → 60px·간격 12px로 한 줄에(4/4 박 표시등과 함께 1180px에서 20px 남음) */
 .ovrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
 .ovrow .overview { flex: 1 1 auto; min-width: 0; margin-top: 0; }
 .toggles { display: flex; gap: 8px; flex: none; }
@@ -302,10 +313,12 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
   .now { min-width: 0; }
   .now .cur { font-size: 26px; }
   .tp .vols-wide { display: none; }
-  .vols-narrow { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
-  /* 볼륨 넷(음악·클릭·피아노·기타)이 폭을 나눠 가짐: 이름은 줄바꿈 없이, 슬라이더가 남는 폭을 고르게 */
-  .vols-narrow label { flex: 1 1 0; min-width: 0; white-space: nowrap; }
-  .vols-narrow input[type=range] { flex: 1 1 0; width: 0; min-width: 0; }
+  /* 1.26.0 볼륨 다섯(음악·클릭·피아노·기타·드럼): 한 줄이면 슬라이더가 너무 짧아(481px에서 30~45px) 두 칸 격자로. 음악은 맨 위 한 줄을 다 쓰고
+     클릭·피아노 / 기타·드럼이 두 줄 두 칸. 이름 칸 폭을 같게(3em) 해서 모든 줄의 슬라이더 시작이 맞음 */
+  .vols-narrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 18px; margin-top: 12px; }
+  .vols-narrow label { display: grid; grid-template-columns: 3em minmax(0, 1fr); gap: 6px; min-width: 0; white-space: nowrap; }
+  .vols-narrow label:first-child { grid-column: 1 / -1; }
+  .vols-narrow input[type=range] { width: 100%; min-width: 0; }
   .ovrow { gap: 8px; }
   .toggles { gap: 6px; }
   .toggle { padding: 0; width: 44px; height: 44px; justify-content: center; }
@@ -335,11 +348,11 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
 @media (max-width: 370px) {
   .leds { display: none; }
 }
-/* 휴대폰 폭(480px 이하): 볼륨 넷을 두 줄 두 칸으로(한 줄이면 슬라이더가 40px 남짓으로 너무 짧음) */
-@media (max-width: 480px) {
-  .vols-narrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 18px; }
-  .vols-narrow label { display: grid; grid-template-columns: 3em minmax(0, 1fr); gap: 6px; }   /* 이름 칸 폭을 같게: 위아래 슬라이더 시작이 맞음 */
-  .vols-narrow input[type=range] { width: 100%; }
+/* 1.26.0 켜고 끄는 버튼 넷(메트로놈·피아노·통기타·드럼): 이름까지 쓰면 428px라 641~760px에서 개요 파형이 160~280px로 좁아짐 → 760px 이하는 아이콘만(44px) */
+@media (max-width: 760px) {
+  .toggle { padding: 0; width: 44px; height: 44px; justify-content: center; }
+  .toggle .lbl { display: none; }
+  .toggle svg { width: 20px; height: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .chord, .chord.zoom { transition: none; }
@@ -366,7 +379,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.25.0">v1.25.0</span>
+    <span class="ver" title="Chordity 버전 1.26.0">v1.26.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -431,7 +444,7 @@ body > main { flex: 1 0 auto; }
         <div class="tpo" aria-live="off" title="재생하는 자리의 템포(BPM)"><span class="lab" id="tBpmLab">템포</span><b id="tBpm">–</b></div>
         <div class="now" aria-live="off">
           <span class="cur" id="cNow">&nbsp;</span>
-          <span class="nxt" id="nxtWrap" hidden>다음 <b id="cNext"></b></span>
+          <span class="nxt" id="nxtWrap" hidden>다음 <span class="bl" id="cLeft" role="img" hidden><i class="lt" aria-hidden="true"></i><i class="dk" aria-hidden="true"></i></span> <b id="cNext"></b></span>
         </div>
         <div class="leds" id="leds" aria-hidden="true"></div>
         <div class="vols vols-wide">
@@ -439,6 +452,7 @@ body > main { flex: 1 0 auto; }
           <label>클릭 <input type="range" data-vol="click" min="0" max="1" step="0.01" aria-label="메트로놈 볼륨"></label>
           <label>피아노 <input type="range" data-vol="piano" min="0" max="1" step="0.01" aria-label="피아노 볼륨"></label>
           <label>기타 <input type="range" data-vol="guitar" min="0" max="1" step="0.01" aria-label="통기타 볼륨"></label>
+          <label>드럼 <input type="range" data-vol="drums" min="0" max="1" step="0.01" aria-label="드럼 볼륨"></label>
         </div>
       </div>
       <div class="ovrow">
@@ -460,6 +474,10 @@ body > main { flex: 1 0 auto; }
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(45 12 12)"><path d="M9.06 13.21A3.8 3.8 0 1 1 14.94 13.21A5.2 5.2 0 1 1 9.06 13.21Z"/><circle cx="12" cy="15.4" r="1.6" fill="currentColor" stroke="none"/><path d="M12 7V2"/><rect x="10.8" y="0" width="2.4" height="3" rx=".7" fill="currentColor" stroke="none"/></g></svg>
             <span class="lbl">통기타</span>
           </button>
+          <button class="toggle" id="drumBtn" type="button" aria-pressed="false" aria-label="드럼 연주">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="12" cy="12.5" rx="8" ry="3"/><path d="M4 12.5v5.5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5.5"/><path d="M8 15.4v5.3M16 15.4v5.3" stroke-width="1.6"/><path d="M10.5 10L6 3M13.5 10L18 3"/></svg>
+            <span class="lbl">드럼</span>
+          </button>
         </div>
       </div>
     </div>
@@ -469,6 +487,7 @@ body > main { flex: 1 0 auto; }
       <label>클릭 <input type="range" data-vol="click" min="0" max="1" step="0.01" aria-label="메트로놈 볼륨"></label>
       <label>피아노 <input type="range" data-vol="piano" min="0" max="1" step="0.01" aria-label="피아노 볼륨"></label>
       <label>기타 <input type="range" data-vol="guitar" min="0" max="1" step="0.01" aria-label="통기타 볼륨"></label>
+      <label>드럼 <input type="range" data-vol="drums" min="0" max="1" step="0.01" aria-label="드럼 볼륨"></label>
     </div>
 
     <details class="panel" id="adjust">
@@ -559,6 +578,18 @@ body > main { flex: 1 0 auto; }
           </div>
         </div>
         <div class="grp">
+          <div class="lab">드럼 연주</div>
+          <div class="ctl">
+            <select id="selDrumKit" aria-label="드럼 키트">
+              <option value="auto">자동(함께 치는 악기 따라: 일렉 기타면 록 키트, 통기타·피아노면 가벼운 키트)</option>
+              <option value="rock">록 키트</option>
+              <option value="light">가벼운 키트</option>
+              <option value="brush">브러시 키트(가벼운 키트에 브러시 스네어)</option>
+            </select>
+            <span class="note">위쪽의 드럼 버튼(D 키)을 켜면 원곡의 드럼(킥·스네어·하이햇·심벌·탐)을 받아 적어 곡의 박에 맞춰 합성 드럼으로 칩니다. 원곡에 드럼이 없는 마디는 쉬고, 드럼이 전혀 없는 곡은 단순한 비트를 칩니다. 키트는 자동(기본)이면 함께 치는 악기를 따라 바뀌고, 여기서 하나를 고르면 그 키트로 칩니다.</span>
+          </div>
+        </div>
+        <div class="grp">
           <div class="lab">메트로놈</div>
           <div class="ctl">
             <label class="chk"><input type="checkbox" id="chkAccent"> 첫 박 강조</label>
@@ -601,7 +632,7 @@ body > main { flex: 1 0 auto; }
       <div class="pbody"><dl class="info" id="info"></dl><p class="infohelp"><a href="information.html#panel" target="_blank" rel="noopener">각 항목의 뜻과 분석 원리 보기</a></p></div>
     </details>
 
-    <p class="keys"><kbd>Space</kbd> 재생·정지 &nbsp; <kbd>M</kbd> 메트로놈 &nbsp; <kbd>P</kbd> 코드 연주 &nbsp; <kbd>←</kbd> <kbd>→</kbd> 이전·다음 마디 &nbsp; <kbd>Home</kbd> 처음으로 &nbsp; 마디를 누르면 그 마디부터 재생합니다.</p>
+    <p class="keys"><kbd>Space</kbd> 재생·정지 &nbsp; <kbd>M</kbd> 메트로놈 &nbsp; <kbd>P</kbd> 피아노 &nbsp; <kbd>G</kbd> 기타 &nbsp; <kbd>D</kbd> 드럼 &nbsp; <kbd>←</kbd> <kbd>→</kbd> 이전·다음 마디 &nbsp; <kbd>Home</kbd> 처음으로 &nbsp; 마디를 누르면 그 마디부터 재생합니다.</p>
   </section>
 </main>
 
@@ -3260,6 +3291,24 @@ const Engine = (function () {
     //   싱어송라이터 기준 스트로크 따라 +0.8, 4비트 +0.2, 8비트 −0.3, 16비트 +1.2, 스윙 +1.4. eg/final/calib.js)
     EG_Y0: -3.0, EG_K: 3, EG_CHUG_DB: 0, EG_16_DB: -2.5, EG_ACC_DB: 1.5, EG_PUSH_DB: 1,
     EG_Y0M: { ssw: 0, strum: 0.8, beat4: 0.2, beat8: -0.3, beat16: 1.2, swing: 1.4 },
+    // 드럼(1.26.0, DR, Engine.drumFeatures·Engine.drums: 사용자 "이제 드럼을 만들자" — 드럼 버튼(D 키), 방식 "곡 따라"(원곡 드럼을 받아 적어 그대로 침),
+    //  소리는 "악기 따라 바뀜"(일렉 기타면 록 키트, 통기타·피아노면 가벼운 키트), 키트 메뉴도 넣음): 원곡 드럼을 박 격자 칸(겹박자 3칸, BPM > EG_8MAX면 2칸, 아니면 4칸, 스윙 φ)마다
+    //  킥·스네어·하이햇(닫힘·열림)·크래시·탐(높음·가운데·낮음)으로 받아 적음(규칙·계수는 DRUM 구역). 끄면(DR false) drumFeatures는 null, drums는 타격 없음 → 화면에 드럼 없음 = 1.25.0과 같음
+    //  (analyze·buildTimeline과 다른 모든 함수는 DR_* 열쇠를 읽지 않으므로 A·TL·피아노·기타는 켜고 끔과 관계없이 1.25.0과 비트 단위로 같음).
+    //  특징(곡마다 한 번): DR_SRMIN 미만 표본율은 특징 없음(하이햇·심벌 대역이 없음 → 단순한 비트), DR_N·DR_HOP: 가운데 STFT(44.1·48 kHz 기준),
+    //   DR_NSCALE: N·hop·평탄도 FFT를 표본율에 맞춤(2^k, k = round(log2(sr/46000)) ∈ [−1, 2]: 대역 칸·프레임 길이가 표본율과 무관)
+    //  결정: DR_PRES: 곡·마디 드럼 있음(곡 점수 > DR_SONG_TH, 마디 두 상태 비터비 바꿈 비용 DR_BAR_C, 4마디 경계는 절반), DR_TH_K·DR_TH_S·DR_TH_H: 무늬 합의 뒤 킥·스네어·하이햇 로짓 문턱,
+    //   DR_BT_REL: 맨 위(하이햇) 대역이 아래 대역보다 이 dB 넘게 작거나 나이퀴스트에 걸리면 내림(5–8 kHz까지), DR_GATE_BAND: 마디 문도 그 대역으로,
+    //   DR_SFB: 스네어 대체(스네어가 거의 없는데 킥·하이햇이 활발하면 그 곡만 스네어 문턱 DR_SFB_TH), DR_KFB: 킥 대체(킥 칸 비율 < DR_KFB_K인데 스네어·하이햇이 활발하면
+    //   곡 안 자기 학습 킥, 그 밀도 ≥ DR_KFB_MIN일 때만), DR_KALIGN: 킥 대체 뒤 한 칸 늦게 잡힌 킥을 앞 칸(박의 어택)으로
+    //  종류·세기: DR_CRASH: 크래시(문턱 DR_CRASH_TH), DR_OPEN: 열린 하이햇(문턱 DR_OPEN_TH), DR_TOMS: 필인 탐(마디 끝 2박에 하이햇 없이 음높이가 내려가는 북 타격),
+    //   세기 = DR_VEL0 + (1 − DR_VEL0)·u^DR_VEL_G(u = 곡 안 같은 갈래 크기의 분위, 10% → 0, 95% → 1). DR_SIMPLE: 원곡에 드럼이 없거나 특징이 없으면 단순한 비트(info.fallback)
+    DR: true, DR_SRMIN: 22050, DR_N: 1024, DR_HOP: 512, DR_NSCALE: true,
+    DR_PRES: true, DR_SONG_TH: -0.718, DR_BAR_C: 4,
+    DR_TH_K: -1.125, DR_TH_S: -0.625, DR_TH_H: -0.75, DR_BT_REL: 12, DR_GATE_BAND: true,
+    DR_SFB: true, DR_SFB_TH: -1.0, DR_KFB: true, DR_KFB_K: 0.06, DR_KFB_MIN: 0.12, DR_KALIGN: true,
+    DR_CRASH: true, DR_CRASH_TH: -1, DR_OPEN: true, DR_OPEN_TH: -1, DR_TOMS: true,
+    DR_VEL0: 0.35, DR_VEL_G: 0.8, DR_SIMPLE: true,
   };
 
   function notePattern(pc, out, w, octOnly) {          // octOnly: 기본음·옥타브 배음만(T7_FUND)
@@ -7297,15 +7346,698 @@ const Engine = (function () {
     return out;
   }
 
+  // ---------------------------------------------------------------
+  // 드럼(1.26.0, P.DR): 곡 따라 드럼 채보 — 원곡 드럼을 박 격자 칸마다 받아 적음(화면이 합성 키트로 다시 침). 규칙과 열쇠는 P의 DR 설명
+  //  두 단계
+  //   ① drumFeatures(input{channels, sampleRate}, A, onProgress): 비동기, 곡마다 한 번(화면이 드럼을 켤 때). 원래 표본율 곡 신호 → 특징(TL과 무관,
+  //      4분 48 kHz 곡에 약 10 MB). 32 ms마다 양보(makeTicker), onProgress가 던지면 멈춤(약속이 그 오류로 거부됨). P.DR 끔·채널 없음·A.fh·A.drum 없음·표본율 DR_SRMIN 미만 → null
+  //   ② drums(A, TL, opt{feat, res}): 동기·순수(신호를 읽지 않음). 격자 → 드럼 있음(곡·마디) → 칸 증거 → 결정 → 종류·세기 → { hits, info }.
+  //      결과 캐시: feat(없으면 고정 표식)마다 WeakMap → Map(drumTLKey(TL) + DR_SIG 값 열쇠, 4개까지), 맞으면 entry.A === A 확인. opt.res는 쓰지 않음(늘 온 칸 격자)
+  //  내는 종류: kick·snare·hat·hatOpen·crash·tomH·tomM·tomL(ride·side·hatPedal은 아직 믿을 만하지 않아 내지 않음: 라이드는 hat으로)
+  //  원곡에 드럼이 없으면(info.why 'song') 또는 특징이 없으면(낮은 표본율·특징 일 실패, info.why 'nofeat') 단순한 비트(info.fallback, DR_SIMPLE)
+  //  결정적: Math.random 없음, 모든 정렬에 동점 깨기, 같은 입력이면 같은 출력. 매개변수는 부를 때마다 P에서 새로 만듦(drParams)
+  //  이 닫힘 안의 median·quant·standardize는 엔진 공용 도구와 뜻이 다름(위쪽 가운데 값 s[n>>1], 보간 없는 고르기 k = ⌊p·(n−1)⌋, S×D 행렬의 열마다 표준화):
+  //   맞춘 기준(드럼 시험대 algos/fin.js)과 비트 단위로 같게 따로 둠. Float32Array 저장도 기준 그대로(반올림이 기준의 일부)
+  //  엔진에서 빌리는 것: makeRealFFT, swingRatio(스윙 φ), makeTicker, P.EG_8MAX(빠른 곡 격자). analyze·buildTimeline과 다른 함수는 이 구역을 부르지 않음
+  // ---------------------------------------------------------------
+  const DRUM = (() => {
+    // 매개변수(시험대 fin PARAMS와 같은 꼴): P.DR_* 스위치·문턱 + 얼린 상수. 부를 때마다 새로 만듦(바깥에서 P를 바꿔도 다음 부름부터 따름)
+    const drParams = () => ({
+      N: P.DR_N, hop: P.DR_HOP, nScale: P.DR_NSCALE ? 1 : 0, srMin: P.DR_SRMIN,
+      presOn: P.DR_PRES ? 1 : 0, songTh: P.DR_SONG_TH, barC: P.DR_BAR_C,
+      cons: { gK: 16, gMinSim: 0.4, gGam: 2, c0: 1, gClip: 4, gB: { kick: 1, snare: 0.8, hc: 0.8 } },   // 닮은 마디 무늬 합의(pat)
+      th: { kick: P.DR_TH_K, snare: P.DR_TH_S, hc: P.DR_TH_H },
+      bTrel: P.DR_BT_REL, gateBand: P.DR_GATE_BAND ? 1 : 0,
+      sfb: P.DR_SFB ? 1 : 0, sfbS: 0.03, sfbK: 0.05, sfbH: 0.1, sfbTh: P.DR_SFB_TH,
+      kfb: P.DR_KFB ? 1 : 0, kfbK: P.DR_KFB_K, kfbMin: P.DR_KFB_MIN, kfbS: 0.03, kfbH: 0.1,
+      kit: { pTop: 0.08, pBot: 0.5, minPos: 8, lam: 0.1, posAbs: 9, posAbs2: 8, thr: 0.4, thr2: 0.6, xW: 0.1, w: 2 },   // 자기 학습 킥(kit)
+      kalign: P.DR_KALIGN ? 1 : 0,
+      kinds: { crash: P.DR_CRASH ? 1 : 0, crashTh: P.DR_CRASH_TH, crashAddTh: 0.5, crashNms: 0.35, crashRise: 2, crashAddRise: 6, crashAdd: 1, open: P.DR_OPEN ? 1 : 0, openTh: P.DR_OPEN_TH },
+      toms: { on: P.DR_TOMS ? 1 : 0, fillBeats: 2, fillMin: 3, rise: 4, ton: 8, harm: -6, spread: 1.2, rho: -0.3 },
+      vel0: P.DR_VEL0, velG: P.DR_VEL_G, simple: P.DR_SIMPLE ? 1 : 0,
+    });
+    // 드럼 결과를 바꾸는 P 열쇠(결과 캐시 열쇠에 값을 넣음): DR_* 전부 + 격자 R(EG_8MAX) + 스윙 φ(swingRatio가 읽는 것)
+    const DR_SIG = ['DR', 'DR_SRMIN', 'DR_N', 'DR_HOP', 'DR_NSCALE', 'DR_PRES', 'DR_SONG_TH', 'DR_BAR_C', 'DR_TH_K', 'DR_TH_S', 'DR_TH_H', 'DR_BT_REL', 'DR_GATE_BAND',
+      'DR_SFB', 'DR_SFB_TH', 'DR_KFB', 'DR_KFB_K', 'DR_KFB_MIN', 'DR_KALIGN', 'DR_CRASH', 'DR_CRASH_TH', 'DR_OPEN', 'DR_OPEN_TH', 'DR_TOMS', 'DR_VEL0', 'DR_VEL_G', 'DR_SIMPLE',
+      'EG_8MAX', 'ST_WIN', 'SW_16', 'SW_AUTO', 'SW_DEF', 'SW_HALF16', 'SW_HI', 'SW_HIT', 'SW_K16', 'SW_LO', 'SW_MAX', 'SW_MIN', 'SW_MINB', 'SW_MINFRAC', 'SW_MINSAL', 'SW_NB', 'SW_ON', 'SW_ONW', 'SW_SHORT'];
+    // ── 맞춘 계수(ocls_v5, dev에서만 맞춤): 갈래별 1단 로지스틱 ──
+    const MODEL = {
+      SPEC: { kick: ['ea1', 'ea2', 'zea0', 'nf8', 'p_gsN'], snare: ['zeSn', 'p_zea3', 'ea9', 'ea3', 'glN', 'ysrM', 'zfx9'], hc: ['cfT', 'zcf3', 'zcf9', 'p_zfxT'] },
+      CLIP: { ea1: [-72.404, 7.2148], ea2: [-66.381, 11.171], zea0: [-8.6169, 1.4729], nf8: [0.041591, 43.438], p_gsN: [-0.82839, 3.3100],
+        zeSn: [-0.85047, 2.5325], p_zea3: [-4.4061, 1.1231], ea9: [-37.144, 8.3300], ea3: [-62.904, 7.4241], glN: [-1.6094, 14.258], ysrM: [-2.4486, 1.5640], zfx9: [-1.0412, 3.0945],
+        cfT: [-0.096372, 1.3369], zcf3: [-0.63717, 3.6070], zcf9: [-1.1157, 3.1251], p_zfxT: [-0.78688, 1.9689] },
+      M1: { kick: { w: [0.10368, 0.15363, 0.73252, -0.074349, 0.51442], b: -1.6402 },
+        snare: { w: [0.87062, 0.62818, 0.065112, 0.078743, -0.069377, -0.46627, 0.57632], b: -1.3455 },
+        hc: { w: [9.5371, -0.083195, -0.65113, 0.69065], b: -1.5128 } },
+      GATE: 0.05, GW: 1,           // 마디 문: ±1마디 안 맨 위 대역(8–12 kHz) 플럭스 최대 ≥ GATE
+    };
+    // ── 드럼 있음(gate.js): 마디 특징 → 로지스틱 1 → 곡 점수, 로지스틱 2 → 두 상태 비터비 ──
+    const PRES = {
+      K1: ['rH2', 'rHb', 'acH', 'qH1', 'lhr', 'lmh', 'rMb', 'rL2', 'acM', 'rO2', 'rOb', 'bb1', 'bb2', 'flt'],
+      W1: [1.1496, 0.3842, 4.331, 3.6316, 0.8591, 0.7421, -1.1254, 2.1808, -0.72, 2.4415, 0.9939, 0.2217, 0.0983, 4.7079], B1: -2.6818,
+      K2: ['e', 'De', 'Dlmh', 'Dlml', 'Drdb', 'rdb', 'rL2', 'kq'],
+      W2: [0.3504, 0.4739, 0.1111, 0.5945, 0.0595, -0.011, -0.8163, 4.6415], B2: 1.9866,
+      Q: 0.75, LHR0: -0.85, LMH0: -3.9, KAPPA: 3, QUIET_DB: -35, FLT0: 0.2,
+    };
+    // ── 종류(aux): 크래시·열린 하이햇 로지스틱 ──
+    const KMODEL = {
+      crash: { f: ['vmin_cy', 'd1_hi', 'K', 'lvl_hi', 'J5_hi', 'down'], b: -1.3687, w: [0.177, 0.248, 0.9796, 0.1709, 0.0431, 1.35] },
+      open: { f: ['d1_air', 'lvl_air', 'stab'], b: -2.4389, w: [0.2007, 0.3629, 6.6629] },
+    };
+    const EDGES = [30, 65, 110, 180, 300, 500, 900, 1600, 3000, 5000, 8000, 12000, 17000], NB = EDGES.length - 1;   // 가운데 12대역
+    const AEDGES = [0, 60, 100, 150, 220, 320, 460, 660, 950, 1350, 1900, 2700, 3800, 5400, 7600, 10800, 15000, 24000], NA = AEDGES.length - 1;   // 종류용 17대역
+    const AGRP = { hm: [10, 13], hi: [13, 15], air: [15, 17], cy: [11, 17], lm: [2, 6] };   // 종류용 묶음(AEDGES 번호 [b0, b1))
+    const KEDGES = [25, 45, 65, 85, 110, 140, 175, 220, 280, 350, 440, 560, 700, 880, 1100, 1400, 1750];   // kit 저역 16띠(÷4 갈래)
+    const CAL = 0.0065;          // 엔진 CALIB_SEC(곡선 프레임 → 시각)
+    const CL3 = ['kick', 'snare', 'hc'];
+    const sig = z => 1 / (1 + Math.exp(-z)), fin = v => isFinite(v) ? v : 0;
+    // 분위수: k번째 작은 값(고르기, 결과는 정렬과 같음)
+    function quant(a, p) {
+      const n = a.length; if (!n) return 0; const s = Float64Array.from(a), k = Math.min(n - 1, Math.max(0, Math.floor(p * (n - 1))));
+      let lo = 0, hi = n - 1;
+      while (hi > lo) {
+        const mid = (lo + hi) >> 1, a0 = s[lo], a1 = s[mid], a2 = s[hi], pv = a0 < a1 ? (a1 < a2 ? a1 : a0 < a2 ? a2 : a0) : (a0 < a2 ? a0 : a1 < a2 ? a2 : a1);
+        let i = lo, j = hi;
+        while (i <= j) { while (s[i] < pv) i++; while (s[j] > pv) j--; if (i <= j) { const t = s[i]; s[i] = s[j]; s[j] = t; i++; j--; } }
+        if (k <= j) hi = j; else if (k >= i) lo = i; else break;
+      }
+      return s[k];
+    }
+    const median = a => { const s = Float64Array.from(a).sort(); return s.length ? s[s.length >> 1] : 0; };
+    const hann = (N, g) => { const w = new Float64Array(N); for (let i = 0; i < N; i++) w[i] = (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N)) * g; return w; };
+    // 대역 경계 → FFT 칸 번호(겹치면 한 칸씩 밀기)
+    const binsOf = (edges, binHz, H) => { const kb = edges.map(h => Math.min(H - 1, Math.round(h / binHz))); for (let b = 1; b < kb.length; b++) if (kb[b] <= kb[b - 1]) kb[b] = kb[b - 1] + 1; return kb; };
+    // SuperFlux 한 대역: 지금 log 크기 − 지연 프레임의 이웃 셋 최대(양수만), 칸 수로 나눔
+    const sfx = (cur, prev, k0, k1) => { let s = 0; for (let k = Math.max(1, k0); k < k1; k++) { const p0 = prev[k - 1], p1 = prev[k], p2 = prev[k + 1], r01 = p0 > p1 ? p0 : p1, ref = r01 > p2 ? r01 : p2, d = cur[k] - ref; if (d > 0) s += d; } return s / Math.max(1, k1 - Math.max(1, k0)); };
+
+    // ════════ ① 특징 단계(곡 신호, 곡마다 한 번) ════════
+    // ÷4 솎기(길이 4 이동 평균 세 번 = CIC 3단, 4칸마다): 조각 단위(상태 st), 끝에 0 여섯 개
+    function makeDecim4(n) {
+      const nO = Math.floor((n - 1) / 4) + 1, y = new Float32Array(Math.max(1, nO)), r1 = new Float64Array(4), r2 = new Float64Array(4), r3 = new Float64Array(4), st = [0, 0, 0, 0, 0];   // s1 s2 s3 prev i
+      const block = (x, m) => {
+        let s1 = st[0], s2 = st[1], s3 = st[2], prev = st[3], i = st[4];
+        for (let k = 0; k < m; k++, i++) {
+          const v = x[k], q = i & 3;
+          s1 += v - r1[q]; r1[q] = v; const y1 = s1 * 0.25;
+          s2 += y1 - r2[q]; r2[q] = y1; const y2 = s2 * 0.25;
+          s3 += y2 - r3[q]; r3[q] = y2; const y3 = s3 * 0.25;
+          if (i >= 5 && ((i - 5) & 3) === 0) { const o = (i - 5) >> 2; if (o < nO) y[o] = 0.5 * (prev + y3); }
+          prev = y3;
+        }
+        st[0] = s1; st[1] = s2; st[2] = s3; st[3] = prev; st[4] = i;
+      };
+      return { block, end: () => { block(new Float32Array(6), 6); return y; } };
+    }
+    // 가운데(채널 평균) 표본 [s0, s1) → out[o..]: Float32로 채널 차례로 더함, 범위 밖은 0
+    function fillMono(ch, s0, s1, out, o) {
+      const nc = ch.length, len = ch[0].length, w = 1 / nc, a = Math.max(0, s0), b = Math.min(len, s1);
+      out.fill(0, o, o + (s1 - s0));
+      if (b <= a) return;
+      const d = o - s0;
+      if (nc === 1) { out.set(ch[0].subarray(a, b), a + d); return; }
+      for (let c = 0; c < nc; c++) { const x = ch[c]; for (let i = a; i < b; i++) out[i + d] += x[i] * w; }
+    }
+    // 탐 음높이용 저역 신호(곡 전체): ÷4 가운데 x4 → 2차 저역 통과 둘(1.1 kHz) → D = round(sr4/2756)마다(약 2.7–3 kHz)
+    function tomSignal(x4, sr4) {
+      const D = Math.max(1, Math.round(sr4 / 2756)), fc = 1100, n = x4.length;
+      const w = 2 * Math.PI * fc / sr4, c = Math.cos(w), al = Math.sin(w) / (2 * 0.7071), a0 = 1 + al, b0 = (1 - c) / 2 / a0, b1 = (1 - c) / a0, a1 = -2 * c / a0, a2 = (1 - al) / a0;
+      const y = new Float32Array(Math.floor((n - 1) / D) + 1);
+      let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, z1 = 0, z2 = 0, cnt = 0, o = 0;
+      for (let i = 0; i < n; i++) { const x = x4[i]; const v = b0 * x + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = v; const u = b0 * v + b1 * u1 + b0 * u2 - a1 * z1 - a2 * z2; u2 = u1; u1 = v; z2 = z1; z1 = u; if (cnt === 0) { y[o++] = u; cnt = D; } cnt--; }
+      return { x: y, sr: sr4 / D };
+    }
+    // 가운데 STFT(256프레임 조각마다 가운데 신호를 채워 FFT): 12대역 에너지 E(dB)·플럭스 F(SuperFlux) + 종류용 17대역 파워 AE·5–10 kHz 미세 구조 안정도 STAB
+    async function midBands(ch, len, sr, N, hop, gain, tick, p0, p1) {
+      const H = N >> 1, fft = makeRealFFT(N), win = hann(N, gain), binHz = sr / N, kb = binsOf(EDGES, binHz, H);
+      const ka = AEDGES.map(h => Math.min(H, Math.max(1, Math.round(h / binHz)))); ka[0] = 1; for (let b = 1; b <= NA; b++) if (ka[b] <= ka[b - 1]) ka[b] = ka[b - 1] + 1;
+      const kTop = kb[NB], kTA = Math.min(H, ka[NA]), kMax = Math.max(kTop + 2, kTA), nF = Math.floor(len / hop) + 1;
+      const E = new Float32Array(nF * NB), F = new Float32Array(nF * NB), AE = new Float32Array(nF * NA), STAB = new Float32Array(nF);
+      const mag = new Float64Array(H + 1), LAG = Math.max(1, Math.round(0.0116 * sr / hop)), ring = [0, 1, 2].map(() => new Float64Array(H + 1)), sc = 1000 * 4 / N, pw = 16 / N / N;
+      const sa = Math.round(5000 / binHz), sb = Math.min(H - 5, Math.round(10000 / binHz)), doS = sb - sa >= 8, SL = 3, ringS = [0, 1, 2, 3].map(() => new Float64Array(Math.max(1, sb - sa))), lm = new Float64Array(H + 1);
+      const BLK = 256, buf = new Float32Array((BLK - 1) * hop + N);
+      for (let t0 = 0; t0 < nF; t0 += BLK) {
+        const t1 = Math.min(nF, t0 + BLK), s0 = t0 * hop - H, s1 = (t1 - 1) * hop - H + N;
+        fillMono(ch, s0, s1, buf, 0);
+        for (let t = t0; t < t1; t++) {
+          fft.win(buf, t * hop - H - s0, win, mag, kMax);
+          const cur = ring[t % 3];
+          for (let k = 0; k <= kTop + 2; k++) cur[k] = Math.log(1 + sc * mag[k]);
+          for (let b = 0; b < NB; b++) { let s = 0; for (let k = kb[b]; k < kb[b + 1]; k++) s += mag[k] * mag[k]; E[t * NB + b] = 10 * Math.log10(s * pw / Math.max(1, kb[b + 1] - kb[b]) + 1e-10); }
+          for (let b = 0; b < NA; b++) { let s = 0; const k1 = Math.min(ka[b + 1], kTA); for (let k = ka[b]; k < k1; k++) s += mag[k] * mag[k]; AE[t * NA + b] = s * pw; }
+          if (doS) {   // 안정도: 9칸 평균을 뺀 log 파워의 3프레임 앞과의 상관(심벌 배음은 오래 남음)
+            const c = ringS[t % 4], p = ringS[(t + 1) % 4]; for (let k = sa - 4; k < sb + 5; k++) lm[k] = Math.log(mag[k] * mag[k] + 1e-20);
+            let acc = 0; for (let k = sa - 4; k <= sa + 4; k++) acc += lm[k];
+            for (let k = sa; k < sb; k++) { c[k - sa] = lm[k] - acc / 9; acc += lm[k + 5] - lm[k - 4]; }
+            if (t >= SL) { let xy = 0, xx = 0, yy = 0; for (let i = 0; i < c.length; i++) { xy += c[i] * p[i]; xx += c[i] * c[i]; yy += p[i] * p[i]; } STAB[t] = xy / Math.sqrt(xx * yy + 1e-12); }
+          }
+          if (t >= LAG) { const prev = ring[(t - LAG) % 3], ti = t - (LAG >> 1); for (let b = 0; b < NB; b++) F[ti * NB + b] = sfx(cur, prev, kb[b], kb[b + 1]); }
+        }
+        await tick(p0 + (p1 - p0) * t1 / nF);
+      }
+      return { nF, E, F, AE, STAB };
+    }
+    // ÷4 곁 신호((L−R)/2) STFT(N/4, hop/4 → 가운데와 같은 프레임 시각): 대역 4–6(300–1600 Hz) 플럭스 SF(nF×3, ysrM용)
+    async function sideBands(xs4, sr4, N, hop, gain, nF, tick, p0, p1) {
+      const H = N >> 1, len = xs4.length, fft = makeRealFFT(N), win = hann(N, gain), kb = binsOf(EDGES, sr4 / N, H);
+      const SF = new Float32Array(nF * 3), mag = new Float64Array(H + 1), frame = new Float64Array(N), ring = [0, 1, 2].map(() => new Float64Array(H + 1));
+      const sc = 1000 * 4 / N, sK = kb[7] + 2, LAG = Math.max(1, Math.round(0.0116 * sr4 / hop));
+      for (let t = 0; t < nF; t++) {
+        if ((t & 511) === 511) await tick(p0 + (p1 - p0) * t / nF);
+        const base = t * hop - H;
+        if (base >= 0 && base + N <= len) fft.win(xs4, base, win, mag, sK);
+        else { for (let n = 0; n < N; n++) { const i = base + n; frame[n] = (i >= 0 && i < len) ? xs4[i] * win[n] : 0; } fft(frame, mag, sK); }
+        const cur = ring[t % 3]; for (let k = Math.max(0, kb[4] - 1); k <= sK; k++) cur[k] = Math.log(1 + sc * mag[k]);
+        if (t >= LAG) { const prev = ring[(t - LAG) % 3], ti = t - (LAG >> 1); for (let b = 4; b <= 6; b++) SF[ti * 3 + b - 4] = sfx(cur, prev, kb[b], kb[b + 1]); }
+      }
+      return SF;
+    }
+    // ÷4 가운데 저역 kit 16띠(최댓값 1로 맞춘 신호): E = log(1 + G·띠 평균 크기), O = SuperFlux(지연 2) 평균
+    async function lowBands(x4, sr4, N, hop, gain, nF, tick, p0, p1) {
+      const H = N >> 1, len = x4.length, fft = makeRealFFT(N), win = hann(N, gain), bin = sr4 / N, BD = [];
+      for (let i = 0; i + 1 < KEDGES.length; i++) { const lo = Math.max(1, Math.round(KEDGES[i] / bin)), hi = Math.max(lo + 1, Math.round(KEDGES[i + 1] / bin)); BD.push([lo, hi]); }
+      const B = BD.length, kHi = BD[B - 1][1], E = new Float32Array(nF * B), O = new Float32Array(nF * B), mag = new Float64Array(H + 1), frame = new Float64Array(N), ring = [0, 1, 2].map(() => new Float64Array(kHi + 2));
+      const G = 4 * 4, G2 = 1.953125 * 4;   // kit(원래 표본율 N=2048)과 같은 눈금
+      for (let f = 0; f < nF; f++) {
+        if ((f & 511) === 511) await tick(p0 + (p1 - p0) * f / nF);
+        const base = f * hop - H;
+        if (base >= 0 && base + N <= len) fft.win(x4, base, win, mag, kHi);
+        else { for (let i = 0; i < N; i++) { const j = base + i; frame[i] = j >= 0 && j < len ? x4[j] * win[i] : 0; } fft(frame, mag, kHi); }
+        const o = f * B, cur = ring[f % 3], prev = ring[(f + 1) % 3];
+        for (let k = 0; k <= kHi; k++) cur[k] = Math.log(1 + G2 * mag[k]);
+        for (let b = 0; b < B; b++) { const [lo, hi] = BD[b]; let s = 0, sx = 0; for (let k = lo; k < hi; k++) { s += mag[k]; if (f >= 2) { const p0 = prev[k - 1], p1 = prev[k], p2 = prev[k + 1], r = p0 > p1 ? (p0 > p2 ? p0 : p2) : (p1 > p2 ? p1 : p2), d = cur[k] - r; if (d > 0) sx += d; } } E[o + b] = Math.log(1 + G * s / (hi - lo)); O[o + b] = sx / (hi - lo); }
+      }
+      const fc = BD.map(([lo, hi]) => Math.sqrt(lo * (hi - 1 || 1)) * bin);   // 띠 가운데 주파수(Hz)
+      return { E, O, B, fc };
+    }
+    // 종류용 묶음(aux): 묶음 에너지 dB, 바닥(이동 최소)의 누적 합, 95% 값, 안정도 누적 합. 10 kHz 위가 죽은 곡(옛 녹음)은 묶음을 내림
+    function runMin(E, w) { const n = E.length, o = new Float32Array(n), dq = new Int32Array(n); let h = 0, t = 0; for (let f = -w, k = 0; f < n; f++) { for (; k <= Math.min(n - 1, f + w); k++) { while (t > h && E[dq[t - 1]] >= E[k]) t--; dq[t++] = k; } while (dq[h] < f - w) h++; if (f >= 0) o[f] = E[dq[h]]; } return o; }
+    function cumsum(a) { const c = new Float64Array(a.length + 1); for (let i = 0; i < a.length; i++) c[i + 1] = c[i] + a[i]; return c; }
+    const segMean = (c, a, b) => { const n = c.length - 1; a = Math.max(0, a); b = Math.min(n - 1, b); return b >= a ? (c[b + 1] - c[a]) / (b - a + 1) : NaN; };
+    function auxGroups(AE, STAB, nF, fps) {
+      const s = fps / 86.1328125, grpE = gr => { const o = new Float32Array(nF); for (let f = 0; f < nF; f++) { let v = 0; for (let b = gr[0]; b < gr[1]; b++) v += AE[f * NA + b]; o[f] = 10 * Math.log10(v + 1e-12); } return o; };
+      let airDead; { const a = grpE(AGRP.air), h = grpE(AGRP.hi), d = new Float64Array(nF); for (let f = 0; f < nF; f++) d[f] = a[f] - h[f]; airDead = quant(d, 0.5) < -16; }
+      const G = Object.assign({}, AGRP, airDead ? { air: [13, 15], hi: [12, 14], cy: [10, 15] } : {}), X = { s, airDead, E: {}, cf: {}, q95: {} };
+      for (const k in AGRP) { const E = grpE(G[k]); X.E[k] = E; X.q95[k] = quant(E, 0.95); if (k !== 'lm') X.cf[k] = cumsum(runMin(E, Math.max(1, Math.round(5 * s)))); }
+      X.cst = cumsum(STAB);
+      return X;
+    }
+    // 고역 어택 순간(A.fh 봉우리) 4–11 kHz 스펙트럼 평탄도(드럼 = 잡음이라 평평) → { f(A 프레임), v }
+    function hfFlatness(A, channels, sr, nfMul) {
+      const fh = A.fh, nF = A.nF, fps = A.fps, of = [], ov = [];
+      const Nf = (sr > 30000 ? 1024 : 512) * (nfMul || 1), H = Nf >> 1, fft = makeRealFFT(Nf), win = hann(Nf, 1), frame = new Float64Array(Nf), mag = new Float64Array(H + 1);
+      const binHz = sr / Nf, k0 = Math.round(4000 / binHz), k1 = Math.min(H - 1, Math.round(Math.min(11000, 0.45 * sr) / binHz));
+      if (k1 - k0 < 8 || !fh || !nF) return { f: new Int32Array(0), v: new Float64Array(0) };
+      const s = Float64Array.from(fh).sort(), med = s[nF >> 1] || 1e-9, nc = channels.length, len = channels[0].length, inv = 1 / nc;
+      let last = -99;
+      for (let f = 2; f < nF - 2; f++) {
+        const v = fh[f]; if (!(v > 3 * med && v >= fh[f - 1] && v >= fh[f + 1] && v >= fh[f - 2] && v >= fh[f + 2]) || f - last < 6) continue; last = f;
+        const base = Math.round((f / fps + CAL + 0.008) * sr) - H; if (base < 0 || base + Nf > len) continue;
+        for (let n = 0; n < Nf; n++) { let xx = 0; for (let c = 0; c < nc; c++) xx += channels[c][base + n]; frame[n] = xx * inv * win[n]; }
+        fft(frame, mag, k1 + 1);
+        let sl = 0, sa = 0; for (let k = k0; k < k1; k++) { const p = mag[k] * mag[k] + 1e-14; sl += Math.log(p); sa += p; }
+        const n = k1 - k0; of.push(f); ov.push(Math.exp(sl / n) / (sa / n));
+      }
+      return { f: Int32Array.from(of), v: Float64Array.from(ov) };
+    }
+    // 곡 신호 → 드럼 특징(TL과 무관). A: hfFlatness(A.fh·A.nF·A.fps)용. Q: drParams(). tick(f): 진행 0..1을 받는 async(양보 자리, 엔진 makeTicker)
+    async function drumFeatures(channels, sr, A, Q, tick) {
+      if (!channels || !channels.length || !channels[0] || !channels[0].length || !(sr >= Q.srMin)) return null;
+      const k = Q.nScale ? Math.max(-1, Math.min(2, Math.round(Math.log2(sr / 46000)))) : 0, N = k ? Q.N * Math.pow(2, k) : Q.N, hop = k ? Q.hop * Math.pow(2, k) : Q.hop;
+      const nc = channels.length, len = channels[0].length;
+      // 1차 훑기(65536표본 조각): 최댓값, 1024표본 칸 RMS, ÷4 가운데·곁(CIC)
+      const nb = Math.floor(len / 1024), rr = new Float64Array(Math.max(1, nb)), dX = makeDecim4(len), dS = nc >= 2 ? makeDecim4(len) : null, c0 = channels[0], c1 = channels[1] || channels[0];
+      const BL = 65536, mb = new Float32Array(BL), sb = new Float32Array(BL);
+      let pk = 0, e = 0;
+      for (let s0 = 0; s0 < len; s0 += BL) {
+        const s1 = Math.min(len, s0 + BL), m = s1 - s0;
+        fillMono(channels, s0, s1, mb, 0);
+        for (let q = 0; q < m; q++) { const v = mb[q], av = v < 0 ? -v : v; if (av > pk) pk = av; }
+        for (let q = 0; q < m; q++) { const i = s0 + q; if ((i >> 10) >= nb) break; const v = mb[q]; e += v * v; if ((i & 1023) === 1023) { rr[i >> 10] = Math.sqrt(e / 1024); e = 0; } }
+        dX.block(mb, m);
+        if (dS) { for (let q = 0; q < m; q++) sb[q] = 0.5 * (c0[s0 + q] - c1[s0 + q]); dS.block(sb, m); }
+        await tick(0.25 * s1 / len);
+      }
+      const r95 = quant(rr, 0.95) || 1e-9, g = 0.1 / Math.max(1e-6, r95);   // 크기 맞춤: 칸 RMS 95% = 0.1
+      const M = await midBands(channels, len, sr, N, hop, g, tick, 0.25, 0.8), nF = M.nF, fps = sr / hop;
+      const sr4 = sr / 4; let x4 = dX.end(); const low = await lowBands(x4, sr4, N >> 1, hop >> 2, pk > 0 ? 1 / pk : 1, nF, tick, 0.8, 0.85), tom = tomSignal(x4, sr4); x4 = null; await tick(0.86);
+      const SF = dS ? await sideBands(dS.end(), sr4, N >> 2, hop >> 2, g, nF, tick, 0.86, 0.9) : null;
+      const st = []; for (let b = 0; b < NB; b++) { const af = new Float64Array(nF), ae = new Float64Array(nF); for (let f = 0; f < nF; f++) { af[f] = M.F[f * NB + b]; ae[f] = M.E[f * NB + b]; } st.push({ f90: quant(af, 0.9), e95: quant(ae, 0.95) }); }
+      await tick(0.92);
+      const aux = auxGroups(M.AE, M.STAB, nF, fps); M.AE = null; M.STAB = null; await tick(0.94);
+      const FL = hfFlatness(A, channels, sr, k > 0 ? Math.pow(2, k) : 1);
+      await tick(1);
+      return { v: 1, sr, N, hop, fps, nF, E: M.E, F: M.F, SF, low, st, aux, FL, tom };
+    }
+
+    // ════════ ② 드럼 있음(곡·마디) ════════
+    function corr(a, b) { const n = a.length; let ma = 0, mb = 0; for (let i = 0; i < n; i++) { ma += a[i]; mb += b[i]; } ma /= n; mb /= n; let sab = 0, saa = 0, sbb = 0; for (let i = 0; i < n; i++) { const x = a[i] - ma, y = b[i] - mb; sab += x * y; saa += x * x; sbb += y * y; } return saa > 1e-12 && sbb > 1e-12 ? sab / Math.sqrt(saa * sbb) : 0; }
+    function sdOf(a) { let s = 0, s2 = 0; for (let i = 0; i < a.length; i++) { s += a[i]; s2 += a[i] * a[i]; } const m = s / a.length; return Math.sqrt(Math.max(1e-12, s2 / a.length - m * m)); }
+    // 마디 특징: 고·중·저역 곡선의 박 사이·마디 사이 무늬 상관, 박 자리 설명력, 주기성, 킥·스네어 엇갈림, 고역 평탄도, 대역 비·크기
+    function presenceFeatures(A, TL, FL) {
+      const fps = A.fps, nF = A.nF, fh = A.fh, fm = A.fm, fl = A.fl, rms = A.rms;
+      const fr = t => { const f = Math.round((t - CAL) * fps); return f < 0 ? 0 : f >= nF ? nF - 1 : f; };
+      const B = TL.beats, nb = B.length, NBp = 12, bars = TL.bars, nBar = bars.length;
+      const sh = sdOf(fh), sm = sdOf(fm), Ho = new Float64Array(nF);
+      for (let f = 0; f < nF; f++) { const v = fh[f] / sh - 0.8 * fm[f] / sm; Ho[f] = v > 0 ? v : 0; }
+      const nbp = Math.max(0, nb - 1);
+      const prof = Y => { const out = new Array(nbp); for (let i = 0; i < nbp; i++) { const v = new Float64Array(NBp), dt = B[i + 1] - B[i]; for (let j = 0; j < NBp; j++) { const a = fr(B[i] + dt * (j - 0.5) / NBp), b = Math.max(a, fr(B[i] + dt * (j + 0.5) / NBp)); let m = 0; for (let f = a; f <= b; f++) if (Y[f] > m) m = Y[f]; v[j] = m; } out[i] = v; } return out; };
+      const PH = prof(fh), PO = prof(Ho), PL = prof(fl), PM = prof(fm);
+      const lagCorr = (Pp, lag) => { const c = new Float64Array(Math.max(0, nbp - lag)); for (let i = 0; i + lag < nbp; i++) c[i] = corr(Pp[i], Pp[i + lag]); return c; };
+      const cH2 = lagCorr(PH, 2), cO2 = lagCorr(PO, 2), cL2 = lagCorr(PL, 2);
+      const barLagCache = new Map();
+      const cBar = (Pp, nm, m) => { const k = nm + m; if (!barLagCache.has(k)) barLagCache.set(k, lagCorr(Pp, m)); return barLagCache.get(k); };
+      const pairMean = (c, lag, b0, b1) => { let s = 0, n = 0; for (let i = Math.max(0, b0 - lag); i < b1 && i < c.length; i++) { s += c[i]; n++; } return n ? s / n : 0; };
+      const K = A.drum.K, Sn = A.drum.Sn, kb = new Float64Array(nb), sb = new Float64Array(nb);
+      for (let i = 0; i < nb; i++) { const c = fr(B[i]); let mk = 0, ms = 0; for (let f = Math.max(0, c - 2); f <= Math.min(nF - 1, c + 2); f++) { if (K[f] > mk) mk = K[f]; if (Sn[f] > ms) ms = Sn[f]; } kb[i] = mk; sb[i] = ms; }
+      const zsc = a => { let s = 0; for (const v of a) s += v; const m = s / a.length, d = sdOf(a) || 1; return Float64Array.from(a, v => (v - m) / d); };
+      const zk = zsc(kb), zn = zsc(sb), dks = Float64Array.from(zk, (v, i) => v - zn[i]);
+      const kq99 = (() => { const s = Float64Array.from(kb).sort(); return s[Math.floor(0.99 * (s.length - 1))] || 1; })();
+      const r2 = (Y, b0, b1) => {
+        if (b1 - b0 < 2) return 0; const sum = new Float64Array(NBp), cnt = new Float64Array(NBp); let tot = 0, tot2 = 0, n = 0;
+        for (let i = b0; i < b1; i++) { const dt = B[i + 1] - B[i], fa = fr(B[i]), fb = fr(B[i + 1]); for (let f = fa; f < fb; f++) { const u = ((f / fps + CAL) - B[i]) / dt; let j = Math.floor(u * NBp); j = j < 0 ? 0 : j > NBp - 1 ? NBp - 1 : j; const y = Y[f]; sum[j] += y; cnt[j]++; tot += y; tot2 += y * y; n++; } }
+        if (n <= NBp + 1) return 0; const mu = tot / n, vt = tot2 - n * mu * mu; if (vt <= 1e-12) return 0; let vb = 0; for (let j = 0; j < NBp; j++) if (cnt[j]) vb += cnt[j] * (sum[j] / cnt[j] - mu) ** 2;
+        const k = (NBp - 1) / (n - 1); return (vb / vt - k) / (1 - k);
+      };
+      const acPeak = (Y, fa, fb) => {
+        const n = fb - fa; if (n < 60) return 0; let mu = 0; for (let f = fa; f < fb; f++) mu += Y[f]; mu /= n; let v0 = 0; for (let f = fa; f < fb; f++) v0 += (Y[f] - mu) ** 2; if (v0 <= 1e-12) return 0;
+        const Lm = Math.min(173, n >> 1); let best = 0, pprev = 0, prev = 0;
+        for (let lag = 6; lag < Lm; lag++) { let s = 0; for (let f = fa; f + lag < fb; f++) s += (Y[f] - mu) * (Y[f + lag] - mu); const v = s / v0 * n / (n - lag); if (lag > 7 && prev > pprev && prev >= v && prev > best) best = prev; pprev = prev; prev = v; }
+        return best;
+      };
+      const rs = Float64Array.from(rms).sort(), r95 = rs[Math.floor(0.95 * (rs.length - 1))] || 1e-9;
+      const flBar = []; for (let i = 0; i < nBar; i++) flBar.push([]);
+      if (FL) { let bi = 0; for (let q = 0; q < FL.f.length; q++) { const t = FL.f[q] / fps + CAL; while (bi + 1 < nBar && t >= bars[bi].t1) bi++; if (t >= bars[bi].t0 && t < bars[bi].t1) flBar[bi].push(FL.v[q]); } }
+      const rows = [];
+      for (let bi = 0; bi < nBar; bi++) {
+        const bar = bars[bi], f0 = fr(bar.t0), f1 = Math.max(f0 + 1, fr(bar.t1)), n = f1 - f0;
+        let sH = 0, sM = 0, sL = 0, sR = 0; for (let f = f0; f < f1; f++) { sH += fh[f]; sM += fm[f]; sL += fl[f]; sR += rms[f] * rms[f]; }
+        const b0 = bar.startBeat, b1 = Math.min(nbp, bar.startBeat + bar.nBeats), m = bar.nBeats;
+        const w0 = Math.max(0, b0 - m), w1 = Math.min(nbp, b1 + m);
+        const cHb = cBar(PH, 'H', m), cOb = cBar(PO, 'O', m), cMb = cBar(PM, 'M', m);
+        const fa = fr(bars[Math.max(0, bi - 1)].t0), fb = fr(bars[Math.min(nBar - 1, bi + 1)].t1);
+        let bb1 = 0, bb2 = 0; { const i0 = w0, i1 = Math.min(nb, w1 + 1); if (i1 - i0 >= 6) { const d = dks.subarray(i0, i1); bb1 = -corr(d.subarray(0, d.length - 1), d.subarray(1)); bb2 = corr(d.subarray(0, d.length - 2), d.subarray(2)); } }
+        let kq = 0; { let s = 0, c = 0; for (let i = b0; i < Math.min(nb, b0 + m); i++) { s += Math.min(1.5, kb[i] / kq99); c++; } kq = c ? s / c : 0; }
+        rows.push({
+          rH2: pairMean(cH2, 2, b0, b1), rHb: pairMean(cHb, m, b0, b1), rO2: pairMean(cO2, 2, b0, b1), rOb: pairMean(cOb, m, b0, b1),
+          rL2: pairMean(cL2, 2, b0, b1), rMb: pairMean(cMb, m, b0, b1), qH1: r2(fh, w0, w1), acH: acPeak(fh, fa, fb), acM: acPeak(fm, fa, fb), bb1, bb2, kq,
+          flt: !FL ? PRES.FLT0 : flBar[bi].length >= 2 ? median(flBar[bi]) : 0,
+          lhr: Math.log((sH + 1e-6) / (sM + 1e-6)), lmh: Math.log(sH / n + 1e-4), lml: Math.log(sL / n + 1e-4), rdb: 10 * Math.log10(sR / n / (r95 * r95) + 1e-12),
+        });
+      }
+      return rows;
+    }
+    // 두 상태(끔·켬) 비터비: z = 켬 점수, cost = 바꿈 비용(마디마다)
+    function viterbi2(z, cost) {
+      const n = z.length, on = new Uint8Array(n); if (!n) return on;
+      const s0 = new Float64Array(n), s1 = new Float64Array(n), k0 = new Uint8Array(n), k1 = new Uint8Array(n);
+      s0[0] = 0; s1[0] = z[0];
+      for (let i = 1; i < n; i++) { const C = cost[i]; const a = s0[i - 1], c = s1[i - 1] - C; if (a >= c) { s0[i] = a; k0[i] = 0; } else { s0[i] = c; k0[i] = 1; } const d = s1[i - 1], e = s0[i - 1] - C; if (d >= e) { s1[i] = d + z[i]; k1[i] = 1; } else { s1[i] = e + z[i]; k1[i] = 0; } }
+      let st = s1[n - 1] > s0[n - 1] ? 1 : 0; for (let i = n - 1; i >= 0; i--) { on[i] = st; st = st ? k1[i] : k0[i]; }
+      return on;
+    }
+    const dot = (w, b, x) => { let z = b; for (let j = 0; j < w.length; j++) z += w[j] * x[j]; return z; };
+    // 곡·마디 드럼 있음 → { song, songScore(마디 없으면 null), bar(0..1), on }
+    //  곡 점수 = 소리 나는 마디(rdb > −25) 마디 점수의 75% 값 − KAPPA·음색 벌점(고역이 약하고 중역보다 낮으면: 피아노 같은 곡)
+    function drumPresence(A, TL, FL, Q) {
+      const nBar = TL.bars.length, M = PRES;
+      if (!nBar) return { song: true, songScore: null, bar: new Float64Array(0), on: new Uint8Array(0) };
+      const F = presenceFeatures(A, TL, FL);
+      for (const r of F) r.e = dot(M.W1, M.B1, M.K1.map(k => r[k]));
+      const loud = F.filter(r => r.rdb > -25), Lr = loud.length >= 2 ? loud : F;
+      const es = Lr.map(r => r.e).sort((a, b) => a - b), q = es[Math.floor(M.Q * (es.length - 1))];
+      const mLhr = median(Lr.map(r => r.lhr)), mLmh = median(Lr.map(r => r.lmh)), mLml = median(Lr.map(r => r.lml)), mRdb = median(Lr.map(r => r.rdb)), mE = median(Lr.map(r => r.e));
+      const pen = Math.max(0, M.LHR0 - mLhr) + Math.max(0, M.LMH0 - mLmh);
+      const songScore = q - M.KAPPA * pen, song = songScore > Q.songTh;
+      const z = new Float64Array(nBar), cost = new Float64Array(nBar);
+      for (let i = 0; i < nBar; i++) {
+        const r = F[i]; r.De = r.e - mE; r.Dlmh = r.lmh - mLmh; r.Dlml = r.lml - mLml; r.Drdb = r.rdb - mRdb;
+        z[i] = r.rdb < M.QUIET_DB ? -10 : dot(M.W2, M.B2, M.K2.map(k => r[k]));
+        const num = TL.bars[i].num != null ? TL.bars[i].num : i + 1; cost[i] = (num - 1) % 4 === 0 ? Q.barC / 2 : Q.barC;
+      }
+      const on = song ? viterbi2(z, cost) : new Uint8Array(nBar);
+      const bar = new Float64Array(nBar); for (let i = 0; i < nBar; i++) bar[i] = song ? sig(z[i]) : sig(Math.min(z[i], songScore - Q.songTh));
+      return { song, songScore: isFinite(songScore) ? songScore : null, bar, on };
+    }
+
+    // ════════ ③ 칸 격자·칸 증거 ════════
+    // 격자: R = 겹박자 3, 빠른 곡(TL.bpm > EG_8MAX, 엔진이 8분을 박으로) 2, 아니면 4. 스윙 φ = 엔진 swingRatio(재지 못했거나 곧으면 0.5)
+    function drumGrid(A, TL) {
+      const B = TL.beats, nb = B.length, triple = !!(TL.meter && TL.meter.triple);
+      const R = triple ? 3 : TL.bpm > P.EG_8MAX ? 2 : 4;
+      let phi = 0.5; try { if (R !== 3) { const sw = swingRatio(A, TL); phi = sw && sw.measured && !sw.straight ? sw.phi : 0.5; } } catch (e) { }
+      const posJ = R === 4 ? [0, phi / 2, phi, (1 + phi) / 2] : R === 2 ? [0, phi] : [0, 1 / 3, 2 / 3];
+      const slots = [];
+      for (let i = 0; i + 1 < nb; i++) { const dt = B[i + 1] - B[i]; for (let j = 0; j < R; j++) slots.push({ t: B[i] + dt * posJ[j], i, j, x: i * R + j, bar: TL.barOfBeat[i], pos: TL.pos[i] }); }
+      return { R, phi, posJ, slots };
+    }
+    // 같은 마디 자리(박·칸) 앞뒤 ±8마디(이웃 10개까지) 평균, 자기 빼고
+    function patCol(a, slots, R) {
+      const out = new Float64Array(a.length), by = new Map();
+      slots.forEach((s, i) => { const k = s.pos * R + s.j; if (!by.has(k)) by.set(k, []); by.get(k).push(i); });
+      for (const [, idx] of by) for (let x = 0; x < idx.length; x++) { const i = idx[x], bi = slots[i].bar; let s = 0, c = 0;
+        for (let y = Math.max(0, x - 10); y < Math.min(idx.length, x + 11); y++) { if (y === x) continue; const sl = slots[idx[y]]; if (Math.abs(sl.bar - bi) > 8) continue; s += a[idx[y]]; c++; }
+        out[i] = c ? s / c : a[i]; }
+      return out;
+    }
+    const zOf = a => { const f = Array.from(a).filter(isFinite), m = quant(f, 0.5), h = quant(f, 0.9) - m || 1e-6; return Float64Array.from(a, v => (v - m) / h); };
+    // 칸 × 대역 기본 특징(쓰는 것만, need = { fx|nf|cf|ea|sr: [대역…] }):
+    //  fx = 칸 둘레(±w) 플럭스 최대(그 프레임 fm), nf = fx/곡 90%, cf = fx − 둘레(±26프레임) 평균, ea = fm부터 6프레임 에너지 최대 − 곡 95%, sr = log(곁 플럭스 최대/가운데)
+    function slotBase(FE, slots, need) {
+      const { fps, nF, F, E, st, SF } = FE, n = slots.length, K = fps / 172.265625, r = x => Math.round(x * K), cl = f => f < 0 ? 0 : f >= nF ? nF - 1 : f, hasS = !!SF;
+      const want = new Map(); for (const key in need) for (const b of need[key]) { if (!want.has(b)) want.set(b, {}); want.get(b)[key] = 1; }
+      const bands = [...want.keys()].sort((a, b) => a - b), base = {};
+      for (const b of bands) { const q = want.get(b); base['fx' + b] = new Float64Array(n); base['nf' + b] = new Float64Array(n); for (const key of ['cf', 'ea', 'sr']) if (q[key]) base[key + b] = new Float64Array(n); }
+      const r2 = r(2), r5 = r(5), r26 = r(26), r6 = r(6), sh = K > 0.75 ? 1 : 0;
+      for (let i = 0; i < n; i++) {
+        const t = slots[i].t, dt = i + 1 < n ? slots[i + 1].t - t : 0.12;
+        const f0 = Math.round(t * fps) - sh, w = Math.max(r2, Math.min(r5, Math.round(dt * fps / 3)));
+        for (const b of bands) {
+          const q = want.get(b);
+          let mx = 0, fm = f0; for (let f = cl(f0 - w); f <= cl(f0 + w); f++) { const v = F[f * NB + b]; if (v > mx) { mx = v; fm = f; } }
+          base['fx' + b][i] = mx; base['nf' + b][i] = mx / (st[b].f90 + 1e-6);
+          if (q.cf) { let bg = 0, nbg = 0; for (let f = cl(fm - r26); f <= cl(fm + r26); f++) { if (Math.abs(f - fm) <= w + 1) continue; bg += F[f * NB + b]; nbg++; } bg /= Math.max(1, nbg); base['cf' + b][i] = mx - bg; }
+          if (q.ea) { let epk = -200; for (let f = cl(fm); f <= cl(fm + r6); f++) epk = Math.max(epk, E[f * NB + b]); base['ea' + b][i] = epk - st[b].e95; }
+          if (q.sr) { if (hasS) { let smx = 0; for (let f = cl(fm - r2); f <= cl(fm + r2); f++) smx = Math.max(smx, SF[f * 3 + b - 4]); base['sr' + b][i] = Math.log((smx + 0.01) / (mx + 0.01)); } else base['sr' + b][i] = -3; }
+        }
+      }
+      return base;
+    }
+    // 엔진 스네어 곡선(A.drum.Sn) 칸 ±30 ms 최대 → 곡 안 z
+    function engSn(A, slots) {
+      const c = A.drum && A.drum.Sn, n = slots.length, v = new Float64Array(n); if (!c) return v;
+      const fps = A.fps, nF = c.length;
+      for (let i = 0; i < n; i++) { const t = slots[i].t, f0 = Math.max(0, Math.round((t - 0.03 - CAL) * fps)), f1 = Math.min(nF - 1, Math.round((t + 0.03 - CAL) * fps)); let m = 0; for (let f = f0; f <= f1; f++) if (c[f] > m) m = c[f]; v[i] = m; }
+      const md = quant(v, 0.5), h = quant(v, 0.9) - md || 1e-6; return Float64Array.from(v, x => (x - md) / h);
+    }
+    // 모형 입력 열: 맨 위(hc) 대역 bT 고르기 → 기본 특징 → 열(z·무늬 평균)
+    function slotCols(FE, g, A, Q) {
+      const slots = g.slots, n = slots.length, st = FE.st, nyq = (FE.sr || 44100) / 2;
+      let bT = 11;
+      if (Q.bTrel) while (bT > 9 && (EDGES[bT] >= 0.95 * nyq || (bT === 11 && st[bT].e95 <= -72) || st[bT].e95 < st[bT - 1].e95 - Q.bTrel)) bT--;   // 나이퀴스트에 걸림·비었음·아래 대역보다 bTrel dB 넘게 작음 → 내림(바닥 5–8 kHz)
+      else while (bT > 10 && st[bT].e95 <= -72) bT--;
+      const B = slotBase(FE, slots, { fx: [9, 10, bT], nf: [1, 2, 7, 8], cf: [3, 9, bT], ea: [0, 1, 2, 3, 9, bT], sr: [4, 5, 6] }), col = {};
+      const avg = ks => { const o = new Float64Array(n); for (const k of ks) { const a = B[k]; for (let i = 0; i < n; i++) o[i] += a[i] / ks.length; } return o; };
+      col.ea1 = B.ea1; col.ea2 = B.ea2; col.zea0 = zOf(B.ea0); col.nf8 = B.nf8; col.p_gsN = patCol(avg(['nf7', 'nf8']).map(x => Math.log(x + 0.2)), slots, g.R);
+      col.zeSn = engSn(A, slots); col.p_zea3 = patCol(zOf(B.ea3), slots, g.R); col.ea9 = B.ea9; col.ea3 = B.ea3; col.glN = avg(['nf1', 'nf2']).map(x => Math.log(x + 0.2));
+      { const a = avg(['sr4', 'sr5', 'sr6']), md = quant(a, 0.5); col.ysrM = Float64Array.from(a, x => x - md); }
+      col.zfx9 = zOf(B.fx9); col.cfT = B['cf' + bT]; col.zcf3 = zOf(B.cf3); col.zcf9 = zOf(B.cf9); col.p_zfxT = patCol(zOf(B['fx' + bT]), slots, g.R);
+      col.gfx = Q.gateBand && bT < 10 ? B['fx' + bT] : B.fx10;   // 마디 문 대역(8–12 kHz, 맨 위가 내려가면 그 대역)
+      col._B = B; col._bT = bT;
+      return col;
+    }
+    // 1단 로짓: 갈래마다 자른 특징의 로지스틱
+    function stage1(col, n) {
+      const md = MODEL, s1 = {};
+      for (const c of CL3) {
+        const f = md.SPEC[c], m1 = md.M1[c], o = new Float64Array(n), cols = f.map(k => col[k]);
+        for (let i = 0; i < n; i++) { let z = m1.b; for (let j = 0; j < f.length; j++) { const cl = md.CLIP[f[j]]; let v = fin(cols[j][i]); v = v < cl[0] ? cl[0] : v > cl[1] ? cl[1] : v; z += m1.w[j] * v; } o[i] = z; }
+        s1[c] = o;
+      }
+      return s1;
+    }
+
+    // ════════ ④ 결정 ════════
+    function barsOf(sl) { const m = new Map(); for (let s = 0; s < sl.length; s++) { const b = sl[s].bar; if (!m.has(b)) m.set(b, []); m.get(b).push(s); } return [...m.entries()].sort((a, b) => a[0] - b[0]).map(e => e[1]); }
+    // 닮은 마디 무늬 합의(pat): 마디 벡터(세 갈래 × 마디 안 자리) 상관 → 위 gK개 이웃(상관 > gMinSim)의 같은 자리 로짓과 섞음
+    function grooveConsensus(z, bars, sl, R, C) {
+      const nb = bars.length, key = s => (sl[s].pos >= 0 ? sl[s].pos * R + sl[s].j : -1), CLIP = C.gClip, cl = x => Math.max(-CLIP, Math.min(CLIP, x));
+      const V = bars.map(ss => { const m = new Map(); for (const s of ss) { const k = key(s); if (k >= 0) m.set(k, s); } return m; });
+      const sim = (a, b) => { let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, n = 0; for (const [k, s] of V[a]) { const t = V[b].get(k); if (t === undefined) continue; for (const c of CL3) { const x = cl(z[c][s]), y = cl(z[c][t]); sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y; n++; } } if (n < 6) return 0; const vx = sxx - sx * sx / n, vy = syy - sy * sy / n; return vx > 0 && vy > 0 ? (sxy - sx * sy / n) / Math.sqrt(vx * vy) : 0; };
+      const out = {}; for (const c of CL3) out[c] = Float64Array.from(z[c]);
+      const S = []; for (let a = 0; a < nb; a++) S.push(new Float64Array(nb));
+      for (let a = 0; a < nb; a++) for (let b = a + 1; b < nb; b++) S[a][b] = S[b][a] = sim(a, b);
+      for (let a = 0; a < nb; a++) {
+        const nbr = []; for (let b = 0; b < nb; b++) if (b !== a && S[a][b] > C.gMinSim) nbr.push([S[a][b], b]);
+        nbr.sort((x, y) => y[0] - x[0] || x[1] - y[1]); const top = nbr.slice(0, C.gK); if (!top.length) continue;
+        for (const [k, s] of V[a]) for (const c of CL3) {
+          let sw = 0, sv = 0; for (const [w0, b] of top) { const t = V[b].get(k); if (t === undefined) continue; const w = Math.pow(w0, C.gGam); sw += w; sv += w * cl(z[c][t]); }
+          if (sw > 0) { const wt = C.gB[c] * sw / (sw + C.c0); out[c][s] = (1 - wt) * cl(z[c][s]) + wt * sv / sw; }
+        }
+      }
+      return out;
+    }
+    // 칸 문: 마디 문(±1마디 안 맨 위 대역 플럭스 최대 ≥ GATE) ∧ 드럼 있음(곡·마디)
+    function slotGate(col, g, pres, Q) {
+      const sl = g.slots, n = sl.length, bm = new Map(), gc = col.gfx;
+      sl.forEach((s, i) => bm.set(s.bar, Math.max(bm.get(s.bar) || 0, fin(gc[i]))));
+      const out = new Uint8Array(n);
+      for (let i = 0; i < n; i++) {
+        const s = sl[i]; let m = 0; for (let b = s.bar - MODEL.GW; b <= s.bar + MODEL.GW; b++) m = Math.max(m, bm.get(b) || 0);
+        let ok = m >= MODEL.GATE;
+        if (ok && pres && Q.presOn) { if (!pres.song) ok = false; else if (s.bar != null && s.bar >= 0 && s.bar < pres.on.length) ok = !!pres.on[s.bar]; }
+        out[i] = ok ? 1 : 0;
+      }
+      return out;
+    }
+    // ── 곡 안 자기 학습 킥(kit): 칸 특징 5종(들머리 O·차분 Ed·잔향 Dc·수준 Lv·앞 수준 Pr) × (저역 16띠 + 가운데 대역 7–11) ──
+    function kitSlotFeats(FE, slots, w) {
+      const L = FE.low, nF = FE.nF, fps = FE.fps, S = slots.length, hiB = [7, 8, 9, 10, 11], B = L.B + hiB.length, D = 5 * B, X = new Float64Array(S * D);
+      const Ev = (f, b) => b < L.B ? L.E[f * L.B + b] : FE.E[f * NB + hiB[b - L.B]] / 10, Ov = (f, b) => b < L.B ? L.O[f * L.B + b] : FE.F[f * NB + hiB[b - L.B]];
+      for (let s = 0; s < S; s++) {
+        const f0 = Math.round(slots[s].t * fps), x = s * D;
+        for (let b = 0; b < B; b++) X[x + 3 * B + b] = -1e9;
+        for (let f = Math.max(2, f0 - w); f <= Math.min(nF - 1, f0 + w); f++) for (let b = 0; b < B; b++) { const a = Ov(f, b), e = Ev(f, b), d = e - Ev(f - 2, b); if (a > X[x + b]) X[x + b] = a; if (d > X[x + B + b]) X[x + B + b] = d; if (e > X[x + 3 * B + b]) X[x + 3 * B + b] = e; }
+        for (let b = 0; b < B; b++) { let m = 1e9; for (let f = Math.max(0, f0 - 6); f <= Math.max(0, f0 - 3); f++) { const e = Ev(f, b); if (e < m) m = e; } X[x + 4 * B + b] = m; }
+        if (f0 + 10 < nF && f0 > 4) for (let b = 0; b < B; b++) { let p = 0; for (let f = f0 + 4; f <= f0 + 10; f++) p += Ev(f, b); X[x + 2 * B + b] = p / 7 - Ev(f0 - 3, b); }
+      }
+      return { X, D, B, S };
+    }
+    function standardize(X, S, D) {
+      const mu = new Float64Array(D), sd = new Float64Array(D), Z = new Float64Array(S * D);
+      for (let s = 0; s < S; s++) for (let i = 0; i < D; i++) mu[i] += X[s * D + i];
+      for (let i = 0; i < D; i++) mu[i] /= S || 1;
+      for (let s = 0; s < S; s++) for (let i = 0; i < D; i++) { const d = X[s * D + i] - mu[i]; sd[i] += d * d; }
+      for (let i = 0; i < D; i++) sd[i] = Math.sqrt(sd[i] / (S || 1)) || 1;
+      for (let s = 0; s < S; s++) for (let i = 0; i < D; i++) Z[s * D + i] = (X[s * D + i] - mu[i]) / sd[i];
+      return Z;
+    }
+    function cholSolve(A, b, n) {
+      const Lm = new Float64Array(n * n);
+      for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) { let s = A[i * n + j]; for (let k = 0; k < j; k++) s -= Lm[i * n + k] * Lm[j * n + k]; Lm[i * n + j] = i === j ? Math.sqrt(Math.max(s, 1e-12)) : s / Lm[j * n + j]; }
+      const y = new Float64Array(n); for (let i = 0; i < n; i++) { let s = b[i]; for (let k = 0; k < i; k++) s -= Lm[i * n + k] * y[k]; y[i] = s / Lm[i * n + i]; }
+      const x = new Float64Array(n); for (let i = n - 1; i >= 0; i--) { let s = y[i]; for (let k = i + 1; k < n; k++) s -= Lm[k * n + i] * x[k]; x[i] = s / Lm[i * n + i]; }
+      return x;
+    }
+    // 무게 있는 릿지(절편은 벌하지 않음) → 칸 점수
+    function ridge(Z, S, D, y, wt, lam) {
+      const n = D + 1, A = new Float64Array(n * n), b = new Float64Array(n), v = new Float64Array(n); let wsum = 0;
+      for (let s = 0; s < S; s++) { const w = wt[s]; if (!w) continue; wsum += w; for (let i = 0; i < D; i++) v[i] = Z[s * D + i]; v[D] = 1; for (let i = 0; i < n; i++) { const wi = w * v[i]; b[i] += wi * y[s]; for (let j = 0; j <= i; j++) A[i * n + j] += wi * v[j]; } }
+      for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) A[j * n + i] = A[i * n + j];
+      for (let i = 0; i < D; i++) A[i * n + i] += lam * wsum;
+      const wv = cholSolve(A, b, n), out = new Float64Array(S);
+      for (let s = 0; s < S; s++) { let a = wv[D]; for (let i = 0; i < D; i++) a += wv[i] * Z[s * D + i]; out[s] = a; }
+      return out;
+    }
+    // 씨앗 점수(저역 수준 + 잔향, 절대 바닥 posAbs) 위 pTop = 친 칸, 아래 pBot·문 밖 칸·스네어 칸(무게 xW) = 안 친 칸 → 릿지 → { sc, thr }
+    function selfKick(FE, slots, ok, snareOn, Q) {
+      const o = Q.kit, L = FE.low, fx = kitSlotFeats(FE, slots, o.w), { X, D, B, S } = fx;
+      const L1 = [], L2 = []; for (let b = 0; b < L.B; b++) { if (L.fc[b] < 65) L1.push(b); else if (L.fc[b] < 110) L2.push(b); }
+      const gm = (x, t, gr) => { let s = 0; for (const b of gr) s += X[x + t * B + b]; return s / Math.max(1, gr.length); };
+      const raw = new Float64Array(S); for (let s = 0; s < S; s++) { const x = s * D; raw[s] = gm(x, 3, L1) + 0.625 * gm(x, 2, L1) + 0.5 * gm(x, 3, L2); }
+      const idx = []; for (let s = 0; s < S; s++) if (ok[s]) idx.push(s); idx.sort((a, b) => raw[b] - raw[a] || a - b);
+      const pick = abs => { const pos = new Uint8Array(S), nT = Math.max(o.minPos, Math.round(o.pTop * idx.length)); let n = 0; for (let i = 0; i < nT && i < idx.length; i++) { const s = idx[i]; if (raw[s] < abs) break; pos[s] = 1; n++; } return n < o.minPos ? null : pos; };
+      let pos = pick(o.posAbs), thr = o.thr; if (!pos && o.posAbs2) { pos = pick(o.posAbs2); thr = o.thr2; }
+      if (!pos) return null;
+      const Z = standardize(X, S, D), y = new Float64Array(S), wt = new Float64Array(S);
+      for (let s = 0; s < S; s++) if (pos[s]) { y[s] = 1; wt[s] = 1; }
+      const nBot = Math.round(o.pBot * idx.length); for (let i = idx.length - nBot; i < idx.length; i++) wt[idx[i]] = 1;
+      for (let s = 0; s < S; s++) if (!ok[s]) wt[s] = 1;
+      if (snareOn && o.xW) for (let s = 0; s < S; s++) if (snareOn[s] && !pos[s]) { y[s] = 0; wt[s] = o.xW; }
+      return { sc: ridge(Z, S, D, y, wt, o.lam), thr };
+    }
+    // 결정: 1단 로짓 → 무늬 합의 → 문턱 ∧ 칸 문 → 스네어 대체 → 킥 대체(+ 킥 맞춤)
+    function decide(FE, g, A, pres, Q) {
+      const sl = g.slots, n = sl.length, col = slotCols(FE, g, A, Q), s1 = stage1(col, n), gate = slotGate(col, g, pres, Q);
+      const zc = grooveConsensus(s1, barsOf(sl), sl, g.R, Q.cons);
+      const on = {}; for (const c of CL3) { on[c] = new Uint8Array(n); for (let i = 0; i < n; i++) on[c][i] = zc[c][i] >= Q.th[c] && gate[i] ? 1 : 0; }
+      const dens = () => { let ng = 0, nk = 0, ns = 0, nh = 0; for (let i = 0; i < n; i++) if (gate[i]) { ng++; nk += on.kick[i]; ns += on.snare[i]; nh += on.hc[i]; } return { ng, k: nk / (ng || 1), s: ns / (ng || 1), h: nh / (ng || 1) }; };
+      // 스네어 대체: 스네어가 거의 없는데 킥·hc는 활발 → 그 곡만 스네어 문턱을 낮춤(기타가 두꺼운 록에서 스네어 몸통이 묻힘)
+      let sfb = null;
+      if (Q.sfb) { const d = dens(); if (d.ng && d.s < Q.sfbS && d.k > Q.sfbK && d.h > Q.sfbH) { sfb = { th: Q.sfbTh }; for (let i = 0; i < n; i++) on.snare[i] = zc.snare[i] >= Q.sfbTh && gate[i] ? 1 : 0; } }
+      // 킥 대체: 킥이 거의 없는데 스네어·hc는 활발 → 곡 안 자기 학습 킥(빽빽한 믹스에서 킥이 묻힘)
+      let kfb = null;
+      if (Q.kfb) {
+        const d = dens();
+        if (d.ng && d.k < Q.kfbK && d.s > Q.kfbS && d.h > Q.kfbH) {
+          const r = selfKick(FE, sl, gate, on.snare, Q);
+          if (r) {
+            let kk = 0; for (let i = 0; i < n; i++) if (gate[i] && r.sc[i] > r.thr) kk++;
+            kfb = { used: kk / d.ng >= Q.kfbMin, dens: kk / d.ng, moved: 0 };
+            if (kfb.used) {
+              for (let i = 0; i < n; i++) { on.kick[i] = gate[i] && r.sc[i] > r.thr ? 1 : 0; zc.kick[i] = Q.th.kick + 2 * (r.sc[i] - r.thr); }
+              // 킥 맞춤: 씨앗(저역 수준·잔향)은 어택 뒤에 커져 킥이 한 칸 늦게 잡힘 → 바로 앞 칸에 스네어(박의 어택)가 있고 이 칸엔 없으면 앞으로
+              if (Q.kalign) for (let i = 1; i < n; i++) if (on.kick[i] && !on.kick[i - 1] && gate[i - 1] && on.snare[i - 1] && !on.snare[i]) { on.kick[i] = 0; on.kick[i - 1] = 1; zc.kick[i - 1] = zc.kick[i]; kfb.moved++; }
+            }
+          }
+        }
+      }
+      return { col, zc, on, gate, kfb, sfb };
+    }
+
+    // ════════ ⑤ 종류·세기 ════════
+    // 칸 하나의 종류 특징(aux): 묶음마다 오름·수준·감쇠·지속, 저중역 오름, 엔진 킥 곡선, 마디 첫 칸, 고역 안정도
+    function auxFeat(FE, X, KQ, A, t, slot) {
+      const n = FE.nF, s = X.s, r = v => Math.round(v * s), f0 = Math.round(t * FE.fps), cl = f => f < 0 ? 0 : f >= n ? n - 1 : f, o = {};
+      for (const k of ['hm', 'hi', 'air', 'cy']) {
+        const E = X.E[k]; let fp = cl(f0 - 1); for (let f = f0 - 1; f <= f0 + r(2); f++) if (E[cl(f)] > E[fp]) fp = cl(f);
+        let pre = 1e9; for (let f = f0 - r(5); f <= f0 - r(2); f++) pre = Math.min(pre, E[cl(f)]);
+        const pk = E[fp], c = X.cf[k], base = segMean(c, f0 - r(26), f0 - r(3));
+        let d1 = 0, n1 = 0; for (let f = fp + r(5); f <= fp + r(9); f++) { d1 += E[cl(f)]; n1++; } d1 = d1 / n1 - pk;
+        let vmin = 1e9; for (let f = f0 + r(5); f <= f0 + r(35); f++) { const v = E[cl(f)]; if (f >= fp + r(4) && f <= fp + r(30) && v < vmin) vmin = v; }
+        o['rise_' + k] = pk - pre; o['lvl_' + k] = pk - X.q95[k]; o['J5_' + k] = segMean(c, f0 + r(17), f0 + r(43)) - base; o['d1_' + k] = d1; o['vmin_' + k] = vmin - pk;
+      }
+      { const E = X.E.lm; let fp = cl(f0 - 1), pre = 1e9; for (let f = f0 - 1; f <= f0 + r(2); f++) if (E[cl(f)] > E[fp]) fp = cl(f); for (let f = f0 - r(5); f <= f0 - r(2); f++) pre = Math.min(pre, E[cl(f)]); o.rise_lm = E[fp] - pre; o.lvl_lm = E[fp] - X.q95.lm; }
+      if (KQ.K) { const fe = Math.round((t - CAL) * A.fps); let mk = 0; for (let f = fe - 2; f <= fe + 2; f++) { const v = KQ.K[Math.max(0, Math.min(KQ.K.length - 1, f))]; if (v > mk) mk = v; } o.K = mk / KQ.kq; } else o.K = 0;
+      o.down = slot && slot.pos === 0 && slot.j === 0 ? 1 : 0; o.stab = segMean(X.cst, f0 + r(3), f0 + r(10));
+      return o;
+    }
+    const kscore = (m, fv) => { let z = m.b; for (let j = 0; j < m.f.length; j++) z += m.w[j] * fin(fv[m.f[j]]); return z; };
+    // 금속 갈래: hc 칸 → kinds[i](hat|hatOpen|crash), 더할 crash 칸 adds. 크래시 = 점수 큰 것부터 ±crashNms초 안 하나(금속 칸이면 바꾸고, 아니면 더 높은 문턱으로 더함)
+    function metalKinds(FE, X, A, g, D, Q) {
+      const sl = g.slots, n = sl.length, K = Q.kinds, kinds = new Array(n).fill(null), fv = new Map(), K0 = A.drum && A.drum.K, KQ = { K: K0 || null, kq: K0 ? quant(K0, 0.99) || 1 : 1 };
+      const at = i => { if (!fv.has(i)) fv.set(i, auxFeat(FE, X, KQ, A, sl[i].t, sl[i])); return fv.get(i); };
+      for (let i = 0; i < n; i++) if (D.on.hc[i]) kinds[i] = 'hat';
+      const cand = [];
+      if (K.crash) for (let i = 0; i < n; i++) { const any = D.on.hc[i] || D.on.kick[i] || D.on.snare[i]; if (!any || !D.gate[i]) continue; const f = at(i), z = kscore(KMODEL.crash, f), m = !!D.on.hc[i];
+        if (z >= (m ? K.crashTh : K.crashAddTh) && f.rise_air >= (m ? K.crashRise : K.crashAddRise)) cand.push({ i, z, m }); }
+      cand.sort((a, b) => b.z - a.z || a.i - b.i); const taken = [], adds = [];
+      for (const c of cand) { if (taken.some(x => Math.abs(sl[x.i].t - sl[c.i].t) < K.crashNms)) continue; taken.push(c); if (c.m) kinds[c.i] = 'crash'; else if (K.crashAdd) { kinds[c.i] = 'crash'; adds.push(c.i); } }
+      if (K.open) for (let i = 0; i < n; i++) if (kinds[i] === 'hat' && kscore(KMODEL.open, at(i)) >= K.openTh) kinds[i] = 'hatOpen';
+      return { kinds, adds, at };
+    }
+    // 탐 음높이: 저역 신호 N=256 FFT 셋(앞 −55 ms, 뒤 +50·+150 ms) → 뒤 +50 ms의 가장 뚜렷한 봉우리(60–420 Hz) f0·뚜렷함 ton·2배음 harm
+    function tomFeat(Y, t, TF) {
+      const x = Y.x, srl = Y.sr, N = 256;
+      const spec = tc => { const b = Math.round(tc * srl) - N / 2, o = new Float64Array(N / 2 + 1); if (b < 0 || b + N > x.length) return null; for (let i = 0; i < N; i++) TF.fr[i] = x[b + i] * TF.win[i]; TF.fft(TF.fr, TF.mag, N / 2); for (let k = 0; k <= N / 2; k++) o[k] = 10 * Math.log10(TF.mag[k] * TF.mag[k] + 1e-12); return o; };
+      const Pp = spec(t - 0.055), Aa = spec(t + 0.05), Bb = spec(t + 0.15); if (!Pp || !Aa || !Bb) return null;
+      const hz = srl / N, k0 = Math.max(2, Math.round(60 / hz)), k1 = Math.round(420 / hz);
+      let best = -1e9, kb = k0;
+      for (let k = k0; k <= k1; k++) { if (!(Aa[k] >= Aa[k - 1] && Aa[k] >= Aa[k + 1])) continue; const w = []; for (let j = k - 6; j <= k + 6; j++) if (j >= 1 && j < N / 2) w.push(Aa[j]); w.sort((a, b) => a - b); const pk = Aa[k] - w[w.length >> 1]; if (pk + 0.02 * Aa[k] > best + 0.02 * Aa[kb]) { best = pk; kb = k; } }
+      const d = 0.5 * (Aa[kb - 1] - Aa[kb + 1]) / (Aa[kb - 1] - 2 * Aa[kb] + Aa[kb + 1] || 1e-9), f0 = (kb + Math.max(-0.5, Math.min(0.5, d))) * hz, k2 = Math.round(2 * f0 / hz);
+      return { ton: best, f0, harm: k2 + 1 < N / 2 ? Math.max(Aa[k2 - 1], Aa[k2], Aa[k2 + 1]) - Aa[kb] : -30 };
+    }
+    // 탐(채움 규칙): 마디 끝 fillBeats박에 하이햇이 없고 북 타격이 fillMin개 이상, 음높이(60–330 Hz)가 spread배 넘게 퍼지고 시간 따라 내려가면(순위 상관 ≤ rho) 탐
+    //  → [{ i, kind: tomH|tomM|tomL(곡 안 음높이 셋으로 나눔), replace: 'snare'|'kick'|null }]
+    function findToms(Y, TL, g, D, kinds, at, Q) {
+      const o = Q.toms, sl = g.slots, n = sl.length, bars = TL.bars, R = g.R, out = []; if (!Y || !Y.x || !Y.x.length) return out;
+      const TF = { fft: makeRealFFT(256), mag: new Float64Array(129), win: hann(256, 1), fr: new Float64Array(256) }, tf = new Map(), tfAt = i => { if (!tf.has(i)) tf.set(i, tomFeat(Y, sl[i].t, TF)); return tf.get(i); };
+      const snF = []; for (let i = 0; i < n && snF.length < 64; i++) if (sl[i].j === 0 && D.on.snare[i]) { const f = tfAt(i); if (f && f.ton >= 6) snF.push(f.f0); }   // 곡 스네어 음높이(정박 스네어 f0 중앙값)
+      const snP = snF.length >= 4 ? quant(snF, 0.5) : 0, first = new Map(); sl.forEach((s, i) => { if (!first.has(s.bar)) first.set(s.bar, i); });
+      const found = [];
+      for (let b = 0; b + 1 < bars.length; b++) {
+        const nx = first.get(b + 1); if (nx == null) continue; const i0 = Math.max(0, nx - o.fillBeats * R); if (sl[i0].bar !== b) continue;
+        let hatIn = false; const drums = [];
+        for (let i = i0; i < nx; i++) { if (kinds[i] && kinds[i] !== 'crash') { hatIn = true; break; } if (!D.gate[i]) continue; const f = at(i); if (D.on.snare[i] || D.on.kick[i] || (f.rise_lm >= o.rise && f.lvl_lm >= -2)) drums.push(i); }
+        if (hatIn || drums.length < o.fillMin) continue;
+        const pts = []; for (const i of drums) { const f = tfAt(i); if (f && f.f0 >= 60 && f.f0 <= 330 && f.ton >= o.ton && f.harm <= o.harm) pts.push({ i, f0: f.f0 }); }
+        const cand = pts.filter(p => !(snP && Math.abs(Math.log(p.f0 / snP)) < 0.08 && D.on.snare[p.i])); if (cand.length < 2) continue;
+        let fmx = -Infinity, fmn = Infinity; for (const p of cand) { if (p.f0 > fmx) fmx = p.f0; if (p.f0 < fmn) fmn = p.f0; }
+        const rk = a => { const ix = a.map((v, k) => k).sort((x, y) => a[x] - a[y] || x - y), r = new Array(a.length); ix.forEach((k, m) => r[k] = m); return r; };
+        const rt = rk(cand.map(p => p.i)), rf = rk(cand.map(p => p.f0)); let sx = 0; const nn = cand.length; for (let k = 0; k < nn; k++) sx += (rt[k] - rf[k]) ** 2; const rho = 1 - 6 * sx / (nn * (nn * nn - 1) || 1);
+        if (fmx / fmn < o.spread || rho > o.rho) continue;
+        for (const p of cand) found.push(p);
+      }
+      const f0s = found.map(x => x.f0).sort((a, b) => a - b), cut = f0s.length >= 3 ? [f0s[Math.floor(f0s.length / 3)], f0s[Math.floor(2 * f0s.length / 3)]] : [115, 170];
+      for (const x of found) out.push({ i: x.i, kind: x.f0 >= cut[1] ? 'tomH' : x.f0 >= cut[0] ? 'tomM' : 'tomL', replace: D.on.snare[x.i] ? 'snare' : (x.f0 >= 80 && D.on.kick[x.i] ? 'kick' : null) });
+      return out;
+    }
+    // 세기: 갈래별 크기(대역 에너지 − 곡 95%: 킥 65–180 Hz 최대, 스네어 180–300 Hz·5–8 kHz 평균, hc 맨 위 대역)를 그 곡 같은 갈래 타격 사이 분위로(10% → 0, 95% → 1)
+    function velocities(D, Q) {
+      const B = D.col._B, bT = D.col._bT, on = D.on, n = on.kick.length, feat = {
+        kick: i => Math.max(B.ea1[i], B.ea2[i]), snare: i => 0.5 * (B.ea3[i] + B.ea9[i]), hc: i => B['ea' + bT][i] };
+      const out = {};
+      for (const c of CL3) {
+        const v = new Float64Array(n), idx = []; for (let i = 0; i < n; i++) if (on[c][i]) { v[i] = fin(feat[c](i)); idx.push(i); }
+        const vals = idx.map(i => v[i]), lo = quant(vals, 0.1), hi = quant(vals, 0.95), o = new Float64Array(n);
+        for (const i of idx) { const u = hi > lo ? Math.max(0, Math.min(1, (v[i] - lo) / (hi - lo))) : 0.7; o[i] = Math.round(100 * (Q.vel0 + (1 - Q.vel0) * Math.pow(u, Q.velG))) / 100; }
+        out[c] = o;
+      }
+      return out;
+    }
+    // 단순한 비트(원곡에 드럼이 없을 때, info.fallback): 코드 마디(N.C. 아닌 사건)만, 무반주 박(TL.acap) 빼고.
+    //  킥 = 마디 첫 박(4박 마디면 3박째도), 스네어 = 홀수 자리 박, 하이햇 = 8분(R 4: 칸 0·2, R 2·3: 칸마다)
+    function simpleBeat(TL, g) {
+      const hits = [], m = TL.meter && TL.meter.m || 4, ac = TL.acap || [], inAc = i => ac.some(([a, b]) => i >= a && i < b);
+      const chordBar = new Uint8Array(TL.bars.length); TL.bars.forEach((b, k) => { chordBar[k] = b.events && b.events.some(e => !(e.label && e.label.nc)) ? 1 : 0; });
+      for (const s of g.slots) {
+        if (s.bar == null || s.bar < 0 || !chordBar[s.bar] || inAc(s.i)) continue;
+        const H = (kind, vel) => hits.push({ t: s.t, kind, vel, bar: s.bar, i: s.i, j: s.j });
+        if (s.j === 0 && (s.pos === 0 || (m === 4 && s.pos === 2))) H('kick', s.pos === 0 ? 0.8 : 0.7);
+        if (s.j === 0 && s.pos % 2 === 1) H('snare', 0.75);
+        if (g.R === 4 ? s.j % 2 === 0 : true) H('hat', s.j === 0 ? 0.6 : 0.45);
+      }
+      return hits;
+    }
+
+    // ════════ ⑥ 진입점 ════════
+    // (A, TL, 특징, Q = drParams()) → { hits:[{ t, kind, vel, bar, i, j, fill? }](시각 차례), info } — 순수(같은 입력이면 같은 출력)
+    function drumsCore(A, TL, feat, Q) {
+      const nBar = TL && TL.bars ? TL.bars.length : 0;
+      if (!A || !TL || TL.empty || !TL.beats || TL.beats.length < 2) return { hits: [], info: { present: false, why: 'empty', songScore: null, bars: new Array(nBar).fill(0), counts: {} } };
+      const g = drumGrid(A, TL), sl = g.slots, n = sl.length;
+      const empty = (pres, why) => ({ hits: [], info: { present: false, why, songScore: pres ? pres.songScore : null, bars: pres ? Array.from(pres.bar) : new Array(nBar).fill(0), counts: {}, R: g.R, phi: g.phi } });
+      const fallback = (pres, why) => { const e = empty(pres, why); if (Q.simple) { e.hits = simpleBeat(TL, g); e.info.fallback = true; for (const h of e.hits) e.info.counts[h.kind] = (e.info.counts[h.kind] || 0) + 1; } return e; };
+      if (!n) return empty(null, 'noslots');
+      if (!feat) return fallback(null, 'nofeat');
+      const pres = Q.presOn ? drumPresence(A, TL, feat.FL, Q) : null;
+      if (pres && Q.presOn && !pres.song) return fallback(pres, 'song');
+      const FE = feat, D = decide(FE, g, A, pres, Q);
+      const { kinds, adds, at } = metalKinds(FE, feat.aux, A, g, D, Q), addSet = new Set(adds), toms = new Map();
+      if (Q.toms && Q.toms.on) for (const x of findToms(feat.tom, TL, g, D, kinds, at, Q)) toms.set(x.i, x);
+      const V = velocities(D, Q), hits = [];
+      const H = (s, kind, vel, fill) => { const h = { t: s.t, kind, vel, bar: s.bar, i: s.i, j: s.j }; if (fill) h.fill = true; hits.push(h); };
+      for (let i = 0; i < n; i++) {
+        const s = sl[i], tm = toms.get(i);
+        if (tm && !tm.replace) H(s, tm.kind, 0.75, true);
+        if (D.on.kick[i]) H(s, tm && tm.replace === 'kick' ? tm.kind : 'kick', V.kick[i], !!(tm && tm.replace === 'kick'));
+        if (D.on.snare[i]) H(s, tm && tm.replace === 'snare' ? tm.kind : 'snare', V.snare[i], !!(tm && tm.replace === 'snare'));
+        if (D.on.hc[i]) { const k = kinds[i]; H(s, k, k === 'crash' ? Math.max(0.75, V.hc[i]) : V.hc[i]); }
+        else if (addSet.has(i)) H(s, 'crash', 0.85);
+      }
+      const counts = {}; for (const h of hits) counts[h.kind] = (counts[h.kind] || 0) + 1;
+      return { hits, info: { present: true, songScore: pres ? pres.songScore : null, bars: pres ? Array.from(pres.bar, (v, i) => pres.on[i] ? Math.max(0.5, v) : Math.min(0.49, v)) : null, counts, kickFallback: D.kfb, snareFallback: D.sfb, R: g.R, phi: g.phi } };
+    }
+    // 드럼 결과 캐시 열쇠: 드럼이 읽는 TL 내용(박·박 자리·마디·겹박자·BPM)만 FNV-1a 32비트 + 박 수(opt.res·어휘·슬래시는 들어가지 않음)
+    function drumTLKey(TL) {
+      if (!TL || TL.empty || !TL.beats || !TL.beats.length) return 'empty';
+      let h = 0x811c9dc5; const f64 = new Float64Array(1), u32 = new Uint32Array(f64.buffer);
+      const mix = v => { for (let s = 0; s < 32; s += 8) { h ^= (v >>> s) & 0xff; h = Math.imul(h, 16777619); } }, num = x => { f64[0] = x; mix(u32[0]); mix(u32[1]); };
+      for (const b of TL.beats) num(b); for (const p of TL.pos) mix(p); for (const b of TL.barOfBeat) mix(b);
+      for (const b of TL.bars) { mix(b.startBeat); mix(b.nBeats); mix(b.num == null ? -1 : b.num); num(b.t0); num(b.t1); }
+      mix(TL.meter && TL.meter.triple ? 1 : 0); num(TL.bpm || 0); return (h >>> 0).toString(16) + ':' + TL.beats.length;
+    }
+
+    // ── 엔진 진입점(Engine.drumFeatures·Engine.drums) ──
+    async function featuresApi(input, A, onProgress) {
+      if (!P.DR || !input || !input.channels || !input.channels.length || !A || !A.fh || !A.drum) return null;
+      const tick = makeTicker(onProgress);
+      await tick.force(0, '드럼 신호 준비');
+      return drumFeatures(input.channels, input.sampleRate, A, drParams(), tick);
+    }
+    const cache = new WeakMap(), noFeat = {};   // 결과 캐시: feat(없으면 noFeat) → Map(열쇠 → { A, R }), 4개까지(오래된 것부터 버림)
+    function drumsApi(A, TL, opt) {
+      opt = opt || {};
+      if (!P.DR || !A || !TL || TL.empty || !TL.beats || TL.beats.length < 2) return { hits: [], info: { present: false, why: P.DR ? 'empty' : 'off', counts: {} } };
+      const feat = opt.feat || null, key = drumTLKey(TL) + '|' + DR_SIG.map(k => P[k]).join('|'), holder = feat || noFeat;
+      let m = cache.get(holder); if (!m) { m = new Map(); cache.set(holder, m); }
+      const hit = m.get(key); if (hit && hit.A === A) return hit.R;
+      const R = drumsCore(A, TL, feat, drParams());
+      m.delete(key); m.set(key, { A, R }); if (m.size > 4) m.delete(m.keys().next().value);
+      return R;
+    }
+    return { drumFeatures: featuresApi, drums: drumsApi, drumTLKey };
+  })();
+
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     strokes: (A, TL) => rakeMark(A, TL, strokes(A, TL)),
     pianoComp, autoModes, pianoLH, pianoLev,
     bandGuitar, bandGuitarPrep,                          // 1.25.0 밴드 일렉 기타 파워 코드 반주(P.EG), 무거운 중간값 미리 재기(조각으로)
     riff, riffAsync, riffApply, riffFeatures,             // 기타 리프 따라 치기(1.25.0, P.RIFF): 특징(일렉 기타를 고를 때 한 번) → 구간·음(riffAsync: 조각으로) → 스트로크 목록에 끼움
+    drumFeatures: DRUM.drumFeatures, drums: DRUM.drums,   // 곡 따라 드럼 채보(1.26.0, P.DR): 특징(드럼을 켤 때 곡마다 한 번, 비동기) → 격자 칸마다 타격(동기·순수, 캐시)
     strumGrid: (A, TL, mode) => rakeMark(A, TL, mode === 'ssw' && P.SSW ? sswStrum(A, TL) : strumGrid(A, TL, mode === 'ssw' ? 'beat8' : mode)),
     // 테스트용 내부 함수
-    _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
+    _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear(), drumTLKey: DRUM.drumTLKey },
   };
 })();
 
@@ -8242,8 +8974,422 @@ const Synth = (function () {
     return ir;
   }
 
+  // ---------------- 드럼(1.26.0) ----------------
+  //  원곡 드럼 전사를 다시 치는 타격음(샘플 없음). 키트는 함께 쓰는 악기에 따라: 'rock'(일렉 기타: 록·팝 어쿠스틱 키트), 'light'(통기타·피아노: 펠트 비터·부드러운 스네어·가벼운 심벌)
+  //  drumHit(kind, sr, vel, variant, kit) → 모노 Float32Array. 첫 normMs RMS = norm × 10^(lvl[kit][kind]/20)
+  //   vel(0~1)은 음색(채 접촉 시간 → 밝기, 어택·클릭, rock의 포화)만 바꾸고 크기는 재생 쪽(vel^velExp × 10^(mix[kit][kind]/20))
+  //   variant 0은 늘 같은 소리(기준 음높이·치는 자리), 1, 2, …는 잡음을 새로 뽑고 음높이(±0.6%)·감쇠·치는 자리를 살짝 흔듦(라운드 로빈)
+  //  drumRoomIR(sr, kit) → [L, R] 방 잔향(초기 반사 + 3대역 잡음 꼬리, 두 채널 에너지 2: makeHallIR과 같은 기준, 젖은 소리만)
+  //  음색 기준: MDB Drums(MedleyDB 23곡 드럼 트랙)의 고립 타격 대역 에너지·감쇠에 맞춤(막은 0.5~2 kHz의 빽빽한 높은 모드, 스네어 줄은 생각보다 작게, 하이햇은 1~5 kHz '칙'도)
+  const DRUM = {
+    kinds: ['kick', 'snare', 'side', 'hhc', 'hho', 'hhp', 'ride', 'bell', 'crash', 'tomH', 'tomM', 'tomL'],
+    // 버퍼 길이(초): 다른 악기 버퍼(3.0·2.5·1.0·0.6·0.3·0.25초)와 겹치지 않게. 0.5초보다 짧은 것(side·hhc·hhp)은 피크 < 0.5(테스트의 메트로놈 판별)
+    len: { kick: 0.83, snare: 0.79, side: 0.41, hhc: 0.37, hho: 1.57, hhp: 0.33, ride: 2.87, bell: 2.77, crash: 3.43, tomH: 1.07, tomM: 1.27, tomL: 1.63 },
+    fade: { kick: 0.3, snare: 0.3, side: 0.12, hhc: 0.15, hho: 0.45, hhp: 0.1, ride: 0.6, bell: 0.6, crash: 0.7, tomH: 0.35, tomM: 0.4, tomL: 0.5 },   // 끝 올림 코사인 페이드(초)
+    norm: 0.12, normMs: 50, peakCap: 0.47,
+    // 버퍼 크기(dB, norm 기준): K 가중 400 ms 순간 크기가 종류마다 같게(−26 dB 언저리). 0.5초보다 짧은 side·hhc·hhp는 피크 상한이 먼저, light 킥은 피크(크레스트 큼) 때문에 1.5 dB 작게(mix가 메움)
+    //  짧은 버퍼는 드물게 피크가 peakCap을 넘으면 그 버퍼만 peakCap으로 줄임(안전망: 64변형 × 세기 5단 × 표본율 2에서 최대 0.464, 걸린 것 0)
+    lvl: {
+      rock: { kick: 2.5, snare: -0.5, side: -7, hhc: -8, hho: -8, hhp: -6.5, ride: -9, bell: -8, crash: -9.5, tomH: -2, tomM: -2, tomL: -2.5 },
+      light: { kick: 1, snare: 0.5, side: -6, hhc: -8, hho: -7.5, hhp: -6.5, ride: -8.5, bell: -8, crash: -8.5, tomH: -2, tomM: -2.5, tomL: -3 },
+    },
+    velExp: 1.2,                                                          // 재생 이득 = vel^velExp(ui.js가 곱함)
+    pan: { kick: 0, snare: 0.05, side: 0.05, hhc: 0.35, hho: 0.35, hhp: 0.35, ride: -0.45, bell: -0.45, crash: 0.55, tomH: 0.2, tomM: -0.12, tomL: -0.4 },   // 관객 시점(−1 왼쪽 … 1 오른쪽)
+    choke: { hho: ['hhc', 'hhp'] },                                        // 열린 하이햇은 닫는 소리가 오면 끊음(ui.js: 10 ms 페이드)
+    kit: {
+      rock: {
+        // kick: f0 Hz, sweep [기본, vel] 처음 높이 비율, tauP 미끄럼 τ, env [τ1 첫 터짐, τ2 몸통, 몸통 몫], res 울림막 [비, 크기, τ배, 오름], tc 비터 접촉 ms [약, 강],
+        //  modes [비, 크기, τ], cloud 높은 막 모드 [개수, 비 아래, 위, 크기, 기울기, τ, τ 지수], knock 통 '둑' [Hz, Q, 크기, τ], slap 비터 '퍽' [Hz, Q, 크기, τ],
+        //  click 비터 클릭 [Hz, Q, 크기 기본, vel, τ, lp 약, lp 강], drive [기본, vel] 포화, bias
+        kick: { f0: 54, sweep: [0.4, 1.0], tauP: 0.014, env: [0.018, 0.07, 0.35], res: [1.03, 0.12, 1.3, 0.004], tc: [4, 1.5],
+          modes: [[1.59, 0.35, 0.04], [2.14, 0.24, 0.03], [2.30, 0.15, 0.026], [2.65, 0.12, 0.022], [2.92, 0.09, 0.018]],
+          cloud: [22, 3.3, 22, 0.07, 0.5, 0.02, 0.5], knock: [190, 1.0, 0.32, 0.012], slap: [900, 0.7, 0.08, 0.004],
+          click: [3400, 0.8, 0.2, 0.62, 0.0016, 4000, 6500], drive: [1.4, 1.8], bias: 0.08,
+          eq: [['pk', 60, 2, 1.0], ['pk', 380, -4, 1.2], ['pk', 3800, 2, 1.0], ['lp', 7000, 0, 0.7]] },
+        // snare: modes [비, 크기, τ, 축대칭 1/0], cloud, shell 통 모드 [Hz, 크기, τ], crack 스틱 [크기 기본, vel, τ, hp, 봉우리 Hz, 봉우리 dB, lp 약, lp 강],
+        //  wire 스네어 줄 { g 크기, hp, lp [약, 강], rise, tau [약, 강], tail [크기, τ], buzz 막 주기 떨림 깊이, delay }, brush 0~1(브러시 느낌)
+        snare: { f0: 186, sweep: [0.03, 0.08], tauP: 0.012, tc: [1.1, 0.45], pos: 0.35,
+          modes: [[1, 1, 0.06, 1], [1.594, 0.6, 0.05, 0], [2.136, 0.45, 0.04, 0], [2.296, 0.3, 0.036, 1], [2.653, 0.25, 0.032, 0], [2.918, 0.18, 0.03, 0], [3.156, 0.14, 0.028, 0], [3.501, 0.1, 0.025, 0]],
+          cloud: [30, 3.7, 14, 0.3, 0.3, 0.025, 0.5], shell: [[430, 0.18, 0.03], [760, 0.14, 0.022], [1180, 0.1, 0.016]],
+          crack: [0.4, 0.7, 0.003, 600, 1800, 8, 3500, 8000],
+          wire: { g: 0.3, hp: 1800, lp: [4000, 6500], rise: 0.0012, tau: [0.055, 0.075], tail: [0.14, 0.16], buzz: 0.5, delay: 0.0008 },
+          brush: 0, drive: [1.1, 1.0], bias: 0.04,
+          eq: [['pk', 200, 2, 1.0], ['pk', 1500, 1.5, 0.8], ['lp', 16000, 0, 0.7]] },
+        // side(크로스 스틱): 스틱·테 나무 모드 [Hz, 크기, τ], head 막 [Hz, 크기, τ], imp 충격 [크기 기본, vel, τ, lp 약, lp 강], wire 줄 크기
+        side: { modes: [[680, 0.6, 0.018], [1200, 1, 0.014], [1800, 0.8, 0.011], [2950, 0.5, 0.008], [4300, 0.3, 0.006]], head: [190, 0.2, 0.03], imp: [0.45, 0.6, 0.0012, 5000, 11000], wire: 0.1, tc: [0.6, 0.25],
+          eq: [['hp', 200, 0, 0.7], ['pk', 1500, 2, 1], ['lp', 14000, 0, 0.7]] },
+        // hat: 모드 n개 fLo~fHi, 포락 pk [아래, 위, 위 차수], tau0(1 kHz 기준 열린 τ)·tauExp, ld 이 Hz 아래 모드는 τ × f/ld(맞닿은 두 장이 낮은 모드를 눌러 1~3 kHz가 '삐-' 하고 남지 않게), 닫힘 τ배 tauC, 페달 tauP, tc 스틱 끝 ms, hp 고역 통과(2차, Q 0.5: 부드럽게), lp, pres 봉우리,
+        //  chick 닫힌 두 장 '칙' [Hz, Q, 크기, τ], nz 잡음 { g 모드 대비 크기, hp 잡음 1극 고역 통과 Hz(낮을수록 1~3 kHz를 잡음이 메움), c 닫힘 [τ1, τ2, 둘째 크기], o 열림 [τ, 오름], rattle 열린 두 장 떨림 깊이 }, bloom 고역 들뜸,
+        //  ped 페달 { bp, q, hp, nz [τ1, τ2, 둘째], puff 두 장 사이 공기 [Hz, 크기], thump 발판 [Hz, 크기] }
+        hat: { n: 56, fLo: 2000, fHi: 17000, pk: [4500, 12000, 2], tau0: 0.53, tauExp: 0.3, ld: 3500, tauC: 0.07, tauP: 0.05, tc: [0.4, 0.12], hp: 5500, lp: 15000, pres: [8000, 1.5], bloom: 0.6,
+          chick: [1600, 0.5, 0.55, 0.008], nz: { g: 1.0, hp: 1200, c: [0.010, 0.075, 0.3], o: [0.32, 0.002], rattle: 0.25 },
+          ped: { bp: 2500, q: 0.6, hp: 400, nz: [0.02, 0.08, 0.4], puff: [420, 1.0], thump: [72, 0.3] },
+          eq: [] },
+        // ride/bell/crash: 모드 n개, pk 포락, tau0·tauExp, tc, bell 컵 부분음 [기준 Hz, [비, 크기, τ] …], rideBell 라이드 몸통에서 컵 크기, ping 라이드 '팅' 무리 [n, Hz 아래, 위, 크기, τ배],
+        //  bloom 고역 들뜸 [크기, 오름, τ, hp Hz], wash 잡음 { xo 대역 경계, rt 대역별 T60, rise 대역별 오름, g 대역 크기, lvl 모드 대비 dB }, tick 스틱 [dB, τ], hp·lp
+        //  (검토 뒤) 모드 100개 남짓은 실제 심벌(17~25 Hz마다 모드 하나)보다 3~10배 성겨 꼬리가 사인 화음으로 들림 → 씻김을 모드만큼 길고 크게(T60 4~5초, lvl −1~+1 dB),
+        //   모드 τ는 줄임: 0.15~0.5초 음조성이 실제 MDB 타격(크래시 0.2, 라이드 0.3·0.45)과 비슷. 라이드는 모드를 늘리고(96·90) 0.5~2 kHz 몫을 줄임(pk 아래 1500)
+        ride: { n: 96, fLo: 200, fHi: 15000, pk: [1500, 10000, 1.0], tau0: 0.75, tauExp: 0.4, tc: [0.35, 0.12], ping: [8, 2500, 6000, 1.6, 0.6], rideBell: 0.08,
+          bloom: [0.3, 0.004, 0.03, 2500], wash: { xo: [1500, 6000], rt: [4.6, 3.9, 2.8], rise: [0.002, 0.01, 0.02], g: [0.6, 0.8, 0.6], lvl: -1 }, tick: [-6, 0.0012], hp: 200, lp: 15000 },
+        bell: { n: 40, fLo: 320, fHi: 15000, pk: [2500, 7000, 1.5], tau0: 0.8, tauExp: 0.4, tc: [0.5, 0.2], bell: [820, [[1, 1, 0.88], [1.49, 0.5, 0.72], [2.04, 0.75, 0.64], [2.66, 0.45, 0.48], [3.37, 0.35, 0.4], [4.1, 0.22, 0.32], [5.0, 0.15, 0.28]]], bellG: 2.5,
+          bloom: [0.2, 0.004, 0.03, 2500], wash: { xo: [1500, 6000], rt: [2.6, 2.2, 1.5], rise: [0.002, 0.01, 0.02], g: [0.3, 0.6, 0.6], lvl: -14 }, tick: [-8, 0.0012], hp: 300, lp: 15000 },
+        crash: { n: 120, fLo: 200, fHi: 15500, pk: [1500, 10000, 1.1], tau0: 0.68, tauExp: 0.3, tc: [0.4, 0.15],
+          bloom: [6.0, 0.005, 0.018, 2500], wash: { xo: [1200, 5000], rt: [5.0, 4.3, 2.9], rise: [0.002, 0.012, 0.025], g: [0.6, 0.9, 0.5], lvl: 1 }, tick: [-12, 0.0015], hp: 200, lp: 16000 },
+        // toms: f [tomH, tomM, tomL] Hz, tau 몸통 τ, sweep, tauP, tc, res 울림막 [비, 크기, 오름], modes [비, 크기, τ배], cloud(τ는 몸통 τ에 곱함),
+        //  stick [크기 기본, vel, τ, hp, 봉우리 Hz, [lp 약, 강]], symp 스네어 줄 공명, drive
+        toms: { f: [200, 150, 100], tau: [0.2, 0.26, 0.34], sweep: [0.05, 0.16], tauP: 0.06, tc: [1.4, 0.6], res: [1.015, 0.18, 0.004],
+          modes: [[1.594, 0.5, 0.42], [2.136, 0.32, 0.3], [2.296, 0.2, 0.26], [2.653, 0.14, 0.2], [2.918, 0.1, 0.17]],
+          cloud: [28, 3.0, 16, 0.3, 0.35, 0.25, 0.6], stick: [0.4, 0.6, 0.003, 400, 1500, [5000, 10000]], symp: 0.03, drive: [1.0, 0.8], bias: 0.03,
+          eq: [['pk', 450, -2, 1.0], ['pk', 4000, 2, 1.0]] },
+        // 방: 3대역 잡음(xo 경계, rt 대역별 RT60, bg 대역 크기) + 초기 반사 er [ms, 크기], pre 시작, fin 확산음 오름, wet 권장 보냄 dB
+        room: { len: 0.83, pre: 0.0035, fin: 0.012, xo: [400, 3500], rt: [0.75, 0.66, 0.56], bg: [1, 1, 0.9], er: [[2.9, 0.9], [4.7, 0.75], [7.3, 0.62], [9.8, 0.5], [13.1, 0.42], [17.6, 0.33], [22.4, 0.26], [28.9, 0.2]], erK: 6, wet: -11 },
+      },
+      light: {
+        kick: { f0: 62, sweep: [0.25, 0.5], tauP: 0.018, env: [0.025, 0.08, 0.4], res: [1.025, 0.2, 1.4, 0.005], tc: [6, 3],
+          modes: [[1.59, 0.4, 0.05], [2.14, 0.26, 0.04], [2.30, 0.18, 0.034], [2.65, 0.12, 0.028], [2.92, 0.08, 0.024]],
+          cloud: [24, 3.3, 20, 0.18, 0.5, 0.024, 0.5], knock: [170, 0.9, 0.3, 0.016], slap: [550, 0.9, 0.2, 0.005],
+          click: [1800, 0.7, 0.05, 0.15, 0.003, 3000, 5000], drive: null, bias: 0,
+          eq: [['pk', 75, 1.5, 0.9], ['pk', 250, 1, 0.8], ['lp', 3500, 0, 0.7]] },
+        snare: { f0: 205, sweep: [0.02, 0.05], tauP: 0.012, tc: [1.6, 0.8], pos: 0.3,
+          modes: [[1, 1, 0.055, 1], [1.594, 0.6, 0.045, 0], [2.136, 0.45, 0.036, 0], [2.296, 0.3, 0.032, 1], [2.653, 0.25, 0.028, 0], [2.918, 0.18, 0.026, 0], [3.156, 0.14, 0.024, 0], [3.501, 0.1, 0.022, 0]],
+          cloud: [28, 3.7, 12, 0.25, 0.4, 0.022, 0.5], shell: [[450, 0.16, 0.03], [800, 0.12, 0.022], [1250, 0.08, 0.016]],
+          crack: [0.18, 0.4, 0.0035, 500, 1500, 6, 3000, 6000],
+          wire: { g: 0.2, hp: 2200, lp: [4000, 6500], rise: 0.0015, tau: [0.05, 0.065], tail: [0.1, 0.14], buzz: 0.4, delay: 0.001 },
+          brush: 0, drive: null, bias: 0,
+          eq: [['pk', 230, 1, 1.0], ['hs', 6000, -3, 0.7]] },
+        side: { modes: [[640, 0.6, 0.02], [1120, 1, 0.015], [1650, 0.8, 0.012], [2600, 0.45, 0.008], [3900, 0.25, 0.006]], head: [205, 0.2, 0.035], imp: [0.3, 0.45, 0.0014, 4000, 9000], wire: 0.06, tc: [0.8, 0.35],
+          eq: [['hp', 180, 0, 0.7], ['hs', 6000, -2, 0.7], ['lp', 13000, 0, 0.7]] },
+        hat: { n: 56, fLo: 1800, fHi: 15000, pk: [4000, 10000, 2], tau0: 0.46, tauExp: 0.3, ld: 3500, tauC: 0.07, tauP: 0.05, tc: [0.6, 0.2], hp: 4500, lp: 13500, pres: [7000, 1.5], bloom: 0.4,
+          chick: [1500, 0.5, 0.6, 0.009], nz: { g: 0.9, hp: 1200, c: [0.011, 0.07, 0.3], o: [0.28, 0.002], rattle: 0.2 },
+          ped: { bp: 2200, q: 0.6, hp: 350, nz: [0.02, 0.08, 0.4], puff: [380, 1.1], thump: [68, 0.3] },
+          eq: [['hs', 11000, -1.5, 0.7]] },
+        ride: { n: 90, fLo: 200, fHi: 14000, pk: [1500, 9000, 1.0], tau0: 0.7, tauExp: 0.4, tc: [0.4, 0.15], ping: [8, 2500, 6000, 1.2, 0.6], rideBell: 0.06,
+          bloom: [0.2, 0.004, 0.03, 2500], wash: { xo: [1500, 6000], rt: [4.2, 3.5, 2.4], rise: [0.002, 0.01, 0.02], g: [0.6, 0.8, 0.6], lvl: -1 }, tick: [-9, 0.0014], hp: 200, lp: 14000 },
+        bell: { n: 36, fLo: 320, fHi: 13000, pk: [2200, 6000, 1.5], tau0: 0.72, tauExp: 0.4, tc: [0.6, 0.3], bell: [900, [[1, 1, 0.8], [1.49, 0.45, 0.64], [2.04, 0.7, 0.56], [2.66, 0.4, 0.44], [3.37, 0.3, 0.36], [4.1, 0.18, 0.28], [5.0, 0.12, 0.24]]], bellG: 2.2,
+          bloom: [0.15, 0.004, 0.03, 2500], wash: { xo: [1500, 6000], rt: [2.2, 1.9, 1.2], rise: [0.002, 0.01, 0.02], g: [0.3, 0.6, 0.5], lvl: -15 }, tick: [-10, 0.0014], hp: 300, lp: 12000 },
+        crash: { n: 110, fLo: 220, fHi: 14000, pk: [1600, 8000, 1.2], tau0: 0.52, tauExp: 0.3, tc: [0.5, 0.22],
+          bloom: [4.8, 0.004, 0.015, 2500], wash: { xo: [1200, 5000], rt: [5.0, 4.4, 2.8], rise: [0.002, 0.01, 0.02], g: [0.6, 1.0, 0.4], lvl: 0 }, tick: [-14, 0.0015], hp: 220, lp: 12000 },
+        toms: { f: [225, 172, 125], tau: [0.18, 0.23, 0.3], sweep: [0.03, 0.08], tauP: 0.06, tc: [2, 1], res: [1.015, 0.18, 0.004],
+          modes: [[1.594, 0.45, 0.42], [2.136, 0.28, 0.3], [2.296, 0.16, 0.26], [2.653, 0.1, 0.2], [2.918, 0.07, 0.17]],
+          cloud: [26, 3.0, 14, 0.28, 0.4, 0.22, 0.6], stick: [0.25, 0.4, 0.0035, 400, 1200, [3500, 7000]], symp: 0.02, drive: null, bias: 0,
+          eq: [['hs', 5000, -2, 0.7]] },
+        room: { len: 0.57, pre: 0.0025, fin: 0.009, xo: [350, 2500], rt: [0.48, 0.42, 0.33], bg: [1, 0.9, 0.6], er: [[2.1, 0.8], [3.6, 0.65], [5.5, 0.5], [7.9, 0.4], [10.6, 0.3], [14.2, 0.22]], erK: 5, wet: -14 },
+      },
+    },
+    // 재생 쪽 기본 dB(ui.js가 곱함): K 가중 100 ms 창 최대 기준 키트별 균형(MDB Drums 실제 드럼 트랙의 종류별 균형 참고: 록은 킥 ≈ 스네어, 닫힌 햇 −11,
+    //  라이트(재즈·컨트리)는 킥이 작고 스네어·탐이 앞). 라이트 키트 전체는 3 dB 작게
+    //  라이드·벨·열린 햇은 꼬리가 길어 그루브에서 쌓임: 8분 라이드 줄기 ≈ 8분 닫힌 햇 줄기 + 3~4 dB, 스네어(2·4박) 줄기보다 1~2 dB 작게 맞춤
+    mix: {
+      rock: { kick: -1, snare: -1, side: -0.5, hhc: -7, hho: -6, hhp: -2.5, ride: -10, bell: -6.5, crash: -2, tomH: -0.5, tomM: 0, tomL: 0.5 },
+      light: { kick: -2.5, snare: -2, side: 2, hhc: -7.5, hho: -8.5, hhp: -4.5, ride: -10, bell: -7.5, crash: -6.5, tomH: -1.5, tomM: -1, tomL: -0.5 },
+    },
+  };
+  // 브러시 키트(1.26.0 키트 고르기): 가벼운 키트에 스네어만 브러시(brush 1: 크랙 없이 느린 어택 + 쓸림). 크기·섞음·방은 가벼운 키트 그대로
+  DRUM.kit.brush = Object.assign({}, DRUM.kit.light, { snare: Object.assign({}, DRUM.kit.light.snare, { brush: 1 }) });
+  DRUM.lvl.brush = DRUM.lvl.light; DRUM.mix.brush = DRUM.mix.light;
+  const dLerp = (a, b, t) => a + (b - a) * t;
+  // 띠 통과 계수(RBJ, 가운데 이득 0 dB): biqCoef에는 'bp'가 없어 따로 둠(기존 함수는 그대로)
+  function dBp(sr, f, Q) { const w = 2 * Math.PI * Math.min(f, 0.45 * sr) / sr, al = Math.sin(w) / (2 * Q), a0 = 1 + al; return { b0: al / a0, b1: 0, b2: -al / a0, a1: -2 * Math.cos(w) / a0, a2: (1 - al) / a0 }; }
+  // 쌍2차 줄(차단 주파수를 표본율 0.45배 안으로: 44.1 kHz에서도 같은 목록)
+  const dEq = (y, sr, list) => { for (const [t, f, g, Q] of list) biqRun(y, biqCoef(sr, t, Math.min(f, 0.45 * sr), g, Q)); return y; };
+  // 채(비터) 접촉 시간 tc(ms)의 힘 펄스 스펙트럼 근사: 차단 ≈ 600/tc Hz, 위로 −12 dB/oct(dTc) 또는 −6 dB/oct(dTc1). 세게 칠수록 짧아 밝음
+  const dTc = (f, tc) => 1 / Math.sqrt(1 + Math.pow(f * tc / 600, 4));
+  const dTc1 = (f, tc) => 1 / Math.sqrt(1 + Math.pow(f * tc / 600, 2));
+  // 막 모드(음높이 미끄럼): 높이 f·(1 + d·e^(−t/τp))(세게 칠수록 처음 장력이 커서 높음), 크기 a·(1 − e^(−t/rise))·((1 − q)·e^(−t/τ) + q·e^(−t/τ2)), 9.2τ(−80 dB)까지
+  function dMem(y, sr, f, d, tauP, tau, a, rise, q, tau2) {
+    q = q || 0; tau2 = tau2 || tau;
+    const n = Math.min(y.length, Math.ceil(sr * Math.max(tau, q > 0 ? tau2 : 0) * 9.2)), k = 2 * Math.PI * f / sr, cP = Math.exp(-1 / (sr * tauP)), cD = Math.exp(-1 / (sr * tau)), cE = Math.exp(-1 / (sr * tau2)), cR = rise > 0 ? Math.exp(-1 / (sr * rise)) : 0;
+    let ph = 0, eP = 1, eD = a * (1 - q), eE = a * q, eR = 1, i = 0;
+    for (; i < n && d * eP > 1e-4; i++) { y[i] += (eD + eE) * (1 - eR) * Math.sin(ph); ph += k * (1 + d * eP); eP *= cP; eD *= cD; eE *= cE; eR = eR > 1e-12 ? eR * cR : 0; }
+    // 미끄럼이 끝나면(높이 차 < 1e-4: 1초에 위상 0.01주기 아래) 회전 점화식으로(Math.sin 대신 곱셈 넷)
+    const c = Math.cos(k), s = Math.sin(k); let cx = Math.cos(ph), sx = Math.sin(ph);
+    for (; i < n; i++) { y[i] += (eD + eE) * (1 - eR) * sx; const nc = cx * c - sx * s; sx = cx * s + sx * c; cx = nc; eD *= cD; eE *= cE; eR = eR > 1e-12 ? eR * cR : 0; }
+  }
+  // (오름 포락 eR은 1e-12 아래에서 0으로: 곱하기만 하면 비정규 수에 멈춰 10배 느려짐)
+  // 고정 높이 감쇠 사인(회전 점화식: 샘플마다 곱셈 넷), 크기 a, 오름 rise, 9.2τ(−80 dB)까지
+  function dRing(y, sr, f, tau, a, rise) {
+    if (f >= 0.45 * sr) return;
+    const n = Math.min(y.length, Math.ceil(sr * tau * 9.2)), w = 2 * Math.PI * f / sr, dec = Math.exp(-1 / (tau * sr)), cw = dec * Math.cos(w), sw = dec * Math.sin(w), cR = rise > 0 ? Math.exp(-1 / (sr * rise)) : 0;
+    let x = a, z = 0, eR = 1;
+    for (let i = 0; i < n; i++) { y[i] += z * (1 - eR); const nx = x * cw - z * sw; z = x * sw + z * cw; x = nx; eR = eR > 1e-12 ? eR * cR : 0; }
+  }
+  // 높은 막 모드 구름: 실제 막은 위로 갈수록 모드가 빽빽함(0.5~2 kHz '몸통·딱'). C = [개수, 비 아래, 위, 크기, 기울기, τ, τ 지수]
+  //  높이·크기는 북마다 고정(rK), 치는 자리에 따라 크기만 흔듦(rV, jit), 채 접촉 시간 tc로 거름(−6 dB/oct)
+  function dCloud(y, sr, rK, rV, jit, f0, C, tc, g, tauMul) {
+    const [N, r0, r1, a, sl, tau, te] = C, fb = f0 * r0;
+    for (let j = 0; j < N; j++) {
+      const f = fb * Math.pow(r1 / r0, (j + rK()) / N), u = rK(), s = rK() < 0.5 ? -1 : 1;
+      dRing(y, sr, f, tau * (tauMul || 1) * Math.pow(fb / f, te) * (0.7 + 0.6 * u), s * g * a * Math.pow(fb / f, sl) * (0.5 + rK()) * dTc1(f, tc) * (1 + jit * 0.5 * (rV() - 0.5)), 0.0003);
+    }
+  }
+  // 잡음 터짐: 백색 잡음 × (1 − e^(−t/rise))·e^(−t/τ), 길이 min(9.2τ, nMax)
+  function dBurst(r, sr, tau, rise, nMax) {
+    const n = Math.min(nMax, Math.ceil(sr * tau * 9.2)), x = new Float32Array(n), cD = Math.exp(-1 / (sr * tau)), cR = rise > 0 ? Math.exp(-1 / (sr * rise)) : 0;
+    let eD = 1, eR = 1;
+    for (let i = 0; i < n; i++) { x[i] = (r() * 2 - 1) * eD * (1 - eR); eD *= cD; eR = eR > 1e-12 ? eR * cR : 0; }
+    return x;
+  }
+  // x를 앞 k 샘플 RMS가 g/√2(크기 g인 사인과 같은 RMS)가 되게 맞춰 y에 더함(성분 크기를 막 모드 크기와 같은 잣대로)
+  function dAdd(y, x, g, k) {
+    k = Math.max(1, Math.min(Math.round(k), x.length)); let e = 0; for (let i = 0; i < k; i++) e += x[i] * x[i];
+    const s = g * Math.SQRT1_2 / (Math.sqrt(e / k) + 1e-12), m = Math.min(x.length, y.length);
+    for (let i = 0; i < m; i++) y[i] += s * x[i];
+  }
+  const dRms = (y, a, b) => { let e = 0; b = Math.min(b, y.length); for (let i = a; i < b; i++) e += y[i] * y[i]; return Math.sqrt(e / Math.max(1, b - a)); };
+  // 금속 모드 묶음: 들뜸 e(앞 ne 샘플)를 모드마다 공진기(극 dec·e^(jw))로 걸러 더함. 모드 [f, τ, a]: 충격이면 a·e^(−t/τ)·sin(2πft)
+  function dBank(y, sr, modes, e, ne) {
+    const n = y.length, acc = new Float64Array(n), m0 = Math.min(ne, n), st = [];
+    let am = 1e-12; for (const md of modes) am = Math.max(am, Math.abs(md[2]));
+    for (const [f, tau, a] of modes) {
+      if (f >= 0.45 * sr) continue;
+      // 길이: 가장 큰 모드 대비 −80 dB(ln 10⁴ ≈ 9.2)까지, 많아야 8τ(−70 dB), 적어도 2τ
+      const w = 2 * Math.PI * f / sr, dec = Math.exp(-1 / (tau * sr)), cw = dec * Math.cos(w), sw = dec * Math.sin(w), kt = clamp(Math.log(Math.abs(a) / am) + 9.2, 2, 8);
+      const nn = Math.min(n, m0 + Math.ceil(tau * sr * kt)), m = Math.min(m0, nn);
+      let x = 0, z = 0;
+      for (let i = 0; i < m; i++) { const nx = x * cw - z * sw + a * e[i]; z = x * sw + z * cw; x = nx; acc[i] += z; }
+      if (nn > m) st.push([cw, sw, x, z, nn]);
+    }
+    // 자유 감쇠(m0부터): 길이 순으로 둘씩 한 루프에(누적 버퍼 읽고 쓰기가 절반, Float64 누적: 3배 빠름)
+    st.sort((p, q) => q[4] - p[4]);
+    const zero = [0, 0, 0, 0, m0];
+    for (let k = 0; k < st.length; k += 2) dFree2(acc, m0, st[k], k + 1 < st.length ? st[k + 1] : zero);
+    for (let i = 0; i < n; i++) y[i] += acc[i];
+  }
+  // 두 모드 자유 감쇠(p가 길거나 같음). 변수는 배열에서 따로 꺼냄(구조 분해 let은 V8에서 5배 느림)
+  function dFree2(acc, m0, p, q) {
+    let c1 = p[0], s1 = p[1], x1 = p[2], z1 = p[3], c2 = q[0], s2 = q[1], x2 = q[2], z2 = q[3], i = m0;
+    const n1 = p[4], n2 = q[4];
+    for (; i < n2; i++) { const t1 = x1 * c1 - z1 * s1; z1 = x1 * s1 + z1 * c1; x1 = t1; const t2 = x2 * c2 - z2 * s2; z2 = x2 * s2 + z2 * c2; x2 = t2; acc[i] += z1 + z2; }
+    for (; i < n1; i++) { const t1 = x1 * c1 - z1 * s1; z1 = x1 * s1 + z1 * c1; x1 = t1; acc[i] += z1; }
+  }
+  // 심벌 모드 목록(심벌마다 고정: 키트 씨앗 r): N개 fLo~fHi(표본율 0.42배까지) 로그 간격 + 난수, 크기 = 띠 꼴 포락 × 난수 × 부호, τ = tau0·(1 kHz/f)^tauExp × 난수
+  function dModes(r, sr, T, N) {
+    const fHi = Math.min(T.fHi, 0.42 * sr), out = [];
+    for (let j = 0; j < N; j++) {
+      const f = T.fLo * Math.pow(fHi / T.fLo, (j + r()) / N);
+      const env = 1 / Math.sqrt(1 + Math.pow(T.pk[0] / f, 4)) / Math.sqrt(1 + Math.pow(f / T.pk[1], 2 * T.pk[2]));
+      out.push([f, T.tau0 * Math.pow(1000 / f, T.tauExp) * (0.6 + 0.8 * r()), env * (0.4 + 1.2 * r()) * (r() < 0.5 ? -1 : 1)]);
+    }
+    return out;
+  }
+  // 3대역 잡음 씻김(심벌 꼬리): 1극 저역 통과 2단으로 낮은·가운데·높은 대역(합 = 원래 잡음), 대역마다 오름·T60·크기
+  function dWash(r, sr, n, W) {
+    const x = new Float32Array(n), [aL, aH] = W.xo.map(f => 1 - Math.exp(-2 * Math.PI * f / sr));
+    const dc = W.rt.map(T => Math.exp(-6.9078 / (T * sr))), rc = W.rise.map(t => Math.exp(-1 / (t * sr)));
+    let l1 = 0, l2 = 0, h1 = 0, h2 = 0, e0 = W.g[0], e1 = W.g[1], e2 = W.g[2], q0 = 1, q1 = 1, q2 = 1;
+    for (let i = 0; i < n; i++) {
+      const w = r() * 2 - 1;
+      l1 += (w - l1) * aL; l2 += (l1 - l2) * aL; h1 += (w - h1) * aH; h2 += (h1 - h2) * aH;
+      x[i] = l2 * e0 * (1 - q0) + (h2 - l2) * e1 * (1 - q1) + (w - h2) * e2 * (1 - q2);
+      e0 *= dc[0]; e1 *= dc[1]; e2 *= dc[2]; q0 = q0 > 1e-12 ? q0 * rc[0] : 0; q1 = q1 > 1e-12 ? q1 * rc[1] : 0; q2 = q2 > 1e-12 ? q2 * rc[2] : 0;
+    }
+    return x;
+  }
+
+  // ---- 킥: 미끄러지는 기본 모드(첫 터짐 + 몸통 두 감쇠) + 울림막 맥놀이 + 낮은·높은 막 모드 + 통 '둑' + 비터 '퍽'·클릭 ----
+  function dKick(y, sr, v, T, rK, rV, rN, jit) {
+    const det = 1 + jit * 0.012 * (rV() - 0.5), f0 = T.f0 * det, d = T.sweep[0] + T.sweep[1] * v, tc = dLerp(T.tc[0], T.tc[1], v), [t1, t2, q] = T.env, tj = 1 + jit * 0.1 * (rV() - 0.5);
+    dMem(y, sr, f0, d, T.tauP, t1 * tj, 1, 0.0006, q, t2 * tj);
+    dMem(y, sr, f0 * T.res[0], d * 0.3, T.tauP, t2 * tj * T.res[2], T.res[1], T.res[3]);      // 울림막(공기로 늦게 울림, 미끄럼 작음)
+    for (const [k, a, tm] of T.modes) dMem(y, sr, f0 * k, d, T.tauP, tm, a * dTc(f0 * k * (1 + d), tc) * (1 + jit * 0.3 * (rV() - 0.5)) * (0.6 + 0.6 * v), 0.0004);
+    dCloud(y, sr, rK, rV, jit, f0, T.cloud, tc, 0.6 + 0.6 * v);
+    const kn = dBurst(rN, sr, T.knock[3], 0.0005, y.length); biqRun(kn, dBp(sr, T.knock[0], T.knock[1]));
+    dAdd(y, kn, T.knock[2] * (0.7 + 0.5 * v), sr * T.knock[3]);
+    const sl = dBurst(rN, sr, T.slap[3], 0.0003, y.length); biqRun(sl, dBp(sr, T.slap[0] * (0.8 + 0.4 * v), T.slap[1]));
+    dAdd(y, sl, T.slap[2] * (0.5 + v), sr * T.slap[3]);
+    const C = T.click, ck = dBurst(rN, sr, C[4], 0, y.length);
+    biqRun(ck, dBp(sr, C[0], C[1])); biqRun(ck, biqCoef(sr, 'lp', Math.min(dLerp(C[5], C[6], v), 0.45 * sr), 0, 0.7)); hp1(ck, sr, 700);
+    dAdd(y, ck, (C[2] + C[3] * v * v), sr * C[4]);
+  }
+  // ---- 스네어: 막 모드(베셀 비, 치는 자리에 따라 비대칭 모드 크기) + 높은 모드 구름 + 통 + 스틱 '딱'(1~2 kHz) + 스네어 줄(막 주기로 떠는 띠 잡음 + 짧은 지글거림 꼬리) ----
+  function dSnare(y, sr, v, T, rK, rV, rN, jit) {
+    const br = clamp(T.brush || 0, 0, 1), det = 1 + jit * 0.012 * (rV() - 0.5), f0 = T.f0 * det, d = T.sweep[0] + T.sweep[1] * v;
+    const tc = dLerp(T.tc[0], T.tc[1], v) * (1 + 2 * br), p = clamp(T.pos + jit * 0.2 * (rV() - 0.5), 0.1, 0.6), mg = 1 - 0.6 * br;
+    for (const [k, a, tm, ax] of T.modes) {
+      const g = a * (ax ? 1 - 0.4 * p : 0.4 + 1.6 * p) * dTc(f0 * k, tc) * (1 + jit * 0.2 * (rV() - 0.5)) * mg;
+      dMem(y, sr, f0 * k, d, T.tauP, tm * (1 + jit * 0.1 * (rV() - 0.5)), g, 0.0003);
+    }
+    dCloud(y, sr, rK, rV, jit, f0, T.cloud, tc, (0.6 + 0.6 * v) * mg);
+    for (const [f, a, tm] of T.shell) dRing(y, sr, f * det, tm, a * dTc(f, tc) * (0.6 + 0.6 * v) * mg, 0.0005);
+    // 스틱 '딱': 짧은 잡음 → 고역 통과 → 1~2 kHz 봉우리 → vel에 따라 열리는 저역 통과
+    const C = T.crack, cr = dBurst(rN, sr, C[2], 0, y.length);
+    biqList(cr, sr, [['hp', C[3], 0, 0.7], ['pk', C[4], C[5], 0.8], ['lp', Math.min(dLerp(C[6], C[7], v), 0.45 * sr), 0, 0.7]]);
+    dAdd(y, cr, (C[0] + C[1] * v) * (1 - br), sr * C[2]);
+    // 스네어 줄: 띠 잡음 × 포락(지연·오름·두 감쇠) × 막 기본 주기 떨림(줄이 아래 막에 부딪힘)
+    const W = T.wire, nW = y.length, w = new Float32Array(nW);
+    for (let i = 0; i < nW; i++) w[i] = rN() * 2 - 1;
+    biqList(w, sr, [['hp', W.hp, 0, 0.7], ['hp', W.hp, 0, 0.7], ['lp', Math.min(dLerp(W.lp[0], W.lp[1], v), 0.45 * sr), 0, 0.7]]);
+    const i0 = Math.round(sr * W.delay), rise = dLerp(W.rise, 0.004, br), tw = dLerp(W.tau[0], W.tau[1], v) * (1 + 0.3 * br), tt = W.tail[1];
+    const cR = Math.exp(-1 / (sr * rise)), cA = Math.exp(-1 / (sr * tw)), cB = Math.exp(-1 / (sr * tt)), kP = 2 * Math.PI * f0 / sr, cP = Math.exp(-1 / (sr * T.tauP));
+    let eR = 1, eA = 1, eB = W.tail[0], ph = 0, eP = 1;
+    const wire = new Float32Array(nW);
+    for (let i = i0; i < nW; i++) {
+      const s = Math.sin(ph), am = 1 - W.buzz + W.buzz * (s > 0 ? Math.PI * s : 0);   // 반파 사인 평균 1/π → 평균 1
+      wire[i] = w[i] * (1 - eR) * (eA + eB) * am;
+      ph += kP * (1 + d * eP); eP *= cP; eR = eR > 1e-12 ? eR * cR : 0; eA *= cA; eB *= cB;
+    }
+    dAdd(y, wire, W.g * (0.8 + 0.4 * v), sr * 0.03);
+    if (br > 0) {   // 브러시 '쓱': 넓은 띠 잡음, 느린 오름
+      const sw = dBurst(rN, sr, 0.06, 0.006, y.length); biqRun(sw, dBp(sr, 3500, 0.5));
+      dAdd(y, sw, 0.6 * br, sr * 0.05);
+    }
+  }
+  // ---- 크로스 스틱: 스틱·테 나무 모드 '똑' + 작은 막 + 충격 + 아주 작은 줄 ----
+  function dSide(y, sr, v, T, rV, rN, jit) {
+    const det = 1 + jit * 0.012 * (rV() - 0.5), tc = dLerp(T.tc[0], T.tc[1], v);
+    for (const [f, a, tm] of T.modes) dRing(y, sr, f * det, tm * (1 + jit * 0.1 * (rV() - 0.5)), a * dTc(f, tc) * (1 + jit * 0.2 * (rV() - 0.5)), 0.0002);
+    dMem(y, sr, T.head[0] * det, 0.02, 0.01, T.head[2], T.head[1], 0.0005);
+    dMem(y, sr, T.head[0] * det * 1.594, 0.02, 0.01, T.head[2] * 0.6, T.head[1] * 0.5, 0.0005);
+    const im = dBurst(rN, sr, T.imp[2], 0, y.length); hp1(im, sr, 800); biqRun(im, biqCoef(sr, 'lp', Math.min(dLerp(T.imp[3], T.imp[4], v), 0.45 * sr), 0, 0.7));
+    dAdd(y, im, T.imp[0] + T.imp[1] * v, sr * T.imp[2]);
+    const wr = dBurst(rN, sr, 0.05, 0.001, y.length); biqList(wr, sr, [['hp', 2000, 0, 0.7], ['lp', 7000, 0, 0.7]]);
+    dAdd(y, wr, T.wire, sr * 0.03);
+  }
+  // ---- 하이햇(닫힘·열림·페달): 금속 모드(충격 + 고역 잡음 들뜸) + 고역 잡음 → 부드러운 고역 통과(5~6 kHz) + 닫힌 두 장 '칙'(1~5 kHz). 페달은 넓은 띠 '칙' + 공기 '퍽' + 발판 '쿵' ----
+  function dHat(y, sr, v, kind, T, rK, rV, rN, jit) {
+    const n = y.length, open = kind === 'hho', ped = kind === 'hhp', tc = dLerp(T.tc[0], T.tc[1], v) * (ped ? 2 : 1);
+    const md = dModes(rK, sr, T, T.n), tk = open ? 1 : ped ? T.tauP : T.tauC;
+    for (const m of md) { m[0] *= 1 + jit * 0.004 * (rV() - 0.5); m[1] *= tk * (m[0] < (T.ld || 0) ? m[0] / T.ld : 1); m[2] *= dTc1(m[0], tc) * (1 + jit * 0.4 * (rV() - 0.5)); }
+    // 들뜸: 충격 1 + 고역 잡음(스틱 끝이 미끄러지며 높은 모드로 번짐)
+    const ne = Math.round(sr * (open ? 0.03 : 0.012)), e = new Float32Array(ne), sB = T.bloom * (0.5 + v) / Math.sqrt(sr * 0.006);
+    let hp = 0, pv = 0; const ch = Math.exp(-2 * Math.PI * 3000 / sr);
+    for (let i = 0; i < ne; i++) { const w = rN() * 2 - 1; hp = ch * (hp + w - pv); pv = w; e[i] = hp * sB * (1 - Math.exp(-i / (sr * 0.001))) * Math.exp(-i / (sr * 0.006)); }
+    e[0] += 1;
+    const bank = new Float32Array(n); dBank(bank, sr, md, e, ne);
+    const bR = dRms(bank, 0, Math.round(sr * 0.01)) + 1e-9;
+    // 고역 잡음: 닫힘 두 감쇠(눌린 두 장 + 남는 지글거림), 열림 오름·감쇠·떨림(헐거운 두 장이 부딪힘), 페달 두 감쇠
+    const z = new Float32Array(n), N = T.nz;
+    if (open) {
+      const cR = Math.exp(-1 / (sr * N.o[1])), cD = Math.exp(-1 / (sr * N.o[0])); let eR = 1, eD = 1, lfo = 0, lt = 0;
+      const cl = Math.exp(-2 * Math.PI * 40 / sr);
+      for (let i = 0; i < n; i++) { if ((i & 31) === 0) lt = rN() * 2 - 1; lfo = lfo * cl + lt * (1 - cl); z[i] = (rN() * 2 - 1) * (1 - eR) * eD * (1 + N.rattle * 4 * lfo); eR = eR > 1e-12 ? eR * cR : 0; eD *= cD; }
+    } else {
+      const c = ped ? T.ped.nz : N.c, c1 = Math.exp(-1 / (sr * c[0])), c2 = Math.exp(-1 / (sr * c[1])), cR = Math.exp(-1 / (sr * (ped ? 0.0012 : 0.0002)));
+      let e1 = 1 - c[2], e2 = c[2], eR = 1;
+      for (let i = 0; i < n; i++) { z[i] = (rN() * 2 - 1) * (e1 + e2) * (1 - eR); e1 *= c1; e2 *= c2; eR = eR > 1e-12 ? eR * cR : 0; }
+    }
+    hp1(z, sr, N.hp || 3000);
+    { const zR = dRms(z, 0, Math.round(sr * 0.01)) + 1e-9, g = N.g * bR / zR; for (let i = 0; i < n; i++) y[i] = bank[i] + g * z[i]; }
+    const ref = dRms(y, 0, Math.round(sr * 0.01)) + 1e-9;
+    if (ped) {
+      // 페달: 넓은 띠로(두 장이 맞부딪는 '칙'은 2 kHz 언저리) + 두 장 사이 공기 '퍽' + 발판 '쿵'
+      biqList(y, sr, [['hp', T.ped.hp, 0, 0.7], ['pk', T.ped.bp, 3, T.ped.q], ['hs', 7000, -2, 0.7]]);
+      const pk = dRms(y, 0, Math.round(sr * 0.02));
+      const pf = dBurst(rN, sr, 0.008, 0.0015, n); biqRun(pf, dBp(sr, T.ped.puff[0], 1.0)); dAdd(y, pf, T.ped.puff[1] * pk * Math.SQRT2, sr * 0.008);
+      const th = new Float32Array(n); dMem(th, sr, T.ped.thump[0], 0.3, 0.008, 0.03, 1, 0.002);
+      const lo = dBurst(rN, sr, 0.008, 0.001, n); biqRun(lo, biqCoef(sr, 'lp', 300, 0, 0.7)); dAdd(th, lo, 0.6, sr * 0.008);
+      const tR = dRms(th, 0, Math.round(sr * 0.02)) + 1e-9; for (let i = 0; i < n; i++) y[i] += th[i] * T.ped.thump[1] * pk / tR;
+    } else {
+      biqList(y, sr, [['hp', T.hp, 0, 0.5]]);
+      // 두 장 '칙'(닫힘: 스틱 끝 + 맞닿은 두 장, 열림은 작게): 1~5 kHz 띠 잡음, 짧게
+      const C = T.chick, ck = dBurst(rN, sr, open ? C[3] * 1.5 : C[3], 0.0003, n); biqRun(ck, dBp(sr, C[0], C[1]));
+      dAdd(y, ck, C[2] * (open ? 0.6 : 1) * ref * Math.SQRT2 * (1.2 - 0.4 * v), sr * C[3]);
+    }
+    dEq(y, sr, [['lp', T.lp, 0, 0.54], ['lp', T.lp, 0, 1.31], ['pk', T.pres[0], T.pres[1], 1.0]]);
+    // 밝기: 세게 칠수록 고역 셸프 올림(±4 dB)
+    biqRun(y, biqCoef(sr, 'hs', Math.min(9000, 0.4 * sr), (v - 0.6) * 10, 0.7));
+  }
+  // ---- 라이드·벨·크래시: 금속 모드(충격 + 블룸 잡음 들뜸) + 3대역 잡음 씻김 + 스틱 딸깍 ----
+  function dCym(y, sr, v, kind, T, K, rK, rV, rN, jit) {
+    const n = y.length, tc = dLerp(T.tc[0], T.tc[1], v), md = dModes(rK, sr, T, T.n);
+    if (T.ping) { const P = T.ping; for (let j = 0; j < P[0]; j++) md.push([P[1] * Math.pow(P[2] / P[1], (j + rK()) / P[0]), T.tau0 * P[4] * (0.7 + 0.6 * rK()) * Math.pow(1000 / P[1], T.tauExp), P[3] * (0.6 + 0.8 * rK()) * (rK() < 0.5 ? -1 : 1)]); }
+    if (kind !== 'crash') {   // 컵 부분음: 벨은 크게, 라이드도 같은 컵이 작게 울림
+      const B = T.bell || K.bell.bell, bg = T.bell ? T.bellG : T.rideBell;
+      for (const [k, a, tm] of B[1]) md.push([B[0] * k * (1 + 0.003 * (rK() - 0.5)), tm, a * bg * (rK() < 0.5 ? -1 : 1)]);
+    }
+    for (const m of md) { m[0] *= 1 + jit * 0.003 * (rV() - 0.5); m[1] *= 1 + jit * 0.1 * (rV() - 0.5); m[2] *= dTc1(m[0], tc) * (1 + jit * 0.4 * (rV() - 0.5)); }
+    // 들뜸: 충격 + 블룸(고역 통과 잡음, 오름 rise, τ: 에너지가 높은 모드로 번지는 시간)
+    const Bl = T.bloom, ne = Math.round(sr * (Bl[2] * 5 + Bl[1])), e = new Float32Array(ne), sB = Bl[0] * Math.pow(0.3 + v, 1.5) / Math.sqrt(sr * Bl[2]);
+    { let hp = 0, pv = 0; const ch = Math.exp(-2 * Math.PI * Bl[3] / sr), cR = Math.exp(-1 / (sr * Bl[1])), cD = Math.exp(-1 / (sr * Bl[2])); let eR = 1, eD = 1;
+      for (let i = 0; i < ne; i++) { const w = rN() * 2 - 1; hp = ch * (hp + w - pv); pv = w; e[i] = hp * sB * (1 - eR) * eD; eR = eR > 1e-12 ? eR * cR : 0; eD *= cD; } }
+    e[0] += 1;
+    dBank(y, sr, md, e, ne);
+    const bR = dRms(y, 0, Math.round(sr * 0.1)) + 1e-9;
+    // 잡음 씻김(빽빽함): 모드 앞 0.1초 RMS 대비 lvl dB
+    const ws = dWash(rN, sr, n, T.wash); hp1(ws, sr, 300);
+    { const wR = dRms(ws, 0, Math.round(sr * 0.1)) + 1e-9, g = Math.pow(10, T.wash.lvl / 20) * bR / wR * (0.7 + 0.5 * v); for (let i = 0; i < n; i++) y[i] += g * ws[i]; }
+    // 스틱 딸깍
+    const tk = dBurst(rN, sr, T.tick[1], 0, n); biqList(tk, sr, [['hp', 1500, 0, 0.7], ['lp', Math.min(dLerp(4000, 12000, v), 0.45 * sr), 0, 0.7]]);
+    dAdd(y, tk, Math.pow(10, T.tick[0] / 20) * bR * Math.SQRT2 * (0.5 + v), sr * T.tick[1]);
+    dEq(y, sr, [['hp', T.hp, 0, 0.7], ['lp', T.lp, 0, 0.54], ['lp', T.lp, 0, 1.31]]);
+  }
+  // ---- 탐: 미끄러지는 막 모드 + 울림막 맥놀이 + 높은 모드 구름 + 스틱 + 스네어 줄 공명 ----
+  function dTom(y, sr, v, T, idx, rK, rV, rN, jit) {
+    const det = 1 + jit * 0.012 * (rV() - 0.5), f0 = T.f[idx] * det, tau = T.tau[idx] * (1 + jit * 0.1 * (rV() - 0.5)), d = T.sweep[0] + T.sweep[1] * v, tc = dLerp(T.tc[0], T.tc[1], v);
+    dMem(y, sr, f0, d, T.tauP, tau, 1, 0.0004);
+    dMem(y, sr, f0 * T.res[0], d * 0.4, T.tauP, tau * 1.2, T.res[1], T.res[2]);
+    for (const [k, a, tm] of T.modes) dMem(y, sr, f0 * k, d, T.tauP, tau * tm, a * dTc(f0 * k, tc) * (1 + jit * 0.3 * (rV() - 0.5)), 0.0003);
+    dCloud(y, sr, rK, rV, jit, f0, T.cloud, tc, 0.6 + 0.6 * v, tau);
+    const S = T.stick, st = dBurst(rN, sr, S[2], 0, y.length);
+    biqList(st, sr, [['hp', S[3], 0, 0.7], ['pk', S[4], 6, 0.8], ['lp', Math.min(dLerp(S[5][0], S[5][1], v), 0.45 * sr), 0, 0.7]]);
+    dAdd(y, st, S[0] + S[1] * v, sr * S[2]);
+    if (T.symp > 0) {   // 스네어 줄 공명(탐을 치면 스네어가 같이 지글거림)
+      const sy = dBurst(rN, sr, 0.12, 0.004, y.length); biqList(sy, sr, [['hp', 2500, 0, 0.7], ['lp', 7000, 0, 0.7]]);
+      dAdd(y, sy, T.symp, sr * 0.05);
+    }
+  }
+  // 한 타격음
+  function drumHit(kind, sr, vel, variant, kit) {
+    const brush = kit === 'brush';                       // 브러시: 가벼운 키트와 같은 난수·크기, 스네어만 브러시
+    kit = kit === 'rock' ? 'rock' : 'light';
+    const v = clamp(vel == null || !isFinite(+vel) ? 0.7 : +vel, 0, 1), K = brush ? DRUM.kit.brush : DRUM.kit[kit], ki = DRUM.kinds.indexOf(kind);
+    if (ki < 0) throw new Error('drumHit: kind ' + kind);
+    const n = Math.round(sr * DRUM.len[kind]), y = new Float32Array(n), vr = Math.max(0, variant | 0), jit = vr ? 1 : 0;
+    // 난수: rK 키트·종류마다 고정(모드 자리 = 악기 자체), rV 변형(음높이·치는 자리), rN 잡음
+    const base = ((ki + 1) * 7919 + (kit === 'rock' ? 104729 : 224737)) >>> 0;
+    const rK = lcg(base), rV = lcg((base * 31 + 17 ^ Math.imul(vr + 1, 0x9E3779B1)) >>> 0), rN = lcg((base * 131 + 7 ^ Math.imul(vr + 1, 0x85EBCA77)) >>> 0);
+    let T;
+    if (kind === 'kick') dKick(y, sr, v, T = K.kick, rK, rV, rN, jit);
+    else if (kind === 'snare') dSnare(y, sr, v, T = K.snare, rK, rV, rN, jit);
+    else if (kind === 'side') dSide(y, sr, v, T = K.side, rV, rN, jit);
+    else if (kind[0] === 'h') dHat(y, sr, v, kind, T = K.hat, rK, rV, rN, jit);
+    else if (kind[0] === 't') dTom(y, sr, v, T = K.toms, kind === 'tomH' ? 0 : kind === 'tomM' ? 1 : 2, rK, rV, rN, jit);
+    else dCym(y, sr, v, kind, T = K[kind], K, rK, rV, rN, jit);
+    // rock 포화: 첫 50 ms RMS 0.25에서 2배 오버샘플 클리퍼(세게 칠수록 깊게) → 직류 막음
+    if (T.drive) {
+      const g0 = 0.25 / (dRms(y, 0, Math.round(sr * 0.05)) + 1e-9); for (let i = 0; i < n; i++) y[i] *= g0;
+      clipOS(y, T.drive[0] + T.drive[1] * v, T.bias, 2);
+    }
+    hp1(y, sr, 18);
+    if (T.eq && T.eq.length) dEq(y, sr, T.eq);
+    // 끝: 시작 0.05 ms 오름(어택 보존), 끝 올림 코사인 페이드
+    edges(y, sr, 0.05, 0);
+    const nf = Math.min(n, Math.round(sr * DRUM.fade[kind])); for (let i = 0; i < nf; i++) y[n - 1 - i] *= 0.5 - 0.5 * Math.cos(Math.PI * i / nf);
+    // 정규화: 첫 normMs RMS → norm × 10^(lvl[kit][kind]/20)
+    let g = DRUM.norm * Math.pow(10, DRUM.lvl[kit][kind] / 20) / (dRms(y, 0, Math.round(sr * DRUM.normMs / 1000)) + 1e-9);
+    if (n < 0.5 * sr) { let p = 0; for (let i = 0; i < n; i++) p = Math.max(p, Math.abs(y[i])); if (p * g > DRUM.peakCap) g = DRUM.peakCap / p; }   // 짧은 버퍼 피크 < 0.5(메트로놈 판별)
+    for (let i = 0; i < n; i++) y[i] *= g;
+    return y;
+  }
+  // 드럼 방 잔향(젖은 소리만): makeHallIR 꼴(씨앗 잡음 3대역·대역별 RT60·확산음 오름) + 짧은 초기 반사(좌우 다른 시각), 두 채널 에너지 2
+  function drumRoomIR(sr, kit) {
+    const R = DRUM.kit[kit === 'rock' ? 'rock' : 'light'].room, len = Math.round(sr * R.len), ir = [new Float32Array(len), new Float32Array(len)];
+    const [aL, aH] = R.xo.map(f => 1 - Math.exp(-2 * Math.PI * f / sr)), [rL, rM, rH] = R.rt.map(T => Math.exp(-6.9078 / (T * sr)));
+    for (let c = 0; c < 2; c++) {
+      const d = ir[c], p0 = Math.round(sr * R.pre), fin = Math.round(sr * R.fin), r = lcg(4711 + 977 * c + (kit === 'rock' ? 0 : 31));
+      let l1 = 0, l2 = 0, h1 = 0, h2 = 0, eL = R.bg[0], eM = R.bg[1], eH = R.bg[2];
+      for (let i = 0; i < len; i++, eL *= rL, eM *= rM, eH *= rH) {
+        const x = r() * 2 - 1;
+        l1 += (x - l1) * aL; l2 += (l1 - l2) * aL; h1 += (x - h1) * aH; h2 += (h1 - h2) * aH;
+        if (i < p0) continue;
+        d[i] = (l2 * eL + (h2 - l2) * eM + (x - h2) * eH) * (i - p0 < fin ? 0.5 - 0.5 * Math.cos(Math.PI * (i - p0) / fin) : 1);
+      }
+      // 초기 반사: 채널마다 조금 다른 시각, 부호를 바꿔 가며, 3샘플로 퍼뜨림(벽의 고역 흡수)
+      R.er.forEach(([ms, g], j) => {
+        const i = Math.round(sr * (ms * (c ? 1.09 : 1) + (c ? 0.25 : 0)) / 1000), s = (j % 2 ? -1 : 1) * g * R.erK;
+        if (i + 2 < len) { d[i] += 0.5 * s; d[i + 1] += s; d[i + 2] += 0.5 * s; }
+      });
+      const nf = Math.round(sr * 0.05); for (let i = 0; i < nf; i++) d[len - 1 - i] *= i / nf;
+    }
+    let e = 0; for (const d of ir) for (let i = 0; i < len; i++) e += d[i] * d[i];
+    const g = 1 / Math.sqrt(e / 2);
+    for (const d of ir) for (let i = 0; i < len; i++) d[i] *= g;
+    return ir;
+  }
+
   return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of,
-    ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB };
+    ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB,
+    DRUM, drumHit, drumRoomIR };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
 </script>
@@ -8269,7 +9415,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const savedPrefs = (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || localStorage.getItem(OLD_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } })();
   const prefs = Object.assign(
     { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'extended', res: 2, slash: true,
-      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name', guitarTone: 'acoustic' },
+      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name', guitarTone: 'acoustic',
+      drums: false, drumsVol: 0.6, drumKit: 'auto' },   // 1.26.0 드럼(기본 끔)·드럼 볼륨·드럼 키트('auto' 악기 따라, 'rock'·'light'·'brush' 고정)
     savedPrefs);
   // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
   // 1.21.0부터 통기타 기본이 자동('auto': 곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름): 그 전 기본값(싱어송라이터)으로 저장된 값은 한 번만 자동으로(gmv 3)
@@ -8349,6 +9496,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // ---------------- 오디오 ----------------
   const AC = window.AudioContext || window.webkitAudioContext;
   let ctx = null, master = null, musicGain = null, clickGain = null, pianoGain = null, guitarGain = null, pianoBus = null, guitarBus = null, clickHi = null, clickLo = null, clickSub = null;
+  let drumGain = null, drumBus = null;    // 1.26.0 드럼 볼륨·키트 경로: 드럼을 처음 켤 때 만듦(끄면 없음, ensureDrums)
   function ensureCtx() {
     if (ctx) return ctx;
     ctx = new AC();
@@ -8362,6 +9510,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     musicGain.gain.value = prefs.musicVol; clickGain.gain.value = prefs.clickVol; pianoGain.gain.value = prefs.pianoVol; guitarGain.gain.value = prefs.guitarVol;
     pianoBus = buildPianoChain(pianoGain);
     guitarBus = buildGuitarChainT(guitarGain);
+    if (drumsOn()) ensureDrums();                     // 1.26.0 드럼을 켜 둔 채 열면 드럼 경로도(끄면 노드를 만들지 않음)
     clickHi = makeClick(1850, 0.9);                     // 첫 박 '띡'
     clickLo = makeClick(1250, 0.6);                     // 나머지 박 '딱'
     clickSub = makeClick(2600, 0.3, 0.008, 0.25);       // ½박 단위일 때 박 사이 '틱': 높고 작고 짧게(박 클릭과 헷갈리지 않게)
@@ -8568,6 +9717,40 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  chugTau·holdTau: 끝에서 사라지는 시정수, drive: 드라이브 강제(null이면 엔진 수준대로: 0 클린·1 크런치·2 하이게인), riff: 리프 따라 치기
   const ELEC = { on: true, makeup: 2.94, cacheMB: 64, takes: 2, pan: 0.8, scatterMs: 12, upVel: 0.85, chugLen: 0.18, stabLen: 0.45, dampTau: 0.008, chugTau: 0.03, holdTau: 0.05, drive: null, riff: false, leadGain: Math.SQRT2 };   // riff: 리프 따라 치기(엔진 RIFF와 함께 기본 끔, 1.25.0 출시 전 사용자 결정)
   //  leadGain: 앞 선율 음(엔진 RIFF_LEAD, 원곡 가운데 솔로·리드)은 한 테이크를 가운데에(솔로 기타처럼) — 좌우 ±pan 두 테이크(채널마다 거의 1 + 거의 0)와 같은 채널 크기가 되게 √2(가운데 패너는 채널마다 0.707)
+  // 1.26.0 드럼(prefs.drums: 드럼 버튼·D 키, 기본 끔, 사용자: "이제 드럼을 만들자"): 엔진이 원곡 드럼을 채보하고(Engine.drumFeatures: 곡마다 한 번 원래 표본율 신호로 따로 잼,
+  //  Engine.drums: 격자 칸마다 킥·스네어·하이햇·심벌·탐) 합성 키트(Synth.drumHit, 샘플 파일 없음)로 다시 침. 키트는 함께 치는 악기를 따름(kitFor):
+  //  일렉 기타가 치면 'rock', 통기타·피아노와 함께면 'light', 드럼만 켜면 고른 기타 소리를 따름(일렉이면 rock).
+  //  소리 경로: 타격 버퍼 → 세기(vel^velExp × 키트 섞음 dB × 흔들림) → 좌우 자리(Synth.DRUM.pan) → drumBus → (건조음 + 방 잔향 Synth.drumRoomIR) → 버스 압축(comp) → makeup → drumGain(드럼 볼륨) → master.
+  //  끄면(기본) 드럼 소리 경로를 만들지 않고 목록도 예약하지 않음: 피아노·기타 목록·렌더링은 1.25.0과 같음(피아노·기타 목록은 드럼 설정을 읽지 않음).
+  //  on: 끄면 버튼을 눌러도 소리 없음. comp: 드럼 버스 압축(실제 밴드 믹스처럼, 사용자: "드럼에 컴프를 걸어"). 끄면 압축 전 1.26.0 경로 그대로(makeup0, 압축 노드 없음).
+  //   까닭: 드럼은 봉우리 대 크기(참 봉우리 − 통합 크기)가 rock 21.0·light 24.8·brush 21.7 dB(통기타 14.4·일렉 10.2)라 압축 없이는 크기를 짝 기타에 맞추면 봉우리가 +7~+12 dBTP이고
+  //   실시간 리미터(master)가 밴드 전체를 누름 → 압축 전에는 짝 기타보다 −4.5 LU로 타협(makeup0).
+  //   bus: 건조음 + 방 잔향 합을 함께 누름(방 소리까지 한 덩어리로 붙고 잔향 꼬리가 타격 뒤에 살짝 올라옴; 잔향 앞에서 누르면 봉우리는 같고 꼬리만 덜 눌림). 입력 = makeup0 × 10^(inDb/20)
+  //   (드럼만 약 −24 LUFS, 봉우리 0 dBFS 근처: 문턱이 보통 드럼 버스 값이 되게) → DynamicsCompressor(키트마다: rock −22 dB·4:1·무릎 6·어택 6 ms·릴리스 120 ms,
+  //   light −22·3:1·8·8 ms·120 ms, brush −24·2.5:1·10·10 ms·150 ms: 어택을 늦춰 스틱 소리는 남김) → 부드러운 깎기(WaveShaper tanh 무릎 6 dB, 천장 rock −12·light·brush −14 dBFS,
+  //   2배 오버샘플: 느린 어택이 남긴 수 ms 어택 봉우리만; 리미터 압축기보다 펌핑 없음) → makeup. 압축기 미리 보기 6 ms + 오버샘플 128표본을 bus.lat로 재고 playDrum이 그만큼 일찍 침(다른 악기와 같은 자리).
+  //   실시간·오프라인 같은 Chromium 압축기(자동 보정 이득은 표본율과 무관)라 렌더링 = 듣는 소리.
+  //  makeup: 키트마다 압축 뒤 보정 이득. 기본 볼륨(모두 0.6)에서 드럼만 = 짝 기타(rock ≈ 일렉, light·brush ≈ 통기타), 곡 중앙값으로 맞춤.
+  //   측정: 드럼 있는 합성곡 8곡(pop97·shuffle·pickup.wav, strum/ncset.js pop120·rap90(ncpalm)·ballad66, riffsongs.js gt_am120·gt_ballad72), 첫 스트로크부터 30초를 __chordityRender로
+  //   드럼만(키트 셋)·통기타·일렉·피아노+기타 렌더링(44.1 kHz), BS.1770-4 통합 크기·4배 참 봉우리, 리미터는 master와 같은 설정의 압축기를 오프라인에서(밴드 = 피아노+기타 + 드럼, 원곡 0).
+  //   결과(rock·light·brush): 드럼 − 짝 기타 중앙값 −0.0·+0.0·+0.0 LU(곡마다 −4.1~+4.1, 압축 전 −4.5), 봉우리 대 크기 21.0·24.8·21.7 → 10.8·10.7·10.3 dB,
+  //   드럼만 참 봉우리 중앙값 −2.6·−3.3·−3.7 dBTP(최대 −2.3), 밴드 중앙값 +2.9·+3.7·+3.7 dBTP(최대 +5.0, 압축 전 평균 +4.5·+6.5·+4.4),
+  //   실시간 리미터 밴드 크기 손실 평균 −0.45·−0.49·−0.50 LU(최악 −0.86, 3 dB 넘게 누르는 창 0.4~0.5%; 압축 전 −0.37·−0.50·−0.32), 압축 GR(10 ms 창, 소리 있는 창) 중앙값 0.1~0.2 dB·
+  //   95% 7.0·5.6·4.6 dB(깎기 포함 8.2·7.9·6.2), 대부분의 창은 거의 안 눌리고 큰 타격만 → 펌핑 적음.
+  //  bus.compLat·osLat: 압축기 미리 보기(초)·2배 오버샘플 지연(표본), clipRange: 깎기 곡선 입력 범위(±8 = +18 dBFS),
+  //  layers: 세기 층 경계(at)와 층마다 합성 세기(vel: 음색만, 크기는 재생 쪽),
+  //  rr: 같은 소리의 변형 수(바로 앞과 다른 것을 곡 씨앗 + 차례로 고름), cacheMB: 드럼 버퍼 크기 합 상한(48 kHz 기준),
+  //  jitDb·jitMs: 사람 손 흔들림(표준편차, 곡 씨앗 + 차례로 고정: 어디서 재생해도 같은 자리는 같은 소리), chokeTau: 닫는 하이햇(닫힘·페달)이 울리던 열린 하이햇을 막는 시정수,
+  //  openTau: 새 열린 하이햇이 앞 열린 하이햇을 막는 시정수(크래시·라이드는 막지 않음), tickMs: 재생 쪽(25 ms 차례)에서 없는 버퍼를 바로 만드는 시간 상한(넘으면 다음 차례에),
+  //  kind: 엔진 종류 → 합성 종류, warm: 미리 만들기 차례(심벌은 길어 뒤로)
+  const DRUM = { on: true, comp: true, makeup: { rock: 4.26, light: 5.0, brush: 4.74 }, makeup0: { rock: 7.45, light: 8.3, brush: 6.3 },
+    bus: { inDb: -10, compLat: 0.006, osLat: 128, clipRange: 8,
+      rock: { th: -22, knee: 6, ratio: 4, att: 0.006, rel: 0.12, clip: [-12, 6] }, light: { th: -22, knee: 8, ratio: 3, att: 0.008, rel: 0.12, clip: [-14, 6] }, brush: { th: -24, knee: 10, ratio: 2.5, att: 0.01, rel: 0.15, clip: [-14, 6] } },
+    layers: { at: [0.5, 0.8], vel: [0.35, 0.65, 0.92] }, rr: 4, cacheMB: 48, jitDb: 0.8, jitMs: 1.5, chokeTau: 0.012, openTau: 0.03, tickMs: 12,
+    kind: { hat: 'hhc', hatOpen: 'hho', hatPedal: 'hhp', tom: 'tomM' }, warm: ['kick', 'snare', 'hhc', 'hhp', 'side', 'hho', 'tomH', 'tomM', 'tomL', 'ride', 'bell', 'crash'] };
+  const drumCache = new Map();            // 드럼 버퍼: '종류|키트|세기 층|변형|표본율' → AudioBuffer(모노). 기준음과 무관해 clearSynthCache에서 비우지 않음(오프라인 렌더링 뒤에도 그대로)
+  let drumBytes = 0;
+  const drumCap = () => DRUM.cacheMB * 1048576 * Math.max(1, (ctx ? ctx.sampleRate : 48000) / 48000);
   const electricCache = new Map();        // 일렉 기타 버퍼: '음들|드라이브|테이크|종류' → AudioBuffer(모노)
   const elecCap = () => ELEC.cacheMB * 1048576 * Math.max(1, (ctx ? ctx.sampleRate : 48000) / 48000);   // 1.25.0 검토 뒤: cacheMB는 48 kHz 기준(96 kHz면 두 배)
   let electricBytes = 0;                  // 그 버퍼들의 크기 합(바이트): 열린 소리 2.5초가 팜뮤트 0.6초·데드 0.3초보다 4~8배 커서 개수가 아니라 크기로 제한(ELEC.cacheMB)
@@ -8785,6 +9968,73 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     try { if (old.out) { old.out.gain.setTargetAtTime(0, now + 0.03, 0.03); } } catch (e) { }
     setTimeout(() => { try { old.disconnect(); if (old.out) old.out.disconnect(); } catch (e) { } }, 400);
     guitarBus = buildGuitarChainT(guitarGain);
+  }
+  // 1.26.0 드럼 키트 경로: 타격들 → 버스 → (건조음 + 방 잔향 Synth.drumRoomIR(젖은 소리만, 두 채널 에너지 2) × 10^(wet/20)) → makeup → out. 키트는 버스에 적어 둠(bus.kit)
+  function buildDrumChain(out, kit) {
+    const bus = ctx.createGain(), mix = ctx.createGain(), R = Synth.DRUM && Synth.DRUM.kit && Synth.DRUM.kit[kit] && Synth.DRUM.kit[kit].room;
+    bus.connect(mix);
+    try {
+      const room = ctx.createConvolver(), wet = ctx.createGain();
+      room.normalize = false; room.buffer = irBuf('droom|' + kit, () => Synth.drumRoomIR(ctx.sampleRate, kit));
+      wet.gain.value = Math.pow(10, (R && R.wet != null ? R.wet : -12) / 20);
+      bus.connect(room); room.connect(wet); wet.connect(mix);
+    } catch (e) { /* 잔향 없이도 동작 */ }
+    const C = DRUM.comp && DRUM.bus[kit];
+    if (!C) { mix.gain.value = DRUM.makeup0[kit] || 1; mix.connect(out); bus.kit = kit; bus.out = mix; bus.lat = 0; return bus; }   // 압축 끔: 1.26.0 압축 전 경로 그대로
+    // 드럼 버스 압축(DRUM.comp): 건조음 + 방 잔향 합 → 입력 이득(makeup0 × 10^(inDb/20)) → 압축기(느린 어택: 스틱 소리는 남기고 몸통을 붙임) → 부드러운 깎기(WaveShaper 2배 오버샘플: 남은 어택 봉우리만) → makeup → out
+    mix.gain.value = (DRUM.makeup0[kit] || 1) * Math.pow(10, DRUM.bus.inDb / 20);
+    const cp = ctx.createDynamicsCompressor(), post = ctx.createGain();
+    cp.threshold.value = C.th; cp.knee.value = C.knee; cp.ratio.value = C.ratio; cp.attack.value = C.att; cp.release.value = C.rel;
+    mix.connect(cp);
+    let node = cp, lat = DRUM.bus.compLat;
+    if (C.clip) {
+      const pre = ctx.createGain(), ws = ctx.createWaveShaper();
+      pre.gain.value = 1 / DRUM.bus.clipRange; ws.curve = drumClipCurve(C.clip[0], C.clip[1]); ws.oversample = '2x';
+      cp.connect(pre); pre.connect(ws); node = ws; lat += DRUM.bus.osLat / ctx.sampleRate;
+    }
+    post.gain.value = (DRUM.makeup[kit] || 1) * (C.clip ? DRUM.bus.clipRange : 1); node.connect(post); post.connect(out);
+    bus.kit = kit; bus.out = post; bus.lat = lat;                 // lat: 압축기 미리 보기(6 ms) + 오버샘플 지연 → playDrum이 그만큼 일찍 쳐서 다른 악기와 맞춤
+    return bus;
+  }
+  // 부드러운 깎기 곡선(입력 ±clipRange): 천장 c dBFS보다 k dB 아래 T까지 y = x(그대로), 위는 T + (C − T)·tanh((|x| − T)/(C − T))(기울기 이어짐, C에 다가감)
+  const clipCurves = new Map();
+  function drumClipCurve(cDb, kDb) {
+    const key = cDb + '|' + kDb;
+    if (clipCurves.has(key)) return clipCurves.get(key);
+    const N = 32769, M = DRUM.bus.clipRange, C = Math.pow(10, cDb / 20), T = C * Math.pow(10, -kDb / 20), cu = new Float32Array(N);
+    for (let i = 0; i < N; i++) { const x = (i / (N - 1) * 2 - 1) * M, a = Math.abs(x); cu[i] = (a <= T ? a : T + (C - T) * Math.tanh((a - T) / (C - T))) * Math.sign(x) / M; }
+    clipCurves.set(key, cu);
+    return cu;
+  }
+  const drumsAble = () => DRUM.on && typeof Engine.drums === 'function' && typeof Synth.drumHit === 'function' && !(Engine._ && Engine._.P && Engine._.P.DR === false);   // 엔진 DR을 끄면 드럼 없음
+  const drumsOn = () => !!prefs.drums && drumsAble();
+  // 키트 고르기: 일렉 기타가 함께 치면 록, 통기타·피아노와 함께면 가벼운 키트, 드럼만이면 고른 기타 소리(일렉이면 록).
+  //  오프라인 렌더링은 prefs.piano를 바꾸지 않으므로 켠 악기를 인자로 받음
+  const kitFor = (pianoOn, guitarOn, electric) => electric && (guitarOn || !pianoOn) ? 'rock' : 'light';
+  const KIT_NAME = { rock: '록 키트', light: '가벼운 키트', brush: '브러시 키트' };
+  //  설정의 드럼 키트(prefs.drumKit): 'auto'(기본, 악기 따라)가 아니면 그 키트로 고정
+  const kitPick = () => prefs.drumKit && prefs.drumKit !== 'auto' && KIT_NAME[prefs.drumKit] ? prefs.drumKit : null;
+  const curKit = () => kitPick() || kitFor(prefs.piano, prefs.guitar, electricOn());
+  const drumWhy = () => kitPick() ? '설정에서 고름' : prefs.guitar ? (electricOn() ? '일렉 기타와 함께' : '통기타와 함께') : prefs.piano ? '피아노와 함께' : '드럼만: 기타 소리 ' + (electricOn() ? '일렉' : '통기타');
+  // 드럼 볼륨·키트 경로(처음 켤 때 한 번)
+  function ensureDrums() {
+    if (!ctx || drumGain) return;
+    drumGain = ctx.createGain(); drumGain.gain.value = prefs.drumsVol; drumGain.connect(master);
+    drumBus = buildDrumChain(drumGain, curKit());
+  }
+  // 함께 치는 악기가 바뀌어 키트가 달라지면 경로를 다시 만듦(syncGuitarChain처럼 앞 경로는 30 ms로 줄인 뒤 0.4초 뒤에 뗌, 울리던 드럼은 멈추고 다음 타격부터 새 키트)
+  function syncDrumKit() {
+    if (!ctx || !drumBus) return;
+    const kit = curKit();
+    if (drumBus.kit !== kit) {
+      cancelVoices('d');
+      const old = drumBus, now = ctx.currentTime;
+      try { if (old.out) old.out.gain.setTargetAtTime(0, now + 0.03, 0.03); } catch (e) { }
+      setTimeout(() => { try { old.disconnect(); if (old.out) old.out.disconnect(); } catch (e) { } }, 400);
+      drumBus = buildDrumChain(drumGain, kit);
+      if (drumsOn()) { player.resyncPiano('d'); if (player.playing) player.schedule(); }
+    }
+    if (drumsOn() && S.TL) renderInfo();                    // 분석 정보의 키트·까닭
   }
   // 코드 → 건반: 왼손 베이스 한 음(D2~C♯3) + 오른손 밀집 배치(이전 배치의 중심과 가장 가깝게)
   //  1.23.0(PIANO.lh): prevTop을 주면 맨 윗음이 앞 코드에서 2반음 넘게 뛸수록 벌점(0.15/반음) → 윗성부가 걸음으로 움직임
@@ -9670,7 +10920,115 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const vv = { src, g, when: t0, ins: 'p', end: t0 + buf.duration }; voices.push(vv);
     src.onended = () => { const k = voices.indexOf(vv); if (k >= 0) voices.splice(k, 1); try { out.disconnect(); g.disconnect(); } catch (e) { } };
   }
-  // 울리는 음 멈추기: ins 'p'(피아노)·'g'(통기타)만, 없으면 모두
+  // 1.26.0 드럼 특징(Engine.drumFeatures)은 곡마다 처음 한 번 따로 잼(원래 표본율 신호: 하이햇·심벌은 분석 22.05 kHz 위에도 있음). 드럼을 켰을 때만(또는 오프라인 렌더링이 드럼을 넣을 때),
+  //  엔진이 32 ms마다 양보하며 onProgress로 진행을 알림. 새 곡을 열면 앞 곡의 일은 다음 양보 때 멈춤(onProgress가 던짐). 다 재면 S.A.drumFeat에 두고 목록을 짬
+  let drumJob = null;                     // 돌고 있는 드럼 특징 일 { A(그 곡의 분석), p(약속), stop(멈춤), f(진행 0~1) }
+  const infoOpen = () => { const d = $('info') && $('info').closest('details'); return !d || d.open; };
+  function drumStart() {
+    if (drumJob) { if (drumJob.A === S.A && !drumJob.stop) return drumJob.p; drumJob.stop = true; return drumJob.p.then(() => drumStart()); }   // 앞 곡(또는 멈춘) 일은 멈추고 그 뒤에
+    if (!drumsAble() || !S.buffer || !S.A || S.A.drumDone || typeof Engine.drumFeatures !== 'function') return null;
+    const A = S.A, buf = S.buffer, chans = [], job = { A, p: null, stop: false, f: 0, t0: performance.now() };
+    for (let c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c));
+    let shown = 0;
+    const prog = f => {
+      if (job.stop) throw new Error('drum job stopped');   // 엔진의 양보 자리에서 멈춤
+      if (f != null) job.f = f;
+      const t = performance.now(); if (t - shown > 400 && S.A === A && S.TL && infoOpen()) { shown = t; renderInfo(); }   // 분석 정보의 '듣는 중…' 진행(열려 있을 때만)
+    };
+    const done = () => { if (drumJob === job) drumJob = null; };
+    job.p = Engine.drumFeatures({ channels: chans, sampleRate: buf.sampleRate }, A, prog).then(feat => {
+      done(); A.drumFeat = feat || null; A.drumDone = true; A.drumMs = performance.now() - job.t0;
+      if (S.A === A && S.TL) drumApply();
+    }, e => {
+      done(); if (job.stop) return;                         // 멈춘 일: 그 곡을 다시 열거나 켜면 처음부터
+      A.drumDone = true; A.drumFeat = null; console.error(e);
+      if (S.A === A && S.TL) drumApply();                   // 특징 없이: 엔진이 단순한 비트(info.why 'nofeat')
+    });
+    drumJob = job;
+    return job.p;
+  }
+  // 드럼 특징이 준비될 때까지(오프라인 렌더링·시험): 없으면 지금 시작
+  const drumReady = () => S.A && !S.A.drumDone ? (drumStart() || Promise.resolve()) : Promise.resolve();
+  function drumApply() { buildDrums(); if (drumsOn()) { player.resyncPiano('d'); if (player.playing) player.schedule(); } renderInfo(); }
+  // 드럼 목록(타임라인이 바뀔 때마다: rebuild, 코드 변화 단위도 rebuild로. buildStrikes 안에서는 짜지 않음: 피아노·기타를 켜고 끌 때 다시 채보하지 않게).
+  //  S.drums = [{t0, kind(엔진), k(합성 종류), vel, layer(세기 층), v(변형), db(세기 곡선 + 흔들림, 키트 섞음 dB는 칠 때), dt(시각 흔들림 초), bar, i, fill}] 시각 차례
+  function buildDrums() {
+    S.drums = []; S.drumT = new Float64Array(0); S.drumInfo = null; S.drumTL = null;
+    if (!drumsAble() || !S.A || !S.TL || S.TL.empty) return;
+    if (!S.A.drumDone && typeof Engine.drumFeatures !== 'function') S.A.drumDone = true;   // 특징 단계가 없는 엔진: 곡선만으로
+    if (!S.A.drumDone) { if (prefs.drums) drumStart(); return; }
+    let r = {};
+    try { r = Engine.drums(S.A, S.TL, { feat: S.A.drumFeat || null, res: S.TL.res }) || {}; } catch (e) { console.error(e); }   // 채보가 실패해도 차트·다른 악기는 그대로(드럼만 없음)
+    const SD = Synth.DRUM || {}, kinds = SD.kinds || [], vx = SD.velExp || 1.2;
+    const seed = songSeed(), last = {}, out = [];
+    const hits = (r.hits || []).filter(h => h && isFinite(h.t) && kinds.includes(DRUM.kind[h.kind] || h.kind)).sort((a, b) => a.t - b.t);
+    hits.forEach(h => {
+      const i = out.length, k = DRUM.kind[h.kind] || h.kind, vel = clamp(h.vel == null ? 0.7 : +h.vel, 0.05, 1), ms = seed + i * 53;
+      const layer = vel < DRUM.layers.at[0] ? 0 : vel < DRUM.layers.at[1] ? 1 : 2, p = last[k];
+      const v = p == null ? Math.floor(hashU(ms, 3) * DRUM.rr) % DRUM.rr : (p + 1 + Math.floor(hashU(ms, 3) * (DRUM.rr - 1))) % DRUM.rr;   // 바로 앞(같은 종류)과 다른 변형
+      last[k] = v;
+      const jd = clamp(gaussH(ms, 5), -2.5, 2.5) * DRUM.jitDb, dt = clamp(gaussH(ms, 7), -3, 3) * DRUM.jitMs / 1000;
+      out.push({ t0: h.t, kind: h.kind, k, vel, layer, v, db: 20 * vx * Math.log10(vel) + jd, dt, bar: h.bar, i, fill: !!h.fill });
+    });
+    S.drums = out; S.drumT = Float64Array.from(out, h => h.t0); S.drumInfo = r.info || null; S.drumTL = S.TL;
+  }
+  const drumMixDb = (kit, k) => { const m = Synth.DRUM && Synth.DRUM.mix && Synth.DRUM.mix[kit]; return m && m[k] != null ? m[k] : 0; };
+  const drumKey = (k, kit, layer, v) => k + '|' + kit + '|' + layer + '|' + v + '|' + ctx.sampleRate;
+  // 드럼 버퍼(모노): 없으면 합성(종류마다 2~65 ms, 심벌이 가장 김). 크기 합이 drumCap을 넘으면 오래 안 쓴 것부터 버림(LRU)
+  function drumBuf(k, kit, layer, v) {
+    const key = drumKey(k, kit, layer, v);
+    let b = drumCache.get(key);
+    if (b) { drumCache.delete(key); drumCache.set(key, b); return b; }
+    b = toBuffer(Synth.drumHit(k, ctx.sampleRate, DRUM.layers.vel[layer], v, kit));
+    drumCache.set(key, b); drumBytes += 4 * b.length;
+    while (drumBytes > drumCap() && drumCache.size > 1) { const k0 = drumCache.keys().next().value; drumBytes -= 4 * drumCache.get(k0).length; drumCache.delete(k0); }
+    return b;
+  }
+  // 지금 키트에서 곡에 나오는 소리(종류 × 세기 층 × 변형)를 미리 합성: 킥·스네어·하이햇 먼저, 길고 무거운 심벌은 뒤로. 버퍼 하나마다 화면에 차례를 넘김
+  let drumWarmTok = 0;
+  async function warmDrums() {
+    if (!ctx || !drumBus || !drumsOn() || !S.drums || !S.drums.length) return;
+    const tok = ++drumWarmTok, kit = drumBus.kit, use = new Map();
+    for (const h of S.drums) { const q = h.k + '|' + h.layer; use.set(q, (use.get(q) || 0) + 1); }
+    const rank = q => { const r = DRUM.warm.indexOf(q.split('|')[0]); return r < 0 ? 99 : r; };
+    const order = [...use.keys()].sort((a, b) => rank(a) - rank(b) || use.get(b) - use.get(a));
+    for (const q of order) {
+      const [k, ls] = q.split('|'), layer = +ls;
+      for (let v = 0; v < DRUM.rr; v++) {
+        if (drumCache.has(drumKey(k, kit, layer, v))) continue;
+        await new Promise(r => setTimeout(r, 0));
+        if (tok !== drumWarmTok || !drumBus || drumBus.kit !== kit || !drumsOn()) return;
+        if (drumBytes > 0.9 * drumCap()) return;
+        drumBuf(k, kit, layer, v);
+      }
+    }
+  }
+  // 드럼 타격 하나: h = S.drums의 항목, when = 오디오 시각(+ 고정 흔들림 h.dt). 하이햇 막기: 닫힘·페달 하이햇이나 새 열린 하이햇이 오면 울리던 열린 하이햇을 짧게 줄임
+  const dRing = { hh: null };             // 울리고 있는 열린 하이햇(목소리)
+  function playDrum(h, when, kit) {
+    if (!drumBus) return;
+    kit = kit || drumBus.kit;
+    const buf = drumBuf(h.k, kit, h.layer, h.v), at = Math.max(when + (h.dt || 0) - (drumBus.lat || 0), ctx.currentTime);   // 버스 압축 지연만큼 일찍
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const g = ctx.createGain(); g.gain.value = Math.pow(10, (h.db + drumMixDb(kit, h.k)) / 20); src.connect(g);
+    let out = g;
+    const pan = Synth.DRUM && Synth.DRUM.pan ? Synth.DRUM.pan[h.k] || 0 : 0;
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = pan; g.connect(pn); out = pn; }
+    out.connect(drumBus);
+    src.start(at);
+    const v = { src, g, when: at, ins: 'd', end: at + buf.duration };
+    if (h.k === 'hhc' || h.k === 'hhp' || h.k === 'hho') {
+      const o = dRing.hh;
+      if (o && o.when < at && o.end > at) {
+        const tau = h.k === 'hho' ? DRUM.openTau : DRUM.chokeTau;
+        try { o.g.gain.setTargetAtTime(0, at, tau); o.src.stop(at + 8 * tau); o.end = at + 8 * tau; } catch (e) { }
+      }
+      dRing.hh = h.k === 'hho' ? v : null;
+    }
+    voices.push(v);
+    src.onended = () => { const q = voices.indexOf(v); if (q >= 0) voices.splice(q, 1); if (dRing.hh === v) dRing.hh = null; try { out.disconnect(); g.disconnect(); } catch (e) { } };
+  }
+  // 울리는 음 멈추기: ins 'p'(피아노)·'g'(통기타)·'d'(드럼)만, 없으면 모두
   function cancelVoices(ins) {
     if (!ctx) return;
     const now = ctx.currentTime;
@@ -9687,6 +11045,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }
     for (let k = voices.length - 1; k >= 0; k--) if (!ins || voices[k].ins === ins) voices.splice(k, 1);
     if (!ins || ins === 'g') { for (let q = 0; q < 6; q++) ringing[q] = null; eRing[0] = eRing[1] = null; }
+    if (!ins || ins === 'd') dRing.hh = null;
   }
   // 곡에 필요한 음을 지금 위치부터 나오는 순서대로 미리 합성(재생 중 끊김 방지). 피아노 v2는 배음 단위로 나눠
   //  한 번에 약 10 ms씩만 만들고 화면에 차례를 넘김(50 ms 넘게 멈추는 작업이 없게). 통기타는 보통 세기 층만 미리
@@ -9767,9 +11126,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 1.25.0 guitarTone 'electric'이면 리프 특징을 먼저 잼(곡마다 한 번, riffReady)
     const toneR = opt.guitarTone === 'electric' || opt.guitarTone === 'acoustic' ? opt.guitarTone : prefs.guitarTone;
     if (toneR === 'electric' && ELEC.on && (opt.riff == null ? ELEC.riff : !!opt.riff)) await riffReady();
+    // 1.26.0 drums: 드럼 넣기(없으면 지금 설정), drumKit: 키트 강제('rock'·'light'·'brush', 없으면 설정의 키트, 그것도 자동이면 렌더링하는 악기 조합으로 kitFor). 드럼 특징은 먼저 잼(곡마다 한 번)
+    const useDrums = (opt.drums != null ? !!opt.drums : prefs.drums) && drumsAble();
+    if (useDrums) { await drumReady(); if (S.drumTL !== S.TL) buildDrums(); }
     const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, tone: prefs.guitarTone, eDrive: ELEC.drive, eRiff: ELEC.riff, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
       grand2: PIANO.grand2, human: PIANO.human.on, shape: PIANO.slowRoll.shape.on, lift: PIANO.liftGtrOnly, hall: PIANO.hall, wetH: PIANO.wetH, pedal: PIANO.pedal.on, pedalO: PIANO.pedal, soft: Synth.PIANO2.G6.soft, room3: PIANO.room3, wound: PIANO.wound,
-      real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar };
+      real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar, drumGain, drumBus };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
     const usePiano = opt.piano != null ? !!opt.piano : prefs.piano, useGuitar = opt.guitar != null ? !!opt.guitar : prefs.guitar;
@@ -9794,6 +11156,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       pianoBus = buildPianoChain(pianoGain); guitarBus = buildGuitarChainT(guitarGain);
       prefs.guitar = useGuitar;                    // 피아노 반주가 통기타 자리를 피할지(렌더링에 통기타를 넣는지에 따라)
       buildStrikes();
+      const kitR = KIT_NAME[opt.drumKit] ? opt.drumKit : kitPick() || kitFor(usePiano, useGuitar, electricOn());   // 1.26.0 드럼 키트
+      dRing.hh = null;
+      if (useDrums) { drumGain = oc.createGain(); drumGain.gain.value = prefs.drumsVol; drumGain.connect(oc.destination); drumBus = buildDrumChain(drumGain, kitR); }
       if (opt.music) { const m = oc.createBufferSource(), g = oc.createGain(); m.buffer = S.buffer; g.gain.value = opt.music; m.connect(g); g.connect(oc.destination); m.start(0, from); }
       // 시작 전 타건은 시작 시각에 울리는 마지막 하나만(통기타는 코드 끝까지 울려 여럿이 겹치므로)
       for (const [list, times] of [[usePiano ? S.strikes : [], S.strikeT], [useGuitar ? S.strums : [], S.strumT]]) {
@@ -9806,6 +11171,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         }
       }
       if (usePiano) for (const p of S.pedals || []) if (p.t >= from - 0.02 && p.t < from + dur) playPedal(p, Math.max(0, p.t - from));   // 1.23.3 페달 소리
+      if (useDrums) for (const h of S.drums || []) if (h.t0 >= from - 0.005 && h.t0 < from + dur) playDrum(h, Math.max(0, h.t0 - from), kitR);   // 1.26.0 드럼(시작 전 타격은 넣지 않음)
       const r = await oc.startRendering();
       return [r.getChannelData(0), r.getChannelData(1)];
     } finally {
@@ -9814,6 +11180,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll;
       PIANO.grand2 = saved.grand2; PIANO.human.on = saved.human; PIANO.slowRoll.shape.on = saved.shape; PIANO.liftGtrOnly = saved.lift; PIANO.hall = saved.hall; PIANO.wetH = saved.wetH; PIANO.pedal = saved.pedalO; PIANO.pedal.on = saved.pedal; Synth.PIANO2.G6.soft = saved.soft; PIANO.room3 = saved.room3; PIANO.wound = saved.wound; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       REAL.forEach((k, i) => { PIANO[k] = saved.real[i]; }); GUITAR.seedVar = saved.seedVar;
+      drumGain = saved.drumGain; drumBus = saved.drumBus; dRing.hh = null;
       voices.length = 0; pianoRing.clear();
       clearSynthCache(); buildStrikes();
     }
@@ -9826,6 +11193,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRiff = () => S.riff ? { on: S.riff.on, src: S.riff.src, sub: S.riff.sub, sections: S.riff.sections.map(s => ({ b0: s.b0, b1: s.b1, t0: s.t0, t1: s.t1, lag: s.lag, agree: s.agree, conf: s.conf, vox: s.vox, kind: s.kind, n: s.n, figure: s.figure })), cands: S.riff.cands.map(c => ({ t0: c.t0, t1: c.t1, why: c.why })), notes: S.riff.notes.map(n => ({ t: n.t, dur: n.dur, m: n.m, kind: n.kind, palm: n.palm, conf: n.conf, lead: !!n.lead })) } : null;
   window.__chordityGuitarTone = t => t != null ? setGuitarTone(t).then(() => prefs.guitarTone) : prefs.guitarTone;   // 톤을 바꾸면 스트로크까지 다 짠 뒤 풀리는 약속
   window.__chordityRiffReady = () => riffReady().then(() => window.__chordityRiff());
+  // 시험용(1.26.0): 드럼 {on, kit(쓰는 키트), want(지금 악기 조합의 키트), busy(특징 재는 중), done, ms(특징 잰 시간), cache(버퍼 수)·cacheMB,
+  //  hits [{t, kind(엔진), k(합성), db(키트 섞음 포함), vel, layer, v, dt(시각 흔들림 초), bar, fill}], info(엔진 요약)}
+  window.__chordityDrums = () => { const want = curKit(), kit = drumBus ? drumBus.kit : want; return { on: drumsOn(), kit, want, busy: !!drumJob, done: !!(S.A && S.A.drumDone), ms: S.A && S.A.drumMs != null ? S.A.drumMs : null, cache: drumCache.size, cacheMB: drumBytes / 1048576,
+    hits: (S.drums || []).map(h => ({ t: h.t0, kind: h.kind, k: h.k, db: h.db + drumMixDb(kit, h.k), vel: h.vel, layer: h.layer, v: h.v, dt: h.dt, bar: h.bar, fill: h.fill })), info: S.drumInfo || null }; };
+  window.__chordityDrumReady = () => drumReady().then(() => window.__chordityDrums());   // 드럼 특징·목록이 준비될 때까지
   S.gapLog = []; S.rollLog = [];
   window.__chordityRollOf = (t, L, n, room, left) => { const k = S.rollLog.length, r = pianoRollOf({ t0: t, L, notes: new Array(n || 4).fill(60), room: room == null ? Infinity : room }, left); S.rollLog.length = Math.min(S.rollLog.length, k); return r * ((n || 4) - 1); };   // (시험용) 그 자리·수준의 굴리는 시간(초), 기록은 그대로
   window.__chordityRolls = () => S.rollLog.splice(0);                                  // (시험용) 피아노가 굴려 친 화음 {t, n, roll(맨 아래 ~ 맨 위 초), L}(1.23.2)
@@ -9838,7 +11210,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 클릭은 setInterval 타이밍이 아니라 AudioContext 시계에 미리(200 ms 앞) 예약한다.
   // 음악 소스와 같은 시계를 쓰므로 클릭 = startCtx + (비트 시각 − 재생 시작 위치) 로 샘플 단위 정렬된다.
   const player = {
-    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, nextStrum: 0, nextPedal: 0, timer: 0, clicks: [], subFrom: -1,
+    src: null, playing: false, startCtx: 0, startOff: 0, pausedAt: 0, next: 0, nextStrike: 0, nextStrum: 0, nextPedal: 0, nextDrum: 0, timer: 0, clicks: [], subFrom: -1,
     dur() { return S.buffer ? S.buffer.duration : 0; },
     // 시작 예약(60 ms) 전에는 이동한 지점으로 고정: 그래야 → 키를 연달아(자동 반복) 눌러도 다음 마디로 계속 넘어감
     pos() { return this.playing ? this.startOff + Math.max(0, ctx.currentTime - this.startCtx) : this.pausedAt; },
@@ -9887,7 +11259,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     },
     // 지금 위치 다음부터 다시 예약(이동·보정·설정 변경 시). 클릭과 코드 연주는 따로 다시 맞출 수 있음
     resync() { this.resyncClicks(); this.resyncPiano(); },
-    // 코드 연주 다시 맞추기. ins 'p'(피아노)·'g'(통기타)만, 없으면 둘 다(옮기기·재생 시작)
+    // 코드 연주 다시 맞추기. ins 'p'(피아노)·'g'(통기타)·'d'(드럼)만, 없으면 모두(옮기기·재생 시작)
     // 1.25.0 검토 뒤: 기타가 바뀌어 피아노 목록(기타 자리를 피하는 싱어송라이터·개성)을 다시 짰을 때 울리는 소리는 두고 다음 칠 자리만 새 목록에서
     reindexPiano() {
       const t = this.playing ? Math.max(this.startOff, this.pos()) : this.pausedAt;
@@ -9899,6 +11271,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const doP = !ins || ins === 'p', doG = !ins || ins === 'g';
       if (doP) { this.nextStrike = lastLE(S.strikeT, t - 1e-4) + 1; this.nextPedal = lastLE(S.pedalT || [], t - 1e-4) + 1; this.restart = null; }
       if (doG) this.nextStrum = lastLE(S.strumT || [], t - 1e-4) + 1;
+      const doD = !ins || ins === 'd';                   // 1.26.0 드럼: 다음 타격부터(울리던 타격을 다시 치지 않음: 한 번 치고 끝나는 소리)
+      if (doD) { this.nextDrum = lastLE(S.drumT || [], t - 1e-4) + 1; if (drumsOn()) warmDrums(); }
       if ((prefs.piano || prefs.guitar) && S.strikes) warmPiano();      // 옮긴 자리부터 다시 미리 만들기
       if (!this.playing) return;
       // 통기타: 스트로크 사이에서 재생을 시작하면 지금 코드를 곧바로 한 번 다운 스트로크로(합성이 빨라 기다리지 않음).
@@ -10004,6 +11378,20 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         if (prefs.guitar && when >= now - 0.01 && s.t0 < this.dur()) strike(s, Math.max(when, now), this.startCtx + (s.t1 - this.startOff));
         this.nextStrum++;
       }
+      // 1.26.0 드럼(켰을 때만: 끄면 목록을 보지 않음, 켤 때 resyncPiano('d')가 지금 자리부터 차례를 맞춤). 없는 버퍼는 바로 만들되 한 차례에 tickMs까지(넘으면 다음 차례에)
+      if (drumsOn() && drumBus) {
+        const ds = S.drums || [], kit = drumBus.kit; let spent = 0;
+        while (this.nextDrum < ds.length) {
+          const h = ds[this.nextDrum];
+          if (h.t0 > horizon) break;
+          const when = this.startCtx + (h.t0 - this.startOff);
+          if (when >= now - 0.01 && h.t0 < this.dur()) {
+            if (!drumCache.has(drumKey(h.k, kit, h.layer, h.v))) { if (spent > DRUM.tickMs) break; const t1 = performance.now(); drumBuf(h.k, kit, h.layer, h.v); spent += performance.now() - t1; if (spent > DRUM.tickMs) break; }
+            playDrum(h, Math.max(when, now), kit);
+          }
+          this.nextDrum++;
+        }
+      }
     },
   };
 
@@ -10045,6 +11433,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (!AC) { showError('이 브라우저는 Web Audio API를 지원하지 않아 분석할 수 없습니다.'); return; }
     const token = ++loadToken;
     player.pause();
+    if (drumJob) drumJob.stop = true;                     // 1.26.0 앞 곡의 드럼 특징 재기는 멈춤(새 곡 분석과 다투지 않게)
     $('err').hidden = true;
     $('intro').hidden = true; $('app').hidden = true; $('busy').hidden = false;
     $('busyFile').textContent = file.name;
@@ -10053,6 +11442,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       $('busy').hidden = true;
       if (!S.buffer) { $('intro').hidden = false; return; }
       $('app').hidden = false;
+      if (drumsOn() && S.A && S.TL && !S.A.drumDone) drumStart();   // 1.26.0 새 곡을 열지 못했으면 멈춘 앞 곡의 드럼 특징을 다시
       // 숨겨진 사이 화면 모드(좁은 화면)나 폭이 바뀌었으면 다시 그림(숨겨진 동안에는 다시 그리지 않으므로)
       if (S.TL && (S.renderNarrow !== narrow.matches || Math.abs($('chart').clientWidth - S.width) > 30)) { renderChart(); S.cur.bar = -1; S.cur.beat = -1; }
     };
@@ -10104,6 +11494,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     buildFlat();
     buildUnits();
     buildStrikes();
+    buildDrums();                                         // 1.26.0 드럼 목록(타임라인마다, 끄면 특징이 없을 때 비워 둠)
     S.cur = { bar: -1, beat: -1, ev: -2, sec: -1, lab: null, unit: -1 };
     renderFacts(); renderChart(); drawOverview(); renderText(); renderInfo(); renderApplied();
     player.resync();
@@ -10122,7 +11513,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       };
       TL.bars.forEach((bar, bi) => bar.events.forEach(ev => {
         if (out.length && out[out.length - 1].label.text === ev.label.text) return;
-        out.push({ t0: tAt(bar.startBeat + ev.off), label: ev.label, bar: bi });
+        out.push({ t0: tAt(bar.startBeat + ev.off), x: bar.startBeat + ev.off, label: ev.label, bar: bi });   // x: 박 자리(1.26.0 남은 박 셈)
       }));
     }
     S.flat = out;
@@ -10986,10 +12377,37 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         if (palm.length) parts.push('팜뮤트 ' + palm.length + '번(' + names.slice(0, 4).join('·') + (names.length > 4 ? ' 외 ' + (names.length - 4) + '가지' : '') + ')');
         rows.push([(electricOn() ? '일렉 기타' : '통기타') + ' 뮤트', 'N.C.에서 ' + parts.join(', ')]);
       }
+      // 1.26.0 드럼(켰을 때): 쓰는 키트와 까닭, 원곡에서 들은 조각 수, 마디 꼴(많이 쓴 순)
+      if (drumsOn()) rows.push(['드럼', drumRow(topPats)]);
     }
     $('info').innerHTML = rows.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>').join('');
   }
 
+  // 1.26.0 분석 정보의 드럼 줄. 마디 꼴은 칸마다 글자 하나(K 킥, S 스네어·사이드 스틱, X 킥+스네어, T 탐, C 심벌(크래시·라이드), o 열린 하이햇, h 하이햇, · 쉼)
+  const drumSym = c => { let K = 0, Sn = 0, T = 0, C = 0, O = 0; for (const { x } of c) { const k = x.k; if (k === 'kick') K = 1; else if (k === 'snare' || k === 'side') Sn = 1; else if (k[0] === 't') T = 1; else if (k === 'crash' || k === 'ride' || k === 'bell') C = 1; else if (k === 'hho') O = 1; }
+    return K && Sn ? 'X' : K ? 'K' : Sn ? 'S' : T ? 'T' : C ? 'C' : O ? 'o' : 'h'; };
+  function drumRow(topPats) {
+    const kit = drumBus ? drumBus.kit : curKit(), head = KIT_NAME[kit] + '(' + drumWhy() + ')';
+    if (drumJob && drumJob.A === S.A) return head + ': 원곡 드럼 듣는 중… ' + Math.round(drumJob.f * 100) + '%';
+    if (!S.A.drumDone) return head + ': 원곡 드럼을 아직 듣지 않음';
+    const ds = S.drums || [], I = S.drumInfo || {};
+    if (!ds.length) return head + ': 칠 타격 없음';
+    const n = {}; for (const h of ds) n[h.k] = (n[h.k] || 0) + 1;
+    const c = k => n[k] || 0, hat = c('hhc') + c('hho') + c('hhp'), toms = c('tomH') + c('tomM') + c('tomL'), fills = ds.filter(h => h.fill).length, parts = [];
+    if (c('kick')) parts.push('킥 ' + c('kick'));
+    if (c('snare')) parts.push('스네어 ' + c('snare'));
+    if (c('side')) parts.push('사이드 스틱 ' + c('side'));
+    if (hat) parts.push('하이햇 ' + hat + (c('hho') || c('hhp') ? '(' + [c('hho') ? '열림 ' + c('hho') : '', c('hhp') ? '페달 ' + c('hhp') : ''].filter(Boolean).join('·') + ')' : ''));
+    if (c('ride') + c('bell')) parts.push('라이드 ' + (c('ride') + c('bell')));
+    if (c('crash')) parts.push('크래시 ' + c('crash'));
+    if (toms) parts.push('탐 ' + toms);
+    if (fills) parts.push('필인 타격 ' + fills);
+    const pl = barPatterns(ds.map(h => ({ t: h.t0, x: h })), drumSym);
+    // 단순한 비트(엔진 info.fallback)의 까닭: why 'song' = 원곡에 드럼이 없음, 'nofeat' = 원곡 드럼 특징이 없음(표본율이 DR_SRMIN 미만이거나 특징 일이 실패)
+    const fb = !I.fallback ? '' : I.why === 'song' ? ': 원곡에 드럼이 없어 단순한 비트' : I.why === 'nofeat' ? ': 원곡 드럼을 듣지 못해 단순한 비트' : ': 단순한 비트';
+    return head + fb + ' — ' + parts.join(', ')
+      + (pl.length ? ' — 마디 꼴 ' + topPats(pl, x => x) + ' (K 킥, S 스네어, X 킥+스네어, h 하이햇, o 열린 하이햇, C 심벌, T 탐)' : '');
+  }
   const PM_LONG = { song: '곡 따라', change: '코드가 바뀔 때', bar: '마디마다 다시', beat: '박마다', ssw: '싱어송라이터', flair: '개성 있게' };
   // 마디마다 친 자리 꼴(분석 정보의 통기타 스트럼·피아노 패턴): items [{t}]를 박 칸(4칸, 겹박자 3칸, ⅙박 단위 6칸)에 넣고 symOf(그 칸의 items) → 글자, 빈 칸 '·'.
   //  주 박자의 코드 마디만(못갖춘마디·N.C. 마디 빼고). 4칸 격자에서 16분 엇박 칸을 한 번도 안 쓰면 8분 격자로 줄임(박 사이 띄움 없음, 4·8·16비트와 같은 꼴),
@@ -11021,7 +12439,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const resOf = r => +r === 1 || +r === 4 ? +r : 2;   // 저장값 → 엔진 res(1박·작은박 2·더 작은박 4), 모르는 값은 기본(2)
   const OPN = { half: '½박 옮김', x2: '템포 ×2', d2: '템포 ÷2', d3: '템포 ÷3' };
   // 보정 패널의 설정 기본값(저장되는 설정). 음량·테마·켜기/끄기 버튼은 여기서 다루지 않음
-  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'auto', guitarMode: 'auto', guitarTone: 'acoustic', accent: true, autoscroll: true, offsetMs: 0 };
+  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'auto', guitarMode: 'auto', guitarTone: 'acoustic', drumKit: 'auto', accent: true, autoscroll: true, offsetMs: 0 };
   function settingParts() {
     const p = [];
     if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'standard') p.push('코드 표준');
@@ -11030,6 +12448,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (prefs.pianoMode === 'song') p.push('피아노 곡 따라'); else if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때'); else if (prefs.pianoMode === 'ssw') p.push('피아노 싱어송라이터'); else if (prefs.pianoMode === 'flair') p.push('피아노 개성 있게');
     if (prefs.guitarMode !== 'auto') p.push((electricOn() ? '일렉 기타 ' : '통기타 ') + gmName(guitarMode()));
     if (electricOn()) p.push('일렉 기타(밴드)');
+    if (kitPick()) p.push('드럼 ' + KIT_NAME[kitPick()]);
     if (!prefs.accent) p.push('첫 박 강조 끔');
     if (!prefs.autoscroll) p.push('자동 스크롤 끔');
     if (prefs.offsetMs) p.push('클릭 타이밍 ' + (prefs.offsetMs > 0 ? '+' : '') + prefs.offsetMs + ' ms');
@@ -11059,6 +12478,25 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     for (let k = 0; k < n; k++) { const i = document.createElement('i'); if (k === 0) i.className = 'down'; box.appendChild(i); }
   }
 
+  // 1.26.0 다음 코드까지 남은 박(사용자: "코드 '다음'이 몇 박 남았는지 ⓾⓽⓼⓻⓺⓹⓸⓷⓶⓵, 다크모드에서는 ❶ ❷ ❸ ❹ ❺ ❻ ❼ ❽ ❾ ❿(거꾸로) 이걸 '다음' 옆에 표기해"):
+  //  '다음' 글자 바로 뒤에 거꾸로 세는 원 숫자. 밝게는 이중 원(⓵~⓾), 어둡게는 검은 원(❶~❿)을 둘 다 넣고 CSS가 테마로 하나만 보임.
+  //  남은 박 = ⌈다음 코드가 시작하는 박 자리 − 지금 박⌉(½·¼박 코드는 소수 자리라 그 박 안이면 1). 첫 박 앞(도입)은 첫 박 간격으로 셈.
+  //  1~max박일 때만 보이고(더 멀면 비움), on false면 1.25.0과 같음(숫자 없음)
+  const NEXT_BEATS = { on: true, max: 10, lt: '⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾', dk: '❶❷❸❹❺❻❼❽❾❿' };
+  function showLeft(TL, t, i, ei) {
+    const nx = S.flat[ei + 1], B = TL.beats;
+    let left = 0;
+    if (nx && nx.x != null && B.length > 1) {
+      const ip = i >= 0 ? i : t < B[0] ? Math.floor((t - B[0]) / (B[1] - B[0])) : null;   // 곡 끝 뒤(i −1)는 다음 코드가 없음
+      if (ip != null) left = Math.ceil(nx.x - ip - 1e-6);
+    }
+    if (left === S.cur.left) return;
+    S.cur.left = left;
+    const el = $('cLeft'), on = left >= 1 && left <= NEXT_BEATS.max;
+    if (!el) return;
+    el.hidden = !on;
+    if (on) { el.children[0].textContent = NEXT_BEATS.lt[left - 1]; el.children[1].textContent = NEXT_BEATS.dk[left - 1]; el.setAttribute('aria-label', '다음 코드까지 ' + left + '박'); el.title = '다음 코드까지 ' + left + '박'; }
+  }
   // ---------------- 재생 위치 표시(매 프레임, 바뀐 것만 갱신) ----------------
   function frame() {
     requestAnimationFrame(frame);
@@ -11146,6 +12584,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (nx) { $('cNext').innerHTML = chordHTML(nx.label); $('nxtWrap').hidden = false; }
       else $('nxtWrap').hidden = true;
     }
+    if (NEXT_BEATS.on) showLeft(TL, t, i, ei);               // 1.26.0 다음 코드까지 남은 박(박이 바뀔 때만 글자를 바꿈)
   }
   // 코드 단위의 이름표들(첫 이름 = 새로 친 코드)
   function unitLabs(u) {
@@ -11289,6 +12728,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     $('pianoBtn').setAttribute('aria-pressed', String(prefs.piano));
     if (prefs.piano) { player.resyncPiano('p'); if (player.playing) player.schedule(); }
     else cancelVoices('p');
+    syncDrumKit();                                          // 1.26.0 드럼만·피아노와 함께에 따라 키트가 바뀔 수 있음
   }
   function toggleGuitar(v) {
     prefs.guitar = v === undefined ? !prefs.guitar : !!v;
@@ -11299,17 +12739,33 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 피아노 싱어송라이터·개성 있게는 통기타를 함께 칠 때 통기타 자리를 피하므로 다시 만듦
     if (S.TL && (pianoMode() === 'ssw' || pianoMode() === 'flair')) { buildStrikes(); renderInfo(); player.resyncPiano('p'); if (player.playing) player.schedule(); }
     if (S.TL) renderStrokeMarks();
+    syncDrumKit();                                          // 1.26.0 일렉 기타를 켜고 끄면 록·가벼운 키트
+  }
+  // 1.26.0 드럼: 켜면 키트 경로(처음이면 만듦)·목록(특징을 아직 안 쟀으면 재기 시작)·지금 자리부터 예약, 끄면 울리던 드럼을 멈춤
+  function toggleDrums(v) {
+    prefs.drums = v === undefined ? !prefs.drums : !!v;
+    savePrefs();
+    $('drumBtn').setAttribute('aria-pressed', String(prefs.drums));
+    if (drumsOn()) {
+      if (ctx) { ensureDrums(); syncDrumKit(); }
+      if (S.TL && S.drumTL !== S.TL) buildDrums();
+      player.resyncPiano('d'); if (player.playing) player.schedule();
+    } else { cancelVoices('d'); drumWarmTok++; }
+    if (S.TL) renderInfo();
   }
 
   function syncControls() {
     $('metro').setAttribute('aria-pressed', String(prefs.metro));
     $('pianoBtn').setAttribute('aria-pressed', String(prefs.piano));
     $('guitarBtn').setAttribute('aria-pressed', String(prefs.guitar));
+    $('drumBtn').setAttribute('aria-pressed', String(prefs.drums));
     $('selPianoMode').value = prefs.pianoMode;
     $('selGuitarMode').value = prefs.guitarMode === 'auto' ? 'auto' : guitarMode();
+    if ($('selDrumKit')) $('selDrumKit').value = kitPick() || 'auto';   // 1.26.0 드럼 키트
     syncToneUI();
     document.querySelectorAll('[data-vol="piano"]').forEach(o => { o.value = prefs.pianoVol; });
     document.querySelectorAll('[data-vol="guitar"]').forEach(o => { o.value = prefs.guitarVol; });
+    document.querySelectorAll('[data-vol="drums"]').forEach(o => { o.value = prefs.drumsVol; });
     document.querySelectorAll('[data-vol="music"]').forEach(o => { o.value = prefs.musicVol; });
     document.querySelectorAll('[data-vol="click"]').forEach(o => { o.value = prefs.clickVol; });
     $('rOffset').value = prefs.offsetMs; $('offTxt').textContent = (prefs.offsetMs > 0 ? '+' : '') + prefs.offsetMs + ' ms';
@@ -11339,6 +12795,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   $('metro').addEventListener('click', () => toggleMetro());
   $('pianoBtn').addEventListener('click', () => togglePiano());
   $('guitarBtn').addEventListener('click', () => toggleGuitar());
+  $('drumBtn').addEventListener('click', () => toggleDrums());
   $('selPianoMode').addEventListener('change', e => {
     prefs.pianoMode = e.target.value; savePrefs(); renderApplied();
     if (!S.TL) return;
@@ -11366,7 +12823,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const tok = ++toneTok;
     const go = () => {
       if (tok !== toneTok) return;
-      syncGuitarChain();
+      syncGuitarChain(); syncDrumKit();                       // 1.26.0 드럼 키트도 기타 소리를 따름
       if (!S.TL) return;
       if (player.playing) player.schedule(0.6);               // 메트로놈 클릭은 0.6초 앞까지 미리(아래 다시 짜기 동안 멈춰도 클릭이 빠지지 않게)
       buildStrikes(); player.resyncPiano('g'); player.reindexPiano();   // 미리 만들기는 resyncPiano가 다시 시작. 피아노 색인도(검토 뒤: 목록이 바뀌면 건너뛰거나 다시 침)
@@ -11379,6 +12836,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     return Promise.resolve(go());
   }
   if ($('selGuitarTone')) $('selGuitarTone').addEventListener('change', e => setGuitarTone(e.target.value));
+  // 1.26.0 드럼 키트 고르기: 자동(악기 따라)·록·가벼운·브러시. 바꾸면 경로를 새 키트로(울리던 드럼은 멈추고 다음 타격부터), 미리 만들기도 새 키트로
+  if ($('selDrumKit')) $('selDrumKit').addEventListener('change', e => {
+    prefs.drumKit = KIT_NAME[e.target.value] ? e.target.value : 'auto'; savePrefs();
+    syncDrumKit(); renderApplied();
+  });
   // 볼륨: 넓은 화면(트랜스포트 안)과 좁은 화면(아래 줄) 두 벌을 같은 값으로 묶음
   document.querySelectorAll('[data-vol]').forEach(inp => {
     inp.addEventListener('input', e => {
@@ -11386,6 +12848,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (kind === 'music') { prefs.musicVol = v; if (musicGain) musicGain.gain.value = v; }
       else if (kind === 'click') { prefs.clickVol = v; if (clickGain) clickGain.gain.value = v; }
       else if (kind === 'guitar') { prefs.guitarVol = v; if (guitarGain) guitarGain.gain.value = v; }
+      else if (kind === 'drums') { prefs.drumsVol = v; if (drumGain) drumGain.gain.value = v; }   // 1.26.0
       else { prefs.pianoVol = v; if (pianoGain) pianoGain.gain.value = v; }
       document.querySelectorAll('[data-vol="' + kind + '"]').forEach(o => { if (o !== e.target) o.value = v; });
     });
@@ -11449,7 +12912,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   });
   // 설정만 기본값으로(박 보정은 그대로): 컨트롤 표시를 맞추고 차트·클릭·코드 연주를 다시 구성
   $('resetPrefsBtn').addEventListener('click', () => {
-    Object.assign(prefs, PREF_DEFAULT); savePrefs(); syncToneUI(); syncGuitarChain();   // 1.25.0: 톤도 기본(통기타)으로 → 소리 경로도
+    Object.assign(prefs, PREF_DEFAULT); savePrefs(); syncToneUI(); syncGuitarChain(); syncDrumKit();   // 1.25.0: 톤도 기본(통기타)으로 → 소리 경로도(1.26.0 드럼 키트도)
     if (!S.set) { renderApplied(); return; }
     S.set.vocab = prefs.vocab; S.set.res = prefs.res; S.set.slash = prefs.slash;
     syncControls();
@@ -11497,6 +12960,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     else if (e.code === 'KeyM') { toggleMetro(); }
     else if (e.code === 'KeyP') { togglePiano(); }
     else if (e.code === 'KeyG') { toggleGuitar(); }
+    else if (e.code === 'KeyD') { toggleDrums(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); jumpBar(1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); jumpBar(-1); }
     else if (e.key === 'Home') { e.preventDefault(); player.seek(0); }
