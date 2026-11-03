@@ -416,7 +416,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.6">v1.26.6</span>
+    <span class="ver" title="Chordity 버전 1.26.7">v1.26.7</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -8861,6 +8861,22 @@ const Synth = (function () {
     cab: { len: 0.15, hp: [85, 0.7], bump: [120, 3, 1.2], dip: [700, -3, 1.0], pres: [2500, 2, 1.2], lp: [4800, 3], ripple: { n: 4, lo: 1500, hi: 4500, db: 2, q: 5, lr: 0.03 }, room: { rt60: 0.10, db: -20, pre: 0.003 }, seed: 5150, refHz: 300 },
     // 더블 트래킹: 두 테이크(같은 쌍의 2k, 2k+1)를 ∓cents/2 조율 차·offsetMs 어긋남(쌍이 홀수면 반대쪽이 앞섬)·±pan(등파워)으로. pairs: 쌍 수(스트로크마다 번갈아)
     double: { cents: 4, offsetMs: 10, pan: 0.8, pairs: 2 },
+    // wound(1.26.7 저음, 사용자: "저음 강화 용수철줄 고려"; 피아노 1.23.3 PIANO2.wound와 같은 생각): 일렉 세트의 6·5·4번 줄(E2·A2·D3 개방)은 강철 심선에 니켈 선을 용수철처럼 감은 줄,
+    //  3·2·1번 줄(G3·B3·E4)은 민 줄. 감은 줄은 같은 장력에서 질량이 커(심선이 가늘어 굽힘 강성은 작음) 비조화성이 민 줄보다 작고(카플러스-스트롱 루프는 처음부터 조화: 그대로 둠),
+    //  감은 선 사이 마찰이 높은 부분음을 더 빨리 먹으며, 무거운 줄이 낮은 부분음을 오래 울림 → 기본음·2~4번 배음이 두껍고 따뜻한 소리.
+    //  현(줄 번호 str < nStr, 열린 소리·팜뮤트만. 데드 뮤트 '칙'은 그대로):
+    //   ① 루프 저역 통과 기준점 s0 + ds(감은 선 마찰: 높은 부분음 감쇠 빠름), 기본음 T60 × t60K(무거운 줄: 낮은 음 서스테인 길게. 루프 이득이 |H(f0)|를 보정해 기본음 T60은 정확)
+    //   ② 들뜸 기울기: 현 출력(= 들뜸, 선형)을 1극 저역 통과(tiltK × f0 Hz)와 tiltW 비율로 섞음 → 기본음~4번 배음은 그대로, 그 위는 최대 20·log10(1 − tiltW) dB
+    //      (실제 피크 들뜸은 삼각형 변위라 배음이 1/n²·자기 픽업은 속도라 × n → 1/n로 줄지만, 잡음 들뜸은 2 kHz까지 평평해 감은 줄이 가늘게 들림)
+    //   ③ 감은 줄 '징'(피크가 감은 선 골을 긁는 소리): zLo~zHi Hz 띠 잡음, 크기 zAmp(팜뮤트는 × zPalm), zTau초 시정수, zDur초(어택만).
+    //      현 날 신호 2.5~6 kHz 첫 20 ms를 열린 소리 +0.7~1.0 dB·팜뮤트 +0.6~2.6 dB만 올림(들뜸 기울기 ②가 깎은 −3.5 dB보다 작게: 살짝 들리는 정도)
+    //  앰프·캐비닛(감은 줄 근음·5도의 무게가 앰프·스피커에서 깎이지 않게, 부밍·탁함 없이):
+    //   ④ 프리앰프 고역 통과 preHp[드라이브](클린 40·크런치 80·하이 100 → …): 낮을수록 근음이 클리퍼까지 감(하이게인은 너무 낮추면 '풀썩'·흐림)
+    //   ⑤ 캐비닛 2차 고역 통과 cabHp [Hz, Q], 닫힌 4×12 통 공진 cabBump [Hz, dB, Q](100~130 Hz), 탁함 막는 cabMud [Hz, dB, Q](250~350 Hz 살짝 깎음)
+    //  크기: ui.js ELEC.woundTrim(재생 이득 dB)로 일렉 기타만의 K 가중 크기를 끌 때와 같게. 끄면(false) 1.26.7 잔향 판과 샘플 단위로 같음(시험 electric.js 지문)
+    wound: false,
+    W: { nStr: 3, ds: 0.04, t60K: 1.4, tiltK: 3, tiltW: 0.35, zLo: 2500, zHi: 6000, zAmp: 0.45, zTau: 0.006, zDur: 0.04, zPalm: 0.5,
+      preHp: [35, 60, 70], toneLs: null, cabHp: [80, 0.7], cabBump: [115, 6.5, 1.4], cabMud: [300, -2.5, 1.0] },
   };
   // RBJ 쿡북 쌍2차 계수(정규화): 'lp' 저역 통과, 'hp' 고역 통과, 'pk' 피크, 'ls'·'hs' 셸프
   function biqCoef(sr, t, f0, g, Q) {
@@ -8909,9 +8925,17 @@ const Synth = (function () {
   const eStrOf = m => m <= 44 ? 0 : m <= 52 ? 1 : m <= 57 ? 2 : m <= 62 ? 3 : m <= 66 ? 4 : 5;   // 근음을 0~7프렛 가운데 가장 낮은 현에(E2~G♯2 6번 줄, A2~E3 5번 줄, …)
   const eT60 = m => ELECTRIC.t60Lo * Math.pow(ELECTRIC.t60Hi / ELECTRIC.t60Lo, clamp((m - 40) / 24, 0, 1));
   function electricString(m, sr, tune, take, n, str, mode) {
-    const E = ELECTRIC, variant = 1000 + 7 * take, f0 = f0Of(m, tune);
+    const E = ELECTRIC, variant = 1000 + 7 * take, f0 = f0Of(m, tune), W = E.wound && mode !== 'dead' && str < E.W.nStr ? E.W : null;   // W: 감은 줄(wound ①~③)
     let k;
-    if (mode === 'dead') k = ksString(m, sr, tune, variant, n, E.dead.t60, E.cut * E.dead.cutMul, E.dead.lpHz, { order: E.order, gCap: 0.95, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos });
+    if (W) {   // wound ①: 루프 기준점 s0 + ds, 기본음 T60 × t60K(팜뮤트는 손바닥이 감쇠를 정해 T60 그대로)
+      const o = { order: E.order, gCap: mode === 'palm' ? 0.95 : 0.9995, sK: E.sK, sMin: E.sMin, s0: E.s0 + W.ds, pickPos: E.pickPos };
+      if (mode === 'palm') { const P = E.palm, t60 = P.t60Lo * Math.pow(P.t60Hi / P.t60Lo, clamp((m - 40) / 24, 0, 1)); k = ksString(m, sr, tune, variant, n, t60, E.cut * P.cutMul, clamp(f0 * P.lpMul, P.lpMin, P.lpMax), o); }
+      else k = ksString(m, sr, tune, variant, n, eT60(m) * W.t60K, E.cut, 0, o);
+      // wound ②: 들뜸 기울기(낮은 배음 두껍게): y ← (1 − tiltW)·y + tiltW·저역 통과(tiltK·f0)
+      const a = Math.exp(-2 * Math.PI * Math.min(W.tiltK * k.f0, 0.45 * sr) / sr), yy = k.y; let q = 0;
+      for (let i = 0; i < n; i++) { q = a * q + (1 - a) * yy[i]; yy[i] = (1 - W.tiltW) * yy[i] + W.tiltW * q; }
+    }
+    else if (mode === 'dead') k = ksString(m, sr, tune, variant, n, E.dead.t60, E.cut * E.dead.cutMul, E.dead.lpHz, { order: E.order, gCap: 0.95, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos });
     else if (mode === 'palm') { const P = E.palm, t60 = P.t60Lo * Math.pow(P.t60Hi / P.t60Lo, clamp((m - 40) / 24, 0, 1)); k = ksString(m, sr, tune, variant, n, t60, E.cut * P.cutMul, clamp(f0 * P.lpMul, P.lpMin, P.lpMax), { order: E.order, gCap: 0.95, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos }); }
     else k = ksString(m, sr, tune, variant, n, eT60(m), E.cut, 0, { order: E.order, gCap: 0.9995, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos });
     // 루프 계수 s의 기준점: ksString은 0.5 − (m − 40)·sK → s0로 옮김(sK로 같은 기울기, 밝은 서스테인)
@@ -8923,6 +8947,11 @@ const Synth = (function () {
     } else {
       const nz = Math.min(n, Math.round(sr * E.nzDur)), c = Math.exp(-2 * Math.PI * E.nzLp / sr), amp = mode === 'palm' ? E.palm.nzAmp : E.nzAmp;
       let q = 0; for (let i = 0; i < nz; i++) { q = q * c + (r() * 2 - 1) * (1 - c); y[i] += q * amp * Math.exp(-i / (sr * E.nzTau)); }
+      if (W) {   // wound ③: 감은 줄 '징'(zLo~zHi Hz 띠 잡음, 피크 잡음 뒤 난수로: 끄면 난수 열 그대로)
+        const ch = Math.exp(-2 * Math.PI * W.zLo / sr), cl = Math.exp(-2 * Math.PI * W.zHi / sr), nzz = Math.min(n, Math.round(sr * W.zDur)), za = W.zAmp * (mode === 'palm' ? W.zPalm : 1);
+        let hp = 0, prev = 0, lp = 0;
+        for (let i = 0; i < nzz; i++) { const x = r() * 2 - 1; hp = ch * (hp + x - prev); prev = x; lp = lp * cl + hp * (1 - cl); y[i] += za * lp * Math.exp(-i / (sr * W.zTau)); }
+      }
       if (mode === 'palm') {   // 기본음 '둥'(guitarMute와 같은 방법: 첫 3주기의 기본음과 같은 위상으로 잠깐 키움)
         const P = E.palm, w = 2 * Math.PI * k.f0 / sr, Pn = Math.min(n, Math.round(3 * sr / k.f0));
         let re = 0, im = 0, hs = 0;
@@ -8948,7 +8977,7 @@ const Synth = (function () {
   // 재생용 한 테이크(ui.js electricNote): 음 목록의 한 모양. 짝 테이크는 −cents/2, 홀 테이크는 +cents/2(같은 스트로크의 두 줄이 늘 다른 테이크라 조율 차가 생김)
   const electricNote = (notes, sr, tune, drive, take, mode) => electricTakeV(electricVoicingN(notes), sr, (tune || 0) + (take & 1 ? 1 : -1) * ELECTRIC.double.cents / 200, drive, take | 0, mode);
   function electricTakeV(vs, sr, tune, drive, take, mode) {
-    const E = ELECTRIC, A = E.amp[clamp(drive | 0, 0, E.amp.length - 1)], len = mode === 'dead' ? E.deadLen : mode === 'palm' ? E.palmLen : E.len, n = Math.round(sr * len);
+    const E = ELECTRIC, di = clamp(drive | 0, 0, E.amp.length - 1), A = E.amp[di], len = mode === 'dead' ? E.deadLen : mode === 'palm' ? E.palmLen : E.len, n = Math.round(sr * len);
     const y = new Float32Array(n), sp = Math.round(sr * E.spreadMs / 1000);
     vs.forEach((v, i) => {
       const s = electricString(v.m, sr, tune, take * 8 + i, n, v.s, mode), g = E.strGain[Math.min(i, E.strGain.length - 1)], off = i * sp;
@@ -8957,12 +8986,12 @@ const Synth = (function () {
     biqRun(y, biqCoef(sr, 'lp', E.pickup.fr, 0, E.pickup.q));                           // 픽업 공진(+Q dB 봉우리, 위로 −12 dB/oct)
     // 입력 기준: 첫 50 ms RMS → 1(드라이브 gain이 곧 클리핑 깊이)
     { const n5 = Math.min(n, Math.round(sr * 0.05)); let e = 0; for (let i = 0; i < n5; i++) e += y[i] * y[i]; const g = E.inRms / (Math.sqrt(e / n5) + 1e-9); for (let i = 0; i < n; i++) y[i] *= g; }
-    hp1(y, sr, A.preHp);
+    hp1(y, sr, E.wound ? E.W.preHp[di] : A.preHp);                                       // wound ④: 프리앰프 고역 통과를 낮춤
     if (A.preMid) biqRun(y, biqCoef(sr, 'pk', A.preMid[0], A.preMid[1], A.preMid[2]));
     clipOS(y, A.gain, A.bias, E.os);
     hp1(y, sr, 15);                                                                       // 직류 막음(비대칭 클리핑의 치우침)
     if (A.post > 0) { const tp = ftanh(A.post); for (let i = 0; i < n; i++) y[i] = ftanh(A.post * y[i]) / tp; }   // 파워앰프 단(대칭)
-    if (A.tone) biqList(y, sr, A.tone);
+    if (A.tone) biqList(y, sr, E.wound && E.W.toneLs ? A.tone.map(t => t[0] === 'ls' ? E.W.toneLs : t) : A.tone);   // wound ④: 톤 스택 베이스 셸프를 낮은 자리로
     if (mode === 'open' && E.die > 0) { const i0 = n - Math.round(sr * E.die); for (let i = Math.max(0, i0); i < n; i++) y[i] *= Math.exp(-(i - i0) / (sr * E.dieTau)); }
     edges(y, sr, 0.5, mode === 'open' ? 60 : 30);
     // 정규화: 열린 코드는 첫 0.3초 RMS(guitarNote와 같은 기준), 팜뮤트·데드 뮤트는 첫 normMute초(어택만: 짧은 소리를 0.3초로 재면 어택이 열린 코드보다 훨씬 커짐) → 피크가 현을 치는 순간의 크기가 열린 코드와 같고 그 뒤가 짧은 만큼 작게
@@ -8986,10 +9015,12 @@ const Synth = (function () {
   }
   // 캐비닛 임펄스 응답(스테레오): 쌍2차 줄(고역 통과·저음 bump·중역 dip·프레즌스·저역 통과 단) + 좌우 다른 자리의 작은 공진 + 가까운 마이크 방 꼬리. 채널마다 refHz 크기 1
   function cabIR(sr) {
-    const C = ELECTRIC.cab, len = Math.round(sr * C.len), ir = [];
+    const C = ELECTRIC.cab, W = ELECTRIC.wound ? ELECTRIC.W : null, len = Math.round(sr * C.len), ir = [];   // W: wound ⑤(고역 통과·통 공진·탁함 깎기)
+    const hp = W ? W.cabHp : C.hp, bump = W ? W.cabBump : C.bump;
     for (let c = 0; c < 2; c++) {
       const r = lcg(C.seed + 977 * c), d = new Float32Array(len); d[0] = 1;
-      const list = [['hp', C.hp[0], 0, C.hp[1]], ['pk', C.bump[0], C.bump[1], C.bump[2]], ['pk', C.dip[0], C.dip[1], C.dip[2]], ['pk', C.pres[0], C.pres[1], C.pres[2]]];
+      const list = [['hp', hp[0], 0, hp[1]], ['pk', bump[0], bump[1], bump[2]], ['pk', C.dip[0], C.dip[1], C.dip[2]], ['pk', C.pres[0], C.pres[1], C.pres[2]]];
+      if (W && W.cabMud) list.push(['pk', W.cabMud[0], W.cabMud[1], W.cabMud[2]]);
       for (let k = 0; k < C.lp[1]; k++) list.push(['lp', C.lp[0], 0, 0.5 / Math.cos(Math.PI * (2 * k + 1) / (4 * C.lp[1]))]);   // 버터워스 2n차 = Q를 달리한 2차 n단
       const rp = C.ripple;
       for (let j = 0; j < rp.n; j++) { const f = rp.lo * Math.pow(rp.hi / rp.lo, (j + 0.3 + 0.4 * r()) / rp.n) * (1 + rp.lr * (c ? 1 : -1) * (0.5 + r())), g = rp.db * (r() < 0.5 ? -1 : 1) * (0.5 + 0.5 * r()); list.push(['pk', f, g, rp.q]); }
@@ -9503,7 +9534,7 @@ const Synth = (function () {
   }
 
   return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of,
-    ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB,
+    ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB, biqCoef, biqRun,
     DRUM, drumHit, drumRoomIR, drumBandRoomIR };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
@@ -9831,6 +9862,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   //  upVel: 업 스트로크 세기 비, chugLen·stabLen: 팜뮤트·스탭이 울리는 길이(초), dampTau: 새 스트로크가 앞 소리를 막는 시정수(피크·손바닥이 현을 다시 침),
   //  chugTau·holdTau: 끝에서 사라지는 시정수, drive: 드라이브 강제(null이면 엔진 수준대로: 0 클린·1 크런치·2 하이게인), riff: 리프 따라 치기
   const ELEC = { on: true, makeup: 2.94, cacheMB: 64, takes: 2, pan: 0.8, scatterMs: 12, upVel: 0.85, chugLen: 0.18, stabLen: 0.45, dampTau: 0.008, chugTau: 0.03, holdTau: 0.05, drive: null, riff: false, leadGain: Math.SQRT2 };   // riff: 리프 따라 치기(엔진 RIFF와 함께 기본 끔, 1.25.0 출시 전 사용자 결정)
+  // 1.26.7 감은 저음 줄(Synth.ELECTRIC.wound, 사용자: "저음 강화 용수철줄 고려"): 6·5·4번 줄(E2·A2·D3)을 감은 줄로(낮은 배음 두껍게·저음 서스테인·감은 선 '징'),
+  //  앰프 프리 고역 통과를 낮추고 캐비닛 통 공진(100~130 Hz)을 키움. 음·시각·세기 계산은 그대로. woundTrim: 켰을 때 재생 이득(dB) — pop97 일렉 기타만 20초 K 가중 크기를
+  //  끈 판(1.26.7 잔향 판)과 같게. 끄면 1.26.7 잔향 판과 같은 소리
+  ELEC.wound = true; ELEC.woundTrim = -1.89;
+  const syncElecWound = () => { if (Synth.ELECTRIC) Synth.ELECTRIC.wound = !!ELEC.wound; };
+  syncElecWound();
   //  leadGain: 앞 선율 음(엔진 RIFF_LEAD, 원곡 가운데 솔로·리드)은 한 테이크를 가운데에(솔로 기타처럼) — 좌우 ±pan 두 테이크(채널마다 거의 1 + 거의 0)와 같은 채널 크기가 되게 √2(가운데 패너는 채널마다 0.707)
   // 1.26.0 드럼(prefs.drums: 드럼 버튼·D 키, 기본 끔, 사용자: "이제 드럼을 만들자"): 엔진이 원곡 드럼을 채보하고(Engine.drumFeatures: 곡마다 한 번 원래 표본율 신호로 따로 잼,
   //  Engine.drums: 격자 칸마다 킥·스네어·하이햇·심벌·탐) 합성 키트(Synth.drumHit, 샘플 파일 없음)로 다시 침. 키트는 함께 치는 악기를 따름(kitFor):
@@ -10078,11 +10115,24 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     : buildChain(out, Synth.bodyIR(ctx.sampleRate), 0.16, Synth.GUITAR.tone2 ? GUITAR.makeup2 : GUITAR.makeup);
   // 1.25.0 일렉 기타 경로: 음들(두 줄을 ±ELEC.pan) → 버스 → 캐비닛 응답(Synth.cabIR, normalize 없음, 좌우 채널이 조금 다른 응답 = 캐비닛·마이크 차이, 방 꼬리 포함) → makeup → out.
   //  톤은 버스에 적어 둠(bus.tone): 톤을 바꾸면 syncGuitarChain이 경로를 다시 만듦
+  const ELEC_VERB = { on: true, wet: -6, trim: -2.9 };   // trim: pop97 일렉 20초 K 가중 크기를 잔향 없을 때(1.26.6)와 같게
   function buildElectricChain(out) {
     const bus = ctx.createGain(), mix = ctx.createGain();
     let src = bus;
-    try { const cab = ctx.createConvolver(); cab.normalize = false; cab.buffer = irBuf('cab', () => Synth.cabIR(ctx.sampleRate)); bus.connect(cab); src = cab; } catch (e) { src = bus; }
-    src.connect(mix); mix.gain.value = ELEC.makeup; mix.connect(out);
+    const wd = !!(Synth.ELECTRIC && Synth.ELECTRIC.wound), mk = ELEC.makeup * (wd ? Math.pow(10, ELEC.woundTrim / 20) : 1);   // 1.26.7 감은 줄: 캐비닛 응답이 달라 따로 기억, 크기 woundTrim
+    try { const cab = ctx.createConvolver(); cab.normalize = false; cab.buffer = irBuf(wd ? 'cab|wound' : 'cab', () => Synth.cabIR(ctx.sampleRate)); bus.connect(cab); src = cab; } catch (e) { src = bus; }
+    src.connect(mix); mix.gain.value = mk; mix.connect(out);
+    // 1.26.7 일렉 기타 잔향(사용자: "일렉기타도 잔향좀 많이"): 캐비닛 뒤 소리를 드럼과 같은 밴드부 합주실 잔향(Synth.drumBandRoomIR 'rock')으로 넉넉히 보냄(ELEC_VERB.wet dB).
+    //  잔향만큼 커지는 크기는 makeup을 ELEC_VERB.trim dB 낮춰 맞춤(건조음 + 젖은 소리 에너지 합 기준). on false면 1.26.6과 같음
+    if (ELEC_VERB.on && typeof Synth.drumBandRoomIR === 'function') {
+      try {
+        const room = ctx.createConvolver(), wet = ctx.createGain();
+        room.normalize = false; room.buffer = irBuf('dband|rock', () => Synth.drumBandRoomIR(ctx.sampleRate, 'rock'));
+        wet.gain.value = Math.pow(10, ELEC_VERB.wet / 20);
+        src.connect(room); room.connect(wet); wet.connect(mix);
+        mix.gain.value = mk * Math.pow(10, ELEC_VERB.trim / 20);
+      } catch (e) { /* 잔향 없이도 동작 */ }
+    }
     bus.tone = 'electric'; bus.out = mix;                  // out: 경로를 다시 만들 때 옛 경로를 떼어 냄(1.23.3 통기타와 같게)
     return bus;
   }
@@ -11273,6 +11323,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (useDrums) { await drumReady(); if (S.drumTL !== S.TL) buildDrums(); }
     const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, tone: prefs.guitarTone, eDrive: ELEC.drive, eRiff: ELEC.riff, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
       grand2: PIANO.grand2, human: PIANO.human.on, shape: PIANO.slowRoll.shape.on, lift: PIANO.liftGtrOnly, hall: PIANO.hall, wetH: PIANO.wetH, pedal: PIANO.pedal.on, pedalO: PIANO.pedal, soft: Synth.PIANO2.G6.soft, room3: PIANO.room3, wound: PIANO.wound,
+      eWound: ELEC.wound, eWoundTrim: ELEC.woundTrim, eW: Synth.ELECTRIC && Synth.ELECTRIC.W,
       real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar, drumGain, drumBus, dBand: DRUM.band };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
     pianoRing.clear();                            // 실시간 재생에서 울리던 피아노 음과 섞이지 않게
@@ -11292,6 +11343,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       for (const k of REAL) { const on = opt[k] != null ? opt[k] : opt.real; if (on != null || opt[k + 'P']) PIANO[k] = Object.assign({}, PIANO[k], opt[k + 'P'] || {}, on != null ? { on: !!on } : {}); }
       // 1.25.0 guitarTone: 'acoustic' 통기타·'electric' 밴드 일렉 기타, drive: 일렉 드라이브 강제(0 클린·1 크런치·2 하이게인, null이면 마디 수준대로), riff: 리프 따라 치기 켬/끔
       prefs.guitarTone = toneR; if (opt.drive !== undefined) ELEC.drive = opt.drive; if (opt.riff != null) ELEC.riff = !!opt.riff;
+      // 1.26.7 elWound: 감은 저음 줄 켬/끔(끄면 1.26.7 잔향 판, 비교 샘플용), elWoundP: Synth.ELECTRIC.W 값 덮어쓰기, elWoundTrim: woundTrim 덮어쓰기(크기 맞추기용)
+      if (opt.elWound != null) ELEC.wound = !!opt.elWound; if (opt.elWoundTrim != null) ELEC.woundTrim = +opt.elWoundTrim; if (opt.elWoundP && Synth.ELECTRIC) Synth.ELECTRIC.W = Object.assign({}, Synth.ELECTRIC.W, opt.elWoundP);
+      syncElecWound(); if (opt.elWoundP) irCache.clear();
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
@@ -11320,6 +11374,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     } finally {
       voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null; eRing[0] = eRing[1] = null;
       strumN = saved.strumN; muteN = saved.muteN; prefs.guitarTone = saved.tone; ELEC.drive = saved.eDrive; ELEC.riff = saved.eRiff;
+      ELEC.wound = saved.eWound; ELEC.woundTrim = saved.eWoundTrim; if (Synth.ELECTRIC && Synth.ELECTRIC.W !== saved.eW) { Synth.ELECTRIC.W = saved.eW; irCache.clear(); } syncElecWound();
       ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll;
       PIANO.grand2 = saved.grand2; PIANO.human.on = saved.human; PIANO.slowRoll.shape.on = saved.shape; PIANO.liftGtrOnly = saved.lift; PIANO.hall = saved.hall; PIANO.wetH = saved.wetH; PIANO.pedal = saved.pedalO; PIANO.pedal.on = saved.pedal; Synth.PIANO2.G6.soft = saved.soft; PIANO.room3 = saved.room3; PIANO.wound = saved.wound; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       REAL.forEach((k, i) => { PIANO[k] = saved.real[i]; }); GUITAR.seedVar = saved.seedVar;
@@ -11332,7 +11387,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
   window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0, fill: !!s.fill }));
   // 시험용(1.25.0): 일렉 기타 스트로크 [{t, t1, kind, notes, palm, drive, db, bar, k, L, antic, stop, build, mute, riff}]·마디 꼴(plan)·요약(info), 리프 구간·음, 톤 고르기
-  window.__chordityElectric = () => ({ on: electricOn(), strums: (S.strums || []).filter(s => s.eg).map(s => ({ t: s.t0, t1: s.t1, dir: s.dir, kind: s.eg.kind, notes: s.eg.notes.slice(), palm: !!s.eg.palm, drive: elDrive(s), mode: elMode(s), db: s.db, bar: s.eg.bar, k: s.eg.k, L: s.eg.L, antic: !!s.eg.antic, stop: !!s.eg.stop, build: !!s.eg.build, mute: s.mute || '', fill: !!s.fill })), plan: S.egPlan || null, info: S.strumEg || null });
+  window.__chordityElectric = () => ({ on: electricOn(), strums: (S.strums || []).filter(s => s.eg).map(s => ({ t: s.t0, t1: s.t1, dir: s.dir, kind: s.eg.kind, notes: s.eg.notes.slice(), palm: !!s.eg.palm, drive: elDrive(s), mode: elMode(s), db: s.db, bar: s.eg.bar, k: s.eg.k, L: s.eg.L, antic: !!s.eg.antic, stop: !!s.eg.stop, build: !!s.eg.build, mute: s.mute || '', fill: !!s.fill })), plan: S.egPlan || null, info: S.strumEg || null, wound: !!(Synth.ELECTRIC && Synth.ELECTRIC.wound) });
   window.__chordityRiff = () => S.riff ? { on: S.riff.on, src: S.riff.src, sub: S.riff.sub, sections: S.riff.sections.map(s => ({ b0: s.b0, b1: s.b1, t0: s.t0, t1: s.t1, lag: s.lag, agree: s.agree, conf: s.conf, vox: s.vox, kind: s.kind, n: s.n, figure: s.figure })), cands: S.riff.cands.map(c => ({ t0: c.t0, t1: c.t1, why: c.why })), notes: S.riff.notes.map(n => ({ t: n.t, dur: n.dur, m: n.m, kind: n.kind, palm: n.palm, conf: n.conf, lead: !!n.lead })) } : null;
   window.__chordityGuitarTone = t => t != null ? setGuitarTone(t).then(() => prefs.guitarTone) : prefs.guitarTone;   // 톤을 바꾸면 스트로크까지 다 짠 뒤 풀리는 약속
   window.__chordityRiffReady = () => riffReady().then(() => window.__chordityRiff());
