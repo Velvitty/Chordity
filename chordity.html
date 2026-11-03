@@ -58,6 +58,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ===== 상단 ===== */
 .top { max-width: 1100px; margin: 0 auto; padding: 14px 20px 6px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }   /* 아주 좁은 화면(약 300px 미만)에서는 테마 막대가 다음 줄로, 가로로 넘치지 않게 */
 .top > .tseg { margin-left: auto; }
+.top > .helpbtn { margin-left: auto; }   /* 도움말 단추가 있으면 단추와 테마 막대를 함께 오른쪽 끝으로 */
+.top > .helpbtn + .tseg { margin-left: 0; }
+/* 도움말(?) 단추: 테마 막대와 같은 높이·테두리의 동그란 단추 */
+.helpbtn { display: flex; align-items: center; justify-content: center; flex: none; box-sizing: border-box; width: 37px; height: 37px; border: 1.5px solid var(--ink); border-radius: 50%; color: var(--ink); text-decoration: none; line-height: 0; transition: background-color .2s ease; }
+.helpbtn:hover { background: var(--hover); }
+.helpbtn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.helpbtn svg { display: block; flex: none; width: 20px; height: 20px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
 .brand svg { width: 26px; height: 26px; }
 .brand .ver { margin-left: -4px; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 99px; font-size: 11.5px; font-weight: 700; line-height: 1.45; letter-spacing: 0; color: var(--pencil); font-variant-numeric: tabular-nums; }
@@ -418,6 +425,7 @@ body > main { flex: 1 0 auto; }
     <span>Chordity</span>
     <span class="ver" title="Chordity 버전 1.26.7">v1.26.7</span>
   </div>
+  <a class="helpbtn" href="information.html" target="_blank" rel="noopener" aria-label="도움말" title="도움말"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.8 8.6a4.3 4.3 0 0 1 8.4 1.2c0 2.9-4.2 3.4-4.2 6"/><path d="M12 20h.01"/></svg></a>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
     <button class="opt" type="button" role="radio" data-theme-opt="" aria-label="테마: 시스템 설정 따름" title="시스템 설정 따름"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>

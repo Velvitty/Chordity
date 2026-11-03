@@ -30,6 +30,7 @@
 }
 html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 88px); -webkit-text-size-adjust: 100%; }
 *, *::before, *::after { box-sizing: inherit; }
+details > * { box-sizing: border-box; }   /* <details> 안 내용은 브라우저의 숨은 칸을 거쳐 content-box를 물려받으므로 다시 잡음(목차의 찾기 칸이 왼쪽 칸 밖으로 넘치던 것) */
 body { margin: 0; background: var(--paper); color: var(--ink); font: 15.5px/1.75 var(--ui-font); }
 a { color: inherit; text-underline-offset: 3px; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
