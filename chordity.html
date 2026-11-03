@@ -287,11 +287,11 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 /* 1.26.2 드럼 줄 진행: 형광펜 같은 연보라 띠가 마디 처음부터 재생 위치까지 차오름(코드 상자의 주황 채움처럼). 기호는 그 위에 */
 .dm .dhl { position: absolute; left: -6px; top: -2px; bottom: -3px; width: 0; max-width: calc(100% + 12px); background: var(--dfocus); border-radius: 6px; }
 /* 1.26.2 가장 최근에 친 드럼 기호 확대: 코드 이름(.chord.zoom)과 같은 때·빠르기(0.1초에 커지고 0.7초에 줄어듦), 아래 가운데 축 */
-.dm b { transform-origin: 50% 95%; transition: transform .7s cubic-bezier(.35, 0, .25, 1), color .7s cubic-bezier(.35, 0, .25, 1); }
+.dm b { transform-origin: 50% 95%; transition: transform .35s cubic-bezier(.35, 0, .25, 1), color .2s ease-out; }   /* 1.26.4 드럼 기호 확대는 0.075초에 커지고 0.35초에 줄어듦 */
 /*  지금 친 기호는 크게(1.9배, 위에 그림), 다음 기호는 아주 조금(1.2배), 다다음은 더 조금(1.07배) */
-.dm b.zoom, .bar.cur .dm b.zoom { transform: translateX(-50%) scale(1.9); color: var(--dhit); transition: transform .1s cubic-bezier(.2, .8, .3, 1), color .1s cubic-bezier(.2, .8, .3, 1); z-index: 2; }   /* 1.26.3 지금 친 드럼은 빨강으로 0.1초 들어오고 0.7초에 빠짐(확대와 같은 때) */
-.dm b.z1 { transform: translateX(-50%) scale(1.2); transition: transform .1s cubic-bezier(.2, .8, .3, 1); z-index: 1; }
-.dm b.z2 { transform: translateX(-50%) scale(1.07); transition: transform .1s cubic-bezier(.2, .8, .3, 1); }
+.dm b.zoom, .bar.cur .dm b.zoom { transform: translateX(-50%) scale(1.9); color: var(--dhit); transition: transform .075s cubic-bezier(.2, .8, .3, 1), color .05s ease-out; z-index: 2; }   /* 1.26.3 지금 친 드럼은 빨강, 1.26.4 빨강은 0.05초에 들어오고 0.2초에 빠짐(확대는 0.1초·0.7초 그대로) */
+.dm b.z1 { transform: translateX(-50%) scale(1.2); transition: transform .075s cubic-bezier(.2, .8, .3, 1); z-index: 1; }
+.dm b.z2 { transform: translateX(-50%) scale(1.07); transition: transform .075s cubic-bezier(.2, .8, .3, 1); }
 #chart.still .dm b { transition: none !important; }
 /* 1.26.3 기타와 드럼을 함께 켜면 드럼 기호는 위쪽을 축으로 아래로 커지고(위의 기타 스트로크 기호를 가리지 않게), 기타 기호 줄은 드럼 줄 위에 그림 */
 #chart.gm.dm .bar .gm { z-index: 3; }
@@ -416,7 +416,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.3">v1.26.3</span>
+    <span class="ver" title="Chordity 버전 1.26.4">v1.26.4</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
