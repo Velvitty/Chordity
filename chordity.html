@@ -366,7 +366,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.24.0">v1.24.0</span>
+    <span class="ver" title="Chordity 버전 1.25.0">v1.25.0</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -540,8 +540,12 @@ body > main { flex: 1 0 auto; }
           </div>
         </div>
         <div class="grp">
-          <div class="lab">통기타 연주</div>
+          <div class="lab" id="gtrLab">통기타 연주</div>
           <div class="ctl">
+            <select id="selGuitarTone" aria-label="기타 소리">
+              <option value="acoustic">통기타</option>
+              <option value="electric">일렉 기타(밴드: 파워 코드)</option>
+            </select>
             <select id="selGuitarMode" aria-label="통기타가 치는 방식">
               <option value="auto">자동(곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름)</option>
               <option value="ssw">싱어송라이터(곡에 맞춘 반주)</option>
@@ -551,7 +555,7 @@ body > main { flex: 1 0 auto; }
               <option value="beat16">16비트 스트럼</option>
               <option value="swing">스윙 스트럼</option>
             </select>
-            <span class="note">자동(기본)은 곡을 연 뒤 원곡의 리듬을 보고, 원곡의 스트럼 꼴이 마디마다 되풀이되거나 박이 흔들리면 스트로크 따라, 꼴이 마디마다 바뀌면 싱어송라이터로 칩니다. 싱어송라이터는 통기타 반주자처럼 곡의 템포·느낌으로 8분·16분·셋잇단 손을 정하고, 곡에 맞는 스트럼 그루브(예: <span class="nw">↓ ↓↑ ↑↓↑</span>)를 골라 조용한 구간은 성기게, 큰 구간은 촘촘하게 치며, 되풀이되는 구간은 같게 칩니다. 스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다.</span>
+            <span class="note">자동(기본)은 곡을 연 뒤 원곡의 리듬을 보고, 원곡의 스트럼 꼴이 마디마다 되풀이되거나 박이 흔들리면 스트로크 따라, 꼴이 마디마다 바뀌면 싱어송라이터로 칩니다. 싱어송라이터는 통기타 반주자처럼 곡의 템포·느낌으로 8분·16분·셋잇단 손을 정하고, 곡에 맞는 스트럼 그루브(예: <span class="nw">↓ ↓↑ ↑↓↑</span>)를 골라 조용한 구간은 성기게, 큰 구간은 촘촘하게 치며, 되풀이되는 구간은 같게 칩니다. 스트로크 따라는 원곡에서 기타 등을 친 리듬을 찾아 그 자리에서 다운·업으로 칩니다. 4·8·16비트는 기타 교본에서 배우는 스트럼 변주(예: 8비트 <span class="nw">↓ ↓↑ ↑↓↑</span>) 가운데 마디마다 원곡 리듬에 가장 잘 맞는 것을 골라 곡의 박에 맞춰 칩니다. 스윙은 박마다 8분음표 둘을 길게·짧게(셋잇단 첫째·셋째, <span class="nw">↓·↑ ↓·↑</span>) 치고, 원곡이 스윙이면 그 비율을 재서 맞춥니다. 코드가 바뀌는 곳에서는 늘 새 코드로 칩니다. 일렉 기타(밴드)를 고르면 같은 방식으로 밴드 리듬 기타처럼 파워 코드(근음·5도·옥타브)를 디스토션 앰프 소리로 칩니다: 조용한 구간은 팜뮤트 8분 연타, 큰 구간은 열린 파워 코드, 커지기 전 마디는 몰아치기, 다음 코드를 반 박 앞당기기도 하고, 노래가 없는 도입·간주에서 원곡의 기타 리프가 되풀이되면 그 음을 채보해 따라 칩니다(믿을 만할 때만, 스테레오 곡).</span>
           </div>
         </div>
         <div class="grp">
@@ -2143,6 +2147,259 @@ const Engine = (function () {
     }
     return out;
   }
+  // 기타 리프(1.25.0, P.RIFF) 분석 단계: 곁 신호(또는 모노)의 피크 STFT(peakSTFT, 화성 분석과 같은 틀)에서 프레임마다 기타 음역 후보의 배음 합 두드러짐(P의 RIFF 설명).
+  //  돌려줌 { lo, nB(후보 수), hop(초), nF, sal(Uint8 nF×nB: 프레임 최대 대비 0~255), smax(프레임 최대 두드러짐), expl(최대 후보의 배음이 설명하는 피크 크기 몫), ms(걸린 시간) }
+  const RIFF_HL = [0, 12, 19.0196, 24, 27.8631, 31.0196, 33.6883, 36, 38.0391, 39.8631, 41.5132, 43.0196];   // 배음 h = 1..12의 반음 간격 12·log2(h)
+  async function riffFrames(x, tuning, tick, p0, p1) {
+    const t0 = nowMs();
+    const Pk = await peakSTFT(x, 2048, 256, 60, 4500, 40, tick, p0, p1);
+    const lo = P.RIFF_LO, hi = P.RIFF_HI, nB = hi - lo + 1, nF = Pk.nF, K = Pk.K, nh = Math.min(RIFF_HL.length, P.RIFF_NH), tol = P.RIFF_TOL, sub = P.RIFF_SUB, pw = P.RIFF_POW;
+    const w = new Float64Array(nh); for (let h = 0; h < nh; h++) w[h] = Math.pow(P.RIFF_DECAY, h);
+    const sal = new Uint8Array(nF * nB), smax = new Float32Array(nF), expl = new Float32Array(nF);
+    const bucket = new Float64Array(140), bucketM = new Float64Array(140), S = new Float64Array(nB);
+    for (let t = 0; t < nF; t++) {
+      if ((t & 255) === 255) await tick(p1);                // 재생 중에도 화면·예약이 멈추지 않게(32 ms마다 양보)
+      const c = Pk.cnt[t], b = t * K;
+      if (!c) continue;
+      bucket.fill(0);
+      // 프레임의 피크를 반올림한 MIDI 칸에(허용 ±tol 안, 칸마다 가장 큰 것; 크기는 pw승 압축)
+      for (let q = 0; q < c; q++) { const m = Pk.midi[b + q] - tuning, r = Math.round(m); if (r < 0 || r >= 140 || Math.abs(m - r) > tol) continue; const a = Math.pow(Pk.amp[b + q], pw); if (a > bucket[r]) { bucket[r] = a; bucketM[r] = m; } }
+      let tc = 0; for (let r = 0; r < 140; r++) tc += bucket[r];
+      let best = 0, bm = -1;
+      for (let m = lo; m <= hi; m++) {
+        let s = 0;
+        for (let h = 0; h < nh; h++) { const r = Math.round(m + RIFF_HL[h]); if (r >= 140) break; const a = bucket[r]; if (a > 0 && Math.abs(bucketM[r] - m - RIFF_HL[h]) <= tol) s += w[h] * a; }
+        if (s > 0 && sub > 0 && m >= 12) { const a0 = bucket[m - 12]; if (a0 > 0) s *= 1 - sub * Math.min(1, a0 / (bucket[m] + 1e-9)); }
+        S[m - lo] = s; if (s > best) { best = s; bm = m; }
+      }
+      if (bm < 0) continue;
+      smax[t] = best;
+      const tb = t * nB; for (let k = 0; k < nB; k++) sal[tb + k] = Math.round(255 * S[k] / best);
+      let e = 0; for (let h = 0; h < nh; h++) { const r = Math.round(bm + RIFF_HL[h]); if (r >= 140) break; const a = bucket[r]; if (a > 0 && Math.abs(bucketM[r] - bm - RIFF_HL[h]) <= tol) e += a; }
+      expl[t] = tc > 0 ? e / tc : 0;
+    }
+    return { lo, nB, hop: 256 / HAR_SR, nF, sal, smax, expl, ms: nowMs() - t0 };
+  }
+
+  // 노래 단서(1.25.0, P.RIFF_VOX): 리프는 노래가 없는 곳(도입·간주·끝)에서만 따라 침. 짧은 창(1024 = 93 ms, MEL_SUP과 같은 틀) 피크 STFT의
+  //  가운데 정위 피크(곁 신호에 같은 음(±0.4반음) 피크가 RIFF_VCEN배 이상이면 뺌: 좌우로 벌린 기타·심벌)에서 프레임마다 두드러진 음높이(MIDI RIFF_VLO~RIFF_VHI,
+  //  배음 8개 합 0.8^h, 음높이는 배음 피크의 가중 평균)와 두드러짐(배음 합 / 프레임 피크 합). 모노는 가운데 = 전체 신호.
+  //  돌려줌 { hop, nF, f0(Float32, −1 = 없음), dom(Uint8 0~255 = 0~1: 배음 합 / 가운데 피크 합), ms }. 노래 판정(줄기의 흔들림·미끄러짐)은 riff()에서
+  async function riffVoxFrames(x, s, tuning, tick, p0, p1) {
+    const t0 = nowMs(), pm = s ? (p0 + p1) / 2 : p1;
+    const T = await peakSTFT(x, 1024, 256, 140, 4200, 24, tick, p0, pm), Ts = s ? await peakSTFT(s, 1024, 256, 140, 4200, 24, tick, pm, p1) : null;
+    const nF = Ts ? Math.min(T.nF, Ts.nF) : T.nF, f0 = new Float32Array(nF).fill(-1), dom = new Uint8Array(nF);
+    const lo = P.RIFF_VLO, hi = P.RIFF_VHI, bucket = new Float64Array(140), bucketM = new Float64Array(140), w = [1, 0.8, 0.64, 0.512, 0.41, 0.328, 0.262, 0.21];
+    for (let t = 0; t < nF; t++) {
+      if ((t & 255) === 255) await tick(p1);
+      const c = T.cnt[t], b = t * T.K; let tot = 0;
+      bucket.fill(0);
+      for (let q = 0; q < c; q++) {
+        const m = T.midi[b + q] - tuning, a = T.amp[b + q];
+        if (Ts) { let sa = 0; const cS = Ts.cnt[t], bS = t * Ts.K; for (let r = 0; r < cS; r++) { const v = Ts.amp[bS + r]; if (v > sa && Math.abs(Ts.midi[bS + r] - tuning - m) < 0.4) sa = v; } if (sa >= P.RIFF_VCEN * a) continue; }
+        tot += a;                                         // 두드러짐은 가운데 피크 합 대비(좌우로 벌린 기타가 많아도 가운데 선율의 몫)
+        const r = Math.round(m); if (r < 0 || r >= 140) continue;
+        if (a > bucket[r]) { bucket[r] = a; bucketM[r] = m; }
+      }
+      if (!(tot > 0)) continue;
+      let best = 0, bm = -1;
+      for (let m = lo; m <= hi; m++) {
+        let sc = 0, pw = 0, pmv = 0;
+        for (let h = 0; h < 8; h++) { const r = Math.round(m + RIFF_HL[h]); if (r >= 140) break; const a = bucket[r]; if (a > 0) { sc += w[h] * a; pw += a * (h + 1); pmv += a * (h + 1) * (bucketM[r] - RIFF_HL[h]); } }
+        if (sc > best) { best = sc; bm = pmv / pw; }
+      }
+      if (bm >= 0) { f0[t] = bm; dom[t] = Math.min(255, Math.round(255 * best / tot)); }
+    }
+    return { hop: 256 / HAR_SR, nF, f0, dom, ms: nowMs() - t0 };
+  }
+
+  // 앞 선율 짧은 창 배음 에너지(LEAD_SW > 0, 음 나누기용): 프레임(홉 128) 가운데에 짧은 창(LEAD_SW점, 256 = 23 ms) FFT를 가운데·곁 신호에 같이 잡고,
+  //  칸마다 가운데 무게 g = (a² − s²)/(a² + s²)(0 미만 0)를 LEAD_GP승 해 곱한 에너지에서 그 프레임 f0(긴 창)의 배음 1~8(5 kHz까지, 칸 3개 합)과
+  //  배음 사이((h + ½)·f0, 칸 3개 합) 에너지를 dB로. 긴 창(93 ms)에 묻히는 같은 음 다시 치기(피킹: 짧게 끊겼다 오름)와 북·심벌(배음 사이도 함께 오름)을 가름
+  //  f0 = 대목 줄(긴 창) 음높이(음 줄 nf0으로 재도 결과는 거의 같음: 통합 측정 일치 0.763 vs 0.751)
+  //  돌려줌 { hs(Float32 dB, −120 = 없음), hn(Float32 dB) }
+  async function riffLeadShort(x, s, f0, nF, tuning, tick, p1) {
+    const Ns = P.LEAD_SW, Hs = Ns >> 1, fft = makeRealFFT(Ns), win = hannWin(Ns), binHz = HAR_SR / Ns, kTop = Math.min(Hs - 1, Math.ceil(5000 / binHz) + 1);
+    const mM = new Float64Array(Hs + 1), mS = new Float64Array(Hs + 1), cw = new Float64Array(Hs + 1), fr = new Float64Array(Ns), gp = P.LEAD_GP;
+    const hs = new Float32Array(nF).fill(-120), hn = new Float32Array(nF).fill(-120), nx = x.length;
+    const band = (kf) => { const k = Math.round(kf); return k < 1 || k >= kTop ? 0 : cw[k - 1] + cw[k] + cw[k + 1]; };
+    for (let t = 0; t < nF; t++) {
+      if ((t & 1023) === 1023) await tick(p1);
+      if (f0[t] < 0) continue;
+      const base = t * 128 - Hs;
+      const inside = base >= 0 && base + Ns <= nx;
+      if (inside) fft.win(x, base, win, mM, kTop + 1); else { for (let n = 0; n < Ns; n++) { const i = base + n; fr[n] = i >= 0 && i < nx ? x[i] * win[n] : 0; } fft(fr, mM, kTop + 1); }
+      if (s) { if (inside) fft.win(s, base, win, mS, kTop + 1); else { for (let n = 0; n < Ns; n++) { const i = base + n; fr[n] = i >= 0 && i < nx ? s[i] * win[n] : 0; } fft(fr, mS, kTop + 1); } }
+      for (let k = 0; k <= kTop; k++) { const a2 = mM[k] * mM[k], b2 = s ? mS[k] * mS[k] : 0, g = a2 > b2 ? (a2 - b2) / (a2 + b2) : 0; cw[k] = a2 * (gp === 1 ? g : Math.pow(g, gp)); }
+      const F = 440 * Math.pow(2, (f0[t] + tuning - 69) / 12) / binHz;
+      let eh = 0, en = 0;
+      for (let h = 1; h <= 8; h++) { if (h * F >= kTop - 1) break; eh += band(h * F); en += band((h + 0.5) * F); }
+      hs[t] = 10 * Math.log10(eh + 1e-12); hn[t] = 10 * Math.log10(en + 1e-12);
+    }
+    return { hs, hn };
+  }
+
+  // 앞 선율(1.25.0 검증 뒤, P.RIFF_LEAD. 사용자: "앞에 튀어나와있는 부분 자체가 리프야 모노로 되어있는 부분"): 가운데(모노)에 두드러진 한 줄 선율의 프레임 특징.
+  //  짧은 창(1024 = 93 ms, 홉 128 = 11.6 ms) 피크 STFT를 가운데 신호와 곁 신호에 같은 틀로 잡고, 가운데 피크마다 같은 음(±RIFF_TOL반음)의 곁 피크 크기 sa로
+  //  가운데 무게 g = (a² − sa²)/(a² + sa²)(0 미만은 0: 좌우로 벌린 더블 트래킹 기타·심벌은 a ≈ sa라 0 근처, 가운데 정위는 1)를 LEAD_GP승 해 곱함.
+  //  배음 합 두드러짐(배음 RIFF_NH개, RIFF_DECAY^h, 피크 크기 RIFF_POW승, 옥타브 아래 피크 깎기)을 MIDI LEAD_BLO~LEAD_HI에서 재고, 가장 큰 것이 LEAD_LO 아래(베이스)면
+  //  그 배음 10개 자리를 지우고 LEAD_LO~LEAD_HI에서 다시 고름. 음높이는 배음 피크 자리의 가중 평균(riffVoxFrames와 같은 식).
+  //  돌려줌 { hop, nF, f0(Float32, −1 = 없음), expl(Uint8: 배음 합 / 가운데 피크 합 × 255), cen(Uint8: 그 배음 피크의 가운데 무게 평균 × 255),
+  //   tilt(Int8 dB: 4~8배음 가운데 가장 큰 것 − 1·2배음 가운데 큰 것 = 배음이 높이까지 센지: 디스토션 기타·톱니파 신스는 0 근처, 노래·건반은 −10 dB 아래), lv(Float32 dB: 배음 합), ms }
+  //  음 줄(LEAD_NLO > 0): 위 특징(대목 문: 덮임·미끄러짐·밝기·가운데 무게)은 그대로 두고, 음 높이만 같은 칸에서 따로 고른 줄을 더 냄 → nf0·nex·nlv(f0·expl·lv와 같은 꼴, riffLeadGen의 음은 이것으로)
+  //   ① 첫 고르기 음이 LEAD_NLO 아래면 베이스로 보고 배음 LEAD_NBNH개만 지운 뒤 LEAD_NLO~LEAD_HI에서 다시 고름
+  //   ② 옥타브 위로 옮기기(LEAD_ODD)는 3·5배음 합도 2·4배음 합의 LEAD_NODD배 미만일 때만
+  async function riffLeadFrames(x, s, tuning, tick, p0, p1) {
+    const t0 = nowMs(), pm = s ? (p0 + p1) / 2 : p1;
+    const T = await peakSTFT(x, 1024, 128, 90, 5000, 32, tick, p0, pm), Ts = s ? await peakSTFT(s, 1024, 128, 90, 5000, 32, tick, pm, p1) : null;
+    const nF = Ts ? Math.min(T.nF, Ts.nF) : T.nF, f0 = new Float32Array(nF).fill(-1), expl = new Uint8Array(nF), cen = new Uint8Array(nF), tilt = new Int8Array(nF), lv = new Float32Array(nF).fill(-120);
+    const lo = P.LEAD_LO, hi = P.LEAD_HI, blo = Math.min(P.LEAD_BLO, lo), nh = Math.min(RIFF_HL.length, P.RIFF_NH), tol = P.RIFF_TOL, pw = P.RIFF_POW, gpow = P.LEAD_GP;
+    const w = new Float64Array(nh); for (let h = 0; h < nh; h++) w[h] = Math.pow(P.RIFF_DECAY, h);
+    const bucket = new Float64Array(140), bucketM = new Float64Array(140), raw = new Float64Array(140), bucketG = new Float64Array(140);
+    const HL10 = Array.from({ length: 10 }, (_, h) => 12 * Math.log2(h + 1));
+    const NP = P.LEAD_NLO > 0, nlo = Math.max(lo, P.LEAD_NLO), nbnh = Math.max(0, Math.min(10, P.LEAD_NBNH | 0));
+    const bucket0 = NP ? new Float64Array(140) : null, nf0 = NP ? new Float32Array(nF).fill(-1) : null, nex = NP ? new Uint8Array(nF) : null, nlv = NP ? new Float32Array(nF).fill(-120) : null;
+    const salAt = (a, b) => {
+      let best = 0, bm = -1;
+      for (let m = a; m <= b; m++) {
+        let v = 0;
+        for (let h = 0; h < nh; h++) { const r = Math.round(m + RIFF_HL[h]); if (r >= 140) break; const q = bucket[r]; if (q > 0 && Math.abs(bucketM[r] - m - RIFF_HL[h]) <= tol) v += w[h] * q; }
+        if (v > 0 && m >= 12) { const a0 = bucket[m - 12]; if (a0 > 0) v *= 1 - 0.5 * Math.min(1, a0 / (bucket[m] + 1e-9)); }
+        if (v > best) { best = v; bm = m; }
+      }
+      return [best, bm];
+    };
+    const at = (bm, d) => { const r = Math.round(bm + d); return r < 140 && bucket[r] > 0 && Math.abs(bucketM[r] - bm - d) <= tol ? bucket[r] : 0; };
+    // 옥타브 아래 읽힘(LEAD_ODD): 고른 음의 홀수 배음(1·3배음) 합이 짝수 배음(2·4배음) 합의 LEAD_ODD배 미만이면 한 옥타브 위가 참 음(아래 칸에 다른 소리가 조금 있어 이긴 것).
+    //  k35 > 0(음 줄: LEAD_NODD)이면 3·5배음 합도 짝수 배음 합의 k35배 미만일 때만 — 근음이 묻힌(가운데 무게·다른 소리) 앞 선율은 3·5배음이 살아 있어 옥타브 위로 잘못 옮겨지던 것
+    const oddUp = (bm, k35) => {
+      if (!(P.LEAD_ODD > 0 && bm + 12 <= hi)) return bm;
+      const e = at(bm, 12) + at(bm, 24);
+      return at(bm, 0) + at(bm, 19.0196) < P.LEAD_ODD * e && !(k35 > 0 && at(bm, 19.0196) + at(bm, 27.8631) >= k35 * e) ? bm + 12 : bm;
+    };
+    // 베이스 지우기: 음 bm의 배음 n개 자리를 지움
+    const unbass = (bm, n) => { for (let h = 0; h < n; h++) { const r = Math.round(bm + HL10[h]); if (r < 140 && bucket[r] > 0 && Math.abs(bucketM[r] - bm - HL10[h]) <= tol) bucket[r] = 0; } };
+    // 음 bm(정수 MIDI)의 특징 → oF(음높이: 배음 피크 자리의 가중 평균), oE(두드러짐 × 255), oC(가운데 무게 × 255), oT(밝기 dB)
+    let oF = 0, oE = 0, oC = 0, oT = 0;
+    const featOf = (bm, tot) => {
+      let pwt = 0, pmv = 0, e = 0, gs = 0, ga = 0;
+      for (let h = 0; h < nh; h++) {
+        const r = Math.round(bm + RIFF_HL[h]); if (r >= 140) break; const q = bucket[r];
+        if (q > 0 && Math.abs(bucketM[r] - bm - RIFF_HL[h]) <= tol) { pwt += q * (h + 1); pmv += q * (h + 1) * (bucketM[r] - RIFF_HL[h]); e += q; gs += raw[r]; ga += bucketG[r] > 0 ? raw[r] / bucketG[r] : 0; }
+      }
+      const hd = h => { const r = Math.round(bm + HL10[h]); return r < 140 && bucket[r] > 0 && Math.abs(bucketM[r] - bm - HL10[h]) <= tol ? 20 * Math.log10(raw[r] + 1e-12) : -120; };
+      let up = -120; for (let h = 3; h < 8; h++) up = Math.max(up, hd(h));
+      // 높은 음역 밝기(LEAD_TILTF Hz, 0 = 끔): 4~8배음 가운데 피크 STFT 위 끝(5 kHz) 근처 LEAD_TILTF Hz 아래에 든 것이 둘 미만이면 3배음까지 보고,
+      //  3배음도 그 위면 밝기를 잴 수 없으니 0(통과). 높은 리드(C#6 위)의 윗배음이 잰 대역 밖이라 밝기가 −100으로 잡혀 대목에서 빠지던 것
+      if (P.LEAD_TILTF > 0) {
+        const mF = 12 * Math.log2(P.LEAD_TILTF / 440) + 69 - tuning;
+        let inb = 0; for (let h = 3; h < 8; h++) if (bm + HL10[h] <= mF) inb++;
+        if (bm + HL10[2] > mF) up = 1e9; else if (inb < 2) up = Math.max(up, hd(2));
+      }
+      oF = pwt > 0 ? pmv / pwt : bm; oE = Math.min(255, Math.round(255 * e / tot)); oC = ga > 0 ? Math.min(255, Math.round(255 * gs / ga)) : 0;
+      oT = up > 1e8 ? 0 : clamp(Math.round(up - Math.max(hd(0), hd(1))), -100, 100);
+    };
+    for (let t = 0; t < nF; t++) {
+      if ((t & 511) === 511) await tick(p1);
+      const c = T.cnt[t], b = t * T.K; let tot = 0;
+      bucket.fill(0);
+      for (let q = 0; q < c; q++) {
+        const m = T.midi[b + q] - tuning, a = T.amp[b + q];
+        let g = 1;
+        if (Ts) { let sa = 0; const cS = Ts.cnt[t], bS = t * Ts.K; for (let r = 0; r < cS; r++) { const v = Ts.amp[bS + r]; if (v > sa && Math.abs(Ts.midi[bS + r] - tuning - m) < tol) sa = v; } g = Math.max(0, (a * a - sa * sa) / (a * a + sa * sa + 1e-30)); }
+        const gp = gpow === 1 ? g : Math.pow(g, gpow), ac = Math.pow(a * gp, pw);
+        tot += ac;
+        const r = Math.round(m); if (r < 0 || r >= 140 || Math.abs(m - r) > tol) continue;
+        if (ac > bucket[r]) { bucket[r] = ac; bucketM[r] = m; raw[r] = a * gp; bucketG[r] = gp; }
+      }
+      if (!(tot > 0)) continue;
+      let [best, bm] = salAt(blo, hi);
+      const fb = best, fm = bm;
+      if (bm >= 0 && bm < lo) {                         // 베이스: 그 배음 자리를 지우고 선율 음역에서 다시
+        if (NP) bucket0.set(bucket);
+        unbass(bm, 10);
+        [best, bm] = salAt(lo, hi);
+      }
+      if (bm >= 0) {
+        featOf(oddUp(bm, 0), tot);
+        f0[t] = oF; expl[t] = oE; cen[t] = oC; tilt[t] = oT; lv[t] = 20 * Math.log10(best + 1e-12);
+      }
+      if (!NP) continue;
+      // 음 줄 ①: 첫 고르기 음이 LEAD_NLO 아래면 베이스 — 가운데 베이스가 A2~B2(45~47)를 치거나 근음이 피크 STFT 바닥(90 Hz) 아래라 2배음이 근음으로 읽히면 LEAD_LO(45) 위라도
+      //  베이스가 앞 선율이 되던 것(LEVEL5 3:40~4:20). 지우는 배음은 LEAD_NBNH개(베이스의 센 1~3배음): 10개를 지우면 베이스 높은 배음 자리(예: A2의 8배음 = A5)에 겹친 앞 선율의 근음까지 지워 옥타브 위로 읽힘
+      let nb = fb, nm = fm;
+      if (fm >= 0 && fm < nlo) {
+        if (fm < lo) bucket.set(bucket0);
+        unbass(fm, nbnh);
+        [nb, nm] = salAt(nlo, hi);
+      }
+      if (nm < 0) continue;
+      featOf(oddUp(nm, P.LEAD_NODD), tot);                // 음 줄 ②
+      nf0[t] = oF; nex[t] = oE; nlv[t] = 20 * Math.log10(nb + 1e-12);
+    }
+    const out = { hop: 128 / HAR_SR, nF, f0, expl, cen, tilt, lv };
+    if (NP) { out.nf0 = nf0; out.nex = nex; out.nlv = nlv; }
+    if (P.LEAD_SW > 0) Object.assign(out, await riffLeadShort(x, s, f0, nF, tuning, tick, p1));
+    out.ms = nowMs() - t0;
+    return out;
+  }
+
+  // 기타 리프 특징 묶음: 곁 신호(곁/가운데 ≥ RIFF_SIDE_DB) 또는 RIFF_MONO일 때 가운데 신호의 음높이 두드러짐(riffFrames) + 노래 단서(RIFF_VOX, riffVoxFrames). 없으면 null
+  async function riffSignalFeatures(x11, s11, sideMid, tuning, tick, p0, p1) {
+    const src = !P.RIFF_SIDE ? null : s11 && sideMid >= P.RIFF_SIDE_DB ? 'side' : P.RIFF_MONO ? 'mid' : null, leadOn = P.RIFF_LEAD && !!s11 && sideMid >= P.LEAD_SIDE_DB;
+    if (!src && !leadOn) return null;
+    // 앞 선율(RIFF_LEAD)은 곁 리프와 따로: 진행 막대의 뒤쪽 몫. 곁 리프가 없는 곡(모노·좁은 믹스)은 빈 곁 특징(nB 0: riff()에서 곁 구간이 생기지 않음)
+    const pl = leadOn ? (src ? p0 + (p1 - p0) * 0.6 : p0) : p1, pm = P.RIFF_VOX ? p0 + (pl - p0) * 0.55 : pl;
+    await tick.force(p0, '기타 리프 특징 추출');
+    const RF = src ? await riffFrames(src === 'side' ? s11 : x11, tuning, tick, p0, pm) : { lo: P.RIFF_LO, nB: 0, hop: 256 / HAR_SR, nF: 0, sal: new Uint8Array(0), smax: new Float32Array(0), expl: new Float32Array(0), ms: 0 };
+    RF.src = src;
+    if (src && P.RIFF_VOX) RF.vox = await riffVoxFrames(x11, src === 'side' ? s11 : null, tuning, tick, pm, pl);   // 노래 단서(가운데 정위 음높이 줄기)
+    if (leadOn) RF.lead = await riffLeadFrames(x11, s11, tuning, tick, pl, p1);   // 앞 선율(가운데 모노 선율): 곁 신호는 좁은 믹스여도 가운데 무게에 씀
+    return RF;
+  }
+  // 기타 리프 특징을 따로(1.25.0): 일렉 기타 소리를 처음 고를 때 한 번. input은 analyze와 같은 { channels, sampleRate }(화면은 디코딩한 곡 버퍼), A는 그 곡의 분석 결과.
+  //  가운데(모노 섞기)와 곁 신호 (L−R)/2를 한 번에 11,025 Hz로 리샘플링(analyze의 22,050 Hz 단계를 건너뜀: 리샘플링 비용 약 절반)하고 모노 최댓값으로 정규화해 riffSignalFeatures.
+  //  돌려준 값을 A.riff에 두면 riff(A, TL)가 씀. RIFF 끔·특징 없음(모노·좁은 믹스) = null. RIFF_EAGER(시험용)는 analyze 안에서 analyze의 신호로 같은 일을 함
+  // 리프 특징용 곡 전체 훑기를 조각으로(같은 식·같은 차례라 값은 mixChannels·sideOf·absMax·scaleBy와 같음): 2채널만
+  const RIFF_CHUNK = 1 << 18;
+  async function riffMix(chans, len, tick) {           // = mixChannels(chans, len, true), 2채널
+    const mono = new Float32Array(len), inv = 1 / chans.length, c0 = chans[0], c1 = chans[1];
+    let es = 0, em = 0;
+    for (let s0 = 0; s0 < len; s0 += RIFF_CHUNK) {
+      const e = Math.min(len, s0 + RIFF_CHUNK);
+      for (let i = s0; i < e; i++) { const a = c0[i], b = c1[i], m = Math.fround(Math.fround(0 + a * inv) + b * inv), d = 0.5 * (a - b); mono[i] = m; es += d * d; em += m * m; }
+      await tick(0);
+    }
+    return { mono, es, em };
+  }
+  async function riffSide(chans, len, tick) {          // = sideOf(chans, len)
+    const side = new Float32Array(len), c0 = chans[0], c1 = chans[1];
+    for (let s0 = 0; s0 < len; s0 += RIFF_CHUNK) { const e = Math.min(len, s0 + RIFF_CHUNK); for (let i = s0; i < e; i++) side[i] = 0.5 * (c0[i] - c1[i]); await tick(0.12); }
+    return side;
+  }
+  async function riffScale(arrs, tick) {
+    let pk = 0; const x = arrs[0];
+    for (let s0 = 0; s0 < x.length; s0 += RIFF_CHUNK) { const e = Math.min(x.length, s0 + RIFF_CHUNK); for (let i = s0; i < e; i++) { const v = Math.abs(x[i]); if (v > pk) pk = v; } await tick(0.24); }
+    if (pk > 1e-9) for (const y of arrs) { if (!y) continue; const g = 1 / pk; for (let s0 = 0; s0 < y.length; s0 += RIFF_CHUNK) { const e = Math.min(y.length, s0 + RIFF_CHUNK); for (let i = s0; i < e; i++) y[i] *= g; await tick(0.24); } }
+  }
+  async function riffFeatures(input, A, onProgress) {
+    if (!P.RIFF || !input || !input.channels || !A || !A.harm) return null;
+    const tick = makeTicker(onProgress), chans = input.channels, srIn = input.sampleRate, len = chans[0].length;
+    await tick.force(0, '기타 리프 신호 준비');
+    const st = chans.length >= 2;
+    const sideOn = P.RIFF_SIDE;                                                    // 곁 리프(옛 방식, 1.25.0 검증 뒤 기본 끔)
+    if (!st && !(sideOn && P.RIFF_MONO)) return null;                              // 모노: 섞지도 않음(앞 선율도 가운데·반주를 가를 수 없어 찾지 않음)
+    let MX = st && chans.length === 2 ? await riffMix(chans, len, tick) : mixChannels(chans, len, st);
+    const sideMid = st && MX.em > 0 ? 10 * Math.log10(MX.es / MX.em + 1e-12) : -Infinity;
+    const leadOn = P.RIFF_LEAD && st && sideMid >= P.LEAD_SIDE_DB;                // 앞 선율: 곁 신호가 있어야 가운데를 가름(거의 모노면 모두 '가운데')
+    if (!(sideOn && st && sideMid >= P.RIFF_SIDE_DB) && !(sideOn && P.RIFF_MONO) && !leadOn) return null;   // 모노·좁은 믹스: 리프를 찾지 않음(리샘플링도 하지 않음)
+    const x11 = await resample(MX.mono, srIn, HAR_SR, tick, 0, 0.12);
+    MX = null;
+    let s11 = null;
+    if (st && ((sideOn && sideMid >= P.RIFF_SIDE_DB) || leadOn)) s11 = await resample(chans.length === 2 ? await riffSide(chans, len, tick) : sideOf(chans, len), srIn, HAR_SR, tick, 0.12, 0.24);
+    await riffScale([x11, s11], tick);
+    return riffSignalFeatures(x11, s11, sideMid, A.harm.tuning, tick, 0.24, 1);
+  }
 
   async function analyze(input, onProgress) {
     const tStart = nowMs();
@@ -2181,7 +2438,10 @@ const Engine = (function () {
     const srms = s11 ? sideRms(s11, R.nF) : null;
     const fs = s11 ? sideFlux(s11, R.nF) : null;                   // 곁 신호 중역 플럭스(스트로크 칸 세기 ST_SIDE). 분석 결과는 바꾸지 않음                  // 곁 신호 프레임 크기(통기타 셈여림 DYN). 분석 결과는 바꾸지 않음
     await tick.force(0.42, '화성 특징 추출');
-    const Hm = await harmonyFeatures(x11, tick, 0.42, 0.86, s11);
+    const riffNow = P.RIFF && P.RIFF_EAGER;
+    const Hm = await harmonyFeatures(x11, tick, 0.42, riffNow ? 0.83 : 0.86, s11);
+    // 기타 리프(1.25.0, RIFF_EAGER일 때만 여기서): 보통은 일렉 기타 소리를 고를 때 riffFeatures(곡 신호, A)로 따로 잼(분석 시간·결과는 1.23.3과 같음)
+    const RF = riffNow ? await riffSignalFeatures(x11, s11, sideMid, Hm.tuning, tick, 0.83, 0.86) : null;
     x11 = null; s11 = null;
 
     await tick.force(0.87, '템포 추정');
@@ -2208,6 +2468,7 @@ const Engine = (function () {
     };
     A.S = beatSalience(A);
     A.drum = drumLayer(A);
+    if (RF) A.riff = RF;                         // 기타 리프 특징(1.25.0, RIFF_EAGER일 때만. 보통은 riffFeatures가 따로 만듦)
     // 주어진 박 주기(프레임)로 DP 추적 → 정밀화 → 소리 구간으로 정리·연장
     const trackAt = tauF => {
       // 간격 벌점을 절대 시간(ms) 기준으로: α = k·τ²(초) → 같은 ms 흔들림엔 같은 벌점. 국소 템포를 따르므로 단단해도 됨
@@ -2745,6 +3006,98 @@ const Engine = (function () {
     //   (합성 정답 세트 22곡의 쉼 구간 거짓 뮤트 13개: 숨 섞인 잡음 6, 여린 한 번 7) → 0. 정답 세트의 다른 결과·키트(0)·스트로크 따라는 그대로,
     //   GTZAN 대중음악형 8비트 뮤트 −15(센 칸 없는 마디 조각). NCM_LACT 0 / 0.1 / 0.15는 정답 세트에서 같고, 0.2는 박 재현율 0.58 → 0.50
     NCM_LOCAL: true, NCM_LACT: 0,
+    //  기타 리프 따라 치기(1.25.0, RIFF, 밴드 일렉 기타. 사용자: "곡 중간에 반주에 기타 리프 나오는 부분에 기타 리프를 따라 쳐야해"): 노래가 없는 대목(도입·간주·끝)에서
+    //   원곡 반주의 되풀이되는 기타 꼴(리프)을 채보해 일렉 기타가 같은 음을 침(Engine.riff). 다른 결과는 하나도 바꾸지 않음: 특징은 analyze가 아니라 일렉 기타 소리를 처음 고를 때
+    //   riffFeatures(곡 신호, A)로 따로 잼(RIFF_EAGER는 시험용으로 analyze 안에서). RIFF를 끄면 riffFeatures는 null, riff()는 빈 결과(1.23.3과 같음).
+    //   특징 1(riffFrames): 곁 신호(L−R: 좌우로 벌린 더블 트래킹 기타는 남고 가운데 노래·베이스·킥은 지워짐; 곁/가운데 ≥ RIFF_SIDE_DB)의 피크 STFT(창 2048·홉 256
+    //    @ 11,025 Hz, 60~4,500 Hz 피크 40개)에서 기타 음역 MIDI RIFF_LO~RIFF_HI 후보마다 배음 합 두드러짐(배음 RIFF_NH개, 가중 RIFF_DECAY^h, 피크 크기 RIFF_POW승,
+    //    허용 ±RIFF_TOL반음, 옥타브 아래 피크가 있으면 RIFF_SUB만큼 깎음). 모노·좁은 믹스는 RIFF_MONO일 때만 가운데 신호로(기본 끔: 노래·반주가 섞여 리프 구간을 가를 수 없음).
+    //   특징 2(RIFF_VOX, riffVoxFrames): 노래 단서. 짧은 창(1024) 피크 STFT의 가운데 정위 피크(곁 신호에 같은 음 피크가 RIFF_VCEN배 이상이면 뺌)에서 프레임마다
+    //    두드러진 음높이(MIDI RIFF_VLO~RIFF_VHI)와 두드러짐(가운데 피크 합 대비).
+    //   채보(riff, 박·마디가 정해진 뒤): 박을 16분음표 칸(박당 4칸, 겹박자 3칸, 박이 8분음표로 잡힌 RIFF_BPM8 BPM 초과 곡은 2칸, RIFF_BPM2 BPM 미만은 8칸)으로 나눠
+    //    칸마다 두드러진 음을 모으고, 배음 관계(같은 음·옥타브·5도)로 이어진 칸을 한 음으로(센 온셋 RIFF_ONNOTE·마디 첫머리 RIFF_ONBAR에서 다시 침). 음높이는 그 칸들의
+    //    두드러짐 합에서 최대 후보의 아래 배음 자리(−31·−24·−19·−12·−7반음)에 최대의 RIFF_LOWREL 이상이 있으면 가장 낮은 것을 되풀이해 고르고(어택 칸의 3배음·5도 읽힘),
+    //    고른 음의 5도 아래가 RIFF_PCROOT 이상·4도 위(근음의 옥타브)가 RIFF_LOWREL 이상이면 파워 코드 근음으로 내림(캐비닛 저역 감쇠·팜뮤트로 근음 기본음이 약한 경우).
+    //    칸 크기가 곡 중앙값보다 RIFF_QUIET dB 아래면 쉼.
+    //   되풀이로 거르기: 마디의 음들이 1·2·4마디 떨어진 한 마디의 같은 칸(±1)에 옥타브 무관하게 다시 나오는 비율이 가장 큰 마디를 짝으로 두고, 음 믿음 = 짝 되풀이
+    //    × 두드러짐(설명 몫 RIFF_EXPL0~RIFF_EXPL1, 무게 RIFF_DOMW) × 온셋. 믿음 ≥ RIFF_CONF인 음이 RIFF_MINN개 이상이고 짝 되풀이 ≥ RIFF_REP인 마디를 이어
+    //    되풀이 길이 L(1·2·4마디)마다 사슬로(평균 되풀이 ≥ RIFF_AGREE, 되풀이 두 번 이상).
+    //   노래 거르기(RIFF_VOX): 가운데 음높이 줄기(두드러짐 ≥ RIFF_VDOM, RIFF_VMINF 프레임 이상)의 흔들림(RIFF_VW0~VW1센트)·미끄러짐(RIFF_VG0~VG1)으로 줄기마다
+    //    노래 점수, 마디 점수 = 줄기 점수의 프레임 평균. 앞·뒤 마디 평균 ≥ RIFF_VBAR인 마디는 사슬에서 빼고, 평균 > RIFF_VSEC인 사슬은 고르지 않음(노래 밑 되풀이 반주 = 후보 why 'vox').
+    //    남은 구간을 실제 한 마디 이하 틈으로 묶은 대목이 실제 RIFF_PASS마디 미만이면 빼고(why 'short'). 실제 곡(레일건·LEVEL5·rough·iu, 분리한 노래 크기로 잰 노래 마디)에서
+    //    노래 마디를 따라 친 비율 0.4%(2/520, RIFF_TRIM·RIFF_SCONF 0.6 전 10/520), 사용자 표시 리프 대목 마디는 레일건 47%(엔진 마디 17/36: 2:35~2:49 모두, 2:57~3:00 E·F♯ 꼴은 짧아 뺌)·
+    //    LEVEL5 11%(4/36: 4:07~4:14. 3:40~4:07은 간주의 기타 솔로·신스 리드가 노래처럼 흔들려, 2:44~2:56 E 페달은 믿음 0.46이라 반주를 그대로)
+    //   꼴: 되풀이 길이 L마디의 칸마다 되풀이 사이 다수결(RIFF_FIG 이상 일치). 같은 음이 이어진 칸은 한 음(온셋 ≥ RIFF_ONFIG면 다시 침). 믿음 conf = 구간 되풀이 × 꼴 일치,
+    //    conf < RIFF_SCONF이거나 꼴 음 가운데 코드 표기 밖 음이 RIFF_NONCH 넘으면 따라 치지 않음(why 'unsure': 틀린 음보다 쉼). RIFF_COMP > 0이면 근음·5도뿐인 꼴도 빼(비교용, 끔)
+    //   음 → 일렉 기타: 5도 두드러짐 ≥ RIFF_P5면 파워 코드(근음+5도), 아니면 한 음(같은 음이름은 구간 안에서 다수결로 한 가지). 낮은 페달 연타(가장 많은 음이름 ≥ RIFF_PEDAL,
+    //    그 음 ≤ MIDI RIFF_PEDLO)는 RIFF_PEDLO + 3 이하 음을 모두 파워 코드로. 파워 코드가 RIFF_PALM초 이하로 짧으면 팜뮤트.
+    //    시각은 칸 자리 + 곡 하나의 박 느낌(ST_BEAT와 같은 중앙값), 세기 db = RIFF_DB0 + 마디 이득(dynBars) + RIFF_DBK·(온셋 − 0.5). 원곡이 쉬는 칸은 치지 않음
+    //   성긴 꼴(RIFF_DENS): 따라 칠 구간의 음이 실제 한 마디에 RIFF_DENS개 미만이면(몇 번의 홑 타격) 따라 치지 않고 반주를 그대로 둠(why 'sparse'. 큰 구간의 반주를
+    //    서너 번의 타격으로 바꾸면 거의 빔: 합성곡 gt_chug150 후렴의 2·3음 구간, 레일건 2:49~2:55의 7음)
+    //   1.25.0 검증 뒤(음악 검증: 분리한 기타·노래 줄기로 들어 봄):
+    //    RIFF_TRIM: 꼴을 만든 뒤 구간 앞·뒤 끝 마디 가운데 그 마디의 칸 음이 꼴과 맞는 비율이 RIFF_FIG 미만이거나 그 마디 자체의 노래 점수가 RIFF_VBAR 이상인 마디를 잘라 냄
+    //     (되풀이 두 번은 남김, 잘린 뒤 실제 RIFF_PASS/2마디 미만이면 why 'short'). 리프로 들어가는 빌드업 마디(기타가 코드를 따라감)와 노래 끝 마디가 앞뒤 마디 평균에 묻혀
+    //     구간에 들어가던 것(레일건 2:31~2:33: D♯m7·Emaj7·F♯7 위에서 G♯ 연타)
+    //    RIFF_SCONF 0.4 → 0.6: 합성 정답곡의 참 리프 구간 믿음은 모두 0.96 이상, 틀린 꼴이거나 노래 위인 구간은 0.46~0.56(LEVEL5 도입부 신스·2:44 E 페달,
+    //     레일건 2:57 E·F♯, gt_chug150 후렴), 다듬은 뒤 맞는 실제 곡 구간은 0.64~0.86
+    //    RIFF_PALM_DB: 팜뮤트 리프 음 +2 dB(팜뮤트는 어택 뒤가 짧아 같은 dB면 바꾼 반주보다 실제 곡에서 0.8~3.2 LU 작았음)
+    //   RIFF 기본 끔(1.25.0 출시 전, 사용자: "그냥 리프는 넣지 말자"): 일렉 기타는 파워 코드 반주만. 켜면 아래 앞 선율(가운데 리드) 따라 치기가 그대로 동작(시험 rifftest·electric은 켜고 확인)
+    RIFF: false, RIFF_EAGER: false, RIFF_MONO: false, RIFF_SIDE_DB: -20, RIFF_LO: 36, RIFF_HI: 84, RIFF_NH: 8, RIFF_DECAY: 0.8, RIFF_POW: 0.6, RIFF_SUB: 0.5, RIFF_TOL: 0.35,
+    RIFF_BPM8: 200, RIFF_BPM2: 75, RIFF_CONF: 0.5, RIFF_EXPL0: 0.22, RIFF_EXPL1: 0.42, RIFF_DOMW: 0.35, RIFF_LOWREL: 0.55, RIFF_ONNOTE: 0.5, RIFF_ONFIG: 0.3, RIFF_ONBAR: 0.25, RIFF_QUIET: -14,
+    RIFF_MINN: 3, RIFF_REP: 0.6, RIFF_AGREE: 0.6, RIFF_BARS: 2, RIFF_LAG4: true, RIFF_FIG: 0.5, RIFF_COMP: 0, RIFF_SCONF: 0.6, RIFF_NONCH: 0.45, RIFF_P5: 0.7, RIFF_PCROOT: 0.35, RIFF_PEDAL: 0.5, RIFF_PEDLO: 47, RIFF_PALM: 0.5, RIFF_DB0: -3.5, RIFF_DBK: 3, RIFF_DENS: 3, RIFF_TRIM: true, RIFF_PALM_DB: 2,
+    RIFF_VOX: true, RIFF_VLO: 50, RIFF_VHI: 88, RIFF_VCEN: 0.5, RIFF_VDOM: 0.15, RIFF_VMINF: 5, RIFF_VW0: 6, RIFF_VW1: 12, RIFF_VG0: 0.25, RIFF_VG1: 0.55, RIFF_VBAR: 0.12, RIFF_VSEC: 0.06, RIFF_PASS: 4,
+    //  앞 선율(1.25.0 검증 뒤, RIFF_LEAD. 사용자: "아니 저기 앞에 튀어나와있는 부분 자체가 리프야 모노로 되어있는 부분"): 레일건 2:35~3:05(가운데 기타 솔로: 벤딩·비브라토)와
+    //   LEVEL5 2:38~2:58·3:40~4:20(가운데 리드 선율)의 리프는 곁 신호가 아니라 가운데(모노)에 두드러진 한 줄 선율. 곁 신호 L−R은 바로 그 선율을 지우고,
+    //   노래 거르기(RIFF_VOX: 23 ms 프레임 흔들림·미끄러짐)는 솔로의 비브라토를 노래로 읽어 LEVEL5 3:40~4:07을 뺐음 → 앞 선율을 따로 찾아 그 마디는 앞 선율을 따라 침
+    //   (곁 리프 구간과 겹치면 앞 선율 마디를 뺀 조각만 곁 리프로). 특징 riffLeadFrames(가운데 무게 g^LEAD_GP, 베이스 배음 지우기), 대목·음 riffLeadGen(설명은 그 함수 위).
+    //   소리: 한 음(파워 코드 아님), 재생은 한 테이크를 가운데에(ui.js: 솔로 기타처럼. 더블 트래킹 좌우가 아님)
+    //   LEAD_GP 3: g 그대로(1)면 합성 정답곡의 절에서 가운데 노래보다 반쯤 벌린 아르페지오 기타(g ≈ 0.4)를 따라가 노래 거르기가 듣지 않음(미끄러짐 0.01~0.11)
+    //    → g³이면 노래를 따라가 0.15~0.29. 실제 곡 노래 마디 오검출 2.7 → 1.1%, 사용자 리프 마디 재현율 90% 그대로, 채보는 분리 반주 기준 일치 0.555 → 0.565
+    //   LEAD_CEN 0.65: 앞 선율 배음의 가운데 무게(중앙값) — 실제 곡 앞 선율·노래 0.77~0.88, 합성곡의 더블 트래킹 리프(같은 음 두 테이크가 거의 같아 가운데로 모임) 0.52
+    //   LEAD_TILT −16 dB: 끄면 실제 곡 노래 마디 오검출 13/440(IU 도입·1:12, Rough 도입: 음높이가 고르고 4~8배음이 약한 노래), −18~−12 dB는 모두 3/440·사용자 리프 마디 그대로
+    //    (−20이면 IU 도입이 다시 걸림) → 가운데 −16
+    //   LEAD_GL 0.24: 0.20이면 LEVEL5 3:40~4:01(리드 미끄러짐 0.18~0.26)을 놓침(사용자 마디 53/72), 0.24는 68/72·노래 3/440, 0.26은 Rough 1:04 노래가 걸림(5/440)
+    //   LEAD_SIDE_DB −15 dB(1.25.0 검증 때 −30): 곁/가운데가 이보다 작은 거의 모노 곡(모노 포함)은 앞 선율을 찾지 않음(모두 가운데라 노래 밑 아르페지오 기타도 '앞 선율': 합성 모노곡 절 10마디).
+    //    −25 dB 곁의 합성곡(확장 합성 벤치)은 −30에서 가운데 무게가 모든 소리 0.99라 노래 13/16·파워 코드 6/12 마디를 따라 쳤음 → −15(실제 곡은 −4.3~−8.1 dB라 그대로, 그 곡의 리드 2마디는 잃음)
+    //   RIFF_SIDE(곁 리프 따라 치기 = 위의 옛 방식) 기본 끔: 사용자의 리프는 가운데 앞 선율이고, 1.25.0 검토에서 곁 방식의 큰 결함이 확인됨(8마디 맑은 아르페지오 도입·간주를
+    //    리프로 따라 쳐 일그러진 틀린 음으로 바꿈, 박 수가 다른 마디가 무음, 음 바뀜 첫 16분이 5도·옥타브 아래로). 켜면 1.25.0 앞 선율 이전과 같은 곁 리프(앞 선율과 겹치는 마디는 앞 선율)
+    RIFF_SIDE: false, RIFF_LEAD: true, LEAD_SIDE_DB: -15, LEAD_LO: 45, LEAD_HI: 96, LEAD_BLO: 28, LEAD_GP: 3, LEAD_E: 0.3, LEAD_COV: 0.3, LEAD_GL: 0.24, LEAD_TILT: -16, LEAD_CEN: 0.65, LEAD_NB: 1,
+    LEAD_HOLD: 4, LEAD_MIN: 0.07, LEAD_RE: 8, LEAD_TOP: 88, LEAD_DB: 0, LEAD_DENS: 1, LEAD_ODD: 0.5,
+    //   음 줄(LEAD_NLO, 설명은 riffLeadFrames 위): 대목 문(f0·expl·cen·tilt)은 그대로 두고 음 높이·유효 프레임만 따로 고른 줄로 채보(끄면 0 → 예전과 같음).
+    //    재 본 것(사용자 리프 창 3개, 기준 = 분리 반주 htdemucs other 가운데의 같은 추적기 음높이 — 참값 아닌 어림): 음 일치 0.681 → 0.749(레일건 0.755 → 0.850, LEVEL5 2:40 0.811 → 0.833,
+    //    LEVEL5 끝 0.559 → 0.630), 온셋 정밀도·재현율 0.586·0.471 → 0.637·0.560, 프레임 음높이(기준이 울리는 프레임 가운데 맞게 낸 몫) 0.536 → 0.604
+    //    (CREPE도 같은 음이라 한 프레임만: 0.640 → 0.712). 사용자 리프 마디 68/72·노래 마디 오검출 3/440·합성 곡 대목·리드 음 0.814는 같음, riffFeatures 시간 +5%
+    //   LEAD_NLO 48(음 일치·프레임): 45 → 0.701·0.590, 47 → 0.739·0.601, 49 → 0.752·0.603, 50 → 0.749·0.601, 52 → 0.746·0.599
+    //   LEAD_NBNH 3: 10 → 0.739·0.573, 6 → 0.747·0.587, 4 → 0.749·0.598, 2 → 0.751·0.604, 1 → 0.737·0.600
+    //   LEAD_NODD 0.2: 0(LEAD_ODD 그대로) → 0.725·0.573(근음이 묻힌 앞 선율을 옥타브 위로 옮김), 0.3 → 0.743·0.601, 거의 옮기지 않음(1e-9) → 0.754·0.606이나 합성 곡 리드 음 0.814 → 0.808
+    LEAD_NLO: 48, LEAD_NBNH: 3, LEAD_NODD: 0.2,
+    //   함께 켠 값(음 줄 + 음 나누기 + 대목 가장자리 + LEAD_TILTF·LEAD_SIDE_DB, 같은 벤치): 사용자 리프 마디 68 → 69/72, 노래 마디 오검출 3 → 2/440, 음 일치 0.681 → 0.763
+    //    (기준 35 ms 당김 0.565 → 0.829), 온셋 정밀도·재현율 0.586·0.471 → 0.585·0.557, 합성 정답곡 리드 음 0.814 → 0.988·리드 마디 0.92 → 1, riffFeatures 시간 ×1.15~1.2.
+    //    확장 합성 벤치(23곡): 리드 마디 104 → 106/205, 노래 마디 오검출 128 → 107/380, 반주 14 → 8/60, 리드 없는 곡 54 → 44마디, 음 일치 0.806 → 0.859·재현율 0.356 → 0.416.
+    //    음 줄 위 음역 줄기 거르기(Melodia식 줄기·평균 음높이 이탈 지우기)는 더 얻는 것이 없어(일치 0.763 → 0.762) 넣지 않음
+    //   앞 선율 음 나누기(1.25.0 검증 뒤, 측정: 실제 곡 세 창(레일건 2:35~3:05, LEVEL5 2:40~2:58·3:40~4:20)의 분리 반주(htdemucs other) 가운데 GP3 줄기 기준 + 합성 gt_lead140 정답,
+    //    아래 '기준 35 ms 당김' = 그 기준 줄기를 35 ms 앞당겨 잰 값). 모두 끄면(LEAD_LAG·LEAD_SW·LEAD_RA·LEAD_SLOT 0) 1.25.0 검증 전과 같은 결과:
+    //   LEAD_LAG 0.025초: 긴 창(93 ms) 음높이 줄기는 음 바뀜을 늦게 잡음(합성 정답 대비 바뀜 프레임 중앙값 +33 ms; 실제 곡은 분리 반주 짧은 창 배음 에너지가 가장
+    //    가파르게 오르는 때 대비 섞인 곡 줄기 +49 ms, 기준 줄기 +35 ms(중앙값) — 이 잼 방식은 합성곡에서 정답과 중앙값 0 ms) → 칸 맞추기·칸 고르기를 그만큼 앞당김. 기준도 같은 만큼
+    //    늦어 실제 곡 지표는 0 쪽을 좋게 셈(칸 고르기 일치 0: 0.816, 0.025: 0.771, 0.03: 0.757 / 기준 35 ms 당김: 0.710, 0.822, 0.838), 합성 정답은 0.025(0.938)~0.03
+    //   LEAD_SW 256점(23 ms, 0 = 끔, 2의 거듭제곱만): 짧은 창 배음 에너지 특징(riffLeadShort: riffFeatures 시간 +5~14%). LEAD_RA 3 dB(0 = 끔)·LEAD_RAD 0 dB: 같은 음 다시 치기 —
+    //    긴 창 배음 합 오름(LEAD_RE 8 dB)은 합성곡 같은 음 되풀이 21개를 거의 못 가름(음 사이 틈이 짧아 93 ms 창에서 1~2 dB, 짧은 창에서 3~4 dB). 배음 사이도 함께 오르면(북·심벌) 아님
+    //   (바닥 프레임 빼기(반올림 음이 LEAD_LO = 45인 프레임: 베이스 찌꺼기)는 음 줄(LEAD_NLO 48)이 같은 일을 해 함께 켜면 결과가 같아 넣지 않음)
+    //   LEAD_SLOT 1(0 = 프레임 음 → 칸 맞추기), LEAD_SSH 0.6, LEAD_SCOV 0.5: 칸 고르기(riffLeadGen 3b). 실제 곡 세 창 일치 0.681 → 0.771(기준 35 ms 당김 0.565 → 0.822),
+    //    온셋 정밀도·재현율 0.586·0.471 → 0.595·0.515, 판정 음 323 → 345; 합성 정답 일치 0.814 → 0.938, 온셋(±60 ms) 0.629·0.524 → 0.750·0.714.
+    //    몫 문턱을 올리면 일치↑·음 수↓(0.65: 일치 0.816, 판정 음 299), 내리면 반대(0.55: 0.730, 374). 같은 값으로 LEAD_SLOT 0(프레임 방식)도 0.760·판정 음 329
+    //    남은 한계: 초킹(아래에서 올라오는 120 ms)은 긴 창에서 반음 사이라 유효 프레임이 없어 목표 음에 닿은 칸에서 시작(합성 5개), 반주에 가려 한 칸 넘게 늦게 잡힌 음 바뀜
+    //   LEAD_RAQ 2(0 = 끔, 1.25.0 검토 뒤): 다시 치기 오름이 앞 8프레임 이웃 차 중앙값(긴 음 안 일렁임) × 2만큼 더 커야 함 — 3 dB만으로는 끄는 음 안에서도 다시 쳤음(검토 둘이 지적).
+    //    세 창 일치 0.763 → 0.769, 온셋 정밀도 0.585 → 0.616, 재현율 0.557 → 0.529; CREPE 기준(분리 반주 가운데, 독립) 일치 0.763 → 0.771, 온셋 정밀도 0.518 → 0.533; 합성 리드 0.988 → 0.985
+    //   모두 끄는 값(1.25.0 검증 전과 같은 결과): LEAD_NLO 0·LEAD_LAG 0·LEAD_SW 0·LEAD_RA 0·LEAD_SLOT 0·LEAD_EXT 0·LEAD_TRIMX false·LEAD_TILTF 0·LEAD_SIDE_DB −30
+    LEAD_LAG: 0.025, LEAD_SW: 256, LEAD_RA: 3, LEAD_RAD: 0, LEAD_RAQ: 2, LEAD_SLOT: 1, LEAD_SCOV: 0.5, LEAD_SSH: 0.6,
+    //   대목 가장자리(1.25.0 검증 뒤): 앞뒤 실제 LEAD_NB마디 평균은 대목 밖 노래 마디를 섞어 첫·끝 마디를 흐림 → 가장자리는 그 마디만의 값으로도 봄
+    //    LEAD_TRIMX: 잘라 내기에 그 마디만의 밝기·가운데 무게도(합성 정답곡 간주 앞 후렴 마디가 빠져 리드 음 일치 0.81 → 0.97·리드 마디 덮임 0.92 → 1, Rough 노래 마디 3 → 2/440)
+    //    LEAD_EXT 1(실제 마디)·LEAD_EXT_GL 0.18: 바로 밖 마디가 그 마디만으로(미끄러짐 < LEAD_EXT_GL: 대목 안보다 엄격하게, 한쪽 이웃이 노래라서) 그리고 대목 쪽 이웃과 합쳐 관문을 넘으면 붙임
+    //     (레일건 3:03.6~3:04.5 마디: 그 마디 0.14, 앞뒤 평균 0.28 → 사용자 마디 68 → 69/72. 0.16~0.20 모두 같음, 0.24면 레일건 2:33.5 마디(0.21, 들쭉날쭉한 음)까지 붙음)
+    LEAD_EXT: 1, LEAD_EXT_GL: 0.18, LEAD_TRIMX: true,
+    //   LEAD_TILTF 4600 Hz(0 = 끔, 설명은 riffLeadFrames의 featOf): 높은 음역 리드의 밝기를 LEAD_TILTF Hz 아래 배음으로만(확장 합성 벤치 리드 마디 104 → 108/205, 실제 곡 그대로)
+    LEAD_TILTF: 4600,
     //  무반주 구간(ACAP): 반주 없이 노래(한 줄 선율)와 효과음만 나오는 곳은 코드가 없음(N.C.). 박마다
     //   fitL = 단선율 정도: 트레블 피크 STFT 프레임마다 가장 낮은 센 피크(프레임 최대의 ACAP_REL 이상)의 배음 1~10(±0.35반음)이 설명하는
     //          피크 크기의 몫(노래 한 줄이면 1에 가깝고 화음이면 낮음), 박 안 프레임 크기 가중 평균. ACAP_REL은 분석(analyze) 때 쓰임
@@ -2882,6 +3235,31 @@ const Engine = (function () {
     POWER_PEN: 6,         // 파워 코드에서 3음·2음·4음 세기의 감점 비중       // 반 마디 증거/첫 박 증거가 이 이상이면 2박자                                   // 국소 템포 곡선 사용                                        // 마디 길이가 바뀔(변박) 사전 확률
     PRI: { maj: 0, min: 0, dom7: -0.4, maj7: -0.6, min7: -0.4, sus4: -1.2, sus2: -1.4, dim: -1.3, aug: -1.8, hdim7: -1.2, dim7: -1.6, '5': -1.4, sl2: -1.6 },
     INV: [0, -0.7, -1.0, -1.0],                          // 근음/3음/5음/7음 베이스
+    // 밴드 일렉 기타(1.25.0, EG, bandGuitar: 사용자 "밴드 일렉트릭 기타처럼 치는 기능 … 기타 스트록을 정확히 파워코드 등으로"): 켜기와 연주 규칙의 문턱.
+    //  통기타와 같은 재료(16분 칸 세기 stSlots·마디 이득 dynBars·싱어송라이터 구간 수준 sswStrum·코드 바뀜 strumMarks·N.C. 뮤트 ncMute·스트로크 따라 strokes)로
+    //  마디마다 밴드 리듬 기타 꼴(팜뮤트 연타·열린 파워 코드·당김·빌드·멈춤)을 고름. 끄면 bandGuitar가 빈 목록을 돌려주고 화면은 통기타 그대로(1.23.3과 같음)
+    //  EG_8MAX: 이 BPM을 넘는 박(엔진이 8분음표를 박으로 잡은 빠른 곡)은 8분 연타 대신 박마다, EG_16MAX: 이 BPM 아래면 수준 3 이상에서 16분(16비트 느낌) 허용,
+    //  EG_GALLOP_MAX: 갤럽(8분 + 16분 둘)·16분 픽업을 넣는 템포 상한. EG_OPEN_EVERY: 수준 1(절)에서 몇 마디마다 끝 박을 열어 치는지(연타-연타-연타-열기),
+    //  EG_ANT: 당김(수준 2 이상, 다음 마디 첫 박에서 바뀌는 코드를 이 마디 끝 박 '&'에서 앞당겨), EG_ANT_U: 그 '&' 칸의 원곡 세기(되풀이 짝과 섞은 uS) 하한, EG_ANT_D: 그 칸이 다음 마디 첫 박 칸보다 이만큼 이상 셀 때만,
+    //  EG_STOP: 멈춤(수준 2 이상 마디에서 첫 박만 세고(u ≥ EG_STOP_ON) 나머지 칸이 모두 곡의 빈 칸 바닥(N.C. 아닌 칸 세기의 20% 값) + EG_STOP_U 이하면 첫 박 한 번 치고 쉼), EG_STAB(끔: 대중음악은 2·4박 스네어가 거의 늘 세서 절이 반쯤 열림): 수준 2에서 스네어 칸(2·4박) 열린 스탭,
+    //  EG_KS_SN: 스네어 칸 판정(원곡 스네어 층 세기, 곡 99% 값 대비), EG_ST_OPEN: 'strum' 방식에서 칸 세기가 이 이상이면 열어 치고 아니면 팜뮤트,
+    //  EG_ALIGN: 박 느낌 맞춤(초, 싱어송라이터와 같음), EG_SLASHBASS: 슬래시 코드는 베이스를 파워 코드 근음으로, EG_THREE: 옥타브까지 세 음으로 치는 최소 수준,
+    //  EG_NC: N.C. 구간 뮤트 연타(원곡에 리듬이 있는 구간, ncMute 규칙), 셈여림: 스트로크 세기 db = EG_Y0 + EG_K·(칸 세기 − 가운데) + 마디 이득 + 꼴 강세(팜뮤트 EG_CHUG_DB, 16분 EG_16_DB, 스탭·당김 EG_ACC_DB)
+    //  EG_GMIN: 열기·연타 가름에 쓸 마디 크기 폭 하한(dB, 코드 마디 g의 20%~90% 값 차. 못 미치면 모두 열기), EG_CHG·EG_CHG4: 열기↔연타 바꿈 벌점(4마디 구절 경계)
+    EG: true, EG_8MAX: 200, EG_16MAX: 100, EG_GALLOP_MAX: 170, EG_OPEN_EVERY: 2, EG_ANT: true, EG_ANT_U: 0.5, EG_ANT_D: 0, EG_STOP: true, EG_STOP_ON: 1.0, EG_STOP_U: 0.15,
+    EG_STAB: false, EG_KS_SN: 0.5, EG_ST_OPEN: 0.5, EG_ALIGN: 0.015, EG_SLASHBASS: true, EG_THREE: 3, EG_NC: true, EG_END: true,
+    EG_GMIN: 3, EG_CHG: 1.0, EG_CHG4: 0.25,
+    //  1.25.0 검증 뒤: EG_ALT5: ♭5·♯5 코드(m7♭5·dim·aug 표기)는 드라이브가 이 값(1 크런치) 이상이면 근음 + 옥타브로(디스토션을 거친 3온음·증5도는 차음·상호 변조가 거칠어
+    //   완전5도보다 훨씬 거칠게 들림: eg/repair 측정, 밴드 기타는 이런 코드도 근음 옥타브로 침). 끄려면 null.
+    //   EG_SLOW: 이 BPM 미만(발라드)은 드라이브를 EG_SLOW_DRIVE(1 크런치)까지만(반주·N.C. 연타·리프 음 모두: 느린 곡 모든 마디 하이게인은 파워 발라드 관용과 다름). 0이면 끔.
+    //   EG_SLOW_IOI: 다만 원곡 스트로크(strokes) 간격 중앙값이 이 박 수 미만이면 빠른 곡을 반 박자로 잡은 것으로 보고 낮추지 않음(합성곡 gt_am120: 120 BPM을 60으로 잡아
+    //    간격 0.25박 = 실제 8분. 발라드 test-ballad68·rit·gt_ballad72 0.5박, ballad128 1박)
+    EG_ALT5: 1, EG_SLOW: 80, EG_SLOW_DRIVE: 1, EG_SLOW_IOI: 0.4,
+    //  1.25.0 통합(소리·연주·리프를 합친 뒤 다시 잼): EG_CHUG_DB −3 → 0(팜뮤트 버퍼는 어택 50 ms로 맞춰 열린 코드와 어택이 같고 뒤가 짧아, 같은 dB의 팜뮤트 8분 연타가 열린 8분보다
+    //   이미 K 가중 −5~−7 LU 작음: 더 깎으면 절이 들리지 않음), EG_Y0M: 방식마다 EG_Y0에 더하는 dB(통기타의 방식별 Y0처럼, 시험곡 11곡의 같은 방식 통기타와 K 가중 크기가 같게:
+    //   싱어송라이터 기준 스트로크 따라 +0.8, 4비트 +0.2, 8비트 −0.3, 16비트 +1.2, 스윙 +1.4. eg/final/calib.js)
+    EG_Y0: -3.0, EG_K: 3, EG_CHUG_DB: 0, EG_16_DB: -2.5, EG_ACC_DB: 1.5, EG_PUSH_DB: 1,
+    EG_Y0M: { ssw: 0, strum: 0.8, beat4: 0.2, beat8: -0.3, beat16: 1.2, swing: 1.4 },
   };
 
   function notePattern(pc, out, w, octOnly) {          // octOnly: 기본음·옥타브 배음만(T7_FUND)
@@ -6134,10 +6512,797 @@ const Engine = (function () {
     return list;
   }
 
+  // ---------------- 밴드 일렉 기타(1.25.0, P.EG): 파워 코드 반주 bandGuitar ----------------
+  // 사용자: "밴드 일렉트릭 기타처럼 치는 기능도 추가해줘. … 기타 스트록을 정확히 파워코드 … 등으로 쳐야". 통기타 싱어송라이터(sswStrum)처럼 원곡을 하나하나 따르지 않고
+  //  밴드 리듬 기타 주자가 하듯 마디마다 꼴을 고름(록 교본·레슨의 관용구: 절 팜뮤트 8분 연타 → 후렴 열린 파워 코드, 연타-연타-연타-열기, 프리코러스 갤럽·16분 빌드,
+  //  다음 마디 첫 박 코드를 4박 '&'에서 앞당기는 당김, 첫 박만 치는 멈춤, 킥·스네어에 맞춘 강세. eg/idioms/catalogue.md A3~A5).
+  //  재료: 16분 칸 세기(stSlots, 스트로크 따라와 같은 중역 플럭스)·되풀이 짝 섞기(repMix)·마디 이득(dynBars)·마디 수준(sswStrum 구간 수준 = pianoLev)·코드 바뀜·N.C. 칸(strumMarks)·
+  //  N.C. 뮤트 구간(ncMute)·원곡 킥·스네어 층(A.drum)·박 느낌(싱어송라이터와 같은 EG_ALIGN)·스윙 비율(swingRatio).
+  //  일렉 수준 EL(0 조용 ~ 4 큼, 아래 lev 계산: 통기타 구간 수준 + 마디 크기의 열기·연타 비터비): 0 온음표 열린 파워 코드(클린, 코드 바뀜에만), 1 팜뮤트 8분 연타(크런치) + EG_OPEN_EVERY마디마다 끝 박 열기, 2 팜뮤트 8분 연타 + 구절 끝 박 열기(EG_STAB을 켜면 스네어 박(2·4박)에 열린 스탭),
+  //   다음 마디가 올라가면(빌드) 갤럽(8분 + 16분 둘) + 끝 박 16분 몰아치기, 3 열린 8분 다운(하이게인), 4 열린 8분 + 코드 바뀜 앞 16분 픽업. 당김은 수준 2 이상.
+  //  빠른 곡(EG_8MAX BPM 넘음: 엔진이 8분음표를 박으로 잡은 곡)·1박 단위(opt.res 1)·4비트는 박마다. 16비트는 16분 연타, 스윙은 8분 엇박을 φ 자리에.
+  //  'strum'(스트로크 따라): 원곡 스트로크를 그대로 파워 코드로(코드 바뀜이나 칸 세기 ≥ EG_ST_OPEN이면 열어, 아니면 팜뮤트, 업은 16분 자리처럼 가볍게).
+  //  N.C.: 원곡에 리듬이 있는 구간(ncMute 규칙)은 8분 팜뮤트 연타(구간 베이스 음, 뮤트 구간은 앞 코드 근음을 막고 '칙'). 곡 끝(EG_END): 마지막 코드 뒤로는 치지 않음.
+  //  파워 코드: 근음 + 5도(dim ♭5·aug ♯5), 수준 EG_THREE 이상은 옥타브까지(6-5-4·5-4-3번 현, 근음 E2~D♯3). 슬래시 코드(EG_SLASHBASS)는 베이스 위 4도·5도의 코드 음이 있으면 베이스 + 그 음(5-1 자리바꿈 꼴), 없으면 베이스 한 음(옥타브).
+  //  셈여림(dynApply): db = EG_Y0 + EG_K·(칸 세기 − 앞뒤 마디 가운데) + 마디 이득 g + 꼴 강세(팜뮤트 EG_CHUG_DB, 16분 EG_16_DB, 스탭·멈춤 EG_ACC_DB, 당김 EG_PUSH_DB), tone은 마디 이득대로.
+  //  돌려줌(시각 차례) [{ t, dir(업 −1), vel, db, tone, change, span, eg: { kind('open'·'chug'·'stab'·'push'·'stop'·'dead'·'nc'), notes(MIDI 낮은 음부터), root(pc), shape('pc'·'pc8'·'inv'·'note'·'oct'),
+  //   palm, drive(0 클린·1 크런치·2 하이게인), ring('hold' 다음 스트로크·코드 끝까지, 'chug' 짧게, 'stab' 중간), bar, k(마디 안 칸), L(수준), antic, build, stop }, (mute: 'palm'·'dead', pc) }],
+  //   배열의 plan = 마디마다 { bar, L, pat(칸 글자), stop, build, antic }('strum'은 빈 목록), lev = 마디마다 일렉 수준 EL, eg = { bpm, hand(4·8·16), shift, swing, levels(수준별 마디 수), openBars, chugBars, stops, builds, antics, mode }
+  const EG_CELL = {   // 박 하나의 칸 꼴(단박자 4칸·겹박자 3칸): D 열린 다운, d 팜뮤트 다운, u 열린 업(16분), p 팜뮤트 업(16분), S 열린 스탭(짧게), - 쉼(앞 소리 이어짐)
+    4: { hold: '----', q: 'D---', qm: 'd---', o8: 'D-D-', c8: 'd-d-', so8: 'S-d-', gal: 'd-dp', s16: 'dpdp', o16: 'DuDu', pick: 'D-Du' },
+    3: { hold: '---', q: 'D--', qm: 'd--', o8: 'DDD', c8: 'ddd', so8: 'Sdd', gal: 'ddd', s16: 'ddd', o16: 'DDD', pick: 'DDD' },
+  };
+  const EG_OPEN = [40, 45];   // 파워 코드 근음을 잡는 6·5번 현(E2·A2)
+  // 파워 코드 근음 자리: 6번 현 0~7프렛(E2~B2) 또는 5번 현 0~7프렛(A2~E3) 가운데 가장 낮은 음(같으면 낮은 프렛: A·A♯·B는 5번 현 0~2프렛)
+  function egRoot(pc) {
+    let best = null;
+    for (const s of [0, 1]) { const f = ((pc - EG_OPEN[s]) % 12 + 12) % 12; if (f > 7) continue; const m = EG_OPEN[s] + f; if (!best || m < best.m || (m === best.m && f < best.f)) best = { s, m, f }; }
+    return best;
+  }
+  // 코드(pcs·bassPc) → 파워 코드 음 { notes(MIDI), root(pc), shape, s(맨 아래 현) }. three: 옥타브까지, L: 그 마디 수준(드라이브 egDrive(L)로 ♭5·♯5 처리, EG_ALT5)
+  function egPower(pcs, bassPc, three, L) {
+    const pc = x => ((x % 12) + 12) % 12, root = pcs && pcs.length ? pc(pcs[0]) : pc(bassPc || 0), has = q => pcs.some(y => pc(y) === pc(q));
+    const bass = bassPc == null ? root : pc(bassPc);
+    if (P.EG_SLASHBASS && bass !== root && !(pcs.length === 1)) {
+      // 슬래시 코드: 베이스 위 4도(5-1 자리바꿈)·5도의 코드 음이 있으면 두 음, 없으면 베이스 한 음(수준이 높으면 옥타브 겹침)
+      const r = egRoot(bass), up = has(bass + 7) ? 7 : has(bass + 5) ? 5 : 0;
+      if (up) return { notes: three ? [r.m, r.m + up, r.m + 12] : [r.m, r.m + up], root: bass, shape: 'inv', s: r.s };
+      return { notes: three ? [r.m, r.m + 12] : [r.m], root: bass, shape: three ? 'oct' : 'note', s: r.s };
+    }
+    const fifth = has(root + 7) ? 7 : has(root + 6) ? 6 : has(root + 8) ? 8 : 7, r = egRoot(root);
+    // ♭5·♯5(EG_ALT5, L을 주면): 드라이브 EG_ALT5 이상에서는 근음 + 옥타브(디스토션을 거친 3온음·증5도의 상호 변조는 거칢)
+    if (fifth !== 7 && P.EG_ALT5 != null && L != null && egDrive(L) >= P.EG_ALT5) return { notes: [r.m, r.m + 12], root, shape: 'oct', s: r.s };
+    return { notes: three ? [r.m, r.m + fifth, r.m + 12] : [r.m, r.m + fifth], root, shape: three ? 'pc8' : 'pc', s: r.s };
+  }
+  const egDrive = L => L <= 0 ? 0 : L <= 2 ? 1 : 2;
+  // 1.25.0 검증 뒤: bandGuitar의 방식과 무관한 무거운 중간값(stSlots·swingRatio·pianoLev·strokes: 긴 곡 한 번에 110~390 ms의 대부분)을 (A, TL, 설정 P 전체)마다
+  //  한 번만 잼(bandGuitar는 읽기만 함). 일렉으로 바꾼 뒤 리프 계산이 끝나 스트로크를 다시 짤 때·일렉 방식을 바꿀 때 같은 값을 다시 재며 재생 중 화면이 수백 ms 멈추던 것을 줄임
+  const egMemo = new WeakMap();
+  function egShared(A, TL) {
+    const sig = JSON.stringify(P); let m = egMemo.get(TL);
+    if (!m || m.A !== A || m.sig !== sig) { m = { A, sig }; egMemo.set(TL, m); }
+    return m;
+  }
+  // 같은 중간값을 조각으로 미리 잼(화면이 일렉으로 바꿀 때: 조각마다 다른 차례라 재생 예약이 밀리지 않음). 값은 bandGuitar가 잴 때와 같고, 끝나면 bandGuitar는 수십 ms
+  async function bandGuitarPrep(A, TL, mode) {
+    if (!P.EG || !A || !A.fm || !TL || TL.empty || TL.beats.length < 2 || !TL.bars.length) return;
+    const sh = egShared(A, TL), R = TL.meter.triple ? 3 : 4, beats = TL.beats, iv = [];
+    for (let i = 0; i + 1 < beats.length; i++) iv.push(beats[i + 1] - beats[i]); iv.sort((a, b) => a - b);
+    const bpm = iv.length ? 60 / iv[iv.length >> 1] : 100;
+    const steps = [() => sh['ss' + R] || (sh['ss' + R] = stSlots(A, TL, R)), () => R !== 4 || sh.sw || (sh.sw = swingRatio(A, TL)), () => sh.lev0 || (sh.lev0 = pianoLev(A, TL)),
+      () => dynBars(A, TL), () => !(mode === 'strum' || (P.EG_SLOW > 0 && bpm < P.EG_SLOW)) || sh.stR || (sh.stR = strokes(A, TL))];
+    for (const f of steps) { await nextTick(); f(); }
+  }
+  function bandGuitar(A, TL, mode, opt) {
+    opt = opt || {};
+    if (!P.EG || !A || !A.fm || !TL || TL.empty || TL.beats.length < 2 || !TL.bars.length) return [];
+    const beats = TL.beats, nb = beats.length, triple = !!TL.meter.triple, R = triple ? 3 : 4, nbar = TL.bars.length, C = EG_CELL[R];
+    const iv = []; for (let i = 0; i + 1 < nb; i++) iv.push(beats[i + 1] - beats[i]); iv.sort((a, b) => a - b);
+    const bpm = iv.length ? 60 / iv[iv.length >> 1] : 100;
+    const { change, nc } = strumMarks(TL, R);
+    const sh = egShared(A, TL), ss = sh['ss' + R] || (sh['ss' + R] = stSlots(A, TL, R)), slot = ss.slot, med = ss.med, sc = ss.sc, nX = slot.length;   // 무거운 중간값은 egShared에 한 번(읽기만 함)
+    if (!nX) return [];
+    const u = x => x >= 0 && x < nX ? (slot[x].v - med) / sc : -1.5;
+    const mix = repMix(TL, Float64Array.from(slot, s => s.v), R, x => nc.has(x)), uS = x => mix && x >= 0 && x < nX ? (mix[x] - med) / sc : u(x);
+    // 박 느낌(EG_ALIGN): 박 위 센 칸의 봉우리 − 칸 시각 중앙값(싱어송라이터와 같음). 스윙: 'swing' 방식이거나 원곡이 스윙이면 8분 엇박을 φ 자리에
+    let shift = 0;
+    if (P.EG_ALIGN > 0) { const d = slot.filter(s => s.j === 0 && !nc.has(s.x) && (s.v - med) / sc >= 1).map(s => s.tp - s.t).sort((a, b) => a - b); if (d.length >= 8) shift = clamp(d[d.length >> 1], -P.EG_ALIGN, P.EG_ALIGN); }
+    const sw = R === 4 ? (sh.sw || (sh.sw = swingRatio(A, TL))) : null, swingOn = !!sw && (mode === 'swing' || (sw.measured && !sw.straight)), phi = swingOn ? sw.phi : 0.5;
+    const posJ = R === 4 ? [0, phi / 2, phi, (1 + phi) / 2] : [0, 1 / 3, 2 / 3];
+    const cellT = x => { const i = Math.floor(x / R), j = x % R, dt = beats[i + 1] - beats[i]; return beats[i] + dt * posJ[j] + shift; };
+    const spanOf = x => { const i = Math.floor(x / R), j = x % R, dt = beats[i + 1] - beats[i]; return dt * ((j + 1 < R ? posJ[j + 1] : 1) - posJ[j]); };
+    // 마디 수준: 통기타 싱어송라이터의 구간 수준(lev0, 원곡 리듬 밀도에 맞춘 0~4)만으로는 마스터링한 대중음악에서 절·후렴이 거의 모두 3이라(원곡은 어디서나 8분 활동이 있음)
+    //  일렉 기타의 열기·팜뮤트는 마디 크기(dynBars g)로 가름: 코드 마디 g를 곡 안 20%~90% 값으로 0~1(rE, 폭이 EG_GMIN dB 못 되면 모두 1 = 열기), 되풀이 짝(TL.rep)끼리 섞고(싱어송라이터 ④와 같음),
+    //  두 상태(팜뮤트 연타 0·열기 1)를 비터비로 이음(비용 (상태 − rE)², 바꾸면 EG_CHG, 4마디 구절 경계는 EG_CHG4). 일렉 수준 EL: lev0 0 → 0(온음표), 연타 상태 → lev0 ≤ 1이면 1, 아니면 2, 열기 상태 → lev0 ≥ 4면 4, 아니면 3
+    const lev0 = sh.lev0 || (sh.lev0 = pianoLev(A, TL)), { g } = dynBars(A, TL);
+    const chordBar = TL.bars.map(b => b.events.some(e => !e.label.nc)), f0 = chordBar.indexOf(true), first = f0 < 0 ? 0 : f0;
+    const lev = new Int32Array(nbar), openB = new Uint8Array(nbar).fill(1);
+    {
+      const on = []; chordBar.forEach((v, i) => { if (v) on.push(i); });
+      const qn = (a, q) => { const s2 = a.slice().sort((x, y) => x - y); return s2.length ? s2[Math.floor(q * (s2.length - 1))] : 0; };
+      const gv = on.map(b => g[b]), lo = qn(gv, 0.2), hi = qn(gv, 0.9), span = hi - lo;
+      let r = Float64Array.from(g, x => span >= P.EG_GMIN ? clamp((x - lo) / (hi - lo), 0, 1) : 1);
+      if (P.ST_REP && TL.rep && span >= P.EG_GMIN) {
+        const rp = TL.rep, res = rp.res || 1, barAt = new Int32Array(nb).fill(-1); TL.bars.forEach((b, bi) => { if (b.startBeat < nb) barAt[b.startBeat] = bi; });
+        const r2 = Float64Array.from(r);
+        for (let bi = 0; bi < nbar; bi++) {
+          const s2 = TL.bars[bi].startBeat * res; if (s2 + 1 >= rp.start.length) continue;
+          let sw2 = 0, sv = 0;
+          for (let p = rp.start[s2]; p < rp.start[s2 + 1]; p++) { const q = rp.pj[p]; if (q % res) continue; const k = barAt[q / res]; if (k < 0 || k === bi || !chordBar[k]) continue; if (P.SSW_REPG > 0 && Math.abs(g[k] - g[bi]) > P.SSW_REPG) continue; sw2 += rp.pw[p]; sv += rp.pw[p] * r[k]; }
+          if (sw2 > 0) { const S2 = (P.ST_REP_SHR || 1) * sw2 / (P.REP_W || 1), w = S2 / (1 + S2); r2[bi] = (1 - w) * r[bi] + w * sv / sw2; }
+        }
+        r = r2;
+      }
+      if (nbar && span >= P.EG_GMIN) {
+        let cost = [r[0] * r[0], (1 - r[0]) * (1 - r[0])]; const back = [];
+        for (let b = 1; b < nbar; b++) { const pen = (b - first) % 4 === 0 ? P.EG_CHG4 : P.EG_CHG, nx = [0, 0], bk = [0, 0]; for (let s2 = 0; s2 < 2; s2++) { let best = Infinity, arg = 0; for (let q = 0; q < 2; q++) { const c = cost[q] + (q === s2 ? 0 : pen); if (c < best) { best = c; arg = q; } } nx[s2] = best + (s2 ? (1 - r[b]) * (1 - r[b]) : r[b] * r[b]); bk[s2] = arg; } cost = nx; back.push(bk); }
+        let s2 = cost[1] < cost[0] ? 1 : 0; for (let b = nbar - 1; b >= 0; b--) { openB[b] = s2; if (b > 0) s2 = back[b - 1][s2]; }
+      }
+      for (let b = 0; b < nbar; b++) lev[b] = lev0[b] <= 0 ? 0 : !openB[b] ? (lev0[b] <= 1 ? 1 : 2) : (lev0[b] >= 4 ? 4 : 3);
+    }
+    const brk = TL.bars.map(b => b.events.length > 1 && b.events[b.events.length - 1].label.nc && b.events.some(e => !e.label.nc));
+    const evs = [], evOf = new Int32Array(nX).fill(-1), up = v => Math.ceil(v - 1e-6);
+    TL.bars.forEach((b, bi) => b.events.forEach(e => { const q = evs.length; evs.push({ pcs: e.pcs, bassPc: e.bassPc, nc: !!e.label.nc, bi }); for (let x = up((b.startBeat + e.off) * R), x1 = Math.min(nX, up((b.startBeat + e.off + e.dur) * R)); x < x1; x++) evOf[x] = q; }));
+    // 원곡 킥·스네어 칸 세기(곡 99% 값 대비): 스탭 자리(스네어 박)와 강세 판정용
+    const kk = new Float64Array(nX), sn = new Float64Array(nX), dr = A.drum, fps = A.fps;
+    if (dr && dr.K && dr.Sn && fps) {
+      const k99 = quantile(dr.K, 0.99) || 1, s99 = quantile(dr.Sn, 0.99) || 1, nF = dr.K.length;
+      for (const s of slot) {
+        const w = Math.min(P.ST_WIN, (beats[s.i + 1] - beats[s.i]) / R / 2); let mk = 0, ms = 0;
+        for (let f = Math.max(0, Math.floor((s.t - w) * fps)); f <= Math.min(nF - 1, Math.ceil((s.t + w) * fps)); f++) { if (dr.K[f] > mk) mk = dr.K[f]; if (dr.Sn[f] > ms) ms = dr.Sn[f]; }
+        kk[s.x] = mk / k99; sn[s.x] = ms / s99;
+      }
+    }
+    const M = P.EG_NC && P.NC_MUTE && nc.size ? ncMute(A, TL) : null, rg = M ? M.regOf(R) : null;
+    const quarter = mode === 'beat4' || bpm > P.EG_8MAX || opt.res === 1;               // 박마다
+    // 느린 곡(EG_SLOW BPM 미만, 원곡 스트로크 간격 중앙값 EG_SLOW_IOI박 이상: 반 박자로 잡은 빠른 곡은 빼고): 드라이브 상한 EG_SLOW_DRIVE
+    const stR = mode === 'strum' || (P.EG_SLOW > 0 && bpm < P.EG_SLOW) ? (sh.stR || (sh.stR = strokes(A, TL))) : null;   // 원곡 스트로크(통기타 스트로크 따라, rakeMark 전)
+    let slow = false;
+    if (P.EG_SLOW > 0 && bpm < P.EG_SLOW) { const ts = stR.filter(s => !s.mute).map(s => s.t), io = []; for (let i = 1; i < ts.length; i++) io.push(ts[i] - ts[i - 1]); slow = !io.length || median(io) * bpm / 60 >= P.EG_SLOW_IOI; }
+    const driveMax = slow ? P.EG_SLOW_DRIVE : 2, drv = L => Math.min(egDrive(L), driveMax);
+    const s16ok = R === 4 && !quarter && bpm <= P.EG_GALLOP_MAX && opt.res !== 1;        // 갤럽·16분 픽업·몰아치기를 넣을 수 있는 템포
+    const sixteen = R === 4 && !quarter && (mode === 'beat16' || (opt.res === 4 && bpm <= P.EG_GALLOP_MAX && mode !== 'beat4' && mode !== 'beat8' && mode !== 'swing'));   // 16비트, 또는 ¼박 단위(악기 밀도 네 배)
+    const cell = new Array(nX).fill('-'), tie = new Set(), plan = [];
+    const uFloor = quantile(slot.filter(s2 => !nc.has(s2.x)).map(s2 => (s2.v - med) / sc), 0.2);   // 곡의 빈 칸 세기(멈춤 판정의 바닥: 8분 곡은 16분 엇박 칸이 비어 20% 값이 곧 빈 칸)
+    const stopB = new Uint8Array(nbar), buildB = new Uint8Array(nbar), antB = new Uint8Array(nbar);
+    const E = P.EG_OPEN_EVERY > 0 ? P.EG_OPEN_EVERY : 2;
+    if (mode !== 'strum') for (let bi = 0; bi < nbar; bi++) {
+      const b = TL.bars[bi], n = b.nBeats, L = chordBar[bi] ? lev[bi] : 3, ph = (((bi - first) % E) + E) % E, x0b = b.startBeat * R;
+      const rise = bi + 1 < nbar && chordBar[bi] && chordBar[bi + 1] && lev[bi + 1] > L && lev[bi + 1] >= 3;   // 다음 마디가 올라감 → 빌드 마디
+      // 멈춤(EG_STOP): 첫 박만 세고(u ≥ EG_STOP_ON) 나머지 칸이 모두 빈 칸 바닥 + EG_STOP_U 아래면 첫 박 한 번 치고 쉼
+      let stop = false;
+      if (P.EG_STOP && chordBar[bi] && L >= 2 && !brk[bi] && n >= 2 && x0b < nX) {
+        let mx = -Infinity;
+        for (let k = 0; k < n; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) { const x = i * R + j; if (x === x0b || nc.has(x)) continue; mx = Math.max(mx, u(x)); } }   // 자기 칸 세기(되풀이 짝과 섞지 않음: 멈춤은 같은 진행의 후렴과 짝이 되기 쉬움)
+        stop = u(x0b) >= P.EG_STOP_ON && mx <= uFloor + P.EG_STOP_U && !nc.has(x0b);
+      }
+      stopB[bi] = stop ? 1 : 0; buildB[bi] = rise ? 1 : 0;
+      let pat = '';
+      for (let k = 0; k < n; k++) {
+        const i = b.startBeat + k; if (i + 1 >= nb) break;
+        const x0 = i * R, nextChange = i + 1 < nb && change.has((i + 1) * R) && !nc.has((i + 1) * R);
+        let c;
+        if (stop) c = k === 0 ? C.q : C.hold;
+        else if (mode === 'beat4') c = L >= 3 ? C.q : C.qm;
+        else if (sixteen) c = L >= 3 ? C.o16 : C.s16;
+        else if (mode === 'beat8' || mode === 'swing') c = L >= 3 ? C.o8 : L >= 1 ? (P.EG_STAB && L === 2 && n === 4 && k % 2 === 1 && sn[x0] >= P.EG_KS_SN ? C.so8 : C.c8) : (k === 0 ? C.q : C.hold);
+        else {
+          if (L <= 0) c = k === 0 ? C.q : C.hold;
+          else if (L === 1) c = ph === E - 1 && k === n - 1 && n >= 2 ? C.q : C.c8;           // 연타-연타-연타-열기(E마디마다 끝 박)
+          else if (L === 2) c = rise ? (s16ok ? C.gal : C.o8) : ph === E - 1 && k === n - 1 && n >= 2 ? C.q : (P.EG_STAB && n === 4 && k % 2 === 1 && sn[x0] >= P.EG_KS_SN ? C.so8 : C.c8);   // 절(수준 2): 연타, 구절 끝 박 열기, (EG_STAB) 스네어 박 스탭
+          else c = C.o8;
+          if (rise && k === n - 1 && s16ok) c = C.o16;                                         // 빌드 마디 끝 박: 16분 몰아치기
+          else if (L >= 4 && s16ok && nextChange && !rise) c = C.pick;                           // 코드 바뀜 앞 16분 픽업
+        }
+        if (quarter && !stop) c = c[0] + C.hold.slice(1);
+        pat += c;
+        for (let j = 0; j < R; j++) cell[x0 + j] = c[j];
+      }
+      // 브레이크(코드 뒤 N.C.로 끝나는 마디): 코드 칸에서 한 번만(코드 바뀜 칸은 아래에서 침)
+      if (brk[bi]) for (let k = 0; k < n; k++) { const i = b.startBeat + k; if (i + 1 >= nb) break; for (let j = 0; j < R; j++) if (!nc.has(i * R + j)) cell[i * R + j] = '-'; }
+      plan.push({ bar: bi, L, pat, stop, build: rise, antic: false });
+    }
+    // 코드 바뀜: 그 칸은 늘 침(수준 1은 팜뮤트, 그 밖은 열어). 박 위가 아닌 16분 자리의 바뀜도 다운
+    if (mode !== 'strum') for (const x of change) { if (x >= nX || nc.has(x)) continue; const L = lev[TL.barOfBeat[Math.floor(x / R)]]; const c = cell[x]; if (c === '-' || c === 'u' || c === 'p') cell[x] = L === 1 ? 'd' : 'D'; else if (c === 'd' && L !== 1) cell[x] = 'D'; }
+    // 당김(EG_ANT, 수준 2 이상): 다음 마디 첫 박에서 바뀌는 코드를 이 마디 끝 박 '&'(칸 R/2)에서 앞당겨 치고 첫 박은 이어 둠(ui.js는 당긴 코드의 울림을 새 코드 구간 끝·다음 스트로크까지)(원곡 그 칸이 EG_ANT_U 이상 세고 다음 첫 박보다 EG_ANT_D 이상 셀 때만)
+    if (P.EG_ANT && R === 4 && mode !== 'strum') for (let bi = first; bi + 1 < nbar; bi++) {
+      const b = TL.bars[bi], x1 = TL.bars[bi + 1].startBeat * R, xa = x1 - 2;
+      if (!chordBar[bi] || lev[bi] < 2 || stopB[bi] || brk[bi] || x1 >= nX || xa < b.startBeat * R) continue;
+      if (!change.has(x1) || nc.has(x1) || change.has(xa) || nc.has(xa) || uS(xa) < P.EG_ANT_U || uS(xa) < uS(x1) + P.EG_ANT_D) continue;   // '&'가 세고(EG_ANT_U) 다음 첫 박보다 EG_ANT_D 이상 셀 때만(큰 구간의 고른 8분 칸은 당김이 아님)
+      cell[xa] = 'A'; for (let x = xa + 1; x < x1; x++) cell[x] = '-'; cell[x1] = '-'; tie.add(x1); antB[bi] = 1; plan[bi].antic = true;   // 당김과 첫 박 사이 16분(옛 코드)은 치지 않고 당긴 코드를 첫 박 너머로 이어 울림
+    }
+    // N.C.(EG_NC): 원곡에 리듬이 있는 구간의 크기 문턱을 넘는 박에서 8분(박마다 곡은 박) 연타. 팜뮤트 구간은 그 음(N), 뮤트 구간은 '칙'(X)
+    if (mode !== 'strum') for (let x = 0; x < nX; x++) {
+      if (!nc.has(x)) continue;
+      const q = rg ? rg[x] : -1, j = x % R;
+      cell[x] = q >= 0 && M.regs[q].active && M.ok[Math.floor(x / R)] && (j === 0 || (!quarter && R === 4 && j === 2) || (!quarter && R === 3)) ? (M.regs[q].mute === 'palm' ? 'N' : 'X') : '-';
+    }
+    // 곡 끝(EG_END): 마지막 코드가 시작한 칸 뒤로는 치지 않음(그 코드를 울려 둠)
+    if (P.EG_END && change.size && mode !== 'strum') { let lastC = -1; for (const x of change) if (x < nX && x > lastC && !nc.has(x)) lastC = x; if (lastC >= 0) { if (cell[lastC] === '-') cell[lastC] = 'D'; for (let x = lastC + 1; x < nX; x++) if (!nc.has(x)) cell[x] = '-'; } }
+    // 'strum'(스트로크 따라): 원곡 스트로크를 그대로 파워 코드로
+    const out = [], dsrc = P.DYN ? [] : null, three = L => L >= P.EG_THREE;
+    const prevRoot = x => { for (let q = x; q >= 0; q--) { const e = evOf[q] >= 0 ? evs[evOf[q]] : null; if (e && !e.nc) return egPower(e.pcs, e.bassPc, false).root; } for (let q = x + 1; q < nX; q++) { const e = evOf[q] >= 0 ? evs[evOf[q]] : null; if (e && !e.nc) return egPower(e.pcs, e.bassPc, false).root; } return 4; };
+    const pushNC = (x, t, dir, vel, pos, reg) => {
+      const bi = TL.barOfBeat[Math.floor(x / R)], L = lev[bi], pc = reg.mute === 'palm' ? reg.pc : prevRoot(x), r = egRoot(pc);
+      out.push({ t, dir, vel, change: false, span: spanOf(x), mute: reg.mute, pc, eg: { kind: reg.mute === 'palm' ? 'nc' : 'dead', notes: [r.m, r.m + 7], root: pc, shape: 'pc', s: r.s, palm: true, drive: drv(L), ring: 'chug', bar: bi, k: x - TL.bars[bi].startBeat * R, L, antic: false, build: false, stop: false } });
+      if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1.25, 2), fb: false, ref: false, pos });
+    };
+    if (mode === 'strum') {
+      const st = stR;              // 통기타 스트로크 따라(rakeMark 전): { t, dir, vel, change, db, tone, mute?, pc? }
+      const xOf = t => { const i = clamp(lastLE(beats, t + 0.03), 0, nb - 2), dt = beats[i + 1] - beats[i], p = (t - beats[i] - shift) / dt; let bj = 0; for (let j = 1; j < R; j++) if (Math.abs(p - posJ[j]) < Math.abs(p - posJ[bj])) bj = j; return i * R + bj; };
+      let lastChord = -1; st.forEach((s, q) => { if (!s.mute) lastChord = q; });
+      let prevOpen = true;
+      st.forEach((s, q) => {
+        const x = xOf(s.t); if (x >= nX) return;
+        if (s.mute) { const r = rg ? rg[x] : -1; if (r >= 0) pushNC(x, s.t, s.dir, s.vel, P.EG_CHUG_DB, M.regs[r]); return; }
+        const e = evOf[x] >= 0 ? evs[evOf[x]] : null;   // 스트로크는 칸 자리(±15 ms)에 있으므로 그 칸의 코드(코드 바뀜 칸의 앞당겨 치기도 같은 칸)
+        if (!e || e.nc) return;
+        // 열기·팜뮤트: 코드 바뀜·곡의 끝 코드·센 칸(uS ≥ EG_ST_OPEN)은 열어, 약한 다운은 팜뮤트, 업은 앞 스트로크를 따름(여린 업을 고스트처럼 막지 않게)
+        const bi = TL.barOfBeat[Math.floor(x / R)], L = lev[bi], isUp = s.dir < 0, open = !!s.change || q === lastChord || uS(x) >= P.EG_ST_OPEN || (isUp && prevOpen), pw = egPower(e.pcs, e.bassPc, three(L), L);
+        prevOpen = open;
+        const pos = (open ? 0 : P.EG_CHUG_DB) + (isUp ? P.EG_16_DB : 0);
+        out.push({ t: s.t, dir: s.dir, vel: s.vel, change: !!s.change, span: spanOf(x), eg: { kind: open ? 'open' : 'chug', notes: pw.notes, root: pw.root, shape: pw.shape, s: pw.s, palm: !open, drive: drv(L), ring: open ? 'hold' : 'chug', bar: bi, k: x - TL.bars[bi].startBeat * R, L, antic: false, build: false, stop: false } });
+        if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1.25, 2), fb: false, ref: !isUp, pos });
+      });
+    } else for (let x = 0; x < nX; x++) {
+      const c = cell[x]; if (c === '-' || tie.has(x)) continue;
+      const i = Math.floor(x / R), bi = TL.barOfBeat[i], L = lev[bi], t = cellT(x);
+      if (c === 'N' || c === 'X') { pushNC(x, t, 1, 0.7, P.EG_CHUG_DB, M.regs[rg[x]]); continue; }
+      let e = c === 'A' ? (evOf[x + 2] >= 0 ? evs[evOf[x + 2]] : null) : (evOf[x] >= 0 ? evs[evOf[x]] : null);
+      if (!e || e.nc) continue;
+      const open = c === 'D' || c === 'u' || c === 'A' || c === 'S', isUp = c === 'u' || c === 'p', pw = egPower(e.pcs, e.bassPc, three(L), L);
+      const kind = c === 'A' ? 'push' : c === 'S' ? 'stab' : stopB[bi] ? 'stop' : open ? 'open' : 'chug';
+      const pos = (open ? 0 : P.EG_CHUG_DB) + (isUp ? P.EG_16_DB : 0) + (c === 'A' ? P.EG_PUSH_DB : 0) + (c === 'S' || stopB[bi] ? P.EG_ACC_DB : 0);
+      out.push({ t, dir: isUp ? -1 : 1, vel: open ? 0.78 : 0.66, change: change.has(x) || c === 'A', span: spanOf(x), eg: { kind, notes: pw.notes, root: pw.root, shape: pw.shape, s: pw.s, palm: !open, drive: drv(L), ring: !open ? 'chug' : kind === 'stab' ? 'stab' : 'hold', bar: bi, k: x - TL.bars[bi].startBeat * R, L, antic: c === 'A', build: !!buildB[bi], stop: !!stopB[bi] } });
+      if (dsrc) dsrc.push({ bar: bi, u: clamp(u(x), -1.25, 2), fb: false, ref: !isUp, pos });
+    }
+    if (dsrc) dynApply(A, TL, out, dsrc, P.EG_K, P.EG_Y0 + ((P.EG_Y0M && P.EG_Y0M[mode]) || 0));   // 방식마다 크기 맞춤(EG_Y0M)
+    const levels = [0, 0, 0, 0, 0]; for (let bi = 0; bi < nbar; bi++) if (chordBar[bi]) levels[clamp(lev[bi], 0, 4)]++;
+    out.plan = plan;
+    out.lev = Array.from(lev);                                   // 마디마다 일렉 수준 EL(0~4)
+    const cnt = a => mode === 'strum' ? 0 : Array.from(a).filter(v => v).length;
+    let nOpen = 0, nChug = 0; for (let bi = 0; bi < nbar; bi++) if (chordBar[bi]) { if (openB[bi]) nOpen++; else nChug++; }
+    out.eg = { bpm, hand: quarter ? 4 : sixteen ? 16 : 8, shift, swing: swingOn ? phi : null, levels, openBars: nOpen, chugBars: nChug, stops: cnt(stopB), builds: cnt(buildB), antics: cnt(antB), mode, slow, driveMax };
+    return out;
+  }
+
+  // ---------------------------------------------------------------
+  // 기타 리프 따라 치기(1.25.0, P.RIFF) 채보·구간·일렉 기타 음(규칙은 P의 RIFF 설명). riff(A, TL) →
+  //  { on, src('side'·'mid'), sub(박당 칸 수), shift(박 느낌, 초), ms,
+  //    sections: 따라 치는 리프 구간 [{ b0, b1(마디 [b0, b1)), t0, t1, lag(되풀이 길이, 마디), agree(평균 되풀이), kind('riff' 음 2가지 이상·'chug' 한 음),
+  //      comp(꼴 음 가운데 코드 표기 근음·5도 비율), nonChord(코드 밖 음 비율), n(친 음 수), figure: [{ q(꼴 안 마디), k(칸), n(칸 수), m, kind('note'·'pc5'), palm, agree, on }] }],
+  //    cands: 되풀이되지만 코드 반주로 본 구간(따라 치지 않음, 같은 꼴), notes: [{ t, dur, m, notes([근음] 또는 [근음, 근음+7]), kind, palm, conf, bar, k, sec, db, vel, tone }],
+  //    bars: Uint8Array(마디마다 1 = 리프 구간) }
+  //  같은 A·TL·설정이면 한 번만 잼(riffCache). A.riff가 없으면(끔·모노) 빈 결과
+  const RIFF_SIG = ['RIFF', 'RIFF_BPM8', 'RIFF_BPM2', 'RIFF_CONF', 'RIFF_EXPL0', 'RIFF_EXPL1', 'RIFF_DOMW', 'RIFF_LOWREL', 'RIFF_ONNOTE', 'RIFF_ONFIG', 'RIFF_ONBAR', 'RIFF_QUIET', 'RIFF_MINN', 'RIFF_REP',
+    'RIFF_AGREE', 'RIFF_BARS', 'RIFF_LAG4', 'RIFF_FIG', 'RIFF_COMP', 'RIFF_SCONF', 'RIFF_NONCH', 'RIFF_P5', 'RIFF_PCROOT', 'RIFF_PEDAL', 'RIFF_PEDLO', 'RIFF_VOX', 'RIFF_VDOM', 'RIFF_VMINF', 'RIFF_VW0', 'RIFF_VW1', 'RIFF_VG0', 'RIFF_VG1', 'RIFF_VBAR', 'RIFF_VSEC', 'RIFF_PASS', 'RIFF_PALM', 'RIFF_DB0', 'RIFF_DBK', 'RIFF_DENS', 'RIFF_TRIM', 'RIFF_PALM_DB', 'ST_BEAT', 'ST_BEAT_MAX', 'ST_WIN', 'DYN',
+    'RIFF_SIDE', 'RIFF_LEAD', 'LEAD_E', 'LEAD_COV', 'LEAD_GL', 'LEAD_TILT', 'LEAD_CEN', 'LEAD_NB', 'LEAD_HOLD', 'LEAD_MIN', 'LEAD_RE', 'LEAD_TOP', 'LEAD_DB', 'LEAD_DENS', 'LEAD_NLO', 'LEAD_NBNH', 'LEAD_NODD', 'LEAD_LAG', 'LEAD_RA', 'LEAD_RAD', 'LEAD_RAQ', 'LEAD_SLOT', 'LEAD_SCOV', 'LEAD_SSH', 'LEAD_EXT', 'LEAD_EXT_GL', 'LEAD_TRIMX'];
+  const riffCache = new WeakMap();
+  const riffEmpty = TL => ({ on: false, src: null, sub: 0, shift: 0, ms: 0, sections: [], cands: [], notes: [], bars: new Uint8Array(TL && TL.bars ? TL.bars.length : 0) });
+  function riff(A, TL) {
+    if (!P.RIFF || !A || !A.riff || !A.fp || !A.rms || !TL || TL.empty) return riffEmpty(TL);
+    const sig = RIFF_SIG.map(k => P[k]).join('|'), c = riffCache.get(TL);
+    if (c && c.A === A && c.sig === sig) return c.R;
+    const R = riffCalc(A, TL);
+    riffCache.set(TL, { A, sig, R });
+    return R;
+  }
+  // 같은 계산을 조각으로(1.25.0 검증 뒤, riffAsync): 리프 특징을 다 잰 뒤 화면이 riff()를 한 번에 부르면 긴 곡은 수백 ms 멈춤(재생 중이면 예약이 밀림) →
+  //  riffGen의 yield 자리마다 32 ms가 지났으면 양보하며 잼. 결과는 riff()와 같고(같은 식·같은 차례) riff()의 캐시에 둠(ms는 계산에 든 시간만)
+  async function riffAsync(A, TL, onProgress) {
+    if (!P.RIFF || !A || !A.riff || !A.fp || !A.rms || !TL || TL.empty) return riffEmpty(TL);
+    const sig = RIFF_SIG.map(k => P[k]).join('|'), c = riffCache.get(TL);
+    if (c && c.A === A && c.sig === sig) return c.R;
+    const tick = makeTicker(onProgress), g = riffGen(A, TL);
+    let r, busy = 0;
+    for (;;) { const t = nowMs(); r = g.next(); busy += nowMs() - t; if (r.done) break; await tick(0); }
+    const R = r.value; R.ms = busy;
+    riffCache.set(TL, { A, sig, R });
+    return R;
+  }
+  const riffPcDist = (a, b) => { const d = Math.abs(((a - b) % 12 + 12) % 12); return Math.min(d, 12 - d); };
+  const riffAgree = (p, q) => p >= 0 && q >= 0 && (Math.abs(p - q) <= 1 || riffPcDist(p, q) <= 1);                                            // 같은 음(옥타브 무관, ±1반음)
+  const riffRelated = (p, q) => riffAgree(p, q) || (p >= 0 && q >= 0 && riffPcDist(p, q) === 5);                                            // + 5도·4도 관계(어택 칸의 3배음·파워 코드의 5도)
+  const RIFF_SUBS = [31, 24, 19, 12, 7];                                                                                                     // 최대 후보 아래의 배음 자리(반음)
+  function riffCalc(A, TL) { const g = riffGen(A, TL); let r; do r = g.next(); while (!r.done); return r.value; }
+  // 앞 선율 대목·음(RIFF_LEAD, riffGen 안에서 같은 칸·박 느낌·셈여림으로): A.riff.lead(riffLeadFrames)
+  //  1) 마디마다 덮임(유효 프레임 = 음높이 있고 두드러짐 ≥ LEAD_E 의 몫), 미끄러짐(이웃 유효 프레임 사이 4~50센트 움직임 / 전이 수: 노래의 끌기·비브라토·흔들림.
+  //     기타·신스 리드는 음이 계단처럼 바뀌고 음 안에서 고정), 밝기(tilt)·가운데 무게(cen) 값을 모으고, 앞뒤 실제 LEAD_NB마디 이웃까지 합쳐
+  //     (미끄러짐 = 움직임 합 / 전이 합, 전이 8개 미만이면 1; 밝기·가운데 무게 = 중앙값) 덮임 ≥ LEAD_COV, 미끄러짐 < LEAD_GL, 밝기 ≥ LEAD_TILT, 가운데 무게 ≥ LEAD_CEN인 마디
+  //  2) 대목: 실제 한 마디 이하 틈은 잇고, 가장자리에서 그 마디만의 미끄러짐이 LEAD_GL 이상이거나 덮임이 모자란 마디는 잘라 냄(실제 RIFF_PASS마디가 남는 동안만), 실제 RIFF_PASS마디 미만이면 버림
+  //     (LEAD_TRIMX: 그 마디만의 밝기·가운데 무게 중앙값이 관문 밑이어도 잘라 냄 — 앞뒤 평균에 묻힌 노래 끝 마디: 합성 정답곡 간주 앞 후렴 마디, Rough 2:32 마디)
+  //     남은 대목은 바로 밖 마디를 실제 LEAD_EXT마디까지 붙임: 그 마디만의 값(미끄러짐 < LEAD_EXT_GL, 밝기·가운데 무게)과 대목 쪽 이웃만 합친 값이 관문을 넘을 때(LEAD_EXT 설명은 그 자리)
+  //  3) 음: 대목 안 유효 프레임 음높이(5프레임 중앙값)에서 반올림 음이 LEAD_HOLD 프레임 넘게 0.75반음 밖에 머물면 새 음, 같은 음에서 배음 합이 최근 최소보다
+  //     LEAD_RE dB 넘게 오르면 다시 침, 3프레임 넘게 끊기면 끝, LEAD_MIN초 미만은 버림. 새 음 앞이 아래에서 올라오는 초킹이면 그 첫 프레임이 시작, 맞닿은 짧은 음(칸 1.5개 이하)이
+  //     이웃 음과 옥타브 차면 그 음에 붙임 → 칸에 맞춤(시작 = 가장 가까운 칸 머리, 끝 = 반 넘게 울린 칸까지, 같은 칸 둘이면
+  //     길이 × 두드러짐이 큰 것). LEAD_TOP보다 높으면 옥타브씩 내리고 MIDI 40보다 낮으면 올림(기타 음역). 대목의 음이 실제 한 마디에 LEAD_DENS개 미만이면 why 'sparse'
+  //     (음 높이·유효·다시 치기 크기는 음 줄(LEAD_NLO: nf0·nex·nlv)이 있으면 그것. LEAD_LAG > 0이면 시작 칸은 LEAD_LAG초 앞당긴 시각에서 가장 가까운 칸 머리,
+  //      LEAD_RA > 0이면 짧은 창 배음 에너지로 같은 음 다시 치기도 가름)
+  //  3b) 칸 고르기(LEAD_SLOT): 위 3) 대신 칸마다 바로 음을 고름(notesSlot: 설명은 그 위). 같은 칸 격자 위 리드는 칸 안 프레임 다수결이 프레임 문턱(LEAD_HOLD)보다 덜 흔들림
+  //  돌려줌 { secs: [{ b0, b1, notes: [{ i, e, m, conf, s0, s1 }], glide, cov }], bars: { cov, glide, tilt, cen, ok } }
+  function* riffLeadGen(TL, L, byBar, barScale) {
+    const bars = TL.bars, nbar = bars.length, hop = L.hop, E = Math.round(255 * P.LEAD_E);
+    const cov = new Float32Array(nbar), mv = new Float64Array(nbar), tr = new Float64Array(nbar), tl = [], cn = [];
+    for (let b = 0; b < nbar; b++) {
+      const f0 = Math.max(0, Math.ceil(bars[b].t0 / hop)), f1 = Math.min(L.nF, Math.floor(bars[b].t1 / hop));
+      let n = 0, a = 0, c = 0; const tv = [], cv = [];
+      for (let t = f0; t < f1; t++) {
+        if (L.f0[t] < 0 || L.expl[t] < E) continue;
+        n++; tv.push(L.tilt[t]); cv.push(L.cen[t]);
+        if (t + 1 < L.nF && L.f0[t + 1] >= 0 && L.expl[t + 1] >= E) { const d = Math.abs(L.f0[t + 1] - L.f0[t]) * 100; c++; if (d > 4 && d < 50) a++; }
+      }
+      cov[b] = f1 > f0 ? n / (f1 - f0) : 0; mv[b] = a; tr[b] = c; tl.push(tv); cn.push(cv);
+      if ((b & 63) === 63) yield;
+    }
+    const w = Math.max(1, Math.round(P.LEAD_NB / barScale)), med = arr => { if (!arr.length) return NaN; const v = Float64Array.from(arr).sort(); return v[v.length >> 1]; };
+    const glide = new Float32Array(nbar), tiltM = new Float32Array(nbar), cenM = new Float32Array(nbar), ok = new Uint8Array(nbar);
+    for (let b = 0; b < nbar; b++) {
+      let a = 0, c = 0; const tv = [], cv = [];
+      for (let q = Math.max(0, b - w); q <= Math.min(nbar - 1, b + w); q++) { a += mv[q]; c += tr[q]; for (const v of tl[q]) tv.push(v); for (const v of cn[q]) cv.push(v); }
+      glide[b] = c >= 8 ? a / c : 1; tiltM[b] = med(tv); cenM[b] = cv.length ? med(cv) / 255 : 0;
+      ok[b] = cov[b] >= P.LEAD_COV && glide[b] < P.LEAD_GL && tiltM[b] >= P.LEAD_TILT && cenM[b] >= P.LEAD_CEN ? 1 : 0;
+      if ((b & 63) === 63) yield;
+    }
+    const gapMax = Math.max(1, Math.round(1 / barScale)), own = b => tr[b] >= 8 ? mv[b] / tr[b] : 0, bad = b => cov[b] < P.LEAD_COV || own(b) >= P.LEAD_GL || (P.LEAD_TRIMX && (!(med(tl[b]) >= P.LEAD_TILT) || !(med(cn[b]) / 255 >= P.LEAD_CEN)));
+    const runs = [];
+    for (let b = 0; b < nbar;) {
+      if (!ok[b]) { b++; continue; }
+      let e = b + 1;
+      for (;;) { while (e < nbar && ok[e]) e++; let g = e; while (g < nbar && !ok[g] && g - e < gapMax) g++; if (g < nbar && ok[g] && g - e <= gapMax) { e = g; continue; } break; }
+      let b0 = b, b1 = e;
+      const room = () => (b1 - b0 - 1) * barScale >= P.RIFF_PASS - 1e-9;          // 다듬어도 실제 RIFF_PASS마디가 남을 때만(짧은 대목은 통째로: 첫 마디 초킹 하나로 버리지 않게)
+      while (b1 - b0 > 1 && bad(b0) && room()) b0++;
+      while (b1 - b0 > 1 && bad(b1 - 1) && room()) b1--;
+      if ((b1 - b0) * barScale >= P.RIFF_PASS - 1e-9) runs.push({ b0, b1 });
+      b = e;
+    }
+    // 가장자리 넓히기(LEAD_EXT): 앞뒤 마디 평균은 대목 밖(노래)의 이웃까지 섞어 대목 첫·끝 마디의 미끄러짐을 부풀림(레일건 3:03.6 마디: 그 마디만 0.14, 앞뒤 평균 0.28).
+    //  대목 바로 밖 마디를 실제 LEAD_EXT마디까지, 그 마디 자체(전이 8개 이상: 미끄러짐·밝기·가운데 무게)와 대목 쪽 이웃만 합친 값(미끄러짐 < LEAD_GL, 밝기·가운데 무게 중앙값)이 모두 관문을 넘으면 붙임
+    if (P.LEAD_EXT > 0) {
+      const extN = Math.max(1, Math.round(P.LEAD_EXT / barScale));
+      const pass = (c, q0, q1) => {
+        if (cov[c] < P.LEAD_COV || tr[c] < 8 || mv[c] / tr[c] >= P.LEAD_EXT_GL || !(med(tl[c]) >= P.LEAD_TILT) || !(med(cn[c]) / 255 >= P.LEAD_CEN)) return false;
+        let a = 0, n = 0; const tv = [], cv = [];
+        for (let q = q0; q <= q1; q++) { a += mv[q]; n += tr[q]; for (const v of tl[q]) tv.push(v); for (const v of cn[q]) cv.push(v); }
+        return n >= 8 && a / n < P.LEAD_GL && med(tv) >= P.LEAD_TILT && cv.length > 0 && med(cv) / 255 >= P.LEAD_CEN;
+      };
+      for (let k = 0; k < runs.length; k++) {
+        const r = runs[k], lo = k > 0 ? runs[k - 1].b1 : 0, hi = k + 1 < runs.length ? runs[k + 1].b0 : nbar;
+        for (let x = 0; x < extN && r.b0 - 1 >= lo && pass(r.b0 - 1, r.b0 - 1, Math.min(r.b1 - 1, r.b0 - 1 + w)); x++) r.b0--;
+        for (let x = 0; x < extN && r.b1 < hi && pass(r.b1, Math.max(r.b0, r.b1 - w), r.b1); x++) r.b1++;
+      }
+    }
+    // 같은 음 다시 치기(LEAD_RA dB > 0, 짧은 창 배음 에너지 L.hs: LEAD_SW로 잰 특징이 있을 때만): 앞 3프레임 최소 → 이 프레임·다음 프레임 최소로 LEAD_RA dB 넘게 오르고,
+    //  배음 사이(L.hn) 오름보다 LEAD_RAD dB 넘게 크며(북·심벌은 배음 사이도 함께 오름), 다음 프레임 오름보다 작지 않을 때(봉우리)
+    const raOn = P.LEAD_RA > 0 && !!L.hs, HS = L.hs, HN = L.hn;
+    const riseAt = (A, f) => { let pre = Infinity; for (let k = 1; k <= 3; k++) { const v = A[f - k]; if (f - k >= 0 && v > -119 && v < pre) pre = v; } const post = Math.min(A[f], f + 1 < L.nF ? A[f + 1] : A[f]); return pre === Infinity || post <= -119 ? -99 : post - pre; };
+    //  1.25.0 검토 뒤(LEAD_RAQ): 오름이 그 앞 8프레임 이웃 차의 중앙값(긴 음 안의 일렁임) × LEAD_RAQ만큼 더 커야 함 — 3 dB 문턱만으로는 길게 끄는 음 안의 일렁임에서도 다시 쳤음
+    const ripple = f => { const d = []; for (let k = Math.max(1, f - 8); k < f; k++) { const x = HS[k], y = HS[k - 1]; if (x > -119 && y > -119) d.push(Math.abs(x - y)); } if (!d.length) return 0; d.sort((p, q) => p - q); return d[d.length >> 1]; };
+    const attack = f => { if (f < 0 || f >= L.nF) return false; const r0 = riseAt(HS, f); if (r0 < P.LEAD_RA || r0 - riseAt(HN, f) < P.LEAD_RAD) return false; if (P.LEAD_RAQ > 0 && r0 < P.LEAD_RA + P.LEAD_RAQ * ripple(f)) return false; return f + 1 >= L.nF || r0 >= riseAt(HS, f + 1); };
+    // 프레임 → 음(초 단위)
+    const notesIn = (ta, tb, fragS) => {
+      const a = Math.max(0, Math.round(ta / hop)), n = Math.max(0, Math.min(L.nF, Math.round(tb / hop)) - a), v = new Float32Array(n), sm = new Float32Array(n), tmp = [];
+      const NF = L.nf0 || L.f0, NE = L.nex || L.expl, NL = L.nlv || L.lv;   // 음 줄(LEAD_NLO)이 있으면 음은 그 줄로(대목 문은 f0·expl 그대로)
+      for (let i = 0; i < n; i++) v[i] = NF[a + i] >= 0 && NE[a + i] >= E ? NF[a + i] : -1;
+      for (let i = 0; i < n; i++) { if (v[i] < 0) { sm[i] = -1; continue; } tmp.length = 0; for (let k = i - 2; k <= i + 2; k++) if (k >= 0 && k < n && v[k] >= 0) tmp.push(v[k]); tmp.sort((p, q) => p - q); sm[i] = tmp[tmp.length >> 1]; }
+      const out = []; let cur = null, cand = -999, cnt = 0, gap = 0, minLv = 0, ex = 0, nx = 0;
+      const close = i => { if (cur) { cur.t1 = (a + i) * hop; cur.conf = nx ? ex / nx / 255 : 0; if (cur.t1 - cur.t >= P.LEAD_MIN) out.push(cur); } cur = null; };
+      const open = (i, r) => { cur = { t: (a + i) * hop, m: r, i0: i }; minLv = NL[a + i]; ex = 0; nx = 0; };
+      const minF = Math.round(P.LEAD_MIN / hop);
+      for (let i = 0; i < n; i++) {
+        if (sm[i] < 0) { gap++; if (gap > 2) { close(i - gap + 1); cand = -999; cnt = 0; } continue; }
+        gap = 0; const r = Math.round(sm[i]);
+        if (!cur) { open(i, r); ex += NE[a + i]; nx++; continue; }
+        if (r !== cur.m) {
+          if (Math.abs(sm[i] - cur.m) > 0.75) { if (cand === r) cnt++; else { cand = r; cnt = 1; } } else { cand = -999; cnt = 0; }
+          if (cand !== -999 && cnt >= P.LEAD_HOLD) {
+            // 초킹(아래에서 밀어 올려 닿음): 새 음(앞 음보다 높음) 앞 프레임이 앞 음보다 0.3반음 넘게 위·새 음 아래 2.5반음 안에서 계속 올라오는 중이면 그 첫 프레임을 시작으로
+            let i0 = i - P.LEAD_HOLD + 1;
+            if (r > cur.m) while (i0 - 1 > cur.i0 + minF && sm[i0 - 1] >= 0 && sm[i0 - 1] - cur.m > 0.3 && r - sm[i0 - 1] <= 2.5 && sm[i0 - 1] < sm[i0] - 0.02) i0--;
+            close(i0); open(i0, r); cand = -999; cnt = 0;
+          }
+          continue;
+        }
+        cand = -999; cnt = 0; ex += NE[a + i]; nx++;
+        if (raOn && (a + i) * hop - cur.t > P.LEAD_MIN && attack(a + i)) { close(i); open(i, r); ex += NE[a + i]; nx++; continue; }
+        if (NL[a + i] - minLv > P.LEAD_RE && (a + i) * hop - cur.t > P.LEAD_MIN) { close(i); open(i, r); ex += NE[a + i]; nx++; continue; }
+        if (NL[a + i] < minLv) minLv = NL[a + i];
+      }
+      close(n);
+      // 옥타브 조각: 맞닿은(틈 0.03초 이하) 두 음이 옥타브(±12·24반음) 차이고 하나가 짧으면(fragS초 이하) 한 음으로(음높이는 긴 쪽, 같으면 앞 음: 어택 쪽이 믿을 만함)
+      //  (합성 정답곡: 음 끝·드럼 칸에서 추적이 한 옥타브 아래로 미끄러진 16분 조각)
+      const oct = (p, q) => p !== q && (p - q) % 12 === 0;
+      for (let i = 1; i < out.length; i++) {
+        const pv = out[i - 1], x = out[i], dp = pv.t1 - pv.t, dx = x.t1 - x.t;
+        if (x.t - pv.t1 > 0.03 || !oct(x.m, pv.m) || Math.min(dp, dx) > fragS) continue;
+        if (dx > dp) pv.m = x.m;
+        pv.t1 = x.t1; pv.conf = (pv.conf * dp + x.conf * dx) / (dp + dx); out.splice(i, 1); i--;
+      }
+      return out;
+    };
+    // 칸 고르기(LEAD_SLOT): 칸마다 그 칸을 긴 창 늦음(LEAD_LAG초)만큼 뒤로 민 자리의 유효 프레임(5프레임 중앙값) 반올림 음높이를 두드러짐(expl) 가중 다수결로
+    //  (유효 프레임 몫 ≥ LEAD_SCOV이고 다수 음 몫 ≥ LEAD_SSH일 때만 소리 칸, 아니면 쉼). 양옆 칸이 같은 음인데 그 칸만 옥타브 차면 양옆 음(옥타브 조각).
+    //  맞닿은 소리 칸이 같은 음이면 이어 한 음, 다만 칸 머리 −30~+50 ms에 다시 치기(attack)가 있으면 새 음. 음 길이는 칸 단위(짧은 조각·최소 길이 문제가 없음)
+    const notesSlot = sl => {
+      const lag = P.LEAD_LAG, S = sl.length, fa = Math.max(0, Math.round((sl[0].t0 + lag) / hop) - 3), fb = Math.min(L.nF, Math.round((sl[S - 1].t1 + lag) / hop) + 3), n = Math.max(0, fb - fa);
+      const v = new Float32Array(n), sm = new Float32Array(n), tmp = [];
+      const NF = L.nf0 || L.f0, NE = L.nex || L.expl;                          // 음 줄(LEAD_NLO)이 있으면 그 줄로
+      for (let i = 0; i < n; i++) v[i] = NF[fa + i] >= 0 && NE[fa + i] >= E ? NF[fa + i] : -1;
+      for (let i = 0; i < n; i++) { if (v[i] < 0) { sm[i] = -1; continue; } tmp.length = 0; for (let k = i - 2; k <= i + 2; k++) if (k >= 0 && k < n && v[k] >= 0) tmp.push(v[k]); tmp.sort((p, q) => p - q); sm[i] = tmp[tmp.length >> 1]; }
+      const pj = new Int16Array(S).fill(-1), cj = new Float32Array(S), hist = new Map();
+      for (let j = 0; j < S; j++) {
+        const i0 = Math.max(0, Math.round((sl[j].t0 + lag) / hop) - fa), i1 = Math.min(n, Math.round((sl[j].t1 + lag) / hop) - fa);
+        hist.clear(); let nv = 0, wt = 0;
+        for (let i = i0; i < i1; i++) { if (sm[i] < 0) continue; nv++; const r = Math.round(sm[i]), w = NE[fa + i]; hist.set(r, (hist.get(r) || 0) + w); wt += w; }
+        if (i1 <= i0 || nv < P.LEAD_SCOV * (i1 - i0) || !(wt > 0)) continue;
+        let best = -1, bw = 0; for (const [r, w] of hist) if (w > bw || (w === bw && r < best)) { bw = w; best = r; }
+        if (bw < P.LEAD_SSH * wt) continue;
+        pj[j] = best; cj[j] = wt / nv / 255;
+      }
+      for (let j = 1; j + 1 < S; j++) if (pj[j] >= 0 && pj[j - 1] >= 0 && pj[j - 1] === pj[j + 1] && pj[j] !== pj[j - 1] && (pj[j] - pj[j - 1]) % 12 === 0) pj[j] = pj[j - 1];
+      const out = [];
+      for (let j = 0; j < S; j++) {
+        if (pj[j] < 0) continue;
+        const pv = out[out.length - 1];
+        let att = false;
+        if (raOn && pv && pv.e === j - 1 && pv.m === pj[j]) { const a0 = Math.round((sl[j].t0 - 0.03) / hop), a1 = Math.round((sl[j].t0 + 0.05) / hop); for (let f = a0; f <= a1 && !att; f++) att = attack(f); }
+        if (pv && pv.e === j - 1 && pv.m === pj[j] && !att) { pv.e = j; pv.cs += cj[j]; pv.k++; continue; }
+        out.push({ i: j, e: j, m: pj[j], cs: cj[j], k: 1 });
+      }
+      return out.map(x => { let m = x.m; while (m > P.LEAD_TOP) m -= 12; while (m < 40) m += 12; return { i: x.i, e: x.e, m, conf: x.cs / x.k }; });
+    };
+    const secs = [];
+    for (const r of runs) {
+      yield;
+      const sl = []; for (let b = r.b0; b < r.b1; b++) for (const x of byBar[b]) sl.push(x);
+      if (!sl.length) continue;
+      const slotS = (sl[sl.length - 1].t1 - sl[0].t0) / sl.length, raw = P.LEAD_SLOT ? [] : notesIn(sl[0].t0 - 0.03, sl[sl.length - 1].t1, 1.5 * slotS), q = P.LEAD_SLOT ? notesSlot(sl) : [];
+      let j = 0;
+      for (const nt of raw) {
+        const tq = nt.t - P.LEAD_LAG;                                                // 긴 창 늦음 보정(LEAD_LAG): 시작은 그만큼 앞에서 가장 가까운 칸 머리
+        while (j + 1 < sl.length && Math.abs(sl[j + 1].t0 - tq) <= Math.abs(sl[j].t0 - tq)) j++;
+        let e = j; while (e + 1 < sl.length && sl[e + 1].t0 < nt.t1 - 0.5 * (sl[e + 1].t1 - sl[e + 1].t0)) e++;
+        let m = nt.m; while (m > P.LEAD_TOP) m -= 12; while (m < 40) m += 12;
+        const prev = q[q.length - 1];
+        if (prev && prev.i === j) { if ((e - j + 1) * nt.conf > (prev.e - prev.i + 1) * prev.conf) q[q.length - 1] = { i: j, e, m, conf: nt.conf }; continue; }
+        if (prev && prev.e >= j) prev.e = j - 1;
+        q.push({ i: j, e: Math.max(j, e), m, conf: nt.conf });
+      }
+      let gs = 0, cs = 0; for (let b = r.b0; b < r.b1; b++) { gs += glide[b]; cs += cov[b]; }
+      secs.push({ b0: r.b0, b1: r.b1, notes: q.map(x => Object.assign(x, { s0: sl[x.i], s1: sl[x.e] })), glide: gs / (r.b1 - r.b0), cov: cs / (r.b1 - r.b0) });
+    }
+    return { secs, bars: { cov, glide, tilt: tiltM, cen: cenM, ok } };
+  }
+  function* riffGen(A, TL) {                            // yield: 양보해도 되는 자리(값은 바꾸지 않음)
+    // RIFF_SIDE를 끄면 곁 특징이 있어도(켠 채 잰 특징) 곁 리프 구간을 만들지 않음(빈 곁 특징: nB 0)
+    const RF0 = A.riff, RF = P.RIFF_SIDE || !RF0.src ? RF0 : Object.assign({}, RF0, { src: null, nB: 0, nF: 0, sal: new Uint8Array(0), smax: new Float32Array(0), expl: new Float32Array(0), vox: null });
+    const t0ms = nowMs(), nB = RF.nB, lo = RF.lo, fpsR = 1 / RF.hop, fps = A.fps;
+    const beats = TL.beats, nb = beats.length, bars = TL.bars, nbar = bars.length, barOf = TL.barOfBeat;
+    const sub = TL.meter.triple ? 3 : TL.bpm > P.RIFF_BPM8 ? 2 : TL.bpm < P.RIFF_BPM2 ? 8 : 4;
+    // 칸(박당 sub칸)마다 두드러짐 벡터(프레임 합·정규화), 으뜸 음 p, 설명 몫 expl, 5도 비 p5, 크기 e(곁 신호 rms), 온셋 on(곁 신호 플럭스 최대)
+    const slots = [], byBar = Array.from({ length: nbar }, () => []);
+    for (let i = 0; i + 1 < nb; i++) {
+      const bL = beats[i + 1] - beats[i], bar = barOf[i], k0 = (i - bars[bar].startBeat) * sub;
+      for (let s = 0; s < sub; s++) { const sl = { t0: beats[i] + bL * s / sub, t1: beats[i] + bL * (s + 1) / sub, bar, i, s, k: k0 + s, idx: slots.length, p: -1, dom: 0, p5: 0, e: 0, expl: 0, on: 0 }; slots.push(sl); byBar[bar].push(sl); }
+    }
+    const nS = slots.length, slotSal = new Float32Array(nS * nB), acc = new Float64Array(nB);
+    const eSrc = RF.src === 'side' && A.srms ? A.srms : A.rms, flux = RF.src === 'side' && A.fs ? A.fs : A.fp;
+    for (const sl of slots) {
+      const f0 = Math.max(0, Math.round(sl.t0 * fpsR)), f1 = Math.min(RF.nF, Math.max(f0 + 1, Math.round(sl.t1 * fpsR)));
+      acc.fill(0); let tot = 0, ex = 0, nfr = 0;
+      for (let f = f0; f < f1; f++) { const g = RF.smax[f] / 255, tb = f * nB; if (g > 0) for (let b = 0; b < nB; b++) { const v = RF.sal[tb + b] * g; acc[b] += v; tot += v; } ex += RF.expl[f]; nfr++; }
+      let bm = 0; for (let b = 1; b < nB; b++) if (acc[b] > acc[bm]) bm = b;
+      sl.p = tot > 0 ? bm + lo : -1; sl.dom = tot > 0 ? acc[bm] / tot : 0; sl.p5 = acc[bm] > 0 && bm + 7 < nB ? acc[bm + 7] / acc[bm] : 0; sl.expl = nfr ? ex / nfr : 0;
+      let nrm = 0; for (let b = 0; b < nB; b++) nrm += acc[b] * acc[b]; nrm = Math.sqrt(nrm) || 1;
+      const si = sl.idx * nB; for (let b = 0; b < nB; b++) slotSal[si + b] = acc[b] / nrm;
+      const g0 = Math.max(0, Math.floor(sl.t0 * fps)), g1 = Math.min(eSrc.length, Math.max(g0 + 1, Math.ceil(sl.t1 * fps)));
+      let e = 0; for (let g = g0; g < g1; g++) e += eSrc[g]; sl.e = e / (g1 - g0);
+      const q = 0.25 * (sl.t1 - sl.t0), h0 = Math.max(0, Math.round((sl.t0 - q) * fps)), h1 = Math.min(flux.length, Math.max(h0 + 1, Math.round((sl.t1 - q) * fps)));   // 플럭스는 한 프레임 늦게 기록
+      let mx = 0; for (let g = h0; g < h1; g++) if (flux[g] > mx) mx = flux[g]; sl.on = mx;
+      if ((sl.idx & 511) === 511) yield;
+    }
+    const qv = (arr, q) => { const v = Float64Array.from(arr).sort(); return v.length ? v[Math.floor(q * (v.length - 1))] : 0; };
+    const onRef = qv(slots.map(s => s.on).filter(x => x > 0), 0.9) || 1, eRef = qv(slots.map(s => s.e).filter(x => x > 0), 0.5) || 1;
+    for (const sl of slots) { sl.domF = clamp((sl.expl - P.RIFF_EXPL0) / (P.RIFF_EXPL1 - P.RIFF_EXPL0), 0, 1); sl.onN = sl.on / onRef; sl.act = sl.p >= 0 && 20 * Math.log10(sl.e / eRef + 1e-9) > P.RIFF_QUIET; }
+    // 음 하나의 음높이: 칸들의 두드러짐 합(두드러진 칸에 가중)에서 최대 후보의 아래 배음 자리에 RIFF_LOWREL 이상이 있으면 가장 낮은 것(옥타브·5도 읽힘 고침)
+    const runPitch = ss => {
+      acc.fill(0);
+      for (const s of ss) { const w = 0.3 + s.domF, si = s.idx * nB; for (let b = 0; b < nB; b++) acc[b] += w * slotSal[si + b]; }
+      let bm = 0; for (let b = 1; b < nB; b++) if (acc[b] > acc[bm]) bm = b;
+      let pick = bm;
+      for (let it = 0; it < 3; it++) { let nx = pick; for (const d of RIFF_SUBS) { const b = pick - d; if (b >= 0 && acc[b] >= P.RIFF_LOWREL * acc[bm]) { nx = b; break; } } if (nx === pick) break; pick = nx; }
+      // 파워 코드 근음(RIFF_PCROOT): 고른 음이 5도이고(5도 아래 근음 ≥ 최대의 RIFF_PCROOT, 4도 위 = 근음의 옥타브 ≥ RIFF_LOWREL) 근음 기본음이 약하게 잡힌 경우(캐비닛 저역 감쇠·팜뮤트)
+      if (P.RIFF_PCROOT > 0 && pick >= 7 && pick + 5 < nB && acc[pick - 7] >= P.RIFF_PCROOT * acc[bm] && acc[pick + 5] >= P.RIFF_LOWREL * acc[bm]) pick -= 7;
+      return { m: pick + lo, p5: pick + 7 < nB && acc[pick] > 0 ? acc[pick + 7] / acc[pick] : 0 };
+    };
+    // 음: 배음 관계로 이어진 칸의 묶음(센 온셋·마디 첫머리에서 나눔, 쉬는 칸에서 끊음)
+    const notes = [];
+    for (let b = 0; b < nbar; b++) {
+      let run = null;
+      const flush = () => { if (!run) return; const ss = run.slots, rp = runPitch(ss); let on = 0, dF = 0; for (const s of ss) { if (s.onN > on) on = s.onN; dF += s.domF; } notes.push({ t: ss[0].t0, t1: ss[ss.length - 1].t1, m: rp.m, p5: rp.p5, domF: dF / ss.length, on, bar: b, k: ss[0].k, n: ss.length, rep: 0, conf: 0 }); run = null; };
+      for (const s of byBar[b]) {
+        if (!s.act) { flush(); continue; }
+        if (!run || !riffRelated(run.p, s.p) || s.onN >= P.RIFF_ONNOTE || (s.k === 0 && s.onN >= P.RIFF_ONBAR)) { flush(); run = { p: s.p, slots: [s] }; } else run.slots.push(s);
+      }
+      flush();
+    }
+    yield;
+    // 마디 짝 되풀이: 1·2·4마디 앞·뒤 가운데 이 마디의 음이 같은 칸(±1)에 가장 많이 다시 나오는 한 마디. 음의 믿음 = 짝 되풀이 × 두드러짐 × 온셋
+    const lags = P.RIFF_LAG4 ? [1, 2, 4] : [1, 2], notesByBar = Array.from({ length: nbar }, () => []);
+    for (const n of notes) notesByBar[n.bar].push(n);
+    const matchIn = (n, o) => o >= 0 && o < nbar && notesByBar[o].some(q => Math.abs(q.k - n.k) <= 1 && riffAgree(q.m, n.m));
+    const barRep = new Float64Array(nbar), barO = new Int32Array(nbar).fill(-1);
+    for (let b = 0; b < nbar; b++) {
+      const ns = notesByBar[b]; if (!ns.length) continue;
+      let best = 0, bo = -1;
+      for (const L of lags) for (const o of [b - L, b + L]) { if (o < 0 || o >= nbar) continue; let a = 0; for (const n of ns) if (matchIn(n, o)) a++; const v = a / ns.length; if (v > best + 1e-9) { best = v; bo = o; } }
+      barRep[b] = best; barO[b] = bo;
+    }
+    for (const n of notes) {
+      const b = n.bar; let rep = 0;
+      if (barO[b] >= 0 && matchIn(n, barO[b])) rep = 1;
+      else for (const L of lags) for (const o of [b - L, b + L]) if (o !== barO[b] && matchIn(n, o)) rep = Math.max(rep, 0.5);
+      n.rep = rep; n.conf = rep * (1 - P.RIFF_DOMW + P.RIFF_DOMW * n.domF) * (0.75 + 0.25 * Math.min(1, n.on));
+    }
+    yield;
+    // 노래 점수(RIFF_VOX, 마디마다 0~1): 가운데 음높이 줄기(두드러짐 ≥ RIFF_VDOM, 이웃 프레임 0.6반음 안으로 RIFF_VMINF 프레임 이상)의 흔들림
+    //  (7프레임 이동 평균과의 차, 센트: 노래의 비브라토·꺾기·끌기. 기타·건반 음은 음높이가 고정)과 미끄러짐(이웃 프레임 사이 8~60센트 움직임 비율: 노래의 음 잇기)을
+    //  RIFF_VW0~RIFF_VW1·RIFF_VG0~RIFF_VG1로 0~1에 놓고 평균. 줄기가 없는 마디(가운데 선율 없음)는 0
+    const vox = new Float32Array(nbar), voxW = new Float32Array(nbar), voxG = new Float32Array(nbar);
+    if (P.RIFF_VOX && RF.vox) {
+      // 줄기마다 노래 점수 sc(흔들림·미끄러짐), 마디 점수 = 마디 프레임 가운데 줄기 프레임의 sc 합 / 마디 프레임 수(노래가 마디 일부에만 있어도 드러나게)
+      const V = RF.vox, nV = V.nF, fsc = new Float32Array(nV), dmin = Math.round(255 * P.RIFF_VDOM);
+      for (let t = 0; t < nV;) {
+        if (V.f0[t] < 0 || V.dom[t] < dmin) { t++; continue; }
+        let e = t + 1; while (e < nV && V.f0[e] >= 0 && V.dom[e] >= dmin && Math.abs(V.f0[e] - V.f0[e - 1]) < 0.6) e++;
+        if (e - t >= P.RIFF_VMINF) {
+          let sw = 0, sg = 0, ng = 0;
+          for (let j = t; j < e; j++) {
+            let a = 0, k = 0; for (let q = Math.max(t, j - 3); q <= Math.min(e - 1, j + 3); q++) { a += V.f0[q]; k++; }
+            sw += Math.abs(V.f0[j] - a / k) * 100;
+            if (j > t) { const d = Math.abs(V.f0[j] - V.f0[j - 1]) * 100; ng++; if (d > 8 && d < 60) sg++; }
+          }
+          const w = sw / (e - t), g = ng ? sg / ng : 0, sc = 0.5 * clamp((w - P.RIFF_VW0) / (P.RIFF_VW1 - P.RIFF_VW0), 0, 1) + 0.5 * clamp((g - P.RIFF_VG0) / (P.RIFF_VG1 - P.RIFF_VG0), 0, 1);
+          for (let j = t; j < e; j++) fsc[j] = sc;
+        }
+        t = e;
+      }
+      for (let b = 0; b < nbar; b++) {
+        const f0 = Math.max(0, Math.floor(bars[b].t0 / V.hop)), f1 = Math.min(nV, Math.ceil(bars[b].t1 / V.hop));
+        let s = 0, n = 0, c = 0; for (let f = f0; f < f1; f++) { n++; s += fsc[f]; if (fsc[f] > 0) c++; }
+        vox[b] = n ? s / n : 0; voxW[b] = n ? c / n : 0;
+      }
+    }
+    yield;
+    // 마디 갈래(0 없음, 1 한 음 연타, 2 여러 음): 믿을 만한 음 RIFF_MINN개 이상·짝 되풀이 ≥ RIFF_REP. 한 마디 빈틈은 메움
+    const cls = new Int8Array(nbar);
+    for (let b = 0; b < nbar; b++) { const ns = notesByBar[b].filter(n => n.conf >= P.RIFF_CONF); if (ns.length < P.RIFF_MINN || barRep[b] < P.RIFF_REP) continue; const pcs = new Set(ns.map(n => ((n.m % 12) + 12) % 12)); cls[b] = pcs.size >= 2 ? 2 : 1; }
+    for (let b = 1; b + 1 < nbar; b++) if (!cls[b] && cls[b - 1] && cls[b + 1] && barRep[b] >= 0.4) cls[b] = cls[b - 1];
+    // 구간: 되풀이 길이 L(1·2·4마디)마다 사슬 — 첫 되풀이 [s, s+L)에 이어 마디마다 L마디 앞과 RIFF_REP 이상 맞으면 잇고(한 마디 어긋남은 다음 마디가 맞으면 건너뜀), 되풀이 두 번(2L마디)
+    //  미만·실제 RIFF_BARS마디(8분음표 박 곡은 두 배, 느린 곡은 절반) 미만·평균 되풀이 < RIFF_AGREE면 버림. 겹치는 사슬은 긴 것(같으면 짧은 L: 1마디 꼴은 2마디 간격으로도 맞으므로)부터 겹치지 않게 고름.
+    //  2마디 꼴은 1마디 간격으로는 엇갈려(A B A B) 맞지 않으므로 간격마다 따로 보고, 꼴이 바뀌는 곳(도입부 리프 → 절 반주)에서 사슬이 끊겨 구간이 나뉨
+    const minRun = Math.max(1, Math.round((TL.bpm > P.RIFF_BPM8 ? 2 : TL.bpm < P.RIFF_BPM2 ? 0.5 : 1) * P.RIFF_BARS));
+    const simTo = (b, o) => { const ns = notesByBar[b].filter(n => n.conf >= P.RIFF_CONF); if (!ns.length) return 1; let a = 0; for (const n of ns) if (matchIn(n, o)) a++; return a / ns.length; };
+    const simBoth = (b, o) => Math.min(simTo(b, o), simTo(o, b));                                   // 서로(이 마디 음이 저 마디에, 저 마디 음이 이 마디에): 음 일부만 겹치는 다른 꼴을 잇지 않게
+    const lagAgree = (b0, e, L) => { let s = 0, c = 0; for (let b = b0; b < e; b++) { const back = b - L >= b0 ? simBoth(b, b - L) : -1, fwd = b + L < e ? simBoth(b, b + L) : -1; if (back < 0 && fwd < 0) continue; s += Math.max(back, fwd); c++; } return c ? s / c : 0; };
+    const chain = (C, gate) => {
+      const runs = [];
+      for (const L of lags) for (let s = 0; s < nbar;) {
+        if (!C[s]) { s++; continue; }
+        let e = s; while (e < s + L && e < nbar && C[e]) e++;
+        if (e < s + L) { s = e + 1; continue; }
+        while (e < nbar && C[e]) { if (simBoth(e, e - L) >= P.RIFF_REP) e++; else if (e + 1 < nbar && C[e + 1] && barRep[e] >= 0.4 && simBoth(e + 1, e + 1 - L) >= P.RIFF_REP) e += 2; else break; }
+        e = Math.min(e, nbar);
+        const agree = lagAgree(s, e, L);
+        if (e - s >= 2 * L && e - s >= minRun && agree >= P.RIFF_AGREE) runs.push({ s, e, L, agree });
+        s = e;
+      }
+      // 노래 점수가 높은 사슬(평균 > RIFF_VSEC)은 고르기 전에 빼서(gate) 겹치는 깨끗한 사슬을 가리지 않게
+      const vMean = r => { let v = 0; for (let q = r.s; q < r.e; q++) v += vox[q]; return v / (r.e - r.s); };
+      const pool = gate ? runs.filter(r => vMean(r) <= P.RIFF_VSEC) : runs;
+      pool.sort((a, b) => (b.e - b.s) - (a.e - a.s) || a.L - b.L || a.s - b.s);
+      const taken = new Uint8Array(nbar), out = [];
+      for (const r of pool) {
+        let free = true; for (let q = r.s; q < r.e; q++) if (taken[q]) { free = false; break; }
+        if (!free) continue;
+        for (let q = r.s; q < r.e; q++) taken[q] = 1;
+        let nR = 0, vs = 0; for (let q = r.s; q < r.e; q++) { if (cls[q] === 2) nR++; vs += vox[q]; }
+        out.push({ b0: r.s, b1: r.e, t0: bars[r.s].t0, t1: bars[r.e - 1].t1, lag: r.L, agree: +r.agree.toFixed(3), kind: nR >= (r.e - r.s) / 2 ? 'riff' : 'chug', vox: +(vs / (r.e - r.s)).toFixed(3) });
+      }
+      return out.sort((a, b) => a.b0 - b.b0);
+    };
+    // 노래 마디 거르기(RIFF_VOX): 노래 점수(앞·뒤 마디와의 평균) ≥ RIFF_VBAR인 마디는 리프 마디에서 뺀 뒤 사슬을 다시 지음(노래 구간을 사이에 둔 리프는 둘로 나뉨).
+    //  빼기 전 사슬 가운데 남은 구간과 겹치지 않는 것은 '노래 밑 되풀이' 후보(cands, why 'vox')로만 둠
+    const voxBar = new Uint8Array(nbar);
+    if (P.RIFF_VOX && RF.vox) for (let b = 0; b < nbar; b++) { const a = vox[Math.max(0, b - 1)], c = vox[Math.min(nbar - 1, b + 1)], v = vox[b]; voxBar[b] = (a + v + c) / 3 >= P.RIFF_VBAR ? 1 : 0; }
+    const clsV = Int8Array.from(cls, (c, b) => voxBar[b] ? 0 : c), voxGated = [];
+    // 구간마다 평균 노래 점수 > RIFF_VSEC면 빼고(노래가 약하게 잡힌 절), 남은 구간을 한 마디(실제 마디) 이하 틈으로 이어 리프 대목(passage)으로 묶어
+    //  대목 길이가 실제 RIFF_PASS마디 미만이면 빼(후렴 밑 두어 마디 되풀이 반주). 8분음표 박 곡은 엔진 마디 둘 = 실제 한 마디
+    const barScale = TL.bpm > P.RIFF_BPM8 ? 0.5 : TL.bpm < P.RIFF_BPM2 ? 2 : 1, gapMax = Math.max(1, Math.round(1 / barScale));
+    const secs1 = [], secs = [];
+    for (const x of chain(clsV, P.RIFF_VOX && RF.vox)) secs1.push(x);
+    for (let i = 0; i < secs1.length;) {
+      let j = i + 1; while (j < secs1.length && secs1[j].b0 - secs1[j - 1].b1 <= gapMax) j++;
+      const grp = secs1.slice(i, j), b0 = grp[0].b0, b1 = grp[grp.length - 1].b1, ok = (b1 - b0) * barScale >= P.RIFF_PASS - 1e-9;
+      for (const x of grp) { x.pass = { b0, b1 }; if (ok) secs.push(x); else voxGated.push(Object.assign(x, { why: 'short' })); }
+      i = j;
+    }
+    const secsAll = P.RIFF_VOX && RF.vox ? chain(cls) : [];
+    const voxSecs = voxGated.concat(secsAll.filter(a => !secs.some(b => b.b0 < a.b1 && a.b0 < b.b1) && !voxGated.some(b => b.b0 < a.b1 && a.b0 < b.b1)).map(x => Object.assign(x, { why: 'vox' })));
+    yield;
+    // 칸마다 코드 표기(베이스음 = 파워 코드 근음, 구성음, N.C.)
+    const chordAt = new Array(nS);
+    for (let b = 0; b < nbar; b++) { const bar = bars[b]; for (const sl of byBar[b]) { const x = sl.i + sl.s / sub - bar.startBeat; let ev = null; for (const e of bar.events) if (e.off <= x + 1e-6) ev = e; chordAt[sl.idx] = ev; } }
+    // 구간의 꼴: 되풀이 길이 L마디의 칸마다 되풀이들 사이 다수결 음(음이름 ±1반음, 옥타브 무관. 5도·옥타브 읽힘은 runPitch가 고침)과 일치 비율·온셋. 같은 음이 이어진 칸은 한 음(센 온셋·마디 첫머리에서 다시 침)
+    const figOf = sec => {
+      const L = Math.min(sec.lag, sec.b1 - sec.b0), baseQ = []; let base = 0;
+      for (let q = 0; q < L; q++) { baseQ.push(base); base += byBar[sec.b0 + q].length; }
+      const fig = [];
+      for (let q = 0; q < L; q++) {
+        const nK = byBar[sec.b0 + q].length;
+        for (let k = 0; k < nK; k++) {
+          const vals = []; for (let b = sec.b0 + q; b < sec.b1; b += L) if (byBar[b].length === nK) vals.push(byBar[b][k]);
+          if (!vals.length) continue;
+          const act = vals.filter(s => s.act);
+          if (act.length < vals.length / 2) continue;                       // 되풀이의 반 넘게 쉬는 칸 = 쉼
+          const cnt = new Map(); for (const s of act) { const pc = ((s.p % 12) + 12) % 12; cnt.set(pc, (cnt.get(pc) || 0) + 1); }
+          let bestPc = -1, bc = 0; for (const [pc, c] of cnt) if (c > bc) { bc = c; bestPc = pc; }
+          const same = act.filter(s => riffPcDist(s.p, bestPc) <= 1), rp = runPitch(same);
+          let on = 0; for (const s of act) on += s.onN;
+          fig.push({ q, k, pos: baseQ[q] + k, m: rp.m, agree: same.length / vals.length, p5: rp.p5, on: on / act.length });
+        }
+      }
+      const fn = []; let cur = null;
+      for (const f of fig) {
+        if (f.agree < P.RIFF_FIG) { cur = null; continue; }
+        if (!cur || cur.m !== f.m || f.pos !== cur.pos + cur.n || f.on >= P.RIFF_ONFIG || (f.k === 0 && f.on >= P.RIFF_ONBAR)) { cur = { q: f.q, k: f.k, pos: f.pos, n: 1, m: f.m, p5: f.p5, agree: f.agree, on: f.on }; fn.push(cur); }
+        else { cur.n++; cur.p5 += f.p5; cur.agree += f.agree; if (f.on > cur.on) cur.on = f.on; }
+      }
+      // 음 종류: 5도 두드러짐 ≥ RIFF_P5면 파워 코드, RIFF_PALM초 이하로 짧은 파워 코드는 팜뮤트 연타. 꼴 안 끝 칸(마디·칸)도 적어 둠
+      for (const n of fn) {
+        n.p5 = +(n.p5 / n.n).toFixed(3); n.agree = +(n.agree / n.n).toFixed(3); n.on = +n.on.toFixed(3);
+        let qe = n.q, ke = n.k + n.n - 1; while (qe + 1 < L && ke >= byBar[sec.b0 + qe].length) { ke -= byBar[sec.b0 + qe].length; qe++; }
+        n.qe = qe; n.ke = Math.min(ke, byBar[sec.b0 + qe].length - 1);
+        const durS = byBar[sec.b0 + n.qe][n.ke].t1 - byBar[sec.b0 + n.q][n.k].t0;
+        n.kind = n.p5 >= P.RIFF_P5 ? 'pc5' : 'note'; n.durS = durS;
+      }
+      // 같은 음(음이름)은 구간 안에서 한 가지로(다수결): 페달 연타가 한 음·파워 코드로 번갈아 바뀌지 않게. 짧은 파워 코드(RIFF_PALM초 이하)는 팜뮤트
+      const kv = new Map(); for (const n of fn) { const pc = ((n.m % 12) + 12) % 12, v = kv.get(pc) || [0, 0]; v[n.kind === 'pc5' ? 0 : 1] += n.n; kv.set(pc, v); }
+      //  낮은 페달 연타(가장 많은 음이름이 칸의 RIFF_PEDAL 이상이고 그 음이 MIDI RIFF_PEDLO 이하 = 6·5번 줄 근음)는 밴드 리듬 기타의 파워 코드 연타로 봄:
+      //  그 구간의 RIFF_PEDLO + 3 이하 음은 모두 파워 코드(디스토션 단음의 3배음과 파워 코드의 5도는 두드러짐으로 가르기 어려움)
+      let pw = 0, pcBest = -1, pcW = 0, pcLow = 999; const pcN = new Map();
+      for (const n of fn) { const pc = ((n.m % 12) + 12) % 12; pcN.set(pc, (pcN.get(pc) || 0) + n.n); pw += n.n; }
+      for (const [pc, w] of pcN) if (w > pcW) { pcW = w; pcBest = pc; }
+      for (const n of fn) if (((n.m % 12) + 12) % 12 === pcBest && n.m < pcLow) pcLow = n.m;
+      const pedal = pw > 0 && pcW / pw >= P.RIFF_PEDAL && pcLow <= P.RIFF_PEDLO;
+      for (const n of fn) { const v = kv.get(((n.m % 12) + 12) % 12); n.kind = v[0] >= v[1] || (pedal && n.m <= P.RIFF_PEDLO + 3) ? 'pc5' : 'note'; n.palm = n.kind === 'pc5' && n.durS <= P.RIFF_PALM + 1e-9; delete n.durS; }
+      sec.pedal = pedal;
+      sec.figure = fn;
+      // 코드 반주인지(RIFF_COMP): 되풀이마다 꼴 음이 그 자리 코드 표기의 근음(베이스음)·5도인 비율(N.C.·코드 밖 음은 리프 쪽)
+      let nComp = 0, nNon = 0, nAll = 0;
+      for (let b = sec.b0; b < sec.b1; b += L) for (const n of fn) {
+        const bb = b + n.q; if (bb >= sec.b1 || byBar[bb].length !== byBar[sec.b0 + n.q].length) continue;
+        const ev = chordAt[byBar[bb][n.k].idx], pc = ((n.m % 12) + 12) % 12; nAll++;
+        if (!ev || ev.label.nc) { nNon++; continue; }
+        const root = ev.bassPc;
+        if (root >= 0 && (pc === root || pc === (root + 7) % 12)) nComp++; else if (!ev.pcs.includes(pc)) nNon++;
+      }
+      sec.comp = +(nAll ? nComp / nAll : 1).toFixed(3); sec.nonChord = +(nAll ? nNon / nAll : 0).toFixed(3);
+      // 믿음(conf) = 구간 되풀이 × 꼴 음의 되풀이 사이 일치(칸 수 가중). 믿음 < RIFF_SCONF이거나 꼴 음 가운데 코드 표기 밖 음이 RIFF_NONCH 넘게 많으면(채보가 틀렸을 가능성)
+      //  따라 치지 않음(why 'unsure': 틀린 음보다 쉼이 나음)
+      let fa = 0, fw = 0; for (const n of fn) { fa += n.agree * n.n; fw += n.n; }
+      sec.conf = +(sec.agree * (fw ? fa / fw : 0)).toFixed(3);
+      sec.follow = fn.length > 0 && !(P.RIFF_COMP > 0 && sec.comp >= P.RIFF_COMP) && sec.conf >= P.RIFF_SCONF && sec.nonChord <= P.RIFF_NONCH;
+    };
+    // 구간 가장자리 다듬기(RIFF_TRIM, 1.25.0 검증 뒤): 구간 앞·뒤 마디 가운데 그 마디의 칸 음이 꼴과 맞는 비율(꼴 음 칸 수 가중, 음이름 ±1반음)이 RIFF_FIG 미만이거나
+    //  그 마디 자체의 노래 점수가 RIFF_VBAR 이상인 마디는 잘라 냄(되풀이 두 번은 남김). 리프로 들어가는 빌드업 마디(기타가 코드를 따라감)와 노래 끝 마디가 앞뒤 마디 평균에
+    //  묻혀 구간에 들어가는 것을 막음(레일건 2:31~2:33: D♯m7·Emaj7·F♯7 위에서 G♯ 연타를 치던 곳). 잘랐으면 되풀이·꼴·믿음·노래 점수·갈래를 다시 잼
+    for (const sec of secs) {
+      yield;
+      figOf(sec);
+      if (!P.RIFF_TRIM || !sec.figure.length) continue;
+      const L0 = Math.min(sec.lag, sec.b1 - sec.b0), fn0 = sec.figure, ob0 = sec.b0;
+      const barAg = b => { const q = (((b - ob0) % L0) + L0) % L0; let a2 = 0, w2 = 0; for (const n of fn0) { if (n.q !== q || byBar[b].length !== byBar[ob0 + q].length) continue; const sl = byBar[b][n.k]; if (!sl) continue; w2 += n.n; if (sl.act && riffAgree(sl.p, n.m)) a2 += n.n; } return w2 ? a2 / w2 : 1; };
+      const bad = b => barAg(b) < P.RIFF_FIG || (P.RIFF_VOX && RF.vox && vox[b] >= P.RIFF_VBAR);
+      let b0 = sec.b0, b1 = sec.b1;
+      while (b1 - b0 > 2 * L0 && bad(b0)) b0++;
+      while (b1 - b0 > 2 * L0 && bad(b1 - 1)) b1--;
+      if (b0 === sec.b0 && b1 === sec.b1) continue;
+      let nR = 0, vs = 0; for (let q = b0; q < b1; q++) { if (cls[q] === 2) nR++; vs += vox[q]; }
+      sec.trim = [sec.b0, sec.b1]; sec.b0 = b0; sec.b1 = b1; sec.t0 = bars[b0].t0; sec.t1 = bars[b1 - 1].t1; sec.agree = +lagAgree(b0, b1, sec.lag).toFixed(3);
+      sec.kind = nR >= (b1 - b0) / 2 ? 'riff' : 'chug'; sec.vox = +(vs / (b1 - b0)).toFixed(3);
+      figOf(sec);
+      if ((b1 - b0) * barScale < P.RIFF_PASS / 2 - 1e-9) { sec.follow = false; sec.short = true; }   // 잘린 뒤 실제 RIFF_PASS/2마디 미만이면 따라 치지 않음(why 'short')
+    }
+    // 박 느낌(ST_BEAT와 같은 식: 박 위 센 칸의 플럭스 봉우리 − 칸 시각 중앙값, ±ST_BEAT_MAX초)
+    let shift = 0;
+    if (P.ST_BEAT) {
+      const D = TL.meter.triple ? 3 : 4, ss = stSlots(A, TL, D), { nc } = strumMarks(TL, D);
+      const d = ss.slot.filter(s => s.j === 0 && !nc.has(s.x) && (s.v - ss.med) / ss.sc >= 1).map(s => s.tp - s.t).sort((a, b) => a - b);
+      shift = d.length >= 8 ? clamp(d[d.length >> 1], -P.ST_BEAT_MAX, P.ST_BEAT_MAX) : 0;
+    }
+    // 일렉 기타 음: 따라 치는 구간의 되풀이마다 꼴의 음을 칸 자리(+ 박 느낌)에. 원곡이 쉬는 칸(크기 문턱 아래)은 치지 않음. 세기 = RIFF_DB0 + 마디 이득 + RIFF_DBK·(온셋 − 0.5)
+    yield;
+    const dyn = P.DYN ? dynBars(A, TL) : null, outNotes = [], barsOut = new Uint8Array(nbar), sections = [], cands = [];
+    // 앞 선율(RIFF_LEAD): 대목을 먼저 재고, 곁 리프 구간과 겹치는 마디는 앞 선율로(사용자: "앞에 튀어나와있는 부분 자체가 리프야 모노로 되어있는 부분").
+    //  곁 리프 구간은 앞 선율 마디를 뺀 조각마다(조각이 실제 RIFF_PASS/2마디 미만이면 버림) 같은 꼴로 둠. 조각이 없으면 후보(why 'lead')
+    const LD = P.RIFF_LEAD && RF.lead ? yield* riffLeadGen(TL, RF.lead, byBar, barScale) : null;
+    const leadBar = new Uint8Array(nbar); if (LD) for (const x of LD.secs) for (let b = x.b0; b < x.b1; b++) leadBar[b] = 1;
+    for (const sec of secs) {
+      const fn = sec.figure, L = Math.min(sec.lag, sec.b1 - sec.b0);
+      const o = { b0: sec.b0, b1: sec.b1, t0: sec.t0, t1: sec.t1, lag: sec.lag, agree: sec.agree, kind: sec.kind, comp: sec.comp, nonChord: sec.nonChord, vox: sec.vox, conf: sec.conf, pedal: !!sec.pedal, why: sec.follow ? '' : sec.short ? 'short' : P.RIFF_COMP > 0 && sec.comp >= P.RIFF_COMP ? 'comp' : 'unsure', n: 0, figure: fn.map(n => ({ q: n.q, k: n.k, n: n.n, m: n.m, kind: n.kind, palm: n.palm, agree: n.agree, on: n.on })) };
+      if (!sec.follow) { cands.push(o); continue; }
+      const si = sections.length, mine = [];
+      for (let b = sec.b0; b < sec.b1; b += L) for (const n of fn) {
+        const bb = b + n.q, be = b + n.qe; if (be >= sec.b1 || byBar[bb].length !== byBar[sec.b0 + n.q].length || byBar[be].length !== byBar[sec.b0 + n.qe].length) continue;
+        const s0 = byBar[bb][n.k], s1 = byBar[be][n.ke]; if (!s0.act) continue;
+        const g = dyn ? dyn.g[bb] : 0, tone = dyn ? dyn.tone[bb] : 0.7;
+        const db = clamp(P.RIFF_DB0 + g + P.RIFF_DBK * (Math.min(1.5, s0.onN) - 0.5) + (n.palm ? P.RIFF_PALM_DB : 0), -30, P.DYN_CEIL);
+        mine.push({ t: s0.t0 + shift, dur: s1.t1 - s0.t0, m: n.m, notes: n.kind === 'pc5' ? [n.m, n.m + 7] : [n.m], kind: n.kind, palm: n.palm, conf: +(sec.agree * n.agree).toFixed(3), bar: bb, k: n.k, sec: si, db: +db.toFixed(2), vel: +Math.pow(10, db / 20).toFixed(4), tone });
+      }
+      // 성긴 꼴(RIFF_DENS, 1.25.0 통합): 실제 한 마디에 RIFF_DENS개 미만이면 따라 치지 않음(why 'sparse': 반주를 몇 번의 홑 타격으로 바꾸면 큰 구간이 거의 빔)
+      if (P.RIFF_DENS > 0 && mine.length < P.RIFF_DENS * (sec.b1 - sec.b0) * barScale) { o.why = 'sparse'; o.n = mine.length; cands.push(o); continue; }
+      let ovl = false; if (LD) for (let b = sec.b0; b < sec.b1; b++) if (leadBar[b]) { ovl = true; break; }
+      if (!ovl) {
+        for (const x of mine) outNotes.push(x);
+        o.n = mine.length;
+        for (let b = sec.b0; b < sec.b1; b++) barsOut[b] = 1;
+        sections.push(o);
+        continue;
+      }
+      // 앞 선율과 겹침: 앞 선율 마디 밖 조각마다 따로(음은 원래 되풀이 자리 그대로, 조각 밖으로 울리는 음은 뺌)
+      const barAtT = t => { let a = 0, z = nbar - 1; while (a < z) { const m = (a + z + 1) >> 1; if (bars[m].t0 <= t) a = m; else z = m - 1; } return a; };
+      let kept = 0;
+      for (let b = sec.b0; b < sec.b1;) {
+        if (leadBar[b]) { b++; continue; }
+        let e = b; while (e < sec.b1 && !leadBar[e]) e++;
+        if ((e - b) * barScale >= P.RIFF_PASS / 2 - 1e-9) {
+          const pi = sections.length, part = mine.filter(x => x.bar >= b && x.bar < e && barAtT(x.t + x.dur - 0.02) < e).map(x => Object.assign({}, x, { sec: pi }));
+          if (part.length) {
+            for (const x of part) outNotes.push(x);
+            for (let q = b; q < e; q++) barsOut[q] = 1;
+            sections.push(Object.assign({}, o, { b0: b, b1: e, t0: bars[b].t0, t1: bars[e - 1].t1, n: part.length }));
+            kept++;
+          }
+        }
+        b = e;
+      }
+      if (!kept) { o.why = 'lead'; o.n = 0; cands.push(o); }
+    }
+    // 앞 선율 대목의 음: 한 음(파워 코드 아님), 칸 자리 + 박 느낌, 세기 = RIFF_DB0 + 마디 이득 + RIFF_DBK·(온셋 − 0.5) + LEAD_DB. 실제 한 마디에 LEAD_DENS개 미만이면 why 'sparse'
+    if (LD) for (const x of LD.secs) {
+      const si = sections.length, mine = [];
+      for (const q of x.notes) {
+        const s0 = q.s0, s1 = q.s1, bb = s0.bar, g = dyn ? dyn.g[bb] : 0, tone = dyn ? dyn.tone[bb] : 0.7;
+        const db = clamp(P.RIFF_DB0 + g + P.RIFF_DBK * (Math.min(1.5, s0.onN) - 0.5) + P.LEAD_DB, -30, P.DYN_CEIL);
+        mine.push({ t: s0.t0 + shift, dur: s1.t1 - s0.t0, m: q.m, notes: [q.m], kind: 'note', palm: false, lead: true, conf: +q.conf.toFixed(3), bar: bb, k: s0.k, sec: si, db: +db.toFixed(2), vel: +Math.pow(10, db / 20).toFixed(4), tone });
+      }
+      const o = { b0: x.b0, b1: x.b1, t0: bars[x.b0].t0, t1: bars[x.b1 - 1].t1, lag: 0, agree: 1, kind: 'lead', comp: 0, nonChord: 0, vox: +x.glide.toFixed(3), conf: +x.cov.toFixed(3), pedal: false, why: '', n: mine.length, figure: [] };
+      if (P.LEAD_DENS > 0 && mine.length < P.LEAD_DENS * (x.b1 - x.b0) * barScale) { o.why = 'sparse'; cands.push(o); continue; }
+      for (const n of mine) outNotes.push(n);
+      for (let b = x.b0; b < x.b1; b++) barsOut[b] = 1;
+      sections.push(o);
+    }
+    // 구간을 시각 차례로(음의 sec 번호도 따라 바꿈: riffApply가 secs[n.sec]로 찾음)
+    const ord = sections.map((x, i) => i).sort((a, b) => sections[a].t0 - sections[b].t0 || a - b), inv = new Int32Array(ord.length);
+    ord.forEach((o, i) => { inv[o] = i; });
+    const secsOut = ord.map(i => sections[i]); for (const n of outNotes) n.sec = inv[n.sec];
+    for (const v of voxSecs) cands.push({ b0: v.b0, b1: v.b1, t0: v.t0, t1: v.t1, lag: v.lag, agree: v.agree, kind: v.kind, vox: v.vox, why: v.why, n: 0, figure: [] });
+    cands.sort((a, b) => a.b0 - b.b0);
+    outNotes.sort((a, b) => a.t - b.t);
+    return { on: true, src: RF.src, sub, shift, beat: 60 / TL.bpm, ms: nowMs() - t0ms, sections: secsOut, cands, notes: outNotes, bars: barsOut, cls, rep: barRep, vox: P.RIFF_VOX && RF.vox ? { score: vox, wob: voxW, glide: voxG, bar: voxBar } : null, lead: LD ? LD.bars : null };
+  }
+  // 리프 음을 스트로크 목록에 끼움(riffApply, 반주 ↔ 리프 넘겨주기): list는 {t, …} 스트로크 목록(일렉 반주·strokes·strumGrid 출력), R은 riff(A, TL).
+  //  리프 구간 [t0, t1) 안의 반주 스트로크(채움·뮤트 포함)는 빼고 리프 음을 { t, dir 1, vel, db, tone, change false, riff(음 정보),
+  //  eg: { kind 'riff', notes([근음] 또는 [근음, 5도]), palm, drive(opt.drive, 기본 1 = 크런치), ring 'riff', dur(울림 초), bar, k } }로 넣음(시각 차례).
+  //  구간 끝 반 박 안의 코드 바뀜 스트로크(다음 코드를 당겨 치는 반주, s.change)는 남기고 그 뒤 리프 음은 뺌(다음 대목으로 자연스럽게 넘김).
+  //  구간 앞 반주의 마지막 스트로크는 첫 리프 음이 막음(화면의 울림 끊기). 구간 밖과 리프 없는 곡은 목록 그대로(복사본)
+  function riffApply(list, R, opt) {
+    if (!R || !R.sections || !R.sections.length) return list.slice();
+    opt = opt || {};
+    const drive = opt.drive == null ? 1 : opt.drive, secs = R.sections, eps = 0.02, half = (R.beat || 0.5) / 2;
+    const secOf = t => { for (const x of secs) if (t >= x.t0 - eps && t < x.t1 - eps) return x; return null; };
+    const out = [], cutAt = new Map();
+    for (const s of list) {
+      const x = secOf(s.t);
+      if (!x) { out.push(s); continue; }
+      if (s.change && !s.mute && s.t >= x.t1 - half - eps) { out.push(s); if (!cutAt.has(x) || s.t < cutAt.get(x)) cutAt.set(x, s.t); }
+    }
+    for (const n of R.notes) {
+      const x = secs[n.sec], c = cutAt.get(x);
+      if (c != null && n.t >= c - eps) continue;
+      out.push({ t: n.t, dir: 1, vel: n.vel, db: n.db, tone: n.tone, change: false, riff: n, eg: { kind: 'riff', notes: n.notes, palm: n.palm, drive, ring: 'riff', dur: n.dur, bar: n.bar, k: n.k } });
+    }
+    out.sort((a, b) => a.t - b.t);
+    return out;
+  }
+
   return {
     analyze, buildTimeline, chartText, defaultSettings,
     strokes: (A, TL) => rakeMark(A, TL, strokes(A, TL)),
     pianoComp, autoModes, pianoLH, pianoLev,
+    bandGuitar, bandGuitarPrep,                          // 1.25.0 밴드 일렉 기타 파워 코드 반주(P.EG), 무거운 중간값 미리 재기(조각으로)
+    riff, riffAsync, riffApply, riffFeatures,             // 기타 리프 따라 치기(1.25.0, P.RIFF): 특징(일렉 기타를 고를 때 한 번) → 구간·음(riffAsync: 조각으로) → 스트로크 목록에 끼움
     strumGrid: (A, TL, mode) => rakeMark(A, TL, mode === 'ssw' && P.SSW ? sswStrum(A, TL) : strumGrid(A, TL, mode === 'ssw' ? 'beat8' : mode)),
     // 테스트용 내부 함수
     _: { acapRegions, monoFit, dynBars, ncMute, stSlots, swingRatio, subdivision, tatumGrouping, rawPeak, tidyRamps, camelot, romanOf, makeRealFFT, resample, estimateTempo, localTempo, levelCheck, doubleBeats, trackBeats, refineFrames, extendBeats, P, getStates, spelling, formatChord, spellChord, FPS, clearCache: () => stateCache.clear() },
@@ -6684,7 +7849,7 @@ const Synth = (function () {
     const order = opt && opt.order || 1, gCap = opt && opt.gCap || 0.95, sK = opt && opt.sK != null ? opt.sK : 0.004, sMin = opt && opt.sMin != null ? opt.sMin : 0.3;
     const f0 = f0Of(m, tune), y = new Float32Array(n);
     // 루프 저역 통과 H(z) = (1−s) + s·z⁻¹ 의 위상 지연은 s 샘플 → 지연선 길이에서 뺌
-    const s = clamp(0.5 - (m - 40) * sK, sMin, 0.5);                 // 높은 현은 고역이 덜 깎임
+    const s = clamp((opt && opt.s0 != null ? opt.s0 : 0.5) - (m - 40) * sK, sMin, 0.5);   // 높은 현은 고역이 덜 깎임. opt.s0(1.25.0 일렉): 기준점, 없으면 0.5 그대로
     const w0 = 2 * Math.PI * f0 / sr, Hm = Math.sqrt((1 - s) * (1 - s) + s * s + 2 * s * (1 - s) * Math.cos(w0));
     // 1극 저역 통과를 더하면 그 f0에서의 위상 지연(샘플)과 크기도 지연선 길이·루프 이득에서 보정(음높이·T60 유지)
     let a1 = 0, d1 = 0, H1 = 1;
@@ -6709,7 +7874,7 @@ const Synth = (function () {
     for (let i = 0; i < ex.length; i++) { lp = lp * c1 + (r() * 2 - 1) * (1 - c1); ex[i] = lp; }
     // 거듭 저역 통과(tone2): 같은 차단으로 한 번 더(난수는 더 쓰지 않음 → order 1이면 1.14와 샘플 단위로 같음)
     for (let o = 1; o < order; o++) { let q = 0; for (let i = 0; i < ex.length; i++) { q = q * c1 + ex[i] * (1 - c1); ex[i] = q; } }
-    const pd = Math.max(1, Math.round(GUITAR.pickPos * Nint));
+    const pd = Math.max(1, Math.round((opt && opt.pickPos || GUITAR.pickPos) * Nint));   // opt.pickPos(1.25.0 일렉): 없으면 통기타 값 그대로
     for (let i = ex.length - 1; i >= pd; i--) ex[i] -= ex[i - pd];
     let mean = 0; for (let i = 0; i < ex.length; i++) mean += ex[i]; mean /= ex.length;
     for (let i = 0; i < ex.length; i++) buf[i] = ex[i] - mean;
@@ -6887,7 +8052,198 @@ const Synth = (function () {
     return best.strings;
   }
 
-  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of };
+  // ---------------- 밴드 일렉트릭 기타(1.25.0, ELECTRIC: 사용자 "밴드 일렉트릭 기타처럼 치는 기능도 추가해줘") ----------------
+  // 솔리드 바디 일렉트릭 기타(픽업, 몸통 울림 없음) → 오버드라이브/디스토션 앰프 → 스피커 캐비닛(응답은 재생 쪽 Convolver: cabIR).
+  //  파워 코드(근음·5도·옥타브)는 현을 더한 뒤 한 버퍼로 비선형(클리핑)을 거침: 현끼리의 상호 변조(f2−f1 = 근음 한 옥타브 아래 차음 등)가 파워 코드 소리의 핵심
+  //  (Herbst 2019; 현마다 따로 왜곡하면 사라짐: Laguerre & Scavone 2021). 순수 함수(node에서도 같은 값), (근음, 모양, 드라이브, 테이크)마다 고정 난수.
+  //  electricNote(음 목록 MIDI(낮은 음부터: 파워 코드·옥타브·한 음·리프 음), sr, tune, 드라이브 0~2, 테이크 번호, 'open'|'palm'|'dead') → 모노 Float32Array 한 테이크
+  //  (테이크마다 다른 들뜸 잡음, 짝·홀 테이크는 ∓double.cents/2 조율 차). ui.js는 (음|드라이브|테이크|종류)로 캐시하고, 스트로크마다 두 테이크를 좌우 ±pan에
+  //  조금 어긋나게(더블 트래킹: 록 녹음 관행, 같은 파트를 두 번 녹음) 놓은 뒤 버스 → cabIR Convolver → 보정 이득으로 냄.
+  //  electricChord(근음 MIDI, 모양, sr, tune, 드라이브, 쌍 번호, 종류) → [L, R]: 같은 더블 트래킹을 버퍼 안에서 만든 스테레오(node 측정·예제용).
+  //  통기타(guitarNote·guitarMute·bodyIR·sympIR)는 건드리지 않음: 이 절은 전부 새 함수라 prefs.guitarTone이 'acoustic'이면 1.23.3과 샘플 단위로 같음
+  const ELECTRIC = {
+    // 버퍼 길이(초): 통기타 3.0·뮤트 1.0·피아노 2.8~8과 겹치지 않게(브라우저 시험이 길이로 악기를 가름). 열린 코드는 끝 die초를 dieTau초 시정수로 줄여 끝냄(잘림이 아니라 사그라짐)
+    len: 2.5, palmLen: 0.6, deadLen: 0.3, die: 0.6, dieTau: 0.15,
+    // 현(ksString 재사용): 솔리드 바디는 공기 마찰·넥 결합만 감쇠(Paté 2014: 기본음 Q 1200~2300 → T60 5~13초). 버퍼가 짧고 클리퍼가 감쇠를 평평하게 눌러 6 → 3초로 둠
+    //  s0·sK·sMin: 루프 2점 저역 통과 계수 s = clamp(s0 − (m − 40)·sK, sMin, 0.5)(통기타 0.5·0.012·0.05보다 작아 높은 배음이 오래 남음 = 밝고 긴 서스테인)
+    //  cut: 들뜸(피크) 저역 통과 차단(Hz), order: 거듭 횟수, pickPos: 피크 위치(현 길이 비), strGain: 근음·5도·옥타브 현의 비(근음을 가장 세게 침)
+    t60Lo: 6.0, t60Hi: 3.0, s0: 0.42, sK: 0.006, sMin: 0.06, cut: 2000, order: 2, pickPos: 0.18, strGain: [1, 0.85, 0.7], spreadMs: 3.5,
+    // 픽업: 브리지 험버커. pos = 브리지에서 픽업까지 거리/스케일(41.3/648 mm, till.com Strat 수치) → 현마다 빗살 x[n] − x[n − pos·sr/f_open](골이 n·f_open/pos Hz: 낮은 E현 1.29 kHz,
+    //  운지와 무관), fr·q: 픽업+케이블 공진(2~5 kHz, Lemme) = 2차 공진 저역 통과(fr Hz, Q 2 ≈ +6 dB, 위로 −12 dB/oct)
+    pickup: { pos: 0.0637, fr: 3000, q: 2.0 },
+    nzAmp: 0.02, nzLp: 5000, nzTau: 0.0015, nzDur: 0.006,     // 피크 잡음(보통 음과 같은 꼴)
+    // 팜뮤트(브리지 뮤트 '척'): 짧은 T60(E2 → E4), 루프 1극 저역 통과 f0 × lpMul(lpMin~lpMax Hz), 들뜸 차단 × cutMul, 기본음 '둥'(thump) — 통기타 GMUTE.palm과 같은 꼴
+    palm: { t60Lo: 0.40, t60Hi: 0.22, lpMul: 8, lpMin: 800, lpMax: 2200, cutMul: 0.7, nzAmp: 0.06, thump: 0.5, thumpTau: 0.015 },
+    // 데드 뮤트(왼손으로 막고 긁는 '칙': N.C.): GMUTE.dead와 같은 꼴
+    dead: { t60: 0.03, lpHz: 2500, cutMul: 0.5, nzAmp: 0.3, nzTau: 0.004, nzLo: 700, nzHi: 4000 },
+    // 앰프: 드라이브 0 clean / 1 crunch / 2 high gain. 입력은 현 합의 첫 50 ms RMS를 1로 맞춘 뒤 → 1극 고역 통과 preHp Hz(저음 '풀썩' 막음, Tube Screamer 720 Hz보다 낮게: 파워 코드 근음도 클리핑되게)
+    //  → preMid [Hz, dB, Q] 피크(프리앰프 미드 범프) → × gain → tanh(gain·x + bias) − tanh(bias)(bias: 비대칭 = 짝수 배음, 진공관 단; Pakarinen & Yeh 2009) 2배 오버샘플링
+    //  → 직류 막음 → post: 파워앰프 단(대칭 tanh, 이득) → tone: 톤 스택 쌍2차 줄([종류, Hz, dB, Q]: 'ls' 저역 셸프(베이스 노브), 'pk' 피크(500~700 Hz 스쿱 V자: Fender/Marshall), 'hs' 고역 셸프). 트레블·프레즌스 봉우리는 픽업 공진·캐비닛이 이미 2~4 kHz를 올려 두지 않음(측정으로 뺌: measure.js)
+    amp: [
+      { name: 'clean', preHp: 40, preMid: null, gain: 0.8, bias: 0, post: 0, tone: [['ls', 180, 4, 0.7], ['pk', 500, -2, 0.7]] },
+      { name: 'crunch', preHp: 80, preMid: [800, 2, 0.8], gain: 4, bias: 0.06, post: 0, tone: [['ls', 180, 4, 0.7], ['pk', 650, -3, 0.7]] },
+      { name: 'high', preHp: 100, preMid: [900, 3, 0.8], gain: 20, bias: 0.15, post: 1.5, tone: [['ls', 180, 4, 0.7], ['pk', 700, -4, 0.7]] },
+    ],
+    os: 2, inRms: 0.3, norm: 0.12, normMute: 0.05, normMuteK: 1.0,                                // 클리퍼 오버샘플링 배수, 앰프 입력 기준(첫 50 ms RMS → inRms: 피크 ≈ 3배라 gain 0.8이면 살짝, 20이면 깊게 클리핑), 출력 정규화(첫 0.3초 RMS: guitarNote와 같은 기준 → 재생 이득은 세기 dB만)
+    levelGain: [1.01, 1, 0.94], palmGain: 1.2, deadGain: 0.5,    // 드라이브별·뮤트별 재생 이득(ui.js playElectric이 곱함): clean·high를 crunch와 같은 K 가중 크기로(+0.1·−0.6 dB), 팜뮤트 1.2(1.25.0 통합에서 0.8 → 1.2: 팜뮤트 8분 연타가 같은 세기 열린 8분보다 K 가중 약 −5 LU, 어택 +1.9 dB), 데드 뮤트 0.5('칙'은 작게)
+    // 캐비닛(4×12, Celestion V30 데이터시트 70~5000 Hz·Fs 75 Hz, Aiken의 Marshall 4×12 측정: 100~150 Hz 최대, 1~5 kHz 울퉁불퉁, 8 kHz −30 dB, 10 kHz −50 dB):
+    //  2차 고역 통과 hp [Hz, Q] + 저음 bump [Hz, dB, Q] + 중역 dip + 프레즌스 봉우리 pres(2~3 kHz +4~6 dB) + 6차 저역 통과 lp [Hz, 2차 단 수] + 1.5~4.5 kHz 작은 공진 ripple(n개, ±db, 좌우 다른 자리)
+    //  + 가까운 마이크 방 꼬리 room(RT60초, dB, 시작 초). 300 Hz 크기 1로 정규화(캐비닛은 음색만, 크기는 ui.js ELEC.makeup)
+    cab: { len: 0.15, hp: [85, 0.7], bump: [120, 3, 1.2], dip: [700, -3, 1.0], pres: [2500, 2, 1.2], lp: [4800, 3], ripple: { n: 4, lo: 1500, hi: 4500, db: 2, q: 5, lr: 0.03 }, room: { rt60: 0.10, db: -20, pre: 0.003 }, seed: 5150, refHz: 300 },
+    // 더블 트래킹: 두 테이크(같은 쌍의 2k, 2k+1)를 ∓cents/2 조율 차·offsetMs 어긋남(쌍이 홀수면 반대쪽이 앞섬)·±pan(등파워)으로. pairs: 쌍 수(스트로크마다 번갈아)
+    double: { cents: 4, offsetMs: 10, pan: 0.8, pairs: 2 },
+  };
+  // RBJ 쿡북 쌍2차 계수(정규화): 'lp' 저역 통과, 'hp' 고역 통과, 'pk' 피크, 'ls'·'hs' 셸프
+  function biqCoef(sr, t, f0, g, Q) {
+    const A = Math.pow(10, (g || 0) / 40), w = 2 * Math.PI * f0 / sr, c = Math.cos(w), sn = Math.sin(w), al = sn / (2 * Q);
+    let b0, b1, b2, a0, a1, a2;
+    if (t === 'lp') { b0 = (1 - c) / 2; b1 = 1 - c; b2 = b0; a0 = 1 + al; a1 = -2 * c; a2 = 1 - al; }
+    else if (t === 'hp') { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; a0 = 1 + al; a1 = -2 * c; a2 = 1 - al; }
+    else if (t === 'pk') { b0 = 1 + al * A; b1 = -2 * c; b2 = 1 - al * A; a0 = 1 + al / A; a1 = -2 * c; a2 = 1 - al / A; }
+    else if (t === 'ls') { const sA = 2 * Math.sqrt(A) * al; b0 = A * ((A + 1) - (A - 1) * c + sA); b1 = 2 * A * ((A - 1) - (A + 1) * c); b2 = A * ((A + 1) - (A - 1) * c - sA); a0 = (A + 1) + (A - 1) * c + sA; a1 = -2 * ((A - 1) + (A + 1) * c); a2 = (A + 1) + (A - 1) * c - sA; }
+    else { const sA = 2 * Math.sqrt(A) * al; b0 = A * ((A + 1) + (A - 1) * c + sA); b1 = -2 * A * ((A - 1) + (A + 1) * c); b2 = A * ((A + 1) + (A - 1) * c - sA); a0 = (A + 1) - (A - 1) * c + sA; a1 = 2 * ((A - 1) - (A + 1) * c); a2 = (A + 1) - (A - 1) * c - sA; }
+    return { b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 };
+  }
+  function biqRun(y, c) {
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < y.length; i++) { const x = y[i], v = c.b0 * x + c.b1 * x1 + c.b2 * x2 - c.a1 * y1 - c.a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = v; y[i] = v; }
+    return y;
+  }
+  const biqList = (y, sr, list) => { for (const [t, f, g, Q] of list) biqRun(y, biqCoef(sr, t, f, g, Q)); return y; };
+  function hp1(y, sr, f) { const a = Math.exp(-2 * Math.PI * f / sr); let hp = 0, prev = 0; for (let i = 0; i < y.length; i++) { const x = y[i]; hp = a * (hp + x - prev); prev = x; y[i] = hp; } return y; }
+  // 2배 오버샘플링 클리퍼: 반대역 FIR(창 함수 sinc, 2K+1탭: 짝수 탭은 가운데 0.5만 남아 다상으로 K탭씩)로 올리고(0 채움 × 2) tanh를 거친 뒤 같은 FIR로 내림.
+  //  올림 필터 = 가운데 탭 1(짝수 샘플 = x) + 홀수 탭 합 2·Σh(직류 이득 1: 한쪽 홀수 탭 합 Σh = 0.25), 내림 필터 = 0.5·가운데 + Σh(직류 이득 1).
+  //  1.25.0 검증에서 고침: 처음 정규화(h /= 2g)는 Σh = 0.125라 홀수 샘플이 절반 크기·통과대역 −2.5 dB·저지대역 −12 dB뿐이어서 알리어싱을 3~6 dB만 줄였음
+  //  → 고친 뒤 1 kHz 사인 하이게인 알리어싱 −35 → −62 dB(eg/repair 측정). 들뜸이 픽업 공진 위로 −12 dB/oct라 실제 음의 알리어싱은 더 작음. 입력 x는 제자리에서 바뀜
+  const HB = (() => { const K = 8, h = new Float64Array(K); for (let j = 0; j < K; j++) { const i = 2 * j + 1, s = Math.sin(Math.PI * i / 2) / (Math.PI * i), w = 0.42 + 0.5 * Math.cos(Math.PI * i / (2 * K + 1)) + 0.08 * Math.cos(2 * Math.PI * i / (2 * K + 1)); h[j] = s * w; } let g = 0; for (let j = 0; j < K; j++) g += h[j]; for (let j = 0; j < K; j++) h[j] *= 0.25 / g; return { K, h }; })();   // 직류 이득 1: 가운데 0.5 + 양쪽 홀수 탭 합 2·Σh = 0.5
+  // tanh의 파데 근사([7/6], |x| ≥ 4.97은 ±1): 오차 1e-4(−80 dB) 아래, Math.tanh의 1/4 시간
+  const ftanh = x => { const a = x < 0 ? -x : x; if (a >= 4.97) return x > 0 ? 1 : -1; const x2 = x * x; return x * (135135 + x2 * (17325 + x2 * (378 + x2))) / (135135 + x2 * (62370 + x2 * (3150 + 28 * x2))); };
+  let osBuf = null;                                                      // 오버샘플링 작업 버퍼(늘리기만 하고 다시 씀: 열린·팜뮤트·데드 길이가 번갈아도 할당·GC 없음. 앞 2n칸만 씀)
+  function clipOS(x, gain, bias, os) {
+    const tb = ftanh(bias), n = x.length;
+    if (os < 2) { for (let i = 0; i < n; i++) x[i] = ftanh(gain * x[i] + bias) - tb; return x; }
+    const { K, h } = HB, u = osBuf && osBuf.length >= 2 * n ? osBuf : (osBuf = new Float64Array(2 * n));
+    for (let i = 0; i < n; i++) {                                          // 짝수 샘플 = x[i], 홀수 샘플 = 홀수 탭 합(h[j]: x[i − j] + x[i + j + 1])
+      u[2 * i] = x[i];
+      let s = 0; for (let j = 0; j < K; j++) { const a = i - j, b = i + j + 1; s += h[j] * ((a >= 0 ? x[a] : 0) + (b < n ? x[b] : 0)); }
+      u[2 * i + 1] = 2 * s;
+    }
+    for (let m = 0; m < 2 * n; m++) u[m] = ftanh(gain * u[m] + bias) - tb;
+    for (let i = 0; i < n; i++) {                                          // 내림: 0.5·u[2i] + 홀수 탭 합(u[2i ± (2j + 1)])
+      let s = 0.5 * u[2 * i]; for (let j = 0; j < K; j++) { const a = 2 * i - 2 * j - 1, b = 2 * i + 2 * j + 1; s += h[j] * ((a >= 0 ? u[a] : 0) + (b < 2 * n ? u[b] : 0)); }
+      x[i] = s;
+    }
+    return x;
+  }
+  // 일렉 현 하나(날 신호): 픽업 위치 빗살까지. str: 현(0 = 6번 줄), mode 'open'·'palm'·'dead', 들뜸 난수는 (음, 테이크) 고정
+  const E_OPEN = [40, 45, 50, 55, 59, 64];
+  const eStrOf = m => m <= 44 ? 0 : m <= 52 ? 1 : m <= 57 ? 2 : m <= 62 ? 3 : m <= 66 ? 4 : 5;   // 근음을 0~7프렛 가운데 가장 낮은 현에(E2~G♯2 6번 줄, A2~E3 5번 줄, …)
+  const eT60 = m => ELECTRIC.t60Lo * Math.pow(ELECTRIC.t60Hi / ELECTRIC.t60Lo, clamp((m - 40) / 24, 0, 1));
+  function electricString(m, sr, tune, take, n, str, mode) {
+    const E = ELECTRIC, variant = 1000 + 7 * take, f0 = f0Of(m, tune);
+    let k;
+    if (mode === 'dead') k = ksString(m, sr, tune, variant, n, E.dead.t60, E.cut * E.dead.cutMul, E.dead.lpHz, { order: E.order, gCap: 0.95, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos });
+    else if (mode === 'palm') { const P = E.palm, t60 = P.t60Lo * Math.pow(P.t60Hi / P.t60Lo, clamp((m - 40) / 24, 0, 1)); k = ksString(m, sr, tune, variant, n, t60, E.cut * P.cutMul, clamp(f0 * P.lpMul, P.lpMin, P.lpMax), { order: E.order, gCap: 0.95, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos }); }
+    else k = ksString(m, sr, tune, variant, n, eT60(m), E.cut, 0, { order: E.order, gCap: 0.9995, sK: E.sK, sMin: E.sMin, s0: E.s0, pickPos: E.pickPos });
+    // 루프 계수 s의 기준점: ksString은 0.5 − (m − 40)·sK → s0로 옮김(sK로 같은 기울기, 밝은 서스테인)
+    const y = k.y, r = k.r;
+    if (mode === 'dead') {
+      const D = E.dead, ch = Math.exp(-2 * Math.PI * D.nzLo / sr), cl = Math.exp(-2 * Math.PI * D.nzHi / sr), ns = Math.min(n, Math.round(sr * D.nzTau * 7));
+      let hp = 0, prev = 0, lp = 0;
+      for (let i = 0; i < ns; i++) { const x = r() * 2 - 1; hp = ch * (hp + x - prev); prev = x; lp = lp * cl + hp * (1 - cl); y[i] += D.nzAmp * lp * Math.exp(-i / (sr * D.nzTau)); }
+    } else {
+      const nz = Math.min(n, Math.round(sr * E.nzDur)), c = Math.exp(-2 * Math.PI * E.nzLp / sr), amp = mode === 'palm' ? E.palm.nzAmp : E.nzAmp;
+      let q = 0; for (let i = 0; i < nz; i++) { q = q * c + (r() * 2 - 1) * (1 - c); y[i] += q * amp * Math.exp(-i / (sr * E.nzTau)); }
+      if (mode === 'palm') {   // 기본음 '둥'(guitarMute와 같은 방법: 첫 3주기의 기본음과 같은 위상으로 잠깐 키움)
+        const P = E.palm, w = 2 * Math.PI * k.f0 / sr, Pn = Math.min(n, Math.round(3 * sr / k.f0));
+        let re = 0, im = 0, hs = 0;
+        for (let i = 0; i < Pn; i++) { const h = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / Pn); re += y[i] * h * Math.cos(w * i); im += y[i] * h * Math.sin(w * i); hs += h; }
+        const A = P.thump * 2 * Math.sqrt(re * re + im * im) / hs, th = Math.atan2(im, re), nt = Math.min(n, Math.round(sr * P.thumpTau * 7)), ra = sr * 0.001, rt = sr * P.thumpTau;
+        for (let i = 0; i < nt; i++) y[i] += A * Math.cos(w * i - th) * (1 - Math.exp(-i / ra)) * Math.exp(-i / rt);
+      }
+    }
+    // 픽업 위치 빗살: 지연 = pos × sr / f_open(현) 샘플(운지와 무관), 기본음이 낮은 현일수록 깎임(브리지 픽업의 가는 소리: 왜곡·캐비닛이 되살림)
+    const pd = Math.max(1, Math.round(E.pickup.pos * sr / f0Of(E_OPEN[str], tune)));
+    for (let i = n - 1; i >= pd; i--) y[i] -= y[i - pd];
+    return y;
+  }
+  // 모양: 'pc5' 근음+5도, 'pc58' 근음+5도+옥타브(6-5-4 / 5-4-3번 줄), 'oct' 옥타브 꼴(한 줄 건너), 'note' 한 음. 근음 현 s = eStrOf(근음)
+  function electricVoicing(rootM, kind) {
+    const s = eStrOf(rootM), up = kind === 'pc58' ? [0, 7, 12] : kind === 'pc5' ? [0, 7] : kind === 'oct' ? [0, 12] : [0];
+    return up.map((iv, i) => ({ s: Math.min(5, s + (iv === 12 ? 2 : i)), m: rootM + iv }));
+  }
+  // 음 목록(낮은 음부터) → 현 자리: 맨 아래 음은 eStrOf, 위 음은 한 줄씩 위(맨 아래 음의 옥타브는 한 줄 건너: 1-5-8 파워 코드·옥타브 꼴, electricVoicing과 같은 규칙)
+  const electricVoicingN = notes => { const s0 = eStrOf(notes[0]); return notes.map((m, i) => ({ s: Math.min(5, s0 + (i && m - notes[0] === 12 ? 2 : i)), m })); };
+  // 한 테이크: 현 합(현마다 피크 차례 spreadMs, strGain) → 픽업 공진 → 앰프(드라이브) → 끝 사그라짐 → 정규화. 길이는 종류별
+  const electricTake = (rootM, kind, sr, tune, drive, take, mode) => electricTakeV(electricVoicing(rootM, kind), sr, tune, drive, take, mode);
+  // 재생용 한 테이크(ui.js electricNote): 음 목록의 한 모양. 짝 테이크는 −cents/2, 홀 테이크는 +cents/2(같은 스트로크의 두 줄이 늘 다른 테이크라 조율 차가 생김)
+  const electricNote = (notes, sr, tune, drive, take, mode) => electricTakeV(electricVoicingN(notes), sr, (tune || 0) + (take & 1 ? 1 : -1) * ELECTRIC.double.cents / 200, drive, take | 0, mode);
+  function electricTakeV(vs, sr, tune, drive, take, mode) {
+    const E = ELECTRIC, A = E.amp[clamp(drive | 0, 0, E.amp.length - 1)], len = mode === 'dead' ? E.deadLen : mode === 'palm' ? E.palmLen : E.len, n = Math.round(sr * len);
+    const y = new Float32Array(n), sp = Math.round(sr * E.spreadMs / 1000);
+    vs.forEach((v, i) => {
+      const s = electricString(v.m, sr, tune, take * 8 + i, n, v.s, mode), g = E.strGain[Math.min(i, E.strGain.length - 1)], off = i * sp;
+      for (let j = 0; j + off < n; j++) y[j + off] += g * s[j];
+    });
+    biqRun(y, biqCoef(sr, 'lp', E.pickup.fr, 0, E.pickup.q));                           // 픽업 공진(+Q dB 봉우리, 위로 −12 dB/oct)
+    // 입력 기준: 첫 50 ms RMS → 1(드라이브 gain이 곧 클리핑 깊이)
+    { const n5 = Math.min(n, Math.round(sr * 0.05)); let e = 0; for (let i = 0; i < n5; i++) e += y[i] * y[i]; const g = E.inRms / (Math.sqrt(e / n5) + 1e-9); for (let i = 0; i < n; i++) y[i] *= g; }
+    hp1(y, sr, A.preHp);
+    if (A.preMid) biqRun(y, biqCoef(sr, 'pk', A.preMid[0], A.preMid[1], A.preMid[2]));
+    clipOS(y, A.gain, A.bias, E.os);
+    hp1(y, sr, 15);                                                                       // 직류 막음(비대칭 클리핑의 치우침)
+    if (A.post > 0) { const tp = ftanh(A.post); for (let i = 0; i < n; i++) y[i] = ftanh(A.post * y[i]) / tp; }   // 파워앰프 단(대칭)
+    if (A.tone) biqList(y, sr, A.tone);
+    if (mode === 'open' && E.die > 0) { const i0 = n - Math.round(sr * E.die); for (let i = Math.max(0, i0); i < n; i++) y[i] *= Math.exp(-(i - i0) / (sr * E.dieTau)); }
+    edges(y, sr, 0.5, mode === 'open' ? 60 : 30);
+    // 정규화: 열린 코드는 첫 0.3초 RMS(guitarNote와 같은 기준), 팜뮤트·데드 뮤트는 첫 normMute초(어택만: 짧은 소리를 0.3초로 재면 어택이 열린 코드보다 훨씬 커짐) → 피크가 현을 치는 순간의 크기가 열린 코드와 같고 그 뒤가 짧은 만큼 작게
+    if (mode === 'open') return normalize(y, sr, E.norm);
+    const nr = Math.min(n, Math.round(sr * E.normMute)); let e = 0; for (let i = 0; i < nr; i++) e += y[i] * y[i];
+    const g = E.norm * E.normMuteK / (Math.sqrt(e / nr) + 1e-9); for (let i = 0; i < n; i++) y[i] *= g;
+    return y;
+  }
+  // 파워 코드/음 한 벌(스테레오): 쌍 pair의 두 테이크(2·pair, 2·pair + 1)를 조율 차 ∓cents/2, 어긋남 offsetMs(짝수 쌍은 B가 늦게, 홀수 쌍은 A가 늦게), 등파워 ±pan으로
+  function electricChord(rootM, kind, sr, tune, drive, pair, mode) {
+    const E = ELECTRIC, D = E.double, p = pair | 0, det = D.cents / 200;
+    const a = electricTake(rootM, kind, sr, (tune || 0) - det, drive, 2 * p, mode), b = electricTake(rootM, kind, sr, (tune || 0) + det, drive, 2 * p + 1, mode);
+    const n = a.length, L = new Float32Array(n), R = new Float32Array(n), off = Math.round(sr * D.offsetMs / 1000), x = (1 - D.pan) * Math.PI / 4, gN = Math.cos(x), gF = Math.sin(x);
+    // 등파워 패닝(Web Audio StereoPanner와 같음): 테이크 A를 −pan에 두면 왼쪽 이득 cos((1 − pan)·π/4) = gN, 오른쪽 sin(…) = gF; B는 +pan(거울)
+    const dA = p & 1 ? off : 0, dB = p & 1 ? 0 : off;
+    for (let i = 0; i < n; i++) {
+      const va = i >= dA ? a[i - dA] : 0, vb = i >= dB ? b[i - dB] : 0;
+      L[i] = gN * va + gF * vb; R[i] = gF * va + gN * vb;
+    }
+    return [L, R];
+  }
+  // 캐비닛 임펄스 응답(스테레오): 쌍2차 줄(고역 통과·저음 bump·중역 dip·프레즌스·저역 통과 단) + 좌우 다른 자리의 작은 공진 + 가까운 마이크 방 꼬리. 채널마다 refHz 크기 1
+  function cabIR(sr) {
+    const C = ELECTRIC.cab, len = Math.round(sr * C.len), ir = [];
+    for (let c = 0; c < 2; c++) {
+      const r = lcg(C.seed + 977 * c), d = new Float32Array(len); d[0] = 1;
+      const list = [['hp', C.hp[0], 0, C.hp[1]], ['pk', C.bump[0], C.bump[1], C.bump[2]], ['pk', C.dip[0], C.dip[1], C.dip[2]], ['pk', C.pres[0], C.pres[1], C.pres[2]]];
+      for (let k = 0; k < C.lp[1]; k++) list.push(['lp', C.lp[0], 0, 0.5 / Math.cos(Math.PI * (2 * k + 1) / (4 * C.lp[1]))]);   // 버터워스 2n차 = Q를 달리한 2차 n단
+      const rp = C.ripple;
+      for (let j = 0; j < rp.n; j++) { const f = rp.lo * Math.pow(rp.hi / rp.lo, (j + 0.3 + 0.4 * r()) / rp.n) * (1 + rp.lr * (c ? 1 : -1) * (0.5 + r())), g = rp.db * (r() < 0.5 ? -1 : 1) * (0.5 + 0.5 * r()); list.push(['pk', f, g, rp.q]); }
+      biqList(d, sr, list);
+      // 방 꼬리: 잡음 × 지수 감쇠(RT60), pre초부터 2 ms 올림, 크기는 직접음 에너지 기준 dB
+      const R0 = C.room, p0 = Math.round(sr * R0.pre), kDec = 6.9078 / R0.rt60, tail = new Float32Array(len);
+      let et = 0, ed = 0; for (let i = 0; i < len; i++) ed += d[i] * d[i];
+      const rr = lcg(C.seed + 31 + 977 * c);
+      for (let i = p0; i < len; i++) { const t = i / sr, w = Math.min(1, (i - p0) / (sr * 0.002)); tail[i] = (rr() * 2 - 1) * Math.exp(-kDec * (t - R0.pre)) * w; et += tail[i] * tail[i]; }
+      const gT = Math.sqrt(ed * Math.pow(10, R0.db / 10) / (et + 1e-12));
+      biqList(tail, sr, [['lp', 3000, 0, 0.7]]);
+      for (let i = 0; i < len; i++) d[i] += gT * tail[i];
+      const fin = Math.round(sr * 0.01); for (let i = 0; i < fin; i++) d[len - 1 - i] *= i / fin;
+      // refHz 크기 1로(괴르첼)
+      const w = 2 * Math.PI * C.refHz / sr; let re = 0, im = 0; for (let i = 0; i < len; i++) { re += d[i] * Math.cos(w * i); im -= d[i] * Math.sin(w * i); }
+      const g = 1 / (Math.sqrt(re * re + im * im) + 1e-12); for (let i = 0; i < len; i++) d[i] *= g;
+      ir.push(d);
+    }
+    return ir;
+  }
+
+  return { pianoV1, pianoV2, pianoV2Steps, pianoRelease, pedalNoise, guitarNote, guitarMute, guitarVoicing, muteVoicing, soundboardIR, bodyIR, sympIR, pianoSympIR, pianoSympIRSteps, PIANO1, PIANO2, SOUNDBOARD, GUITAR, GMUTE, PSYMP, f0Of,
+    ELECTRIC, electricNote, electricChord, electricTake, electricTakeV, electricVoicing, electricVoicingN, electricString, cabIR, eStrOf, clipOS, HB };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
 </script>
@@ -6913,7 +8269,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const savedPrefs = (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || localStorage.getItem(OLD_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } })();
   const prefs = Object.assign(
     { metro: true, accent: true, clickVol: 0.8, musicVol: 0.9, offsetMs: 0, autoscroll: true, theme: '', vocab: 'extended', res: 2, slash: true,
-      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name' },
+      piano: true, guitar: false, pianoVol: 0.6, guitarVol: 0.6, pianoMode: 'auto', guitarMode: 'auto', notation: 'name', guitarTone: 'acoustic' },
     savedPrefs);
   // 1.16.0부터 통기타 기본 방식이 싱어송라이터('ssw'): 그 전 기본값(스트로크 따라)으로 저장된 값은 한 번만 새 기본으로 옮김(gmv 2). 다른 방식을 고른 값은 그대로
   // 1.21.0부터 통기타 기본이 자동('auto': 곡의 리듬으로 싱어송라이터·스트로크 따라 가운데 고름): 그 전 기본값(싱어송라이터)으로 저장된 값은 한 번만 자동으로(gmv 3)
@@ -7005,7 +8361,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     musicGain.connect(master); clickGain.connect(master); pianoGain.connect(master); guitarGain.connect(master);
     musicGain.gain.value = prefs.musicVol; clickGain.gain.value = prefs.clickVol; pianoGain.gain.value = prefs.pianoVol; guitarGain.gain.value = prefs.guitarVol;
     pianoBus = buildPianoChain(pianoGain);
-    guitarBus = buildGuitarChain(guitarGain);
+    guitarBus = buildGuitarChainT(guitarGain);
     clickHi = makeClick(1850, 0.9);                     // 첫 박 '띡'
     clickLo = makeClick(1250, 0.6);                     // 나머지 박 '딱'
     clickSub = makeClick(2600, 0.3, 0.008, 0.25);       // ½박 단위일 때 박 사이 '틱': 높고 작고 짧게(박 클릭과 헷갈리지 않게)
@@ -7198,6 +8554,23 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const pianoCache = new Map();           // MIDI 음 → AudioBuffer
   const guitarCache = new Map();          // 'MIDI|세기 층|변형' → AudioBuffer
   const muteCache = new Map();            // 뮤트 음: 'MIDI|세기 층|변형|종류' → AudioBuffer(같은 음이 보통 음에도 있으므로 따로)
+  // 1.25.0 밴드 일렉트릭 기타(prefs.guitarTone 'electric', 사용자: "밴드 일렉트릭 기타처럼 치는 기능도 추가해줘. 이 기능의 주요 특징은 기타 스트록을 정확히 파워코드...등으로
+  //  쳐야하고 곡 중간에 반주에 기타 리프 나오는 부분에 기타 리프를 따라 쳐야해"). 기타 버튼·G 키·볼륨·치는 방식(자동·싱어송라이터·스트로크 따라·4·8·16비트·스윙)은
+  //  통기타와 함께 쓰고 소리와 꼴만 바꿈: 스트로크는 엔진 bandGuitar(밴드 리듬 기타 파워 코드 반주) + riff·riffApply(노래 없는 리프 구간은 원곡 리프를 채보한 음),
+  //  소리는 모양 하나(파워 코드·옥타브·한 음)가 버퍼 하나(Synth.electricNote: 현 합 → 픽업 → 앰프 비선형) → 캐비닛 응답(Synth.cabIR Convolver) → makeup → guitarGain.
+  //  'acoustic'(기본)이면 이 절의 코드는 하나도 돌지 않음(1.23.3과 샘플 단위로 같음).
+  //  on: 끄면 톤을 골라도 통기타. makeup: 통기타 경로(makeup3 1.58)와 K 가중 크기를 맞춘 보정 이득(시험곡·합성 정답곡 23곡을 자동 방식으로 곡 전체 렌더링해 통기타와의 차 평균 −0.1 LU·표준편차 1.0 LU,
+  //   방식별 차는 엔진 EG_Y0M으로 맞춤. 측정 eg/final/calib.js),
+  //  cacheMB: 일렉 버퍼 크기 합의 상한(MB, 개수가 아니라 크기: 열린 소리 모노 2.5초 ≈ 0.46 MB @48 kHz, 팜뮤트 0.6초·데드 0.3초는 4~8배 작음. 실제 곡은 모양 28~88개 × 테이크 2 = 56~176개 = 20~57 MB라
+  //   128개 개수 제한이면 iu·레일건(146~176개)이 재생 중 54~58번 다시 합성함. 64 MB면 0번이고 최대 크기는 128개 제한(61 MB)과 같음), takes: 모양마다 테이크 수(스트로크의 두 줄이 늘 다른 테이크),
+  //  pan: 더블 트래킹 두 줄의 좌우 자리(통기타 현 ±0.3, 피아노 ±0.5보다 넓게), scatterMs: 늦는 줄의 어긋남 상한(ms, 곡 씨앗 + 차례로 고정),
+  //  upVel: 업 스트로크 세기 비, chugLen·stabLen: 팜뮤트·스탭이 울리는 길이(초), dampTau: 새 스트로크가 앞 소리를 막는 시정수(피크·손바닥이 현을 다시 침),
+  //  chugTau·holdTau: 끝에서 사라지는 시정수, drive: 드라이브 강제(null이면 엔진 수준대로: 0 클린·1 크런치·2 하이게인), riff: 리프 따라 치기
+  const ELEC = { on: true, makeup: 2.94, cacheMB: 64, takes: 2, pan: 0.8, scatterMs: 12, upVel: 0.85, chugLen: 0.18, stabLen: 0.45, dampTau: 0.008, chugTau: 0.03, holdTau: 0.05, drive: null, riff: false, leadGain: Math.SQRT2 };   // riff: 리프 따라 치기(엔진 RIFF와 함께 기본 끔, 1.25.0 출시 전 사용자 결정)
+  //  leadGain: 앞 선율 음(엔진 RIFF_LEAD, 원곡 가운데 솔로·리드)은 한 테이크를 가운데에(솔로 기타처럼) — 좌우 ±pan 두 테이크(채널마다 거의 1 + 거의 0)와 같은 채널 크기가 되게 √2(가운데 패너는 채널마다 0.707)
+  const electricCache = new Map();        // 일렉 기타 버퍼: '음들|드라이브|테이크|종류' → AudioBuffer(모노)
+  const elecCap = () => ELEC.cacheMB * 1048576 * Math.max(1, (ctx ? ctx.sampleRate : 48000) / 48000);   // 1.25.0 검토 뒤: cacheMB는 48 kHz 기준(96 kHz면 두 배)
+  let electricBytes = 0;                  // 그 버퍼들의 크기 합(바이트): 열린 소리 2.5초가 팜뮤트 0.6초·데드 0.3초보다 4~8배 커서 개수가 아니라 크기로 제한(ELEC.cacheMB)
   let pianoTune = 0;                      // 곡의 기준음 편차(반음): 피아노·기타도 녹음의 튜닝에 맞춤
   const voices = [];                      // 울리고 있거나 예약된 음
   const toBuffer = y => { const b = ctx.createBuffer(1, y.length, ctx.sampleRate); if (b.copyToChannel) b.copyToChannel(y, 0); else b.getChannelData(0).set(y); return b; };
@@ -7231,7 +8604,17 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     while (c.size > max) c.delete(c.keys().next().value);
     return b;
   }
-  const clearSynthCache = () => { pianoCache.clear(); pianoJobs.clear(); guitarCache.clear(); muteCache.clear(); if (typeof pedalCache !== 'undefined') pedalCache.clear(); };
+  // 1.25.0 일렉 기타 버퍼(모노 한 테이크): 모양 notes(MIDI, 낮은 음부터), 드라이브, 테이크, 종류('open'·'palm'·'dead'). 곡의 기준음(pianoTune)을 따름. LRU ELEC.cacheMax개
+  function electricNote(notes, drive, take, mode) {
+    const k = notes.join('.') + '|' + drive + '|' + take + '|' + mode;
+    let b = electricCache.get(k);
+    if (b) { electricCache.delete(k); electricCache.set(k, b); return b; }
+    b = toBuffer(Synth.electricNote(notes, ctx.sampleRate, pianoTune, drive, take, mode));
+    electricCache.set(k, b); electricBytes += 4 * b.length;
+    while (electricBytes > elecCap() && electricCache.size > 1) { const k0 = electricCache.keys().next().value; electricBytes -= 4 * electricCache.get(k0).length; electricCache.delete(k0); }
+    return b;
+  }
+  const clearSynthCache = () => { pianoCache.clear(); pianoJobs.clear(); guitarCache.clear(); muteCache.clear(); electricCache.clear(); electricBytes = 0; if (typeof pedalCache !== 'undefined') pedalCache.clear(); };
   // 방 잔향 임펄스 응답: 시간이 지날수록 어두워지며 사라지는 잡음(1.6초)
   function makeRoomIR() {
     const sr = ctx.sampleRate, len = Math.round(sr * 1.6);
@@ -7303,6 +8686,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     return ir;
   }
   const stereoIR = ir => { const b = ctx.createBuffer(2, ir[0].length, ctx.sampleRate); for (let c = 0; c < 2; c++) b.getChannelData(c).set(ir[c]); return b; };
+  // 1.25.0 검토 뒤: 톤을 바꿀 때마다 몸통·공명현 응답을 다시 계산하면 0.3~0.5초 멈춤 → 열쇠(종류|샘플레이트|기준음)마다 한 번(AudioBuffer는 여러 Convolver가 함께 써도 됨)
+  const irCache = new Map();
+  const irBuf = (key, make) => { const k = key + '|' + ctx.sampleRate; if (!irCache.has(k)) irCache.set(k, stereoIR(make())); return irCache.get(k); };
   // 공통 소리 경로: 음들 → 버스 → [몸통(소리판·기타 몸통) 응답] → (건조음 + 방 잔향) → 고정 보정 이득 → out
   // 압축기는 쓰지 않는다: 꼬리까지 끌어올려 울림이 과하게 길어지기 때문(측정으로 확인)
   //  room(1.13): 주면 makeRoomIR2(room)을 정규화 없이(에너지 1) 씀, 없으면 1.12 방 잔향(makeRoomIR, Web Audio 정규화). 1.23.3: room에 xo(대역 경계)가 있으면 홀 잔향(makeHallIR)
@@ -7363,11 +8749,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   function buildGuitarSelf(out, makeup) {
     const bus = ctx.createGain(), mix = ctx.createGain();
     let src = bus;
-    try { const body = ctx.createConvolver(); body.normalize = false; body.buffer = stereoIR(Synth.bodyIR(ctx.sampleRate)); bus.connect(body); src = body; } catch (e) { src = bus; }
+    try { const body = ctx.createConvolver(); body.normalize = false; body.buffer = irBuf('body', () => Synth.bodyIR(ctx.sampleRate)); bus.connect(body); src = body; } catch (e) { src = bus; }
     src.connect(mix);
     try {
       const sy = ctx.createConvolver(), g = ctx.createGain();
-      sy.normalize = false; sy.buffer = stereoIR(Synth.sympIR(ctx.sampleRate, pianoTune)); g.gain.value = Synth.GUITAR.sympGain;
+      sy.normalize = false; sy.buffer = irBuf('symp|' + pianoTune, () => Synth.sympIR(ctx.sampleRate, pianoTune)); g.gain.value = Synth.GUITAR.sympGain;
       src.connect(sy); sy.connect(g); g.connect(mix);
     } catch (e) { /* 공명현 없이도 동작 */ }
     mix.gain.value = makeup;
@@ -7377,6 +8763,29 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
   const buildGuitarChain = out => Synth.GUITAR.selfRes ? buildGuitarSelf(out, GUITAR.makeup3)
     : buildChain(out, Synth.bodyIR(ctx.sampleRate), 0.16, Synth.GUITAR.tone2 ? GUITAR.makeup2 : GUITAR.makeup);
+  // 1.25.0 일렉 기타 경로: 음들(두 줄을 ±ELEC.pan) → 버스 → 캐비닛 응답(Synth.cabIR, normalize 없음, 좌우 채널이 조금 다른 응답 = 캐비닛·마이크 차이, 방 꼬리 포함) → makeup → out.
+  //  톤은 버스에 적어 둠(bus.tone): 톤을 바꾸면 syncGuitarChain이 경로를 다시 만듦
+  function buildElectricChain(out) {
+    const bus = ctx.createGain(), mix = ctx.createGain();
+    let src = bus;
+    try { const cab = ctx.createConvolver(); cab.normalize = false; cab.buffer = irBuf('cab', () => Synth.cabIR(ctx.sampleRate)); bus.connect(cab); src = cab; } catch (e) { src = bus; }
+    src.connect(mix); mix.gain.value = ELEC.makeup; mix.connect(out);
+    bus.tone = 'electric'; bus.out = mix;                  // out: 경로를 다시 만들 때 옛 경로를 떼어 냄(1.23.3 통기타와 같게)
+    return bus;
+  }
+  const electricOn = () => ELEC.on && prefs.guitarTone === 'electric' && typeof Engine.bandGuitar === 'function' && typeof Synth.electricNote === 'function' && !(Engine._ && Engine._.P && Engine._.P.EG === false);   // 엔진 EG를 끄면 통기타(1.24.0과 같음)
+  // 톤에 맞는 기타 경로: 통기타면 1.23.3 경로 그대로(buildGuitarChain)
+  const buildGuitarChainT = out => electricOn() ? buildElectricChain(out) : buildGuitarChain(out);
+  // 실시간 경로가 지금 톤과 다르면 다시 만듦(앞 경로는 입구를 끊어 조용히; 울리던 기타 소리는 멈춤)
+  function syncGuitarChain() {
+    if (!ctx || !guitarBus || (guitarBus.tone === 'electric') === electricOn()) return;
+    cancelVoices('g');
+    // 1.25.0 검토 뒤: 끊기를 바로 하면 cancelVoices의 20 ms 사그라짐·응답 꼬리가 들리지 않고 한 처리 단위 안에 무음(딸깍) → 옛 경로 출력을 30 ms로 줄인 뒤 0.4초 뒤에 뗌
+    const old = guitarBus, now = ctx.currentTime;
+    try { if (old.out) { old.out.gain.setTargetAtTime(0, now + 0.03, 0.03); } } catch (e) { }
+    setTimeout(() => { try { old.disconnect(); if (old.out) old.out.disconnect(); } catch (e) { } }, 400);
+    guitarBus = buildGuitarChainT(guitarGain);
+  }
   // 코드 → 건반: 왼손 베이스 한 음(D2~C♯3) + 오른손 밀집 배치(이전 배치의 중심과 가장 가깝게)
   //  1.23.0(PIANO.lh): prevTop을 주면 맨 윗음이 앞 코드에서 2반음 넘게 뛸수록 벌점(0.15/반음) → 윗성부가 걸음으로 움직임
   //  1.24.0(PIANO.band, 엔진 PC_BAND): colPc(9도 색 음)를 주면 맨 윗음이 그 음일 때 벌점 topCol(색은 안쪽 성부에, 실제 반주의 윗음이 색 음인 건 6%)
@@ -7634,6 +9043,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     }));
     // 1.23.3: 같은 코드가 마디를 넘어 이어지는 구간들은 한 덩어리 — t1r: 덩어리 끝(다음 코드·N.C.), rgi: 덩어리 마지막 구간의 차례(페달·댐퍼 흔들림이 씀)
     for (let i = segs.length - 1; i >= 0; i--) { const g = segs[i], nx = segs[i + 1]; const same = !g.nc && nx && !nx.nc && nx.key === g.key; g.t1r = same ? nx.t1r : g.t1; g.rgi = same ? nx.rgi : g.gi; }
+    buildRiff();                                            // 1.25.0 기타 리프 구간·음(일렉 기타 톤일 때만, 아니면 S.riff = null)
     buildStrums(segs);                                      // 통기타는 늘 스트로크 따라(켜고 끄기와 따로 만들어 둠)
     buildPedals(segs);                                      // 1.23.3 페달 소리 자리
     const mode = pianoMode();
@@ -7854,7 +9264,69 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const gmName = m => m === 'swing' ? '스윙' : m === 'ssw' ? '싱어송라이터' : m === 'strum' ? '스트로크 따라' : m.slice(4) + '비트';
   // 통기타: 스트로크마다 그 자리 코드의 운지(Synth.guitarVoicing). 다음 스트로크나 N.C.까지 울림
   //  N.C. 뮤트 스트로크(엔진 NC_MUTE, s.mute 'dead'·'palm'): 코드 구간에 넣지 않고 뮤트 운지(Synth.muteVoicing)로. 다음 스트로크까지, 길어야 GUITAR.muteRing
+  // 1.25.0 밴드 일렉 기타 스트로크(prefs.guitarTone 'electric'): 엔진 bandGuitar(마디마다 팜뮤트 연타·열린 파워 코드·빌드·당김·멈춤, 'strum'은 원곡 스트로크를 파워 코드로)
+  //  → 리프 구간(엔진 riff, S.riff)은 riffApply로 반주를 리프 음으로 바꿈 → S.strums(통기타와 같은 목록 꼴이라 재생기·스트로크 기호·피아노 피하기·시험 훅이 그대로).
+  //  항목: { t0, t1, g, dir, vel, db, tone, acc, span, strings, notes, eg(엔진: kind·notes·palm·drive·ring·bar·k·L·antic·build·stop, 리프는 kind 'riff'·dur), mute·pc(N.C.), riff }.
+  //  울림(t1): 열린 코드(ring 'hold')는 다음 스트로크나 코드 끝까지(다음 스트로크가 앞 소리를 막음), 팜뮤트(chug)는 ELEC.chugLen, 스탭은 ELEC.stabLen, 리프 음은 채보한 길이(다음 음까지).
+  //  리프 음의 드라이브는 그 마디 반주 수준대로(수준 0~2 크런치, 3~4 하이게인). 현 자리(strings)는 파워 코드를 6·5·4번(5·4·3번) 현에(스트로크 기호·시험용).
+  //  밀도 조절(densify)은 스트로크 따라만(꼴 방식은 꼴이 곧 밀도): 채우는 스트로크는 앞 스트로크와 같은 파워 코드의 팜뮤트 연타, 리프 구간 안은 채우지 않음
+  function buildElectric(segs) {
+    const TL = S.TL, gm = guitarMode(), OPEN = [40, 45, 50, 55, 59, 64];
+    const eg = Engine.bandGuitar(S.A, TL, gm, { res: TL.res }) || [];
+    S.strumPlan = null; S.strumSwing = null; S.strumSsw = null; S.strumEg = eg.eg || null; S.egPlan = eg.plan || null;
+    let st = eg;
+    const secs = ELEC.riff && S.riff && S.riff.sections && S.riff.sections.length && Engine.riffApply ? S.riff.sections : null;
+    if (secs) {
+      const lev = eg.lev || [];
+      st = Engine.riffApply(eg, S.riff, { drive: 2 });
+      const cap = eg.eg && eg.eg.driveMax != null ? eg.eg.driveMax : 2;   // 느린 곡(엔진 EG_SLOW)은 반주와 같은 드라이브 상한
+      for (const s of st) if (s.eg && s.eg.kind === 'riff') { const L = lev[s.eg.bar]; s.eg.drive = Math.min(cap, L == null ? 2 : L <= 2 ? 1 : 2); }
+    }
+    const inRiff = t => !!secs && secs.some(x => t >= x.t0 - 0.02 && t < x.t1 - 0.02);
+    const end = TL.beats[TL.beats.length - 1], out = [], riffs = [];
+    let k = 0;
+    for (let i = 0; i < st.length; i++) {
+      const s = st[i], t = s.t, nx = i + 1 < st.length ? st[i + 1].t : Infinity;
+      while (k + 1 < segs.length && segs[k + 1].t0 <= t + 0.06) k++;
+      // 당김(eg.antic, 1.25.0 검증 뒤): 울림은 당긴 코드가 시작하는 다음 마디 첫 박의 구간으로 잼(지금 자리 구간이면 옛 코드 끝 = 첫 박에서 끊겨 첫 박이 비었음)
+      let ka = k;
+      if (s.eg.antic && s.eg.bar + 1 < TL.bars.length) { const td = TL.beats[Math.min(TL.beats.length - 1, TL.bars[s.eg.bar + 1].startBeat)]; let j = k; while (j + 1 < segs.length && segs[j + 1].t0 <= td + 0.06) j++; if (j > k && !segs[j].nc) ka = j; }
+      const g = segs[ka];
+      let t1, gg = null;
+      if (s.eg.kind === 'riff') { t1 = Math.min(nx, t + s.eg.dur); gg = g && !g.nc && t >= g.t0 - 0.08 ? g : null; }
+      else if (s.mute) t1 = Math.min(nx, t + ELEC.chugLen);
+      else {
+        if (!g || g.nc || (ka === k && t < g.t0 - 0.08)) continue;
+        let j = ka + 1; while (j < segs.length && !segs[j].nc && segs[j].key === g.key) j++;
+        const cend = j < segs.length ? segs[j].t0 : end;
+        t1 = s.eg.ring === 'chug' ? Math.min(nx, t + ELEC.chugLen, cend) : s.eg.ring === 'stab' ? Math.min(nx, t + ELEC.stabLen, cend) : Math.min(nx, cend);
+        gg = g;
+      }
+      const strings = Synth.electricVoicingN(s.eg.notes).map(x => ({ s: x.s, m: x.m, f: Math.max(0, x.m - OPEN[x.s]) }));
+      const it = { t0: t, t1: Math.max(t + 0.05, t1), g: gg, dir: s.dir, vel: s.vel, db: s.db, tone: s.tone, acc: s.eg.kind === 'stab' || s.eg.kind === 'push' || s.eg.kind === 'stop', span: s.span, rake: 0, mute: s.mute, pc: s.pc, strings, eg: s.eg, riff: s.riff || null };
+      (s.eg.kind === 'riff' ? riffs : out).push(it);
+    }
+    // 1.22.0 악기 밀도(densify): 스트로크 따라만. 채우는 스트로크는 앞 스트로크와 같은 파워 코드의 팜뮤트 연타(진자 방향, DENS.fillDb)
+    const fillE = (a, b, t, x, te) => {
+      const s = a[a.length - 1], R = TL.res, slot = ((Math.round(x * R) % R) + R) % R, bi = Math.min(TL.beats.length - 2, Math.max(0, Math.floor(x)));
+      if (!s.eg || inRiff(t) || (!s.mute && (!s.g || t > s.g.t1 - 0.03))) return null;
+      const R4 = TL.meter.triple ? 3 : 4, bar = TL.barOfBeat[bi], eg2 = Object.assign({}, s.eg, { kind: s.mute ? s.eg.kind : 'chug', palm: true, ring: 'chug', antic: false, stop: false, fill: true, bar, k: Math.round((x - TL.bars[bar].startBeat) * R4) });
+      return { t0: t, t1: Math.max(t + 0.05, Math.min(te, t + ELEC.chugLen)), g: s.g, dir: slot % 2 ? -1 : 1, vel: s.vel != null ? s.vel * DENS.fillVel : s.vel, db: typeof s.db === 'number' ? s.db + DENS.fillDb : s.db, tone: s.tone, acc: false, span: (TL.beats[bi + 1] - TL.beats[bi]) / R, rake: 0, mute: s.mute, pc: s.pc, strings: s.strings, eg: eg2, riff: null, fill: true };
+    };
+    S.densG = DENS.on && gm === 'strum'; S.densGx = false;
+    let list = out;
+    if (S.densG) { const d = densify(out, TL, fillE); S.densGx = d.length !== out.length; list = d; }
+    if (riffs.length) { list = list.concat(riffs); list.sort((a, b) => a.t0 - b.t0 || (a.eg.kind === 'riff') - (b.eg.kind === 'riff')); }   // 리프 음(densify 밖: 1박 단위에서도 꼴 그대로)
+    for (const s of list) s.notes = s.strings.map(x => x.m);
+    for (let i = 0; i < list.length; i++) list[i].room = i + 1 < list.length ? list[i + 1].t0 - list[i].t0 : Infinity;
+    list.forEach((s, i) => { s.i = i; });                   // 차례: 더블 트래킹 테이크·어긋남의 난수 열쇠(곡 씨앗 + 차례)
+    S.riffN = riffs.length;
+    S.strums = list;
+    S.strumT = Float64Array.from(list, s => s.t0);
+    S.bounceT = null;
+  }
   function buildStrums(segs) {
+    if (electricOn()) return buildElectric(segs);           // 1.25.0 밴드 일렉 기타
     const TL = S.TL, out = [], gm = guitarMode();
     const st = gm === 'strum' ? Engine.strokes(S.A, TL) : Engine.strumGrid(S.A, TL, gm);
     S.strumPlan = st.plan || null;                               // 4·8·16비트·스윙: 묶음마다 고른 패턴(분석 정보에 보임)
@@ -7987,6 +9459,92 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (old && !list.some(x => x.s === q) && old.end > when) { try { const p = old.g.gain; p.cancelScheduledValues(when); p.setTargetAtTime(0, when, 0.03); old.src.stop(when + 0.25); } catch (e) { } ringing[q] = null; }
     }
   }
+  // 1.25.0 일렉 기타 한 번 치기(playElectric): 모양 하나(파워 코드·옥타브·한 음)가 버퍼 하나(electricNote: 드라이브까지 든 소리라 재생 경로에 샘플 단위 JS 없음).
+  //  더블 트래킹(록 녹음 관행: 같은 파트를 두 번 녹음해 좌·우로, 복제·지연 복사가 아니라 다른 연주): 다른 테이크 둘을 ±ELEC.pan에, 곡 씨앗 + 차례로 고른 한 줄을
+  //  ELEC.scatterMs 안에서 조금 늦게. 앞 스트로크 소리는 새 스트로크 시각에 막음(리듬 기타 한 줄: 피크·손바닥이 현을 다시 침, ELEC.dampTau).
+  //  endAt(코드 끝·연타 길이·리프 음 길이)에서 사라짐: 열린 소리 ELEC.holdTau, 팜뮤트·뮤트 ELEC.chugTau.
+  //  세기: 셈여림 db(엔진 EG_Y0·EG_K·꼴 강세, 리프 RIFF_DB0·RIFF_DBK)를 진폭으로 × 업이면 ELEC.upVel × 드라이브별·뮤트별 이득(Synth.ELECTRIC.levelGain·palmGain·deadGain)
+  const eRing = [null, null];
+  const elMode = s => s.mute === 'dead' ? 'dead' : s.eg.palm ? 'palm' : 'open';
+  const elDrive = s => ELEC.drive != null ? clamp(ELEC.drive | 0, 0, 2) : clamp(s.eg.drive | 0, 0, 2);
+  function playElectric(s, when, endAt) {
+    const E = Synth.ELECTRIC, dyn = typeof s.db === 'number', up = s.dir < 0, mode = elMode(s), drive = elDrive(s);
+    const vel = (dyn ? Math.pow(10, s.db / 20) : clamp(s.vel == null ? 0.75 : s.vel, 0.3, 1)) * (up ? ELEC.upVel : 1) * (E.levelGain[drive] || 1) * (mode === 'palm' ? E.palmGain : mode === 'dead' ? E.deadGain : 1);
+    const seed = songSeed() + (s.i != null ? s.i : s.mute ? muteN : strumN), late = hashU(seed, 7) < 0.5 ? 0 : 1, dt = hashU(seed, 5) * ELEC.scatterMs / 1000, tk = seed & 1;
+    if (s.mute) muteN++; else strumN++;
+    // 앞 선율 음(s.riff.lead): 한 테이크를 가운데에(솔로 기타). 울리던 두 줄은 이 음에서 막음
+    const solo = !!(s.riff && s.riff.lead), nTr = solo ? 1 : 2;
+    if (solo) { const old = eRing[1], at = Math.max(ctx.currentTime, when); if (old && old.end > at) { try { const p = old.g.gain; p.cancelScheduledValues(at); p.setTargetAtTime(0, at, ELEC.dampTau); old.src.stop(at + 8 * ELEC.dampTau); } catch (e) { } } }
+    for (let tr = 0; tr < nTr; tr++) {
+      const at = Math.max(ctx.currentTime, when + (!solo && tr === late ? dt : 0));
+      const old = eRing[tr];
+      if (old && old.end > at) { try { const p = old.g.gain; p.cancelScheduledValues(at); p.setTargetAtTime(0, at, ELEC.dampTau); old.src.stop(at + 8 * ELEC.dampTau); } catch (e) { } }
+      const buf = electricNote(s.eg.notes, drive, (tk + tr) % ELEC.takes, mode), src = ctx.createBufferSource(); src.buffer = buf;
+      const g = ctx.createGain(); g.gain.value = solo ? vel * ELEC.leadGain : vel;
+      src.connect(g);
+      let o = g;
+      if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = solo ? 0 : (tr ? 1 : -1) * ELEC.pan; g.connect(pn); o = pn; }
+      o.connect(guitarBus);
+      src.start(at);
+      const end = Math.min(at + buf.duration, Math.max(endAt + (!solo && tr === late ? dt : 0), at + 0.05)), tau = mode === 'open' ? ELEC.holdTau : ELEC.chugTau;
+      if (end < at + buf.duration) { g.gain.setValueAtTime(g.gain.value, end); g.gain.setTargetAtTime(0, end, tau); src.stop(end + 8 * tau); }
+      const v = { src, g, when: at, end, ins: 'g' };
+      eRing[tr] = v;
+      voices.push(v);
+      src.onended = () => { const k = voices.indexOf(v); if (k >= 0) voices.splice(k, 1); if (eRing[tr] === v) eRing[tr] = null; try { o.disconnect(); g.disconnect(); } catch (e) { } };
+    }
+  }
+  // 1.25.0 기타 리프 따라 치기(엔진 riff, P.RIFF): 일렉 기타 톤일 때만(통기타면 아무것도 하지 않음: S.riff = null).
+  //  특징(Engine.riffFeatures: 곁 신호 음높이 두드러짐 + 노래 단서)은 곡마다 처음 한 번 따로 잼(4분 곡에 브라우저에서 약 3~5초, 분석 analyze 시간·결과는 그대로.
+  //  엔진이 32 ms마다 양보하고, 다 재면 리프 계산(riffAsync, 조각으로)과 스트로크 다시 짜기(bandGuitar 포함 긴 곡 0.1~0.3초 한 번)를 따로 차례에).
+  //  다 재면 S.A.riff에 두고 스트로크를 다시 짬. S.riff = { on, sections(따라 치는 구간), cands(따라 치지 않은 되풀이: why 'vox' 노래·'short' 짧음·'unsure' 믿음 부족), notes, bars }.
+  //  모노·좁은 믹스는 찾지 않음(riffFeatures가 null: 노래와 반주를 가를 곁 신호가 없음)
+  let riffJob = null;                     // 돌고 있는 리프 특징 일 { A(그 곡의 분석), p(약속) }: 곡마다 하나
+  function buildRiff() {
+    S.riff = null;
+    if (!electricOn() || !ELEC.riff || typeof Engine.riff !== 'function' || !S.A || !S.TL || S.TL.empty) return;
+    if (S.A.riff) { S.riff = Engine.riff(S.A, S.TL); return; }
+    riffStart();
+  }
+  const strumSig = () => (S.strums || []).map(x => x.t0.toFixed(3) + (x.eg ? x.eg.kind + x.eg.notes.join('.') : '')).join(',');
+  function riffStart() {
+    // 다른 곡의 일이 아직 돌고 있으면 그 일이 끝난 뒤 이 곡의 일을 이어서(1.25.0 검증 뒤: 앞 곡의 일을 돌려줘 새 곡은 리프를 찾지 않고 '찾는 중…'에 멈췄음)
+    if (riffJob) return riffJob.A === S.A ? riffJob.p : riffJob.p.then(() => riffStart());
+    if (!S.buffer || !S.A || S.A.riff || S.A.riffDone || typeof Engine.riffFeatures !== 'function') return null;
+    const A = S.A, buf = S.buffer, chans = [], job = { A, p: null };
+    for (let c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c));
+    const later = () => new Promise(r => setTimeout(r, 0)), done = () => { if (riffJob === job) riffJob = null; };
+    // 그사이 다른 곡을 열었으면 그 곡의 리프 특징을 이어서 잼
+    const next = () => { done(); if (S.A && S.A !== A && S.TL && !S.TL.empty && electricOn() && ELEC.riff) { riffStart(); renderInfo(); } };
+    job.p = Engine.riffFeatures({ channels: chans, sampleRate: buf.sampleRate }, A, null).then(async RF => {
+      A.riffDone = true;
+      if (RF) A.riff = RF;
+      if (S.A !== A || !S.TL) return next();
+      // 리프 구간·음(Engine.riffAsync: 32 ms마다 양보하며 잼, riff()의 캐시에 둠)과 스트로크 다시 짜기를 따로 차례에(한 번에 오래 멈추지 않게)
+      if (RF && electricOn() && ELEC.riff && !S.TL.empty) { await Engine.riffAsync(S.A, S.TL); await later(); if (S.A !== A || !S.TL) return next(); }
+      done();
+      if (!RF || !electricOn() || !ELEC.riff) { renderInfo(); return; }   // 1.25.0 검토 뒤: 그사이 통기타로 바꿨으면 다시 짤 것이 없음(울리던 통기타를 끊고 다시 치던 것)
+      if (player.playing) player.schedule(0.6);             // 메트로놈 클릭은 0.6초 앞까지 미리(다시 짜기 동안 빠지지 않게)
+      const sig = strumSig();
+      buildStrikes();
+      if (strumSig() !== sig) player.resyncPiano('g');      // 스트로크가 바뀐 때만 기타를 다시 맞춤(같으면 울리는 소리를 끊지 않음)
+      player.reindexPiano();                                // 피아노 목록도 기타 자리에 따라 바뀔 수 있음(싱어송라이터·개성): 색인만 다시
+      await later(); renderStrokeMarks(); renderInfo(); if (player.playing) player.schedule();   // 표시·예약은 다음 차례에(한 차례를 짧게)
+    }, e => { A.riffDone = true; console.error(e); next(); });
+    riffJob = job;
+    return job.p;
+  }
+  // 리프 특징이 준비될 때까지(오프라인 렌더링·시험): 없으면 지금 시작
+  const riffReady = () => S.A && !S.A.riff && !S.A.riffDone ? (riffStart() || Promise.resolve()) : Promise.resolve();
+  // 1.25.0 일렉 스트로크의 테이크(ELEC.takes개) 가운데 아직 없는 것 하나를 만들고 true(다 있으면 false: 칠 수 있음). 재생 쪽은 차례(25 ms)마다 하나만 만듦
+  //  (1.25.0 검증 뒤: 테이크 하나 15~48 ms라 톤을 바꾼 직후·옮긴 직후 재생 쪽에서 스트로크 여럿을 한 번에 만들면 수백 ms 멈춰 클릭·스트로크 예약이 밀렸음.
+  //  미리 만들기 warmPiano가 대개 먼저 만들어 둠. 기다리다 늦은 스트로크는 건너뜀)
+  function electricMake(s) {
+    const d = elDrive(s), md = elMode(s), k = s.eg.notes.join('.') + '|' + d + '|';
+    for (let v = 0; v < ELEC.takes; v++) if (!electricCache.has(k + v + '|' + md)) { electricNote(s.eg.notes, d, v, md); return true; }
+    return false;
+  }
+  const electricReady = s => { const k = s.eg.notes.join('.') + '|' + elDrive(s) + '|', md = '|' + elMode(s); for (let v = 0; v < ELEC.takes; v++) if (!electricCache.has(k + v + md)) return false; return true; };
   // 이 타건의 음이 다 준비됐는가: 피아노 v2는 합성이 음마다 수십 ms라, 아직이면 재생 쪽에서 기다림(화면을 멈추지 않게)
   const strikeReady = s => !!s.strings || !PIANO.v2 || s.notes.every((m, q) => pianoCache.has(rrKey(m, s.rr ? s.rr[q] : 0)));   // 1.23.3: 고른 변형(PIANO.rr)까지
   const LATE_OK = 0.3;                    // 준비가 늦은 타건을 그래도 칠 수 있는 지연(초). 넘으면 건너뜀
@@ -8001,7 +9559,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     return true;
   };
   // 타건 하나 울리기(악기에 따라)
-  function strike(s, when, endAt) { if (s.strings) playStrum(s, when, endAt); else { const o = {}, r = pianoRollOf(s, endAt - when, o); playChord(s.notes, when, endAt, s.vels, r, o.slow, s); } }
+  function strike(s, when, endAt) { if (s.eg) playElectric(s, when, endAt); else if (s.strings) playStrum(s, when, endAt); else { const o = {}, r = pianoRollOf(s, endAt - when, o); playChord(s.notes, when, endAt, s.vels, r, o.slow, s); } }
   // 1.23.2 느린 곡 화음 굴리기(PIANO.slowRoll): 음 사이 간격(초). 세 음 이상 화음만(왼손 꼴 빼고), 그 자리 박 길이로 템포 비중 w, 구간 수준(s.L)으로 굴리는 시간
   //  s.minRoll: 엔진이 정한 굴림 간격(싱어송라이터 느린 곡 스탭·마디 가운데 코드 PC_RROLL)이 있으면 그보다 짧게 굴리지 않음
   //  left: 치는 때부터 손을 떼는 때(endAt)까지 남은 초. 재생을 화음 끝 근처에서 다시 시작하거나 늦게 친 화음은 그 안에서 다 굴림(맨 윗음이 다음 화음 위로 넘어가지 않게)
@@ -8128,7 +9686,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       } catch (e) { /* 이미 멈춘 음 */ }
     }
     for (let k = voices.length - 1; k >= 0; k--) if (!ins || voices[k].ins === ins) voices.splice(k, 1);
-    if (!ins || ins === 'g') for (let q = 0; q < 6; q++) ringing[q] = null;
+    if (!ins || ins === 'g') { for (let q = 0; q < 6; q++) ringing[q] = null; eRing[0] = eRing[1] = null; }
   }
   // 곡에 필요한 음을 지금 위치부터 나오는 순서대로 미리 합성(재생 중 끊김 방지). 피아노 v2는 배음 단위로 나눠
   //  한 번에 약 10 ms씩만 만들고 화면에 차례를 넘김(50 ms 넘게 멈추는 작업이 없게). 통기타는 보통 세기 층만 미리
@@ -8150,14 +9708,20 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 1.23.0: 피아노는 앞으로 20초 안의 화음(왼손 꼴·채움 빼고)을 먼저 → 재생을 바로 시작해도 화음이 빠지지 않게
     if (prefs.piano && S.strikes) { const ix = []; S.strikes.forEach((s, q) => { if (s.comp !== 'L' && !s.fill && s.t0 >= t - 1 && s.t0 < t + 20) ix.push(q); }); add(ix.map(q => S.strikes[q]), Float64Array.from(ix, q => S.strikes[q].t0), false); }
     const nNear = need.length;                                 // 1.23.3: 이만큼(앞 20초 화음)을 만드는 동안은 warmUrgent(공명현 응답 만들기가 기다림)
+    // 1.25.0 일렉 기타: 모양(음·드라이브·종류)마다 테이크들을 나오는 차례로. 앞으로 20초 안의 모양은 피아노 곡 전체보다 먼저(테이크 하나가 통기타 현 하나의 10~20배라 칠 때 만들면 늦을 수 있음)
+    const addE = (lim) => { if (!(prefs.guitar && electricOn() && S.strums && S.strums.length)) return; const from = Math.max(0, lastLE(S.strumT, t)); for (let q = 0; q < S.strums.length; q++) { const s = S.strums[(from + q) % S.strums.length]; if (!s.eg) continue; if (lim && (s.t0 < t - 1 || s.t0 > t + lim)) continue; const d = elDrive(s), md = elMode(s), ek = s.eg.notes.join('.') + '|' + d + '|' + md; if (!need.some(x => x.ek === ek)) need.push({ ek, notes: s.eg.notes, d, md }); } };
+    addE(20);
     if (prefs.piano) add(S.strikes, S.strikeT, false);
-    if (prefs.guitar) add(S.strums, S.strumT, true);
+    if (prefs.guitar && !electricOn()) add(S.strums, S.strumT, true);
+    addE(0);
     const yieldNow = () => new Promise(r => setTimeout(r, 0));
     warmUrgent = nNear > 0;
     for (let qi = 0; qi < need.length; qi++) {
       const { m, v, str, gtr, kind, layer } = need[qi];
       if (tok !== warmToken) return;
       if (qi >= nNear) warmUrgent = false;
+      const ex = need[qi];
+      if (ex.ek) { for (let tk = 0; tk < ELEC.takes && electricBytes < 0.9 * elecCap(); tk++) { await yieldNow(); if (tok !== warmToken) return; electricNote(ex.notes, ex.d, tk, ex.md); } continue; }   // 테이크 하나 15~48 ms
       if (gtr) {
         if ((kind ? muteCache : guitarCache).size + GUITAR.variants <= (kind ? GUITAR.muteCacheMax : GUITAR.cacheMax)) for (let v = 0; v < GUITAR.variants; v++) guitarNote(m, layer, v, kind, str);
         await yieldNow(); continue;
@@ -8200,7 +9764,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     opt = opt || {};
     if (!S.TL || !S.buffer) throw new Error('곡이 없음');
     ensureCtx();
-    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
+    // 1.25.0 guitarTone 'electric'이면 리프 특징을 먼저 잼(곡마다 한 번, riffReady)
+    const toneR = opt.guitarTone === 'electric' || opt.guitarTone === 'acoustic' ? opt.guitarTone : prefs.guitarTone;
+    if (toneR === 'electric' && ELEC.on && (opt.riff == null ? ELEC.riff : !!opt.riff)) await riffReady();
+    const sr = ctx.sampleRate, saved = { ctx, pianoGain, guitarGain, pianoBus, guitarBus, tone: prefs.guitarTone, eDrive: ELEC.drive, eRiff: ELEC.riff, v2: PIANO.v2, v3: PIANO.v3, grand: PIANO.grand, slowRoll: GUITAR.slowRoll.on, pianoRoll: PIANO.slowRoll.on, gm: prefs.guitarMode, pm: prefs.pianoMode, pg: prefs.guitar, strumN, muteN,
       grand2: PIANO.grand2, human: PIANO.human.on, shape: PIANO.slowRoll.shape.on, lift: PIANO.liftGtrOnly, hall: PIANO.hall, wetH: PIANO.wetH, pedal: PIANO.pedal.on, pedalO: PIANO.pedal, soft: Synth.PIANO2.G6.soft, room3: PIANO.room3, wound: PIANO.wound,
       real: REAL.map(k => PIANO[k]), seedVar: GUITAR.seedVar };
     strumN = 0; muteN = 0;                        // 변형 차례를 처음부터(같은 구간은 늘 같은 소리로 렌더링)
@@ -8219,10 +9786,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (opt.pedalP) PIANO.pedal = Object.assign({}, PIANO.pedal, opt.pedalP);   // pedalP: 페달 hold·lag·rel 덮어쓰기(비교 샘플용)
       // 1.23.3 기계 소리 줄이기(비교·시험용): touch·rr·timing·reso·hallSum 켬·끔(real: 다섯 가지를 한꺼번에), touchP·rrP·timingP·resoP·hallSumP: 값 덮어쓰기
       for (const k of REAL) { const on = opt[k] != null ? opt[k] : opt.real; if (on != null || opt[k + 'P']) PIANO[k] = Object.assign({}, PIANO[k], opt[k + 'P'] || {}, on != null ? { on: !!on } : {}); }
+      // 1.25.0 guitarTone: 'acoustic' 통기타·'electric' 밴드 일렉 기타, drive: 일렉 드라이브 강제(0 클린·1 크런치·2 하이게인, null이면 마디 수준대로), riff: 리프 따라 치기 켬/끔
+      prefs.guitarTone = toneR; if (opt.drive !== undefined) ELEC.drive = opt.drive; if (opt.riff != null) ELEC.riff = !!opt.riff;
       clearSynthCache();
       pianoGain = oc.createGain(); pianoGain.gain.value = prefs.pianoVol; pianoGain.connect(oc.destination);
       guitarGain = oc.createGain(); guitarGain.gain.value = prefs.guitarVol; guitarGain.connect(oc.destination);
-      pianoBus = buildPianoChain(pianoGain); guitarBus = buildGuitarChain(guitarGain);
+      pianoBus = buildPianoChain(pianoGain); guitarBus = buildGuitarChainT(guitarGain);
       prefs.guitar = useGuitar;                    // 피아노 반주가 통기타 자리를 피할지(렌더링에 통기타를 넣는지에 따라)
       buildStrikes();
       if (opt.music) { const m = oc.createBufferSource(), g = oc.createGain(); m.buffer = S.buffer; g.gain.value = opt.music; m.connect(g); g.connect(oc.destination); m.start(0, from); }
@@ -8240,8 +9809,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       const r = await oc.startRendering();
       return [r.getChannelData(0), r.getChannelData(1)];
     } finally {
-      voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null;
-      strumN = saved.strumN; muteN = saved.muteN;
+      voices.length = 0; for (let q = 0; q < 6; q++) ringing[q] = null; eRing[0] = eRing[1] = null;
+      strumN = saved.strumN; muteN = saved.muteN; prefs.guitarTone = saved.tone; ELEC.drive = saved.eDrive; ELEC.riff = saved.eRiff;
       ctx = saved.ctx; pianoGain = saved.pianoGain; guitarGain = saved.guitarGain; pianoBus = saved.pianoBus; guitarBus = saved.guitarBus; PIANO.v2 = saved.v2; PIANO.v3 = saved.v3; PIANO.grand = saved.grand; GUITAR.slowRoll.on = saved.slowRoll; PIANO.slowRoll.on = saved.pianoRoll;
       PIANO.grand2 = saved.grand2; PIANO.human.on = saved.human; PIANO.slowRoll.shape.on = saved.shape; PIANO.liftGtrOnly = saved.lift; PIANO.hall = saved.hall; PIANO.wetH = saved.wetH; PIANO.pedal = saved.pedalO; PIANO.pedal.on = saved.pedal; Synth.PIANO2.G6.soft = saved.soft; PIANO.room3 = saved.room3; PIANO.wound = saved.wound; syncPianoV3(); prefs.guitarMode = saved.gm; prefs.pianoMode = saved.pm; prefs.guitar = saved.pg;
       REAL.forEach((k, i) => { PIANO[k] = saved.real[i]; }); GUITAR.seedVar = saved.seedVar;
@@ -8252,6 +9821,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   window.__chordityRender = offlineRender;
   // 시험용: 지금 통기타가 치는 스트로크(차트 기호와 대조) [{t, dir, mute}]
   window.__chordityStrums = () => (S.strums || []).map(s => ({ t: s.t0, dir: s.dir, mute: s.mute || '', rake: s.rake || 0, fill: !!s.fill }));
+  // 시험용(1.25.0): 일렉 기타 스트로크 [{t, t1, kind, notes, palm, drive, db, bar, k, L, antic, stop, build, mute, riff}]·마디 꼴(plan)·요약(info), 리프 구간·음, 톤 고르기
+  window.__chordityElectric = () => ({ on: electricOn(), strums: (S.strums || []).filter(s => s.eg).map(s => ({ t: s.t0, t1: s.t1, dir: s.dir, kind: s.eg.kind, notes: s.eg.notes.slice(), palm: !!s.eg.palm, drive: elDrive(s), mode: elMode(s), db: s.db, bar: s.eg.bar, k: s.eg.k, L: s.eg.L, antic: !!s.eg.antic, stop: !!s.eg.stop, build: !!s.eg.build, mute: s.mute || '', fill: !!s.fill })), plan: S.egPlan || null, info: S.strumEg || null });
+  window.__chordityRiff = () => S.riff ? { on: S.riff.on, src: S.riff.src, sub: S.riff.sub, sections: S.riff.sections.map(s => ({ b0: s.b0, b1: s.b1, t0: s.t0, t1: s.t1, lag: s.lag, agree: s.agree, conf: s.conf, vox: s.vox, kind: s.kind, n: s.n, figure: s.figure })), cands: S.riff.cands.map(c => ({ t0: c.t0, t1: c.t1, why: c.why })), notes: S.riff.notes.map(n => ({ t: n.t, dur: n.dur, m: n.m, kind: n.kind, palm: n.palm, conf: n.conf, lead: !!n.lead })) } : null;
+  window.__chordityGuitarTone = t => t != null ? setGuitarTone(t).then(() => prefs.guitarTone) : prefs.guitarTone;   // 톤을 바꾸면 스트로크까지 다 짠 뒤 풀리는 약속
+  window.__chordityRiffReady = () => riffReady().then(() => window.__chordityRiff());
   S.gapLog = []; S.rollLog = [];
   window.__chordityRollOf = (t, L, n, room, left) => { const k = S.rollLog.length, r = pianoRollOf({ t0: t, L, notes: new Array(n || 4).fill(60), room: room == null ? Infinity : room }, left); S.rollLog.length = Math.min(S.rollLog.length, k); return r * ((n || 4) - 1); };   // (시험용) 그 자리·수준의 굴리는 시간(초), 기록은 그대로
   window.__chordityRolls = () => S.rollLog.splice(0);                                  // (시험용) 피아노가 굴려 친 화음 {t, n, roll(맨 아래 ~ 맨 위 초), L}(1.23.2)
@@ -8314,6 +9888,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     // 지금 위치 다음부터 다시 예약(이동·보정·설정 변경 시). 클릭과 코드 연주는 따로 다시 맞출 수 있음
     resync() { this.resyncClicks(); this.resyncPiano(); },
     // 코드 연주 다시 맞추기. ins 'p'(피아노)·'g'(통기타)만, 없으면 둘 다(옮기기·재생 시작)
+    // 1.25.0 검토 뒤: 기타가 바뀌어 피아노 목록(기타 자리를 피하는 싱어송라이터·개성)을 다시 짰을 때 울리는 소리는 두고 다음 칠 자리만 새 목록에서
+    reindexPiano() {
+      const t = this.playing ? Math.max(this.startOff, this.pos()) : this.pausedAt;
+      this.nextStrike = lastLE(S.strikeT || [], t - 1e-4) + 1; this.nextPedal = lastLE(S.pedalT || [], t - 1e-4) + 1;
+    },
     resyncPiano(ins) {
       cancelVoices(ins);
       const t = this.playing ? Math.max(this.startOff, this.pos()) : this.pausedAt;
@@ -8325,7 +9904,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       // 통기타: 스트로크 사이에서 재생을 시작하면 지금 코드를 곧바로 한 번 다운 스트로크로(합성이 빨라 기다리지 않음).
       //  현은 코드 끝까지 울리므로, 0.1초 안에 칠 스트로크가 있으면 겹쳐 치지 않게 건너뜀. 뮤트(N.C.의 짧은 '칙')는 이어 울리는 코드가 아니라 다시 치지 않음
       const g = doG && prefs.guitar && S.strums ? S.strums[this.nextStrum - 1] : null, nx = g ? S.strums[this.nextStrum] : null;
-      if (g && !g.mute && t < g.t1 - 0.1 && !(nx && nx.t0 < t + 0.1)) strike(Object.assign({}, g, { dir: 1 }), Math.max(ctx.currentTime, this.startCtx + (t - this.startOff)), this.startCtx + (g.t1 - this.startOff));
+      //  1.25.0 일렉 기타는 테이크가 다 있을 때만(없으면 다음 스트로크부터: 여기서 만들면 길게 멈춤)
+      if (g && !g.mute && t < g.t1 - 0.1 && !(nx && nx.t0 < t + 0.1) && (!g.eg || electricReady(g))) strike(Object.assign({}, g, { dir: 1 }), Math.max(ctx.currentTime, this.startCtx + (t - this.startOff)), this.startCtx + (g.t1 - this.startOff));
       if (!doP || !prefs.piano) return;
       // 코드 한가운데서 재생을 시작하면 지금 코드를 곧바로 한 번 울림(음이 아직 준비 중이면 schedule에서 준비되는 대로).
       //  1.23.3: 그 앞의 왼손 꼴·채움 너머 아직 울리는 화음이 있으면 그 화음을(싱어송라이터는 같은 시각의 화음 뒤에 왼손이 와서 베이스 음만 다시 울렸음)
@@ -8364,7 +9944,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (d > 0) for (let k = 1; k < r; k++) out.push(b[i] + d * k / r);
       return out;
     },
-    schedule() {
+    schedule(clickAhead) {                                  // 1.25.0 clickAhead(초, 일렉 기타만 씀): 메트로놈 클릭만 그만큼 앞까지 미리 예약. 없으면 그대로
       if (!this.playing || !S.TL) return;
       const beats = S.TL.beats, off = prefs.offsetMs / 1000, now = ctx.currentTime;
       const horizon = this.pos() + (document.hidden ? 1.5 : 0.2);   // 백그라운드 탭은 타이머가 느려지므로 길게
@@ -8375,13 +9955,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (this.subFrom >= 0) { if (sub) for (const ts of this.subTimes(this.subFrom)) this.tick(ts + off, clickSub, now); this.subFrom = -1; }
       while (this.next < beats.length) {
         const bt = beats[this.next] + off;
-        if (bt > horizon) break;
+        if (bt > (clickAhead ? Math.max(horizon, this.pos() + clickAhead) : horizon)) break;
         if (prefs.metro) this.tick(bt, prefs.accent && S.TL.pos[this.next] === 0 ? clickHi : clickLo, now);
         if (sub) for (const ts of this.subTimes(this.next)) this.tick(ts + off, clickSub, now);
         this.next++;
       }
       // 코드 연주: 음악 시각 그대로 예약(클릭 타이밍 보정은 적용하지 않음).
       //  음이 아직 준비 중(미리 만들기가 따라오는 중)이면 기다렸다가 준비되는 대로 치고, LATE_OK 넘게 늦으면 건너뜀
+      if (clickAhead) return;                                 // 1.25.0: clickAhead면 클릭만(음은 보통 차례에: 일렉 테이크를 여기서 만들지 않게)
       const st = S.strikes, cur = this.pos();
       if (this.restart) {
         const s = this.restart;
@@ -8419,6 +10000,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         const s = gs[this.nextStrum];
         if (s.t0 > horizon) break;
         const when = this.startCtx + (s.t0 - this.startOff);
+        if (prefs.guitar && s.eg && when >= now - 0.01 && s.t0 < this.dur() && electricMake(s)) break;   // 1.25.0 일렉: 테이크를 하나 만들었으면 다음 차례에 다시(늦으면 건너뜀)
         if (prefs.guitar && when >= now - 0.01 && s.t0 < this.dur()) strike(s, Math.max(when, now), this.startCtx + (s.t1 - this.startOff));
         this.nextStrum++;
       }
@@ -8503,7 +10085,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     if (token !== loadToken) return;
     S.buffer = buf; S.A = A; S.name = file.name.replace(/\.[^.]+$/, '');
     // 피아노를 이 녹음의 기준음에 맞춤(0.5 cent 넘게 달라지면 다시 합성)
-    if (Math.abs(A.harm.tuning - pianoTune) > 0.005) { clearSynthCache(); pianoTune = A.harm.tuning; if (ctx && Synth.GUITAR.selfRes) { if (guitarBus && guitarBus.out) try { guitarBus.out.disconnect(); } catch (e) { } guitarBus = buildGuitarChain(guitarGain); } if (ctx && pianoBus && pianoBus.reso) pianoResoTune(pianoBus.reso); }   // 1.23.3 공명현도 기준음을 따름
+    if (Math.abs(A.harm.tuning - pianoTune) > 0.005) { clearSynthCache(); pianoTune = A.harm.tuning; if (ctx && Synth.GUITAR.selfRes) { if (guitarBus && guitarBus.out) try { guitarBus.out.disconnect(); } catch (e) { } guitarBus = buildGuitarChainT(guitarGain); } if (ctx && pianoBus && pianoBus.reso) pianoResoTune(pianoBus.reso); }   // 1.23.3 공명현도 기준음을 따름
     S.set = Object.assign(Engine.defaultSettings(), { vocab: prefs.vocab, res: resOf(prefs.res), slash: !!prefs.slash });
     player.pausedAt = 0;
     $('busy').hidden = true; $('app').hidden = false;
@@ -9354,7 +10936,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
           : '스윙(엇박 ' + sw.phi.toFixed(2) + '박 자리, 길게:짧게 ' + (sw.phi / (1 - sw.phi)).toFixed(1) + ':1, '
             + (sw.measured ? '원곡에서 잼' : (Math.abs(sw.fallback - 2 / 3) < 1e-9 ? '기본값 셋잇단' : '기본값') + ', ' + (sw.straight ? '원곡은 곧음' : '원곡에서 못 잼')) + ') ';   // 못 잼: 엇박이 뚜렷하지 않아 믿을 수 없음
         rows.push(['통기타 스트럼', (prefs.guitarMode === 'auto' ? '자동: ' : '') + head + topPats([...cnt].sort((a, b) => b[1] - a[1]), show)]);
-      } else if (S.strums && S.strums.length) {
+      } else if (S.strums && S.strums.length && !electricOn()) {
         // 스트로크 따라(1.21.0, 사용자: "[스트로크 따라]랑 피아노 패턴도 나오게"): 미리 정한 꼴이 없으므로 실제로 친 스트로크를 마디마다 박 칸 꼴로 모음
         const pl = barPatterns(S.strums.map(x => ({ t: x.t0, x })), c => c[0].x.mute ? 'M' : c[0].x.dir > 0 ? '↓' : '↑', '✗');
         if (pl.length) rows.push(['통기타 스트럼', (prefs.guitarMode === 'auto' ? '자동: ' : '') + gmName(guitarMode()) + ' ' + topPats(pl, x => x)]);
@@ -9369,6 +10951,26 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         else if (lhOn) mix = '(화음 ' + n.C + '·왼손 ' + n.B + '번) ';
         if (pl.length) rows.push(['피아노 패턴', (prefs.pianoMode === 'auto' ? '자동: ' : '') + PM_LONG[pm] + ' ' + mix + topPats(pl, x => x)]);
       }
+      // 1.25.0 일렉 기타(엔진 bandGuitar): 마디 수준별 마디 수, 당김·멈춤·빌드 수, 꼴(마디마다 칸 글자: D 열린 다운, d 팜뮤트, u·p 16분 업, A 당김, · 쉼)
+      if (electricOn() && S.strumEg) {
+        const e = S.strumEg, cnt = new Map();
+        for (const p of S.egPlan || []) if (p.pat) cnt.set(p.pat, (cnt.get(p.pat) || 0) + 1);
+        const pats = topPats([...cnt].sort((a, b) => b[1] - a[1]), x => x.replace(/-/g, '·')).trim();
+        rows.push(['일렉 기타', (prefs.guitarMode === 'auto' ? '자동: ' : '') + '밴드 파워 코드(' + (e.mode === 'strum' ? '스트로크 따라' : e.hand + '분음표 손') + (e.swing ? ', 스윙 ' + e.swing.toFixed(2) : '') + ') 수준 0~4 마디 ' + e.levels.join('·')
+          + ', 팜뮤트 연타 ' + e.chugBars + '·열기 ' + e.openBars + '마디, 당김 ' + e.antics + ', 멈춤 ' + e.stops + ', 빌드 ' + e.builds + (S.riffN ? ', 리프 음 ' + S.riffN + '번' : '') + (pats ? ' — ' + pats : '')]);
+      }
+      // 1.25.0 기타 리프(엔진 riff): 따라 치는 리프 구간(마디·시각·되풀이 길이·리프/한 음 연타·믿음)과 따라 치지 않은 되풀이 구간 수(노래·짧음·믿음 부족). 모노·좁은 믹스는 찾지 않음
+      if (electricOn() && ELEC.riff && S.A && (S.riff || riffJob || S.A.riffDone)) {
+        const R = S.riff;
+        if (!R || !R.on) rows.push(['기타 리프', riffJob ? '찾는 중…' : Engine._ && Engine._.P && !Engine._.P.RIFF ? '끔' : '찾지 않음(모노·좁은 믹스)']);
+        else {
+          const secT = s => { const n0 = TL.bars[s.b0].num, n1 = TL.bars[s.b1 - 1].num; return (n0 === n1 ? n0 : n0 + '~' + n1) + '마디(' + fmtTime(s.t0) + '~' + fmtTime(s.t1) + ', ' + (s.kind === 'lead' ? '앞 선율(가운데 리드·솔로) 음 ' + s.n + '개)' : s.lag + '마디 꼴, ' + (s.kind === 'chug' ? '한 음 연타' : '리프') + ', 믿음 ' + Math.round(s.conf * 100) + '%)'); };
+          const why = { vox: '노래', short: '짧음', unsure: '믿음 부족', sparse: '음이 드묾', comp: '코드 반주', lead: '앞 선율과 겹침' }, cnt = {};
+          for (const c of R.cands) cnt[c.why] = (cnt[c.why] || 0) + 1;
+          const tail = R.cands.length ? ' (따라 치지 않은 되풀이: ' + Object.keys(cnt).map(k => (why[k] || k) + ' ' + cnt[k] + '구간').join(', ') + ')' : '';
+          rows.push(['기타 리프', (R.sections.length ? R.sections.length + '구간: ' + R.sections.map(secT).join(' · ') : '없음') + tail]);
+        }
+      }
       // 통기타 N.C. 뮤트(엔진 NC_MUTE): 원곡에 리듬이 있는 N.C. 구간에서 친 뮤트·팜뮤트 수(지금 치는 방식 기준)와 팜뮤트 음(그 자리 조의 철자로 파워 코드 이름)
       const mutes = (S.strums || []).filter(s => s.mute && !s.chuck);
       if (mutes.length) {
@@ -9382,7 +10984,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
         const parts = [];
         if (nDead) parts.push('뮤트 ' + nDead + '번');
         if (palm.length) parts.push('팜뮤트 ' + palm.length + '번(' + names.slice(0, 4).join('·') + (names.length > 4 ? ' 외 ' + (names.length - 4) + '가지' : '') + ')');
-        rows.push(['통기타 뮤트', 'N.C.에서 ' + parts.join(', ')]);
+        rows.push([(electricOn() ? '일렉 기타' : '통기타') + ' 뮤트', 'N.C.에서 ' + parts.join(', ')]);
       }
     }
     $('info').innerHTML = rows.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>').join('');
@@ -9419,14 +11021,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   const resOf = r => +r === 1 || +r === 4 ? +r : 2;   // 저장값 → 엔진 res(1박·작은박 2·더 작은박 4), 모르는 값은 기본(2)
   const OPN = { half: '½박 옮김', x2: '템포 ×2', d2: '템포 ÷2', d3: '템포 ÷3' };
   // 보정 패널의 설정 기본값(저장되는 설정). 음량·테마·켜기/끄기 버튼은 여기서 다루지 않음
-  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'auto', guitarMode: 'auto', accent: true, autoscroll: true, offsetMs: 0 };
+  const PREF_DEFAULT = { vocab: 'extended', res: 2, slash: true, pianoMode: 'auto', guitarMode: 'auto', guitarTone: 'acoustic', accent: true, autoscroll: true, offsetMs: 0 };
   function settingParts() {
     const p = [];
     if (prefs.vocab === 'basic') p.push('코드 기본(3화음)'); else if (prefs.vocab === 'standard') p.push('코드 표준');
     if (resOf(prefs.res) === 1) p.push('1박 단위'); else if (resOf(prefs.res) === 4) p.push(subUnit2(S.TL) + ' 단위');
     if (!prefs.slash) p.push('베이스음 표기 끔');
     if (prefs.pianoMode === 'song') p.push('피아노 곡 따라'); else if (prefs.pianoMode === 'bar') p.push('코드 연주 마디마다'); else if (prefs.pianoMode === 'beat') p.push('코드 연주 박마다'); else if (prefs.pianoMode === 'change') p.push('코드 연주 코드가 바뀔 때'); else if (prefs.pianoMode === 'ssw') p.push('피아노 싱어송라이터'); else if (prefs.pianoMode === 'flair') p.push('피아노 개성 있게');
-    if (prefs.guitarMode !== 'auto') p.push('통기타 ' + gmName(guitarMode()));
+    if (prefs.guitarMode !== 'auto') p.push((electricOn() ? '일렉 기타 ' : '통기타 ') + gmName(guitarMode()));
+    if (electricOn()) p.push('일렉 기타(밴드)');
     if (!prefs.accent) p.push('첫 박 강조 끔');
     if (!prefs.autoscroll) p.push('자동 스크롤 끔');
     if (prefs.offsetMs) p.push('클릭 타이밍 ' + (prefs.offsetMs > 0 ? '+' : '') + prefs.offsetMs + ' ms');
@@ -9704,6 +11307,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     $('guitarBtn').setAttribute('aria-pressed', String(prefs.guitar));
     $('selPianoMode').value = prefs.pianoMode;
     $('selGuitarMode').value = prefs.guitarMode === 'auto' ? 'auto' : guitarMode();
+    syncToneUI();
     document.querySelectorAll('[data-vol="piano"]').forEach(o => { o.value = prefs.pianoVol; });
     document.querySelectorAll('[data-vol="guitar"]').forEach(o => { o.value = prefs.guitarVol; });
     document.querySelectorAll('[data-vol="music"]').forEach(o => { o.value = prefs.musicVol; });
@@ -9743,8 +11347,38 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   $('selGuitarMode').addEventListener('change', e => {
     prefs.guitarMode = e.target.value; savePrefs(); renderApplied();
     if (!S.TL) return;
-    buildStrikes(); renderStrokeMarks(); renderInfo(); player.resyncPiano('g'); if (player.playing) player.schedule();
+    buildStrikes(); renderStrokeMarks(); renderInfo(); player.resyncPiano('g'); player.reindexPiano(); if (player.playing) player.schedule();
   });
+  // 1.25.0 기타 소리(통기타·일렉 기타(밴드)): 고른 톤으로 이름(버튼·묶음)·소리 경로·스트로크를 맞춤
+  function syncToneUI() {
+    const el = electricOn(), sel = $('selGuitarTone'), lb = $('guitarBtn').querySelector('.lbl'), gl = $('gtrLab');
+    if (sel) sel.value = el ? 'electric' : 'acoustic';
+    if (lb) lb.textContent = el ? '일렉' : '통기타';
+    $('guitarBtn').setAttribute('aria-label', (el ? '일렉 기타' : '통기타') + ' 코드 연주');
+    if (gl) gl.textContent = el ? '일렉 기타 연주' : '통기타 연주';
+    const ms = $('selGuitarMode'); if (ms) ms.setAttribute('aria-label', el ? '일렉 기타가 치는 방식' : '통기타가 치는 방식');
+  }
+  let toneTok = 0;
+  function setGuitarTone(t) {
+    t = t === 'electric' ? 'electric' : 'acoustic';
+    if (prefs.guitarTone !== t) { prefs.guitarTone = t; savePrefs(); }
+    syncToneUI(); renderApplied();
+    const tok = ++toneTok;
+    const go = () => {
+      if (tok !== toneTok) return;
+      syncGuitarChain();
+      if (!S.TL) return;
+      if (player.playing) player.schedule(0.6);               // 메트로놈 클릭은 0.6초 앞까지 미리(아래 다시 짜기 동안 멈춰도 클릭이 빠지지 않게)
+      buildStrikes(); player.resyncPiano('g'); player.reindexPiano();   // 미리 만들기는 resyncPiano가 다시 시작. 피아노 색인도(검토 뒤: 목록이 바뀌면 건너뛰거나 다시 침)
+      // 스트로크 표시·분석 정보·예약은 다음 차례에(한 차례를 짧게: 긴 곡은 표시만 수십 ms)
+      return new Promise(r => setTimeout(() => { if (tok === toneTok) { renderStrokeMarks(); renderInfo(); } if (player.playing) player.schedule(); r(); }, 0));
+    };
+    // 1.25.0 검증 뒤: 일렉으로 바꿀 때는 bandGuitar의 무거운 중간값(긴 곡 0.1~0.4초)을 조각으로 먼저 잰 뒤(Engine.bandGuitarPrep) 스트로크를 짬(재생 중 한 번에 오래 멈춰
+    //  클릭·스트로크 예약이 밀리지 않게). 그동안(긴 곡 0.1~0.3초)은 앞 톤 소리가 그대로 이어짐. 끝나면 풀리는 약속을 돌려줌(시험 훅)
+    if (t === 'electric' && electricOn() && S.A && S.TL && !S.TL.empty && typeof Engine.bandGuitarPrep === 'function') return Engine.bandGuitarPrep(S.A, S.TL, guitarMode()).then(go, go);
+    return Promise.resolve(go());
+  }
+  if ($('selGuitarTone')) $('selGuitarTone').addEventListener('change', e => setGuitarTone(e.target.value));
   // 볼륨: 넓은 화면(트랜스포트 안)과 좁은 화면(아래 줄) 두 벌을 같은 값으로 묶음
   document.querySelectorAll('[data-vol]').forEach(inp => {
     inp.addEventListener('input', e => {
@@ -9815,7 +11449,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   });
   // 설정만 기본값으로(박 보정은 그대로): 컨트롤 표시를 맞추고 차트·클릭·코드 연주를 다시 구성
   $('resetPrefsBtn').addEventListener('click', () => {
-    Object.assign(prefs, PREF_DEFAULT); savePrefs();
+    Object.assign(prefs, PREF_DEFAULT); savePrefs(); syncToneUI(); syncGuitarChain();   // 1.25.0: 톤도 기본(통기타)으로 → 소리 경로도
     if (!S.set) { renderApplied(); return; }
     S.set.vocab = prefs.vocab; S.set.res = prefs.res; S.set.slash = prefs.slash;
     syncControls();
