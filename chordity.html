@@ -269,6 +269,19 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 .gm .mb.r { border-right: 1.2px solid var(--pencil); }
 .gm .mb i { position: absolute; left: 50%; bottom: 100%; margin-bottom: 0; transform: translateX(-50%); font: 800 11px/10px var(--ui-font); font-style: normal; color: var(--ink); }   /* 글자라 마우스를 올린 마디(--hover)에서도 4.5:1 넘게 잉크색 */
 .bar.cur .gm .mb, .bar.cur .gm .mb i { border-color: var(--ink); color: var(--ink); }
+/* 1.26.1 일렉 기타 악보: 팜뮤트 묶음은 점선 꺾쇠 위 P.M.(기타 악보 표기), 데드 뮤트는 ×(묶지 않음) */
+.gm .mb.pm { border-top-style: dashed; }
+.gm .mb.one, .bar.cur .gm .mb.one { border: 0; }   /* 한 박짜리 뮤트: 꺾쇠 없이 글자만 */
+.gm .mb.pm i { font-size: 10px; letter-spacing: -.02em; }
+/* 1.26.1 드럼 악보(드럼을 켰을 때만, 기호 ○⊛*⊝⊜●◒◕−=O): 통기타 칸이 없으면 그 자리(코드 이름 아래 50px)에, 통기타와 함께면 통기타 줄 아래(72px~)에 한 줄 더.
+   기호는 그 칸 자리 빗금 가운데(칸 왼쪽 + 6.5px)에 가운데 맞춤. 글꼴은 기호가 다 든 것 먼저(섞이면 크기가 들쭉날쭉) */
+.bar .dm { display: none; position: absolute; left: 12px; right: 10px; top: 50px; height: 22px; pointer-events: none; }
+#chart.dm .bar { height: 106px; }
+#chart.dm .bar .dm { display: block; }
+#chart.gm.dm .bar { height: 124px; }
+#chart.gm.dm .bar .dm { top: 72px; height: 18px; }
+.dm b { position: absolute; bottom: 1px; margin-left: 6.5px; transform: translateX(-50%); font: 400 16px/16px "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", "Noto Sans Math", "Noto Sans Symbols 2", "Noto Sans Symbols", var(--ui-font); color: var(--pencil); white-space: nowrap; }
+.bar.cur .dm b { color: var(--ink); }
 .bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; line-height: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; padding: 0 3px; border-radius: 3px; }   /* 상자 아래 끝이 코드 칸 위(12px)를 넘지 않게. 바탕은 비워 지금 코드 상자 윗변을 가리지 않음 */
 .bar.pickup .tag { right: auto; left: 10px; }
 .bar .pillrow { position: absolute; top: -4px; z-index: 3; display: flex; gap: 4px; }
@@ -334,6 +347,11 @@ kbd { font: 600 11.5px/1 var(--ui-font); border: 1px solid var(--rule); border-b
   .bar { height: 78px; }
   .bar .gm { top: 47px; height: 21px; }
   #chart.gm .bar { height: 101px; }
+  .bar .dm { top: 47px; height: 21px; }
+  #chart.dm .bar { height: 101px; }
+  #chart.gm.dm .bar { height: 119px; }
+  #chart.gm.dm .bar .dm { top: 68px; height: 18px; }
+  .dm b { font-size: 13px; line-height: 13px; }
   .chord { font-size: 21px; }
   .chord.sm { font-size: 16px; }
   .chord.xs { font-size: 13px; }
@@ -379,7 +397,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.0">v1.26.0</span>
+    <span class="ver" title="Chordity 버전 1.26.1">v1.26.1</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
@@ -10949,7 +10967,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
   }
   // 드럼 특징이 준비될 때까지(오프라인 렌더링·시험): 없으면 지금 시작
   const drumReady = () => S.A && !S.A.drumDone ? (drumStart() || Promise.resolve()) : Promise.resolve();
-  function drumApply() { buildDrums(); if (drumsOn()) { player.resyncPiano('d'); if (player.playing) player.schedule(); } renderInfo(); }
+  function drumApply() { buildDrums(); renderDrumMarks(); if (drumsOn()) { player.resyncPiano('d'); if (player.playing) player.schedule(); } renderInfo(); }
   // 드럼 목록(타임라인이 바뀔 때마다: rebuild, 코드 변화 단위도 rebuild로. buildStrikes 안에서는 짜지 않음: 피아노·기타를 켜고 끌 때 다시 채보하지 않게).
   //  S.drums = [{t0, kind(엔진), k(합성 종류), vel, layer(세기 층), v(변형), db(세기 곡선 + 흔들림, 키트 섞음 dB는 칠 때), dt(시각 흔들림 초), bar, i, fill}] 시각 차례
   function buildDrums() {
@@ -11648,7 +11666,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     const bl0 = S.barLabels.find(b => b && !b.final), cw1 = chart.clientWidth;
     if (bl0) { const adj = bl0.lane.getBoundingClientRect().width - laneWidth(cw1, false); if (adj < -0.05 || cw1 !== cw0) { S.laneAdj = Math.min(0, adj); layoutChords(cw1); } }
     if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { chordWCache.clear(); S.rampNeed = null; measureChords(S.TL); layoutChords(); layoutTempoRow(); });
-    renderStrokeMarks();
+    renderStrokeMarks(); renderDrumMarks();
   }
 
   // 통기타 스트로크 기호(1.14.0): 통기타를 켜면 마디 안 코드 이름과 빗금 사이에, 실제로 치는 스트로크마다 다운 Π·업 V를 그 박 자리에.
@@ -11702,8 +11720,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (s.el && s.el.isConnected) { S.bounceLog.push({ t0: s.t0, at: t, dir: s.dir, rake: !!s.rkEl }); if (S.bounceLog.length > 64) S.bounceLog.shift(); }
     }
   }
+  // 1.26.1 일렉 기타 악보(사용자: "일렉기타로 설정하면 일렉악보로 바꿔줘. 팜뮤트랑 뮤트 표기되게"): 일렉 기타로 칠 때는 기타 악보 표기대로
+  //  팜뮤트(파워 코드 연타 eg.palm·N.C. 팜뮤트)는 이어진 동안 점선 꺾쇠 위에 P.M., 데드 뮤트(N.C. 'dead')는 스트로크 기호 대신 ×(묶지 않음).
+  //  열린 코드·스탭은 Π·V 그대로. ELEC_MARK false면 1.26.0과 같음(뮤트만 실선 꺾쇠 M)
+  const ELEC_MARK = true;
+  const MUTE_ONE = true;                                 // 한 박짜리 뮤트 묶음은 글자만(false면 1.26.0처럼 꺾쇠)
   function renderStrokeMarks() {
     const chart = $('chart'), TL = S.TL, on = !!(prefs.guitar && TL && !TL.empty && S.barEls.length && S.strums);
+    const el = ELEC_MARK && electricOn();
     chart.classList.toggle('gm', on);
     for (const be of S.barEls) if (be && be.gm) be.gm.textContent = '';
     if (!on) return;
@@ -11725,21 +11749,28 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
     for (const s of S.strums) {
       const gx = beatPos(s.t0), bi = barAt(gx);
       if (bi == null || !S.barEls[bi]) continue;
-      const d = document.createElement('span');
-      d.className = 'sd' + (s.dir < 0 ? ' up' : '') + (s.mute ? ' mu' : '') + (s.chuck ? ' ck' : '');
-      d.textContent = s.chuck ? '×' : s.dir < 0 ? 'V' : 'Π';            // 처크(싱어송라이터 SSW_CHUCK): 코드 구간 2·4박 뮤트는 × 한 글자(뮤트 꺾쇠 묶음에 넣지 않음)
+      const d = document.createElement('span'), dead = el && s.mute === 'dead', palm = el && (s.mute === 'palm' || (!s.mute && !!(s.eg && s.eg.palm)));
+      d.className = 'sd' + (s.dir < 0 && !dead ? ' up' : '') + (s.mute ? ' mu' : '') + (s.chuck || dead ? ' ck' : '');
+      d.textContent = s.chuck || dead ? '×' : s.dir < 0 ? 'V' : 'Π';            // 처크(싱어송라이터 SSW_CHUCK): 코드 구간 2·4박 뮤트는 × 한 글자(뮤트 꺾쇠 묶음에 넣지 않음)
       d.style.left = pct(fOf(bi, gx));
       fragOf(bi).appendChild(d);
       s.el = d; s.rkEl = null;                            // 재생 때 통통 튀기(bounceStrokes)
       // 느린 긁기: 다운 기호 왼쪽에 아르페지오 물결선
       if (s.rake) { const w = document.createElement('span'); w.className = 'rk'; w.style.left = pct(fOf(bi, gx)); fragOf(bi).appendChild(w); s.rkEl = w; }
       // 뮤트 구간: 뮤트 스트로크가 다른 스트로크 없이 이어지는 동안(2박 넘게 비면 새 구간)
-      if (s.mute && !s.chuck) {
+      if (el ? palm : s.mute && !s.chuck) {                  // 일렉: 팜뮤트만 묶음(P.M.), 통기타: 뮤트·팜뮤트(M)
         if (grp && gx - grp.x1 <= 2 + 1e-9) grp.x1 = gx;
-        else { grp = { x0: gx, x1: gx, palm: s.mute === 'palm' }; groups.push(grp); }
+        else { grp = { x0: gx, x1: gx, palm: s.mute === 'palm' || palm }; groups.push(grp); }
       } else grp = null;
     }
     for (const g of groups) {
+      // 1.26.1(사용자: "일렉악보던 통악보던 1박자 뮤트는 꺽쇠 없이 그냥 M만"): 한 박 안에서 끝나는 뮤트 묶음은 꺾쇠 없이 글자만(통기타 M, 일렉 P.M.)
+      if (MUTE_ONE && g.x1 - g.x0 < 1 - 1e-9) {
+        const bi = barAt(g.x0), m = document.createElement('span'), t = document.createElement('i');
+        m.className = 'mb one'; m.style.left = 'calc(' + pct(fOf(bi, g.x0)) + ' + 1px)'; m.style.width = 'calc(' + pct(fOf(bi, g.x1)) + ' - ' + pct(fOf(bi, g.x0)) + ' + 11px)';
+        t.textContent = el ? 'P.M.' : 'M'; m.appendChild(t); fragOf(bi).appendChild(m);
+        continue;
+      }
       const b0 = barAt(g.x0), b1 = barAt(g.x1), pieces = [];
       for (let bi = b0; bi <= b1; bi++) {
         const bar = TL.bars[bi], s0 = bar.startBeat, s1 = s0 + bar.nBeats;
@@ -11750,17 +11781,63 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       let lab = pieces[0]; for (const pc of pieces) if (pc.z - pc.a > lab.z - lab.a + 1e-9) lab = pc;
       for (const pc of pieces) {
         const m = document.createElement('span');
-        m.className = 'mb' + (pc.L ? ' l' : '') + (pc.R ? ' r' : '');
+        m.className = 'mb' + (pc.L ? ' l' : '') + (pc.R ? ' r' : '') + (el ? ' pm' : '');
         // 끝 조각은 스트로크 기호 바깥쪽 끝까지(기호 가운데 ± 5.5px), 이어지는 쪽은 마디 칸 끝까지
         const fa = pc.L ? fOf(pc.bi, pc.a) : null, fz = pc.R ? fOf(pc.bi, pc.z) : null;
         const left = pc.L ? 'calc(' + pct(fa) + ' + 1px)' : '-12px';
         const right = pc.R ? 'calc(' + pct(fz) + ' + 12px)' : 'calc(100% + 10px)';
         m.style.left = left; m.style.width = 'calc(' + right + ' - ' + left + ')';
-        if (pc === lab) { const t = document.createElement('i'); t.textContent = 'M'; m.appendChild(t); }
+        if (pc === lab) { const t = document.createElement('i'); t.textContent = el ? 'P.M.' : 'M'; m.appendChild(t); }
         fragOf(pc.bi).appendChild(m);
       }
     }
     for (const [bi, f] of frags) S.barEls[bi].gm.appendChild(f);
+  }
+
+  // 1.26.1 드럼 악보(사용자: "드럼 악보도. ○베이스드럼(킥) ⊛킥+크래쉬 ⊝킥+하이햇 클로즈 ⊜킥+하이햇 오픈 ●스네어 ◒스네어+하이햇 ◕스네어+하이햇 클로즈
+  //  - 하이햇 클로즈 =하이햇 오픈 O필인", 뒤에 "킥 없는 크래시는 *"): 드럼을 켜면 마디마다 드럼 칸을 두고, 타격이 있는 격자 칸마다 기호 하나를 그 칸 자리에.
+  //  칸 하나의 기호(위가 먼저): 탐(필인) O, 킥 + 크래시 ⊛·킥 없는 크래시 *(사용자), 킥 + 열린 하이햇 ⊜·+ 닫힘(페달) 하이햇 ⊝·그 밖 ○(사용자: 킥과 스네어가
+  //  한 칸이면 킥 쪽 기호), 킥 없는 스네어(사이드 스틱 포함) + 열린 하이햇 ◒·+ 닫힘(페달) 하이햇 ◕·그 밖 ●,
+  //  하이햇만 닫힘(페달) −·열림 =. 라이드(벨)는 닫힘 하이햇처럼(박을 새는 심벌).
+  //  ◒은 사용자가 "스네어+하이햇"으로만 적었으나 킥 짝(⊝ 닫힘·⊜ 열림)처럼 열린 하이햇으로 봄.
+  //  자리: 타격 시각을 드럼 격자(엔진 info.R: 박을 4·2·3칸, 스윙 칸도 곧은 칸으로)의 가장 가까운 칸으로 → 마디 안 자리(스트로크 기호와 같은 셈).
+  //  통기타 칸이 없으면 그 자리(코드 이름과 빗금 사이)에, 통기타와 함께면 통기타 줄 아래 한 줄 더(마디를 그만큼 높임, #chart.dm·#chart.gm.dm).
+  //  DRUM_MARK false면 1.26.0과 같음(칸을 만들지 않고 마디 높이 그대로)
+  const DRUM_MARK = true;
+  const DM_TOM = new Set(['tomH', 'tomM', 'tomL']), DM_SN = new Set(['snare', 'side']), DM_HC = new Set(['hhc', 'hhp', 'ride', 'bell']);
+  // 한 칸에 든 합성 종류(k) 모음 → 기호
+  function drumGlyph(ks) {
+    const has = k => ks.has(k), any = set => [...ks].some(k => set.has(k));
+    if (any(DM_TOM)) return 'O';
+    if (has('crash')) return has('kick') ? '⊛' : '*';
+    const ho = has('hho'), hc = any(DM_HC);
+    if (has('kick')) return ho ? '⊜' : hc ? '⊝' : '○';      // 킥과 스네어가 함께면 킥 쪽 기호
+    if (any(DM_SN)) return ho ? '◒' : hc ? '◕' : '●';
+    return ho ? '=' : hc ? '−' : '';
+  }
+  function renderDrumMarks() {
+    if (!DRUM_MARK) return;
+    const chart = $('chart'), TL = S.TL, ds = S.drums;
+    const on = !!(drumsOn() && TL && !TL.empty && S.barEls.length && ds && ds.length && S.drumTL === TL);
+    chart.classList.toggle('dm', on);
+    for (const be of S.barEls) if (be && be.dm) be.dm.textContent = '';
+    if (!on) return;
+    const b = TL.beats, nb = b.length, R = (S.drumInfo && S.drumInfo.R) || (TL.meter.triple ? 3 : 4);
+    const cells = new Map();                                // 격자 칸(박 좌표 × R, 정수) → 합성 종류 모음
+    for (const h of ds) {
+      let i = Math.min(nb - 2, Math.max(0, lastLE(b, h.t0 + 0.03))), x = Math.round(Math.max(0, (h.t0 - b[i]) / (b[i + 1] - b[i])) * R);
+      if (x >= R) { if (i + 1 < nb - 1) { i++; x = 0; } else x = R - 1; }
+      const key = i * R + x; let c = cells.get(key); if (!c) { c = new Set(); cells.set(key, c); } c.add(h.k);
+    }
+    const frags = new Map();
+    for (const [key, ks] of cells) {
+      const g = drumGlyph(ks), gx = key / R, bi = TL.barOfBeat[Math.min(nb - 1, Math.floor(gx + 1e-9))];
+      if (!g || bi == null || !S.barEls[bi] || !S.barEls[bi].dm || !S.barGeo[bi]) continue;
+      const bar = TL.bars[bi], geo = S.barGeo[bi], d = document.createElement('b');
+      d.textContent = g; d.style.left = ((geo.shift + gx - bar.startBeat) / geo.slots * 100).toFixed(3) + '%';
+      let f = frags.get(bi); if (!f) { f = document.createDocumentFragment(); frags.set(bi, f); } f.appendChild(d);
+    }
+    for (const [bi, f] of frags) S.barEls[bi].dm.appendChild(f);
   }
 
   // 템포 줄에 그릴 것을 박 단위로 정리: 엔진이 겹치는 구간을 주더라도 화면에는 겹쳐 그리지 않음
@@ -12223,7 +12300,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       names.push('템포 ' + Math.round(t.bpm));
     }
     el.setAttribute('aria-label', (bar.pickup ? '못갖춘마디' : bar.num + '마디') + ': ' + names.join(', '));
-    S.barEls[idx] = { el, marks, gm };
+    let dm = null;
+    if (DRUM_MARK) { dm = document.createElement('div'); dm.className = 'dm'; dm.setAttribute('aria-hidden', 'true'); el.appendChild(dm); }   // 1.26.1 드럼 악보 칸(renderDrumMarks가 채움)
+    S.barEls[idx] = { el, marks, gm, dm };
     return el;
   }
 
@@ -12751,7 +12830,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Synth;
       if (S.TL && S.drumTL !== S.TL) buildDrums();
       player.resyncPiano('d'); if (player.playing) player.schedule();
     } else { cancelVoices('d'); drumWarmTok++; }
-    if (S.TL) renderInfo();
+    if (S.TL) { renderDrumMarks(); renderInfo(); }
   }
 
   function syncControls() {
