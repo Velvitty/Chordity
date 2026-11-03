@@ -19,6 +19,7 @@
   --hl-ink: #1b2433;
   --box: #ffed85;          /* 지금 코드 상자: 연한 형광펜. 잉크 13.2:1 */
   --soft: #4e5662;         /* 회색 코드 이름(끌어 둔 코드, N.C.): 진행 채움 위 4.6:1, 상자 위 6.3:1, 차트 면 위 7.2:1, 잉크와 2.1:1 떨어져 회색으로 보임 */
+  --dhit: #d7263d;         /* 1.26.3 지금 친 드럼 기호(빨강) */
   --dfocus: #e3c6ff;       /* 1.26.2 드럼 줄 진행 띠(형광 연보라, 잉크 대비 높음) */
   --fill: #ffc061;         /* 지금 코드 상자 안 진행 채움(주황). 잉크 9.6:1, 상자 노랑과 1.37:1 */
   --wave: rgba(27, 36, 51, .22);
@@ -35,14 +36,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
-    --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78;
+    --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78; --dhit: #ff6b6b;
     --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #15181d; --sheet: #1b1f25; --ink: #e8ebef; --pencil: #8d95a1; --foot: #8d95a1; --rule: #343b45;
-  --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78;
+  --hover: rgba(232, 235, 239, .05); --hl: #e9c93f; --hl-ink: #14171b; --box: #4b4219; --soft: #aab1bb; --fill: #5e3110; --dfocus: #4b2a78; --dhit: #ff6b6b;
   --wave: rgba(232, 235, 239, .2); --wave-played: rgba(232, 235, 239, .72); --focus: #7aa7ff; --danger: #ff8a80;
   color-scheme: dark;
 }
@@ -286,12 +287,19 @@ select { min-height: 34px; border-radius: 8px; border: 1px solid var(--rule); ba
 /* 1.26.2 드럼 줄 진행: 형광펜 같은 연보라 띠가 마디 처음부터 재생 위치까지 차오름(코드 상자의 주황 채움처럼). 기호는 그 위에 */
 .dm .dhl { position: absolute; left: -6px; top: -2px; bottom: -3px; width: 0; max-width: calc(100% + 12px); background: var(--dfocus); border-radius: 6px; }
 /* 1.26.2 가장 최근에 친 드럼 기호 확대: 코드 이름(.chord.zoom)과 같은 때·빠르기(0.1초에 커지고 0.7초에 줄어듦), 아래 가운데 축 */
-.dm b { transform-origin: 50% 70%; transition: transform .7s cubic-bezier(.35, 0, .25, 1); }
+.dm b { transform-origin: 50% 95%; transition: transform .7s cubic-bezier(.35, 0, .25, 1), color .7s cubic-bezier(.35, 0, .25, 1); }
 /*  지금 친 기호는 크게(1.9배, 위에 그림), 다음 기호는 아주 조금(1.2배), 다다음은 더 조금(1.07배) */
-.dm b.zoom { transform: translateX(-50%) scale(1.9); transition: transform .1s cubic-bezier(.2, .8, .3, 1); z-index: 2; }
+.dm b.zoom, .bar.cur .dm b.zoom { transform: translateX(-50%) scale(1.9); color: var(--dhit); transition: transform .1s cubic-bezier(.2, .8, .3, 1), color .1s cubic-bezier(.2, .8, .3, 1); z-index: 2; }   /* 1.26.3 지금 친 드럼은 빨강으로 0.1초 들어오고 0.7초에 빠짐(확대와 같은 때) */
 .dm b.z1 { transform: translateX(-50%) scale(1.2); transition: transform .1s cubic-bezier(.2, .8, .3, 1); z-index: 1; }
 .dm b.z2 { transform: translateX(-50%) scale(1.07); transition: transform .1s cubic-bezier(.2, .8, .3, 1); }
 #chart.still .dm b { transition: none !important; }
+/* 1.26.3 기타와 드럼을 함께 켜면 드럼 기호는 위쪽을 축으로 아래로 커지고(위의 기타 스트로크 기호를 가리지 않게), 기타 기호 줄은 드럼 줄 위에 그림 */
+#chart.gm.dm .bar .gm { z-index: 3; }
+#chart.gm.dm .dm b { transform-origin: 50% 45%; }
+/*  함께 켜면 위(기타 기호)·아래(박 빗금) 둘 다 닿지 않게 확대를 줄임 */
+#chart.gm.dm .dm b.zoom { transform: translateX(-50%) scale(1.35); }
+#chart.gm.dm .dm b.z1 { transform: translateX(-50%) scale(1.15); }
+#chart.gm.dm .dm b.z2 { transform: translateX(-50%) scale(1.05); }
 @media (prefers-reduced-motion: reduce) { .dm b, .dm b.zoom, .dm b.z1, .dm b.z2 { transition: none; } }
 .bar .tag { position: absolute; right: 12px; top: -1px; font-size: 10.5px; line-height: 13px; color: var(--pencil); font-variant-numeric: tabular-nums; padding: 0 3px; border-radius: 3px; }   /* 상자 아래 끝이 코드 칸 위(12px)를 넘지 않게. 바탕은 비워 지금 코드 상자 윗변을 가리지 않음 */
 .bar.pickup .tag { right: auto; left: 10px; }
@@ -408,7 +416,7 @@ body > main { flex: 1 0 auto; }
   <div class="brand">
     <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="4" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v18M17 4v18" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.5l2-5M11.5 17.5l2-5M19.5 17.5l2-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     <span>Chordity</span>
-    <span class="ver" title="Chordity 버전 1.26.2">v1.26.2</span>
+    <span class="ver" title="Chordity 버전 1.26.3">v1.26.3</span>
   </div>
   <div class="tseg" id="themeSeg" role="radiogroup" aria-label="테마">
     <span class="thumb" aria-hidden="true"></span>
