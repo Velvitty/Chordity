@@ -2,22 +2,27 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<meta name="robots" content="noindex">
-<title>Chordity로 이동합니다</title>
-<link rel="canonical" href="chordity.html">
-<meta http-equiv="refresh" content="0; url=chordity.html">
-<script>
-  // 주소 뒤의 ?…와 #…를 그대로 붙여 넘김 (뒤로 가기 기록에 이 페이지를 남기지 않도록 replace)
-  location.replace('chordity.html' + location.search + location.hash);
-</script>
-<style>
-  body { font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; min-height: 100vh; display: grid; place-items: center; }
-  a { color: inherit; }
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15181d">
+<meta name="description" content="Chordity · 브라우저에서 사용하는 독립 실행 앱">
+<title>Chordity</title>
+<!-- Velvitty PWA -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="./pwa.js" defer></script>
+<!-- /Velvitty PWA -->
+<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#15181d}iframe{display:block;position:fixed;inset:0;width:100%;height:100%;border:0;background:#15181d}.fallback{font:16px/1.7 system-ui;padding:24px;color:#eee}a{color:inherit}</style>
 </head>
 <body>
-<p>Posity(Chordity로 이동합니다. 넘어가지 않으면 <a href="chordity.html">여기를 누르세요</a>.</p>
+<iframe id="application" src="./chordity.html" title="Chordity" allow="autoplay; fullscreen; clipboard-write" allowfullscreen></iframe>
+<script>
+// The original app stays at its established source path for existing commits and merges.
+const application = document.getElementById('application');
+if (location.search || location.hash) application.src = './chordity.html' + location.search + location.hash;
+</script>
+<noscript><p class="fallback"><a href="./chordity.html">Chordity 열기</a></p></noscript>
 </body>
 </html>
