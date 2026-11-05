@@ -1,6 +1,6 @@
 /* Project-local PWA cache. Offline launches display a connection notice. */
 'use strict';
-const VERSION = "d2ba340f3ce61644";
+const VERSION = "e25bc99ac3602655";
 const APP = "Chordity";
 const CORE = ["./manifest.webmanifest", "./pwa.js", "./offline.html", "./pwa-icon-192.png", "./pwa-icon-512.png", "./pwa-icon-maskable.png", "./apple-touch-icon.png"];
 const OPTIONAL = [];
@@ -17,6 +17,7 @@ const MAX_BYTES = 4 * 1024 * 1024;
 
 const UI_URL = new URL('./pwa-ui.html', SCOPE).href;
 function uiOnly(source) {
+  source = source.replace(/<!-- Velvitty launch screen -->[\s\S]*?<!-- \/Velvitty launch screen -->/gi, '');
   source = source.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '');
   source = source.replace(/<(?:iframe|object)\b[^>]*>[\s\S]*?<\/(?:iframe|object)\s*>/gi, '');
   source = source.replace(/<(?:base|embed)\b[^>]*>/gi, '');
