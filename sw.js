@@ -1,6 +1,6 @@
 /* Project-local PWA cache. Offline launches display a connection notice. */
 'use strict';
-const VERSION = "e25bc99ac3602655";
+const VERSION = "77e480c0092fcf1c";
 const APP = "Chordity";
 const CORE = ["./manifest.webmanifest", "./pwa.js", "./offline.html", "./pwa-icon-192.png", "./pwa-icon-512.png", "./pwa-icon-maskable.png", "./apple-touch-icon.png"];
 const OPTIONAL = [];

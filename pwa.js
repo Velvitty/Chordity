@@ -21,8 +21,11 @@
     backdrop.removeAttribute('src');
     const fallback = doc.getElementById('velvitty-ui-fallback');
     if (fallback && !backdrop.hasAttribute('srcdoc')) backdrop.srcdoc = fallback.content.textContent;
+    const initialUI = backdrop.getAttribute('srcdoc');
+    let themeProfile = null;
+    if (initialUI) themeProfile = setUIBackdrop(backdrop, initialUI, themeProfile, glass, root.host || doc.body);
     const uiScope = new URL('./', location.href).href;
-    readStaticUIFromCache(uiScope).then(html => { if (html) backdrop.srcdoc = html; }).catch(() => {});
+    readStaticUIFromCache(uiScope).then(html => { if (html) themeProfile = setUIBackdrop(backdrop, html, themeProfile, glass, root.host || doc.body); }).catch(() => {});
     const optics = doc.createElement('div');
     optics.className = 'lens-optics';
     optics.setAttribute('aria-hidden', 'true');
@@ -149,6 +152,8 @@
       try {
         const page = backdrop.contentDocument;
         if (!page?.documentElement || page.URL === 'about:blank') return;
+      synchronizeUITheme(page, themeProfile);
+      backdrop.removeAttribute('data-ui-theme-pending');
         const style = page.defaultView.getComputedStyle(page.body);
         let background = style.backgroundColor;
         let values = background.match(/[\d.]+/g)?.map(Number);
@@ -200,8 +205,69 @@
     }
     return '';
   }
-  
-  function applyGlassMaterial(glass, brightness, light) {
+function prepareUIBackground(source, fallbackProfile) {
+  const marker = source.match(/<!-- velvitty-ui-theme (.*?) -->/);
+  let profile = fallbackProfile || null;
+  if (!profile && marker) {
+    try { profile = JSON.parse(marker[1]); } catch (_) { /* Keep the app's fallback profile. */ }
+  }
+  if (!profile) return {html: source, profile: null, theme: null, selected: null};
+
+  const {selected, theme} = readUITheme(profile);
+  const html = source.replace(/<html\b([^>]*)>/i, (_, attributes) => {
+    const clean = attributes.replace(/\sdata-theme\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+    return '<html' + clean + (selected ? ' data-theme="' + selected + '"' : '') + '>';
+  });
+  return {html, profile, theme, selected};
+}
+
+function readUITheme(profile) {
+  let value;
+  try {
+    let saved = null;
+    for (const key of profile.keys) {
+      saved = localStorage.getItem(key);
+      if (saved) break;
+    }
+    value = profile.field ? JSON.parse(saved || '{}')?.[profile.field] : saved;
+  } catch (_) { /* The application also follows the system when storage cannot be read. */ }
+
+  const selected = value === 'light' || value === 'dark' ? value : '';
+  if (selected) return {selected, theme: selected};
+  let theme = profile.default || 'light';
+  if (typeof matchMedia === 'function') {
+    if (matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
+    else if (matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+  }
+  return {selected, theme};
+}
+
+function synchronizeUITheme(page, profile) {
+  if (!profile) return;
+  const {selected} = readUITheme(profile);
+  if (selected) page.documentElement.dataset.theme = selected;
+  else delete page.documentElement.dataset.theme;
+  for (const option of page.querySelectorAll('[data-theme-opt][role="radio"]')) {
+    const active = option.dataset.themeOpt === selected;
+    option.setAttribute('aria-checked', String(active));
+    if (active) option.style.backgroundColor = 'var(--ink)';
+    else option.style.removeProperty('background-color');
+  }
+}
+
+function setUIBackdrop(backdrop, source, profile, glass, surface) {
+  const prepared = prepareUIBackground(source, profile);
+  if (prepared.theme) {
+    const light = prepared.theme === 'light';
+    glass.dataset.surface = prepared.theme;
+    surface.style.setProperty('--app-ui-background', light ? '#f5f5f5' : '#181818');
+    applyGlassMaterial(glass, (light ? 245 : 24) / 255, light);
+  }
+  backdrop.srcdoc = prepared.html;
+  return prepared.profile;
+}
+
+function applyGlassMaterial(glass, brightness, light) {
     const middleTone = 1 - Math.abs(brightness * 2 - 1);
     glass.style.setProperty('--glass-alpha', (.055 + .075 * middleTone).toFixed(3));
     glass.style.setProperty('--glass-rgb', light ? '255 255 255' : '12 12 12');

@@ -4,10 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Velvitty launch screen -->
+<style data-velvitty-prepaint>html[data-pwa-start-theme="light"]{background-color:#f5f5f5;color-scheme:light}html[data-pwa-start-theme="dark"]{background-color:#181818;color-scheme:dark}</style>
+<script data-velvitty-prepaint>(() => {
+  if (window.top !== window) return;
+function readUITheme(profile) {
+  let value;
+  try {
+    let saved = null;
+    for (const key of profile.keys) {
+      saved = localStorage.getItem(key);
+      if (saved) break;
+    }
+    value = profile.field ? JSON.parse(saved || '{}')?.[profile.field] : saved;
+  } catch (_) { /* The application also follows the system when storage cannot be read. */ }
+
+  const selected = value === 'light' || value === 'dark' ? value : '';
+  if (selected) return {selected, theme: selected};
+  let theme = profile.default || 'light';
+  if (typeof matchMedia === 'function') {
+    if (matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
+    else if (matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+  }
+  return {selected, theme};
+}
+  document.documentElement.dataset.pwaStartTheme = readUITheme({"keys":["chordity-prefs-v1","madi-code-prefs-v1"],"field":"theme","default":"light"}).theme;
+})();</script>
 <!-- Velvitty UI snapshot -->
 <template id="velvitty-ui-fallback">&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;ko&quot;&gt;
-&lt;head&gt;&lt;base href=&quot;./&quot;&gt;&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;none&#x27;; connect-src &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https:; img-src &#x27;self&#x27; data: https:; font-src &#x27;self&#x27; data: https:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; form-action &#x27;none&#x27;; base-uri &#x27;self&#x27;&quot;&gt;&lt;style&gt;html{pointer-events:none!important}*{animation-play-state:paused!important;caret-color:transparent!important}&lt;/style&gt;
+&lt;head&gt;&lt;!-- velvitty-ui-theme {&quot;keys&quot;:[&quot;chordity-prefs-v1&quot;,&quot;madi-code-prefs-v1&quot;],&quot;field&quot;:&quot;theme&quot;,&quot;default&quot;:&quot;light&quot;} --&gt;&lt;base href=&quot;./&quot;&gt;&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;none&#x27;; connect-src &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https:; img-src &#x27;self&#x27; data: https:; font-src &#x27;self&#x27; data: https:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; form-action &#x27;none&#x27;; base-uri &#x27;self&#x27;&quot;&gt;&lt;style&gt;html{pointer-events:none!important}*{animation-play-state:paused!important;caret-color:transparent!important}&lt;/style&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
 &lt;title&gt;Chordity: 마디별 코드 인식과 메트로놈&lt;/title&gt;
@@ -704,6 +729,67 @@ body &gt; main { flex: 1 0 auto; }
 <script data-velvitty-launch data-app="./chordity.html">
 (() => {
   'use strict';
+  function prepareUIBackground(source, fallbackProfile) {
+    const marker = source.match(/<!-- velvitty-ui-theme (.*?) -->/);
+    let profile = fallbackProfile || null;
+    if (!profile && marker) {
+      try { profile = JSON.parse(marker[1]); } catch (_) { /* Keep the app's fallback profile. */ }
+    }
+    if (!profile) return {html: source, profile: null, theme: null, selected: null};
+  
+    const {selected, theme} = readUITheme(profile);
+    const html = source.replace(/<html\b([^>]*)>/i, (_, attributes) => {
+      const clean = attributes.replace(/\sdata-theme\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+      return '<html' + clean + (selected ? ' data-theme="' + selected + '"' : '') + '>';
+    });
+    return {html, profile, theme, selected};
+  }
+  
+  function readUITheme(profile) {
+    let value;
+    try {
+      let saved = null;
+      for (const key of profile.keys) {
+        saved = localStorage.getItem(key);
+        if (saved) break;
+      }
+      value = profile.field ? JSON.parse(saved || '{}')?.[profile.field] : saved;
+    } catch (_) { /* The application also follows the system when storage cannot be read. */ }
+  
+    const selected = value === 'light' || value === 'dark' ? value : '';
+    if (selected) return {selected, theme: selected};
+    let theme = profile.default || 'light';
+    if (typeof matchMedia === 'function') {
+      if (matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
+      else if (matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+    }
+    return {selected, theme};
+  }
+  
+  function synchronizeUITheme(page, profile) {
+    if (!profile) return;
+    const {selected} = readUITheme(profile);
+    if (selected) page.documentElement.dataset.theme = selected;
+    else delete page.documentElement.dataset.theme;
+    for (const option of page.querySelectorAll('[data-theme-opt][role="radio"]')) {
+      const active = option.dataset.themeOpt === selected;
+      option.setAttribute('aria-checked', String(active));
+      if (active) option.style.backgroundColor = 'var(--ink)';
+      else option.style.removeProperty('background-color');
+    }
+  }
+  
+  function setUIBackdrop(backdrop, source, profile, glass, surface) {
+    const prepared = prepareUIBackground(source, profile);
+    if (prepared.theme) {
+      const light = prepared.theme === 'light';
+      glass.dataset.surface = prepared.theme;
+      surface.style.setProperty('--app-ui-background', light ? '#f5f5f5' : '#181818');
+      applyGlassMaterial(glass, (light ? 245 : 24) / 255, light);
+    }
+    backdrop.srcdoc = prepared.html;
+    return prepared.profile;
+  }
   function applyGlassMaterial(glass, brightness, light) {
     const middleTone = 1 - Math.abs(brightness * 2 - 1);
     glass.style.setProperty('--glass-alpha', (.055 + .075 * middleTone).toFixed(3));
@@ -728,7 +814,8 @@ body &gt; main { flex: 1 0 auto; }
   const percent = root.querySelector('.percent');
   const backdrop = root.querySelector('.app-backdrop');
   const fallback = document.getElementById('velvitty-ui-fallback');
-  if (fallback) backdrop.srcdoc = fallback.content.textContent;
+  let themeProfile = null;
+  if (fallback) themeProfile = setUIBackdrop(backdrop, fallback.content.textContent, themeProfile, glass, host);
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let frame;
   let ready = false;
@@ -739,6 +826,7 @@ body &gt; main { flex: 1 0 auto; }
 
   function removeSplash() {
     window.removeEventListener('offline', showOffline);
+    delete document.documentElement.dataset.pwaStartTheme;
     host.remove();
   }
 
@@ -746,7 +834,6 @@ body &gt; main { flex: 1 0 auto; }
     offline = true;
     frame?.removeAttribute('src');
     delete host.dataset.pageVisible;
-    delete glass.dataset.surface;
     message.textContent = '인터넷 연결 상태가 불안정하여 어플리케이션을 실행할 수 없습니다.';
     guidance.hidden = false;
     hint.hidden = false;
@@ -755,6 +842,7 @@ body &gt; main { flex: 1 0 auto; }
   }
 
   function showPageBehindGlass(page, snapshot = false) {
+    if (snapshot) synchronizeUITheme(page, themeProfile);
     const bodyStyle = page.defaultView.getComputedStyle(page.body);
     const bodyColor = bodyStyle.backgroundColor.match(/[\d.]+/g)?.map(Number);
     const htmlColor = page.defaultView.getComputedStyle(page.documentElement)
@@ -787,7 +875,7 @@ body &gt; main { flex: 1 0 auto; }
       const response = await caches.match(url, {cacheName});
       if (!response?.ok) continue;
       const html = await response.text();
-      if (!ready && host.isConnected) backdrop.srcdoc = html;
+      if (!ready && host.isConnected) themeProfile = setUIBackdrop(backdrop, html, themeProfile, glass, host);
       return;
     }
   }
